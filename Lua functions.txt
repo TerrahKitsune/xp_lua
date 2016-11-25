@@ -1,3 +1,9 @@
+Misc global functions:
+
+	-Returns a UUID from windows CoCreateGuid
+	-returns nil if the UUID cannot be garantueed unique
+	string UUID()
+
 MySQL:
 	-Escapes a string using a mysql object
 	string MySQL:EscapeString(string)
