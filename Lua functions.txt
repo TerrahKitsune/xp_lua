@@ -1,0 +1,192 @@
+MySQL:
+	-Escapes a string using a mysql object
+	string MySQL:EscapeString(string)
+
+	-turns a string into a hex literal which can be used in queries
+	-Does *not* need a mysql object
+	string MySQL.EncodeString(string)
+
+	-use the mysql library to connect to a server
+	-if successful this returns a MySQL object that other functions are called from
+	-returns nil on failure
+	MySQL MySQL.Connect(address, user, password, database, opt port 3306)
+
+	-runs querystring on the opened mysql object
+	-returns true, rowsaffected on success or false and an error message on failure
+	bool, msg MySQL:Query(querystring)
+
+	-Advances the resultset to the next row
+	-returns false if there is no more rows or there was none to begin with
+	bool MySQL:Fetch()
+
+	-Returns a table containing the the column names and their values
+	-if an optional index is provided it'll return a single value from that index
+	table (or single value) MySQL:GetRow(opt index)
+
+Timer:
+
+	-Returns a new timer object
+	Timer Timer.New()
+
+	-Returns true if the timer is running
+	bool Timer:IsRunning()	
+
+	-Resets the time elapsed back to 0
+	nil Timer:Reset()
+
+	-Starts (or Restarts) a timer
+	nil Timer:Start()
+
+	-Stops the timer
+	nil Stop()
+
+	-Returns the amount of time the timer has run for
+	number (miliseconds) Timer:Elapsed()
+
+SQLite:
+
+	-Opens a new SQLite instance and returns the instance object
+	-if a filename is provided it will attempt opening that file or create a new one
+	-if no filename is given the sqlite database will be opened in memory
+	-returns nil on failure
+	SQLite SQLite.Open(opt filename)
+
+	-Runs a query on the sqlite object, preparedstatements should contain values matching the query
+	-IE: "INSERT INTO Test (?Data)" then preparedstatements should contain a value with the key "Data"
+	-returns true,"OK" on success, false and an error message on failure
+	bool, txt SQLite:Query(querystring, preparedstatements)
+
+	-Advance the recordset to the next row, returns false if there are no more rows
+	bool SQLite:Fetch()
+
+	-Returns a table containing the the column names and their values
+	-if an optional index is provided it'll return a single value from that index
+	table (or single value) SQLite:GetRow(opt index)
+
+FileSystem:
+
+	-Returns an array containing all files that exists in path
+	Array FileSystem.GetFiles(path)
+
+	-Returns an array containing all directories that exists in path
+	Array FileSystem.GetDirectories(path)
+
+	-Returns a table containing file info:
+	-isFolder bool
+	-Size integer
+	-Creation unix time when the file was created
+	-Access unix time when the file was accessed
+	-Writeunix time when the file was written to
+	-returns nil on failure
+	FileInfo FileSystem.GetFileInfo(file)
+
+	-Copies file source to destination
+	-if overwrite is true existing file will be overwritten
+	-returns false on failure
+	bool FileSystem.Copy(source, destination, bool overwrite)
+
+	-Moves file source to destination
+	-true on success
+	bool FileSystem.Move(source, destination)
+
+	-Deletes source, returns true on success
+	bool FileSystem.Delete(source)
+
+	-Creates a directory at path
+	-returns true on success
+	bool FileSystem.CreateDirectory(path)
+
+	-Creates a directory at path
+	-Folder has to be empty
+	-returns true on success
+	bool FileSystem.RemoveDirectory(path)
+
+	-Renames source to destination
+	bool FileSystem.Rename(source, destination)
+	
+	-Retruns the current active directory in full path (the directory the program lives in)
+	string FileSystem.CurrentDirectory()
+
+GFF:
+
+	-Opens file and attempts decodings its content as a gff
+	-Throws errors on failure
+	struct GFF.OpenFile(file)
+
+	-Deserializes a string into a gff
+	-Throws errors on failure
+	struct GFF.OpenString(string)
+
+	-Save gff to file, overwrites the file if it exists
+	-Throws errors on failure
+	nil GFF.SaveToFile(gff, file)
+
+	-returns a serilized version of the gff as a binary string
+	-Throws errors on failure
+	string GFF.SaveToString(gff)
+
+	*gff parameters are top structs as described below
+
+struct:
+
+	*4 chars "BIC", "UTI" etc, only exists on toplevel struct
+	string FileType
+
+	*4 chars describing the version usually "V3.2" topstruct only
+	string FileVersion
+
+	*programmer defined int of the struct type topstruct is always 0xFFFFFFFF
+	int Type
+
+	*Number of fields loaded in Field
+	*Largly irrelevant as its recalculated when the gff is saved
+	int FieldCount
+
+	*1 index array of all fields in the array
+	array Fields
+
+	*The gff type for this table, this can be "topstruct" or "struct"
+	string gff
+
+field:
+
+	*Int that represents the type in the field (see GFFTYPES)
+	int Type
+
+	*Name of this field (should not be longer then 16 chars)
+	string Label
+
+	*Contains the data as speificed by the Type (see GFFTYPES)
+	variable Data
+
+	*The gff type for this table, its always "field" on a field
+	string gff
+
+CExoLocString:
+
+	*Index into the tlk files, this is 0xFFFFFFFF it unused
+	int StringRef
+
+	*The amount of strings this CExoLocString contains
+	*Largly irrelevant as its recalculated when the gff is saved
+	int StringCount
+
+	*Total size in bytes (minus this field) that the CExoLocString contains
+	*Largly irrelevant as its recalculated when the gff is saved
+	int TotalSize
+
+	*An array that contains the CExoLocSubstrings
+	*this will be empty rather then nil if there are none
+	array Strings
+
+CExoLocStringSubString:
+
+	*This is equal to LanguageID * 2 + gender (0 for masculine 1 for feminine)
+	int StringID
+
+	*Length of the string
+	*Largly irrelevant as its recalculated when the gff is saved
+	int StringLength
+
+	*The string this exolocsubstring contains
+	string String

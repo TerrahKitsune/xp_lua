@@ -43,6 +43,24 @@
     <Filter Include="LuaTimer\Header Files">
       <UniqueIdentifier>{71f8fdca-5425-425a-977b-5c025c9aa3ec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaSQLite">
+      <UniqueIdentifier>{7ba3c5e5-c6b4-482a-af92-277f1ba530e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaSQLite\Header Files">
+      <UniqueIdentifier>{436b3e00-f762-4325-9d4c-8396ca58abcc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaSQLite\Source Files">
+      <UniqueIdentifier>{fefbe6e0-fe6b-459e-a1de-3e3fbfd3dcb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaFileSystem">
+      <UniqueIdentifier>{6841bb59-2231-450d-b353-913e5c201d4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaFileSystem\Header Files">
+      <UniqueIdentifier>{7924f7ad-aa75-4733-b94d-805a8a7c3c4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaFileSystem\Source Files">
+      <UniqueIdentifier>{3441ad4d-451a-4302-aeea-1be3c58fd123}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\plugin.cpp">
@@ -195,6 +213,24 @@
     <ClCompile Include="TimerMain.cpp">
       <Filter>LuaTimer</Filter>
     </ClCompile>
+    <ClCompile Include="SQLite\sqlite3.c">
+      <Filter>LuaSQLite\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaSQLite.cpp">
+      <Filter>LuaSQLite\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaSQLiteMain.cpp">
+      <Filter>LuaSQLite</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaFileSystem.cpp">
+      <Filter>LuaFileSystem\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaFileSystemMain.cpp">
+      <Filter>LuaFileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="lua_misc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -327,6 +363,24 @@
       <Filter>LuaTimer</Filter>
     </ClInclude>
     <ClInclude Include="lua_main_incl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SQLite\sqlite3.h">
+      <Filter>LuaSQLite\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaSQLite.h">
+      <Filter>LuaSQLite\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaSQLiteMain.h">
+      <Filter>LuaSQLite</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaFileSystem.h">
+      <Filter>LuaFileSystem\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaFileSystemMain.h">
+      <Filter>LuaFileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="lua_misc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

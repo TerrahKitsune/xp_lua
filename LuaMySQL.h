@@ -29,6 +29,7 @@ LuaMySQL * lua_pushmysql(lua_State *L);
 int luamysql_gc(lua_State *L);
 int luamysql_tostring(lua_State *L);
 int DataToHex(lua_State *L);
+int EscapeString(lua_State *L);
 
 int MySQLConnect(lua_State *L);
 int MySQLExecute(lua_State *L);

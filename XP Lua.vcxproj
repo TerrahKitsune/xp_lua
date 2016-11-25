@@ -19,8 +19,13 @@
     <ClCompile Include="GffLabel.cpp" />
     <ClCompile Include="GFFMain.cpp" />
     <ClCompile Include="GffStruct.cpp" />
+    <ClCompile Include="LuaFileSystem.cpp" />
+    <ClCompile Include="LuaFileSystemMain.cpp" />
     <ClCompile Include="LuaGff.cpp" />
     <ClCompile Include="LuaMySQL.cpp" />
+    <ClCompile Include="LuaSQLite.cpp" />
+    <ClCompile Include="LuaSQLiteMain.cpp" />
+    <ClCompile Include="lua_misc.cpp" />
     <ClCompile Include="MySQLMain.cpp" />
     <ClCompile Include="NWN2LuaLib.cpp" />
     <ClCompile Include="plua.cpp" />
@@ -59,6 +64,7 @@
     <ClCompile Include="Lua\lutf8lib.c" />
     <ClCompile Include="Lua\lvm.c" />
     <ClCompile Include="Lua\lzio.c" />
+    <ClCompile Include="SQLite\sqlite3.c" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimerMain.cpp" />
   </ItemGroup>
@@ -71,9 +77,14 @@
     <ClInclude Include="GffLabel.h" />
     <ClInclude Include="GFFMain.h" />
     <ClInclude Include="GffStruct.h" />
+    <ClInclude Include="LuaFileSystem.h" />
+    <ClInclude Include="LuaFileSystemMain.h" />
     <ClInclude Include="LuaGff.h" />
     <ClInclude Include="LuaMySQL.h" />
+    <ClInclude Include="LuaSQLite.h" />
+    <ClInclude Include="LuaSQLiteMain.h" />
     <ClInclude Include="lua_main_incl.h" />
+    <ClInclude Include="lua_misc.h" />
     <ClInclude Include="MySQLMain.h" />
     <ClInclude Include="NWN2LuaLib.h" />
     <ClInclude Include="plua.h" />
@@ -104,6 +115,7 @@
     <ClInclude Include="Lua\lundump.h" />
     <ClInclude Include="Lua\lvm.h" />
     <ClInclude Include="Lua\lzio.h" />
+    <ClInclude Include="SQLite\sqlite3.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimerMain.h" />
     <ClInclude Include="xp_lua_incl.h" />

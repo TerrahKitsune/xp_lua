@@ -76,7 +76,7 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type){
 		result = gff->Header.FieldDataCount;
 		gff->Header.FieldDataCount += sizeof(double);
 		ddata = lua_tonumber(L, -1);
-		memcpy(ptr, &data, sizeof(double));
+		memcpy(ptr, &ddata, sizeof(double));
 		break;
 	case 13:
 	case 10:
@@ -398,6 +398,10 @@ void PushField(lua_State *L, Gff * gff, unsigned int fieldindex){
 
 	lua_pushstring(L, "Label");
 	PushLabel(L, gff, field->LabelIndex);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "gff");
+	lua_pushstring(L, "field");
 	lua_settable(L, -3);
 }
 

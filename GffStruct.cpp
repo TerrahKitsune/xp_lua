@@ -232,6 +232,10 @@ void PushTopLevelStruct(Gff * gff, lua_State *L){
 	PushStructFields(gff, L, top);
 	lua_settable(L, -3);
 
+	lua_pushstring(L, "gff");
+	lua_pushstring(L, "topstruct");
+	lua_settable(L, -3);
+
 	UntrackOrBail(L, gff, top);
 }
 
@@ -257,6 +261,10 @@ void PushStruct(Gff * gff, lua_State *L, unsigned int index){
 
 	lua_pushstring(L, "Fields");
 	PushStructFields(gff, L, top);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "gff");
+	lua_pushstring(L, "struct");
 	lua_settable(L, -3);
 
 	UntrackOrBail(L, gff, top);

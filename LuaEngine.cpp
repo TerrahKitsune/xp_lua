@@ -4,6 +4,9 @@
 #include "GFFMain.h"
 #include "TimerMain.h"
 #include "MySQLMain.h"
+#include "LuaSQLiteMain.h"
+#include "LuaFileSystemMain.h"
+#include "lua_misc.h"
 
 static int print(lua_State *L){
 
@@ -41,6 +44,12 @@ LuaEngine::LuaEngine()
 	lua_setglobal(L, "Timer");
 	luaopen_mysql(L);
 	lua_setglobal(L, "MySQL");
+	luaopen_sqlite(L);
+	lua_setglobal(L, "SQLite");
+	luaopen_filesystem(L);
+	lua_setglobal(L, "FileSystem");
+
+	luaopen_misc(L);
 
 	lua_pushcfunction(L, print);
 	lua_setglobal(L, "print");

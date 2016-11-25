@@ -4,11 +4,11 @@
 #pragma comment(lib, "mysql/libmysql.lib")
 
 int DataToHex(lua_State *L){
-	
+
 	size_t len;
 	const char * data = luaL_checklstring(L, 1, &len);
 
-	char * buffer = (char*)malloc((len*2)+3);
+	char * buffer = (char*)malloc((len * 2) + 3);
 	if (!buffer){
 		luaL_error(L, "Unable to allocate %u bytes for conversion buffer", (len * 2) + 1);
 	}
@@ -18,7 +18,28 @@ int DataToHex(lua_State *L){
 
 	unsigned long newlen = mysql_hex_string(&buffer[2], data, len);
 	lua_pop(L, 1);
-	lua_pushlstring(L, buffer, newlen+2);
+	lua_pushlstring(L, buffer, newlen + 2);
+	free(buffer);
+	return 1;
+}
+
+int EscapeString(lua_State *L){
+
+	LuaMySQL * luamysql = luaL_checkmysql(L, 1);
+	size_t len;
+	const char * data = luaL_checklstring(L, 2, &len);
+
+	char * buffer = (char*)malloc((len * 2) + 3);
+	if (!buffer){
+		luaL_error(L, "Unable to allocate %u bytes for conversion buffer", (len * 2) + 1);
+	}
+
+	buffer[0] = '0';
+	buffer[1] = 'x';
+
+	unsigned long newlen = mysql_real_escape_string(&luamysql->mysql, &buffer[2], data, len);
+	lua_pop(L, 1);
+	lua_pushlstring(L, buffer, newlen + 2);
 	free(buffer);
 	return 1;
 }
@@ -84,7 +105,7 @@ int MySQLGetRow(lua_State *L){
 			return 1;
 		}
 	}
-	
+
 	lua_createtable(L, 0, luamysql->fields);
 	for (int n = 0; n < luamysql->fields; n++){
 		lua_pushlstring(L, luamysql->columns[n].name, luamysql->columns[n].name_length);
@@ -199,35 +220,53 @@ int MySQLExecute(lua_State *L){
 
 int MySQLConnect(lua_State *L){
 
+	for (int n = 1; n <= 4; n++){
+		if (!lua_isstring(L, n))
+			luaL_error(L, "Parameter #%d on Connect is not a string", n);
+	}
+
+	size_t len;
+	const char * temp = luaL_checklstring(L, 1, &len);
+	char * temp_server = (char*)malloc(len + 1);
+	temp_server[len] = '\0';
+	memcpy(temp_server, temp, len);
+
+	temp = luaL_checklstring(L, 2, &len);
+	char * temp_user = (char*)malloc(len + 1);
+	temp_user[len] = '\0';
+	memcpy(temp_user, temp, len);
+
+	temp = luaL_checklstring(L, 3, &len);
+	char * temp_password = (char*)malloc(len + 1);
+	temp_password[len] = '\0';
+	memcpy(temp_password, temp, len);
+
+	temp = luaL_checklstring(L, 4, &len);
+	char * temp_schema = (char*)malloc(len + 1);
+	temp_schema[len] = '\0';
+	memcpy(temp_schema, temp, len);
+
+	int port = luaL_optinteger(L, 5, 3306);
+
+	lua_pop(L, lua_gettop(L));
+
 	LuaMySQL * luamysql = lua_pushmysql(L);
 	if (!mysql_init(&luamysql->mysql)){
+		free(temp_server);
+		free(temp_user);
+		free(temp_password);
+		free(temp_schema);
 		luaL_error(L, "Unable to initialize mysql");
 	}
-	size_t len;
-	const char * server = luaL_checklstring(L, 1, &len);
-	luamysql->server = (char*)malloc(len + 1);
-	luamysql->server[len] = '\0';
-	memcpy(luamysql->server, server, len);
 
-	const char * user = luaL_checklstring(L, 2, &len);
-	luamysql->user = (char*)malloc(len + 1);
-	luamysql->user[len] = '\0';
-	memcpy(luamysql->user, server, len);
-
-	const char * password = luaL_checklstring(L, 3, &len);
-	luamysql->password = (char*)malloc(len + 1);
-	luamysql->password[len] = '\0';
-	memcpy(luamysql->password, server, len);
-
-	const char * schema = luaL_checklstring(L, 4, &len);
-	luamysql->schema = (char*)malloc(len + 1);
-	luamysql->schema[len] = '\0';
-	memcpy(luamysql->schema, server, len);
-
-	unsigned long port = luaL_checkinteger(L, 5);
+	//Give the memory to lua
+	luamysql->server = temp_server;
+	luamysql->user = temp_user;
+	luamysql->password = temp_password;
+	luamysql->schema = temp_schema;
 	luamysql->port = port;
 
-	luamysql->connection = mysql_real_connect(&luamysql->mysql, server, user, password, schema, port, NULL, NULL);
+	luamysql->connection = mysql_real_connect(&luamysql->mysql, temp_server, temp_user, temp_password, temp_schema, port, NULL, NULL);
 	if (luamysql->connection == NULL)
 	{
 		mysql_close(&luamysql->mysql);
@@ -318,6 +357,6 @@ int luamysql_gc(lua_State *L){
 
 int luamysql_tostring(lua_State *L){
 
-	lua_pushfstring(L, "Timer: 0x%08X", lua_tomysql(L, 1));
+	lua_pushfstring(L, "MySQL: 0x%08X", lua_tomysql(L, 1));
 	return 1;
 }

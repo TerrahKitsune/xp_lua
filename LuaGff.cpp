@@ -110,10 +110,10 @@ int OpenGffString(lua_State *L){
 		Bail(gff, L, "Gff Malformed, structs still in tracker");
 	}
 	else{
-		FILE * f = fopen("header.txt", "w");
+		/*FILE * f = fopen("header.txt", "w");
 		fprintf(f, "%u\n%u\n%u\n%u\n%u\n%u\n%u\n", gff->size, gff->Header.StructCount, gff->Header.FieldCount, gff->Header.LabelCount, gff->Header.FieldDataCount, gff->Header.FieldIndicesCount, gff->Header.ListIndicesCount);
 		fprintf(f, "\n%u\n%u\n%u\n%u\n%u\n%u\n%u\n", gff->size, gff->Header.StructOffset, gff->Header.FieldOffset, gff->Header.LabelOffset, gff->Header.FieldDataOffset, gff->Header.FieldIndicesOffset, gff->Header.ListIndicesOffset);
-		fclose(f);
+		fclose(f);*/
 		UntrackAll(gff);
 		StringClear(gff);
 		free(gff->raw);

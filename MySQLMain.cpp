@@ -3,6 +3,7 @@
 
 static const struct luaL_Reg mysqlfunctions[] = {	
 	{ "EncodeString", DataToHex },
+	{ "EscapeString", EscapeString },
 	{ "GetRow", MySQLGetRow },
 	{ "Fetch", MySQLFetch },
 	{ "Connect", MySQLConnect },
