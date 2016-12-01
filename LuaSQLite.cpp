@@ -40,6 +40,80 @@ void push_sqlitevalue(lua_State *L, sqlite3_stmt *pStmt, int idx){
 	}
 }
 
+static int callback(void *NotUsed, int argc, char **argv, char **azColName){
+
+	lua_State *L = (lua_State *)NotUsed;
+
+	lua_createtable(L, argc, 0);
+
+	for (int n = 0; n < argc; n++){
+		lua_pushstring(L, azColName[n]);
+		lua_pushstring(L, argv[n]);
+		lua_settable(L, -3);
+	}
+
+	if (lua_pcall(L, 1, 0, NULL)){
+		return 1;
+	}
+	else{
+
+		//Repush the function
+		lua_pushvalue(L, -1);
+
+		return 0;
+	}
+}
+
+int SQLiteExecuteWithCallback(lua_State *L){
+
+	size_t len;
+	LuaSQLite * luasqlite = (LuaSQLite*)luaL_checksqlite(L, 1);
+	const char * query = luaL_checklstring(L, 2, &len);
+	int err;
+	char *zErrMsg = 0;
+	char * current = (char*)malloc(len + 1);
+	if (current == NULL){
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		lua_pushstring(L, "Unable to allocate memory for query");
+		return 2;
+	}
+
+	current[len] = '\0';
+	memcpy(current, query, len);
+
+	if (lua_isfunction(L, 3)){
+		lua_pushvalue(L, 3);
+		err = sqlite3_exec(luasqlite->db, query, callback, L, &zErrMsg);
+	}
+	else{
+		err = sqlite3_exec(luasqlite->db, query, NULL, NULL, &zErrMsg);
+	}
+
+	if (err == SQLITE_ABORT){
+		lua_pushboolean(L, false);
+		lua_pushfstring(L, "%s: %s", zErrMsg, lua_tostring(L, -2));
+		free(current);
+		sqlite3_free(zErrMsg);
+		return 2;
+	}
+	else if (err){
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		lua_pushstring(L, zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+	else{
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, true);
+		lua_pushstring(L, "OK");
+	}
+
+	free(current);
+	return 2;
+}
+
 int SQLiteGetRow(lua_State *L){
 
 	LuaSQLite * luasqlite = (LuaSQLite*)luaL_checksqlite(L, 1);
@@ -58,8 +132,8 @@ int SQLiteGetRow(lua_State *L){
 	}
 
 	int idx = luaL_optinteger(L, 2, -1);
-	if (idx >= 0){
-
+	if (idx > 0){
+		idx--;
 		if (idx >= sqlite3_column_count(luasqlite->stmt)){
 			lua_pop(L, lua_gettop(L));
 			lua_pushnil(L);
@@ -240,6 +314,10 @@ int SQLite_GC(lua_State *L){
 
 int SQLite_ToString(lua_State *L){
 
-	lua_pushfstring(L, "SQLite: 0x%08X", luaL_checksqlite(L, 1));
+	LuaSQLite * sq = luaL_checksqlite(L, 1);
+	char sqlite[_MAX_PATH + 20];
+	sprintf(sqlite, "SQLite: 0x%08X File: %s", sq, sq->file);
+
+	lua_pushstring(L, sqlite);
 	return 1;
 }

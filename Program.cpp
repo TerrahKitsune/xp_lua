@@ -9,6 +9,9 @@
 #include "LuaFileSystemMain.h"
 #include "LuaSQLiteMain.h"
 
+#define HI_PART(x)  ((x>>4) & 0x0F)
+#define LO_PART(x)  ((x) & 0x0F)
+
 double PCFreq = 0.0;
 __int64 CounterStart = 0;
 
@@ -67,6 +70,109 @@ static int print(lua_State *L){
 	return 0;
 }
 
+
+static int L_kbhit(lua_State *L){
+
+	lua_pushboolean(L, _kbhit());
+	return 1;
+}
+
+static int L_getch(lua_State *L){
+	lua_pushinteger(L, _getch());
+	return 1;
+}
+
+static int L_GetTextColor(lua_State *L){
+
+	WORD data;
+	CONSOLE_SCREEN_BUFFER_INFO   csbi;
+	if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)){
+		data = csbi.wAttributes;
+
+		lua_pushinteger(L, HI_PART(data));
+		lua_pushinteger(L, LO_PART(data));
+	}
+	else{
+		lua_pushnil(L);
+		lua_pushnil(L);
+	}
+
+	return 2;
+}
+
+static int L_SetTextColor(lua_State *L){
+
+	int BackC = luaL_checknumber(L, 1);
+	int ForgC = luaL_checknumber(L, 2);
+
+	lua_pop(L, 2);
+
+	WORD wColor = ((BackC & 0x0F) << 4) + (ForgC & 0x0F);
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), wColor);
+
+	return 0;
+}
+
+static int L_cls(lua_State *L) {
+
+	HANDLE                     hStdOut;
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	DWORD                      count;
+	DWORD                      cellCount;
+	COORD                      homeCoords = { 0, 0 };
+
+	hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (hStdOut == INVALID_HANDLE_VALUE) return 0;
+
+	if (!GetConsoleScreenBufferInfo(hStdOut, &csbi)) return 0;
+	cellCount = csbi.dwSize.X *csbi.dwSize.Y;
+
+	if (!FillConsoleOutputCharacter(
+		hStdOut,
+		(TCHAR) ' ',
+		cellCount,
+		homeCoords,
+		&count
+		)) return 0;
+
+	if (!FillConsoleOutputAttribute(
+		hStdOut,
+		csbi.wAttributes,
+		cellCount,
+		homeCoords,
+		&count
+		)) return 0;
+
+	SetConsoleCursorPosition(hStdOut, homeCoords);
+
+	return 0;
+}
+
+static int L_put(lua_State *L) {
+
+	size_t len;
+	const char * text = luaL_tolstring(L, 1, &len);
+	unsigned int n;
+
+	if (len > 0) {
+
+		for (n = 0; n < len; n++) {
+
+			if (text[n] == 13) {
+				printf("\n");
+			}
+			else if (text[n] == 8) {
+				printf("\b \b");
+			}
+			else
+				printf("%c", text[n]);
+		}
+	}
+
+	lua_pop(L, 1);
+	return 0;
+}
+
 void main(int argc, char *argv[]){
 
 	StartCounter();
@@ -83,6 +189,24 @@ void main(int argc, char *argv[]){
 	lua_setglobal(L, "FileSystem");
 	luaopen_sqlite(L);
 	lua_setglobal(L, "SQLite");
+
+	lua_pushcfunction(L, L_cls);
+	lua_setglobal(L, "CLS");
+
+	lua_pushcfunction(L, L_GetTextColor);
+	lua_setglobal(L, "GetTextColor");
+
+	lua_pushcfunction(L, L_SetTextColor);
+	lua_setglobal(L, "SetTextColor");
+
+	lua_pushcfunction(L, L_getch);
+	lua_setglobal(L, "GetKey");
+
+	lua_pushcfunction(L, L_kbhit);
+	lua_setglobal(L, "HasKeyDown");
+
+	lua_pushcfunction(L, L_put);
+	lua_setglobal(L, "Put");
 
 	//returns nothing
 	luaopen_misc(L);

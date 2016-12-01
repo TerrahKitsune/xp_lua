@@ -68,10 +68,6 @@ int OpenGffFile(lua_State *L){
 		free(gff);
 	}
 
-	if (lua_gettop(L) > 1){
-		DumpStack(L, false);
-	}
-
 	return 1;
 }
 

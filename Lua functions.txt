@@ -4,6 +4,17 @@ Misc global functions:
 	-returns nil if the UUID cannot be garantueed unique
 	string UUID()
 
+	-Sleep for 1 milisecond second or opt int, max 1000 (1 second)
+	nil Sleep(opt int);
+	
+	--non nwnx functions
+	nil CLS()
+	fore,background GetTextColor()
+	nil SetTextColor(fore,background)
+	int GetKey()
+	bool HasKeyDown()
+	nil Put(text)
+
 MySQL:
 	-Escapes a string using a mysql object
 	string MySQL:EscapeString(string)
@@ -27,6 +38,7 @@ MySQL:
 
 	-Returns a table containing the the column names and their values
 	-if an optional index is provided it'll return a single value from that index
+	-1 indexed
 	table (or single value) MySQL:GetRow(opt index)
 
 Timer:
@@ -67,7 +79,15 @@ SQLite:
 
 	-Returns a table containing the the column names and their values
 	-if an optional index is provided it'll return a single value from that index
+	-1 indexed
 	table (or single value) SQLite:GetRow(opt index)
+
+	-Executes a query, if a callback is present function(table) ... end
+	-the results are pushed as key-value columnname: value tables to the callback function one at the time as strings
+	-returns false if something failed
+	-if no callback is passed any resultset (if any) is ignored
+	-For more accurate data or binary data Query
+	bool, txt SQLite:Execute(querystring, opt callback)
 
 FileSystem:
 

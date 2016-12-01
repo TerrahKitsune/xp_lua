@@ -112,6 +112,8 @@ int Timer_gc(lua_State *L){
 
 int Timer_tostring(lua_State *L){
 
-	lua_pushfstring(L, "Timer: 0x%08X", lua_totimer(L, 1));
+	char tim[100];
+	sprintf(tim,"Timer: 0x%08X", lua_totimer(L, 1));
+	lua_pushfstring(L, tim);
 	return 1;
 }

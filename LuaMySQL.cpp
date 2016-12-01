@@ -357,6 +357,9 @@ int luamysql_gc(lua_State *L){
 
 int luamysql_tostring(lua_State *L){
 
-	lua_pushfstring(L, "MySQL: 0x%08X", lua_tomysql(L, 1));
+	LuaMySQL * sq = lua_tomysql(L, 1);
+	char my[500];
+	sprintf(my, "MySQL: 0x%08X Connection: server=%s;database=%s;uid=%s;port=%u;", sq, sq->server, sq->schema, sq->user, sq->port);
+	lua_pushstring(L, my);
 	return 1;
 }
