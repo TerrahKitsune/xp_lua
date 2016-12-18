@@ -14,6 +14,44 @@ Misc global functions:
 	int GetKey()
 	bool HasKeyDown()
 	nil Put(text)
+	nil ShellExecute(file, parameter)
+
+	--Sets a function as a ticker function
+	--if the function parameter isnt a function the ticker is disabled
+	nil SetTicker(function, opt ms)
+
+	--return memory in bytes used by lua
+	int GetMemory()
+
+	--called when GFF.exe shuts down can also be called to shut gff.exe down prematurely
+	Exit()
+
+	--key:
+	--0: HKEY_LOCAL_MACHINE
+	--1: HKEY_CLASSES_ROOT
+ 	--2: HKEY_CURRENT_CONFIG
+	--3: HKEY_CURRENT_USER
+	--4: HKEY_PERFORMANCE_DATA
+	--5: HKEY_PERFORMANCE_NLSTEXT
+	--6: HKEY_PERFORMANCE_TEXT
+	--7: HKEY_USERS
+	string GetRegistryValue(key,subkey,entry)
+
+	ToggleConsole(bool)
+	SetTitle(newtitle)
+
+	ms Runtime()
+MD5:
+	
+	-Returns a newly initilized instance of MD5
+	MD5 MD5.New()
+
+	-Digests data into the MD5 instance	
+	nil MD5:Update(data)
+
+	-Finilizes the digest and returns the hash as a hex string and a 16 byte string representation
+	-if the digest is finalized already it just returns the previous result without doing anything
+	hexstring, 16bytes MD:Finish()
 
 MySQL:
 	-Escapes a string using a mysql object
@@ -70,7 +108,7 @@ SQLite:
 	SQLite SQLite.Open(opt filename)
 
 	-Runs a query on the sqlite object, preparedstatements should contain values matching the query
-	-IE: "INSERT INTO Test (?Data)" then preparedstatements should contain a value with the key "Data"
+	-IE: "INSERT INTO Test (@Data)" then preparedstatements should contain a value with the key "Data"
 	-returns true,"OK" on success, false and an error message on failure
 	bool, txt SQLite:Query(querystring, preparedstatements)
 
@@ -133,6 +171,30 @@ FileSystem:
 	-Retruns the current active directory in full path (the directory the program lives in)
 	string FileSystem.CurrentDirectory()
 
+ERF:
+	
+	-opens filename as a erf returning a erf object
+	-entries = the number of resources in the file
+	-filetype = what kind of file it is "ERF ", "MOD " etc
+	-version = what the version is "V1.0"
+	ERF, entries, filetype, version ERF.Open(filename)
+
+	-Returns an array containing localized strings describing the container
+	-localsized string is a table containing:
+	-LanguageID int
+	-String string
+	array of localized strings ERF:GetStrings()
+
+	-Returns an array of tables each containing these fields:
+	-ResRef string (max 16 characters)
+	-ResID int (key to get the actual resource in GetResource)
+	-ResType int (type of resource)
+	-Unused int 0
+	array of keys ERF:GetKeys()
+
+	-Returns a binary string from the ResID provided
+	-ResID is modified to be 1 index'ed instead of 0 indexed
+	binary ERF:GetResource(ResID);
 GFF:
 
 	-Opens file and attempts decodings its content as a gff
@@ -176,7 +238,23 @@ struct:
 
 field:
 
-	*Int that represents the type in the field (see GFFTYPES)
+	*Int that represents the type in the field
+	*0 = byte
+	*1 = char
+	*2 = word
+	*3 = short
+	*4 = dword
+	*5 = int
+	*6 = dword64
+	*7 = int64
+	*8 = float
+	*9 = double
+	*10 = string (CExoString)
+	*11 = ResRef (no space lowercase string max 16 characters)
+	*12 = CExoLocString
+	*13 = string (of binary data)
+	*14 = struct
+	*15 = array of structs (list)
 	int Type
 
 	*Name of this field (should not be longer then 16 chars)

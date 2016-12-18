@@ -70,6 +70,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Erf.cpp" />
+    <ClCompile Include="ERFMain.cpp" />
     <ClCompile Include="GffField.cpp" />
     <ClCompile Include="GffHeader.cpp" />
     <ClCompile Include="GffLabel.cpp" />
@@ -78,6 +80,7 @@
     <ClCompile Include="LuaFileSystem.cpp" />
     <ClCompile Include="LuaFileSystemMain.cpp" />
     <ClCompile Include="LuaGff.cpp" />
+    <ClCompile Include="LuaMD5.cpp" />
     <ClCompile Include="LuaSQLite.cpp" />
     <ClCompile Include="LuaSQLiteMain.cpp" />
     <ClCompile Include="Lua\lapi.c" />
@@ -115,6 +118,8 @@
     <ClCompile Include="Lua\lzio.c" />
     <ClCompile Include="LuaMySQL.cpp" />
     <ClCompile Include="lua_misc.cpp" />
+    <ClCompile Include="md5.c" />
+    <ClCompile Include="MD5Main.cpp" />
     <ClCompile Include="MySQLMain.cpp" />
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="SQLite\sqlite3.c" />
@@ -122,6 +127,8 @@
     <ClCompile Include="TimerMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Erf.h" />
+    <ClInclude Include="ERFMain.h" />
     <ClInclude Include="GffField.h" />
     <ClInclude Include="GffHeader.h" />
     <ClInclude Include="GffLabel.h" />
@@ -130,6 +137,7 @@
     <ClInclude Include="LuaFileSystem.h" />
     <ClInclude Include="LuaFileSystemMain.h" />
     <ClInclude Include="LuaGff.h" />
+    <ClInclude Include="LuaMD5.h" />
     <ClInclude Include="LuaSQLite.h" />
     <ClInclude Include="LuaSQLiteMain.h" />
     <ClInclude Include="Lua\lapi.h" />
@@ -161,6 +169,8 @@
     <ClInclude Include="lua_main_incl.h" />
     <ClInclude Include="LuaMySQL.h" />
     <ClInclude Include="lua_misc.h" />
+    <ClInclude Include="md5.h" />
+    <ClInclude Include="MD5Main.h" />
     <ClInclude Include="MySQLMain.h" />
     <ClInclude Include="SQLite\sqlite3.h" />
     <ClInclude Include="Timer.h" />
@@ -171,6 +181,7 @@
     <None Include="xp_craft.lua" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="Lua functions.txt" />
     <Text Include="scrap.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

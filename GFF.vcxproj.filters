@@ -61,6 +61,24 @@
     <Filter Include="LuaSQLite\Source Files">
       <UniqueIdentifier>{a4ce2ed5-5512-49e7-875d-28cc80fa3375}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaErf">
+      <UniqueIdentifier>{46f129c2-2319-4be8-a3a4-19ef57b74e1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaErf\Header Files">
+      <UniqueIdentifier>{59156827-bd84-4c7b-b96b-9852b78bff65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaErf\Source Files">
+      <UniqueIdentifier>{95b69ef2-fe92-4cfb-99c9-4245e44dcdb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaMD5">
+      <UniqueIdentifier>{f3664418-ac63-4aaa-87cc-3d0da3ad7fb6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaMD5\Header Files">
+      <UniqueIdentifier>{7a1e04f4-2838-4487-9e6f-f0de28216ed1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaMD5\Source Files">
+      <UniqueIdentifier>{7703a69d-d192-4f3a-8d11-e570dcac0244}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -213,6 +231,21 @@
     <ClCompile Include="SQLite\sqlite3.c">
       <Filter>LuaSQLite\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ERFMain.cpp">
+      <Filter>LuaErf</Filter>
+    </ClCompile>
+    <ClCompile Include="Erf.cpp">
+      <Filter>LuaErf\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="md5.c">
+      <Filter>LuaMD5\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MD5Main.cpp">
+      <Filter>LuaMD5</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaMD5.cpp">
+      <Filter>LuaMD5\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -344,6 +377,21 @@
     <ClInclude Include="SQLite\sqlite3.h">
       <Filter>LuaSQLite\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ERFMain.h">
+      <Filter>LuaErf</Filter>
+    </ClInclude>
+    <ClInclude Include="Erf.h">
+      <Filter>LuaErf\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="md5.h">
+      <Filter>LuaMD5\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MD5Main.h">
+      <Filter>LuaMD5</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaMD5.h">
+      <Filter>LuaMD5\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="main.lua">
@@ -355,5 +403,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="scrap.txt" />
+    <Text Include="Lua functions.txt" />
   </ItemGroup>
 </Project>

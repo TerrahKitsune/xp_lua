@@ -52,7 +52,7 @@ Implementation of Lua Plugin
 PLua::PLua()
 {
 	header = _T(
-		"NWNX Lua Plugin V.0.0.3\n" \
+		"NWNX Lua Plugin V.0.0.4\n" \
 		"(c) 2016 by Robin Karlsson (Terrahkitsune)\n" \
 		"Lua (c) PUC-Rio: https://www.lua.org/ \n"\
 		"visit us at http://www.nwnx.org\n");
@@ -61,8 +61,8 @@ PLua::PLua()
 		"This plugin provides a lua engine and environment.");
 
 	subClass = _T("LUA");
-	version = _T("0.0.3");
-
+	version = _T("0.0.4");
+	buffer = NULL;
 	Engine = new LuaEngine();
 }
 
@@ -126,6 +126,10 @@ char* PLua::GetString(char* sFunction, char* sParam1, int nParam2)
 	wxString function(sFunction);
 	wxString timerName(sParam1);
 #endif
+	if (buffer){
+		delete[]buffer;
+		buffer = NULL;
+	}
 
 	if (function == wxT(""))
 	{
@@ -134,14 +138,11 @@ char* PLua::GetString(char* sFunction, char* sParam1, int nParam2)
 	}
 	else if (function == wxT("RunString"))
 	{
-		if (!Engine->RunString(returnBuffer, MAX_BUFFER - 3, sParam1, "RunString"))
-		{
-			memmove(&returnBuffer[1], returnBuffer, MAX_BUFFER - 3);
-			returnBuffer[0] = '%';
-		}
-
-		wxLogMessage(wxT("* RunString( %s ): %s"), sParam1, returnBuffer);
+		wxLogMessage(wxT("* RunString( %s )"), sParam1);
+		buffer = Engine->RunString(sParam1, "RunString");
+		if (buffer)
+			wxLogMessage(wxT("= %s"), sParam1, buffer);		 			
 	}
 
-	return returnBuffer;
+	return buffer;
 }

@@ -10,7 +10,7 @@ public:
 	LuaEngine();
 	~LuaEngine();
 
-	bool RunString(char * result, size_t resultsize, const char * script, const char * name);
+	char * RunString(const char * script, const char * name);
 
 	lua_State *L;
 };

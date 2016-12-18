@@ -29,17 +29,14 @@ int EscapeString(lua_State *L){
 	size_t len;
 	const char * data = luaL_checklstring(L, 2, &len);
 
-	char * buffer = (char*)malloc((len * 2) + 3);
+	char * buffer = (char*)malloc((len * 2) + 1);
 	if (!buffer){
 		luaL_error(L, "Unable to allocate %u bytes for conversion buffer", (len * 2) + 1);
 	}
 
-	buffer[0] = '0';
-	buffer[1] = 'x';
-
-	unsigned long newlen = mysql_real_escape_string(&luamysql->mysql, &buffer[2], data, len);
+	unsigned long newlen = mysql_real_escape_string(&luamysql->mysql, buffer, data, len);
 	lua_pop(L, 1);
-	lua_pushlstring(L, buffer, newlen + 2);
+	lua_pushlstring(L, buffer, newlen);
 	free(buffer);
 	return 1;
 }

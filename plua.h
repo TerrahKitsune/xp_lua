@@ -44,4 +44,5 @@ public:
 private:
 	LuaEngine * Engine;
 	wxLogNWNX * logger;
+	char * buffer;
 };

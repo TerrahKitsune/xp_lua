@@ -8,6 +8,8 @@
 #include "lua_misc.h"
 #include "LuaFileSystemMain.h"
 #include "LuaSQLiteMain.h"
+#include "ERFMain.h"
+#include "MD5Main.h"
 
 #define HI_PART(x)  ((x>>4) & 0x0F)
 #define LO_PART(x)  ((x) & 0x0F)
@@ -31,6 +33,27 @@ double GetCounter()
 	LARGE_INTEGER li;
 	QueryPerformanceCounter(&li);
 	return double(li.QuadPart - CounterStart) / PCFreq;
+}
+
+double TickPCFreq = 0.0;
+__int64 TickCounterStart = 0;
+
+void TickStartCounter()
+{
+	LARGE_INTEGER li;
+	if (!QueryPerformanceFrequency(&li))
+		puts("QueryPerformanceFrequency failed!");
+
+	TickPCFreq = double(li.QuadPart) / 1000.0;
+
+	QueryPerformanceCounter(&li);
+	TickCounterStart = li.QuadPart;
+}
+double TickGetCounter()
+{
+	LARGE_INTEGER li;
+	QueryPerformanceCounter(&li);
+	return double(li.QuadPart - TickCounterStart) / PCFreq;
 }
 
 int GetResults(lua_State *L){
@@ -173,9 +196,177 @@ static int L_put(lua_State *L) {
 	return 0;
 }
 
+static int L_Exit(lua_State *L){
+
+	lua_pop(L, lua_gettop(L));
+	lua_gc(L, LUA_GCCOLLECT, 0);
+	lua_close(L);
+	exit(0);
+}
+
+static int L_GetMemory(lua_State *L){
+
+	lua_pop(L, lua_gettop(L));
+	int mem = lua_gc(L, LUA_GCCOUNT, 0);
+	mem = mem * 1024;
+	mem += lua_gc(L, LUA_GCCOUNTB, 0);
+	lua_pushinteger(L, mem);
+	return 1;
+}
+
+
+static int L_ShellExecute(lua_State *L){
+
+	ShellExecute(NULL, "open", luaL_checkstring(L, 1), luaL_checkstring(L, 2), NULL, SW_SHOW);
+	lua_pop(L, lua_gettop(L));
+	return 0;
+}
+
+static int hook;
+static double ticktime;
+void L_Ticker(lua_State *L, lua_Debug *ar){
+	if (hook == -1)
+		return;
+	else if (TickGetCounter() < ticktime){
+		return;
+	}
+	else
+		TickStartCounter();
+
+	lua_rawgeti(L, LUA_REGISTRYINDEX, hook);
+	if (lua_isfunction(L, 1)){
+		lua_pcall(L, 0, 0, NULL);
+	}
+	lua_pop(L, lua_gettop(L));
+}
+
+static int L_SetTick(lua_State *L){
+
+	if (!lua_isfunction(L, 1)){
+		lua_sethook(L, L_Ticker, 0, 0);
+		if (hook != -1)
+			luaL_unref(L, LUA_REGISTRYINDEX, hook);
+		hook = -1;
+		return 0;
+	}
+
+	lua_pushvalue(L, 1);
+	hook = luaL_ref(L, LUA_REGISTRYINDEX);
+	ticktime = luaL_optnumber(L, 2, 1000.0);
+	if (ticktime < 0.0)
+		ticktime = 0.0;
+	lua_pop(L, lua_gettop(L));
+	TickStartCounter();
+
+	int maskcnt = ticktime;
+	if (maskcnt <= 0)
+		maskcnt = 1;
+	else if (maskcnt > 1000)
+		maskcnt = 1000;
+
+	lua_sethook(L, L_Ticker, 0xFFFFFFFF, maskcnt);
+
+	return 0;
+}
+
+static int L_GetReg(lua_State *L){
+
+	HKEY key = HKEY_LOCAL_MACHINE;
+
+	switch (lua_tointeger(L, 1)){
+	case 1:
+		key = HKEY_CLASSES_ROOT;
+		break;
+	case 2:
+		key = HKEY_CURRENT_CONFIG;
+		break;
+	case 3:
+		key = HKEY_CURRENT_USER;
+		break;
+	case 4:
+		key = HKEY_PERFORMANCE_DATA;
+		break;
+	case 5:
+		key = HKEY_PERFORMANCE_NLSTEXT;
+		break;
+	case 6:
+		key = HKEY_PERFORMANCE_TEXT;
+		break;
+	case 7:
+		key = HKEY_USERS;
+		break;
+	default:
+		break;
+	}
+
+	DWORD max = 1048576;
+	char * buffer = (char*)malloc(max);
+	if (!buffer)
+		luaL_error(L, "Unable to allocate memory for readbuffer in GetReg");
+	memset(buffer, 0, max);
+	LSTATUS status = RegGetValue(key, luaL_checkstring(L, 2), luaL_checkstring(L, 3), RRF_RT_ANY, nullptr, buffer, &max);
+	if (status == ERROR_SUCCESS){
+		lua_pop(L, lua_gettop(L));
+		lua_pushstring(L, buffer);
+		free(buffer);
+	}
+	else{
+
+		lua_pop(L, lua_gettop(L));
+
+		char *err;
+		if (!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+			NULL,
+			status,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // default language
+			(LPTSTR)&err,
+			0,
+			NULL))
+		{
+			lua_pushnil(L);
+			lua_pushstring(L, "unable to format error message!");
+		}
+		else{
+			lua_pushnil(L);
+			lua_pushstring(L, err);
+			LocalFree(err);
+		}	
+		free(buffer);
+
+		return 2;
+	}
+	return 1;
+}
+
+static int L_ToggleConsole(lua_State *L){
+
+	bool toggle = lua_toboolean(L, 1);
+	HWND console = GetConsoleWindow();
+	if (toggle){		
+		ShowWindow(console, SW_RESTORE);
+	}
+	else{
+		ShowWindow(console, SW_HIDE);
+	}
+	lua_pop(L, 1);
+	return 0;
+}
+
+static int L_SetTitle(lua_State *L){
+	SetConsoleTitle(luaL_checkstring(L, 1));
+	lua_pop(L, 1);
+	return 0;
+}
+
+static int L_GetRuntime(lua_State *L){
+	lua_pushnumber(L, GetCounter());
+	return 1;
+}
+
 void main(int argc, char *argv[]){
 
 	StartCounter();
+	hook = -1;
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
 
@@ -189,9 +380,34 @@ void main(int argc, char *argv[]){
 	lua_setglobal(L, "FileSystem");
 	luaopen_sqlite(L);
 	lua_setglobal(L, "SQLite");
+	luaopen_md5(L);
+	lua_setglobal(L, "MD5");
+	luaopen_erf(L);
+	lua_setglobal(L, "ERF");
 
-	lua_pushcfunction(L, L_cls);
-	lua_setglobal(L, "CLS");
+	lua_pushcfunction(L, L_GetRuntime);
+	lua_setglobal(L, "Runtime");
+
+	lua_pushcfunction(L, L_SetTitle);
+	lua_setglobal(L, "SetTitle");
+
+	lua_pushcfunction(L, L_ToggleConsole);
+	lua_setglobal(L, "ToggleConsole");
+
+	lua_pushcfunction(L, L_GetReg);
+	lua_setglobal(L, "GetRegistryValue");
+
+	lua_pushcfunction(L, L_SetTick);
+	lua_setglobal(L, "SetTicker");
+
+	lua_pushcfunction(L, L_ShellExecute);
+	lua_setglobal(L, "ShellExecute");
+
+	lua_pushcfunction(L, L_GetMemory);
+	lua_setglobal(L, "GetMemory");
+
+	lua_pushcfunction(L, L_Exit);
+	lua_setglobal(L, "Exit");
 
 	lua_pushcfunction(L, L_GetTextColor);
 	lua_setglobal(L, "GetTextColor");
@@ -212,12 +428,11 @@ void main(int argc, char *argv[]){
 	luaopen_misc(L);
 
 	const char * file = "main.lua";
-	if (argc>1){
+	if (argc > 1){
 		file = argv[1];
 	}
 
-	//lua_pushcfunction(L, print);
-	//lua_setglobal(L, "print");
+	SetConsoleTitle(file);
 
 	if (luaL_loadfile(L, file) != 0){
 		puts(lua_tostring(L, 1));
@@ -239,7 +454,11 @@ void main(int argc, char *argv[]){
 
 	printf("%f", GetCounter());
 
-	lua_close(L);
+	lua_getglobal(L, "Exit");
+	if (lua_type(L, 1) == LUA_TFUNCTION){
+		lua_pcall(L, 0, 0, NULL);
+	}
 
+	lua_close(L);
 	_getch();
 }

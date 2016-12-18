@@ -61,6 +61,24 @@
     <Filter Include="LuaFileSystem\Source Files">
       <UniqueIdentifier>{3441ad4d-451a-4302-aeea-1be3c58fd123}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaErf">
+      <UniqueIdentifier>{7e901d3b-7f65-4a4f-88aa-10d5c0983bbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaErf\Header Files">
+      <UniqueIdentifier>{af0eefe7-1a43-46eb-afd4-4bcaa86abb14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaErf\Source Files">
+      <UniqueIdentifier>{6652e13a-08df-4c05-98f4-b32f7d341610}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaMD5">
+      <UniqueIdentifier>{3a92cb55-9246-47af-8322-a9c4c1334a08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaMD5\Header Files">
+      <UniqueIdentifier>{0860ec31-06e2-4bc3-9221-3819accb6d16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaMD5\Source Files">
+      <UniqueIdentifier>{64426d92-43ad-44e8-93e8-d950fb46b7bc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\plugin.cpp">
@@ -231,6 +249,21 @@
     <ClCompile Include="lua_misc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Erf.cpp">
+      <Filter>LuaErf\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ERFMain.cpp">
+      <Filter>LuaErf</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaMD5.cpp">
+      <Filter>LuaMD5\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="md5.c">
+      <Filter>LuaMD5\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MD5Main.cpp">
+      <Filter>LuaMD5</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -382,6 +415,21 @@
     </ClInclude>
     <ClInclude Include="lua_misc.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Erf.h">
+      <Filter>LuaErf\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ERFMain.h">
+      <Filter>LuaErf</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaMD5.h">
+      <Filter>LuaMD5\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="md5.h">
+      <Filter>LuaMD5\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MD5Main.h">
+      <Filter>LuaMD5</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

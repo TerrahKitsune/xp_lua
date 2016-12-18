@@ -7,7 +7,10 @@
 #include "LuaSQLiteMain.h"
 #include "LuaFileSystemMain.h"
 #include "lua_misc.h"
+#include "ERFMain.h"
+#include "MD5Main.h"
 
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
 static int print(lua_State *L){
 
 	FILE * file = fopen("LUA.txt", "a");
@@ -48,6 +51,10 @@ LuaEngine::LuaEngine()
 	lua_setglobal(L, "SQLite");
 	luaopen_filesystem(L);
 	lua_setglobal(L, "FileSystem");
+	luaopen_erf(L);
+	lua_setglobal(L, "ERF");
+	luaopen_md5(L);
+	lua_setglobal(L, "MD5");
 
 	luaopen_misc(L);
 
@@ -61,19 +68,22 @@ LuaEngine::~LuaEngine()
 	lua_close(L);
 }
 
-bool LuaEngine::RunString(char * result, size_t resultsize, const char * script, const char * name)
+char * LuaEngine::RunString(const char * script, const char * name)
 {
 	int error = luaL_loadbuffer(L, script, strlen(script), name);
 	size_t len;
 	const char * luaresult;
+	char * result;
 
 	if (error)
 	{
 		luaresult = lua_tolstring(L, -1, &len);
-		strncpy(result, luaresult, resultsize - 1);
-		result[resultsize - 1] = '\0';
+		result = new char[len+2];
+		result[0] = '%';
+		memcpy(&result[1], luaresult, len);
+		result[len]='\0';
 		lua_pop(L, lua_gettop(L));
-		return false;
+		return result;
 	}
 
 	error = lua_pcall(L, 0, 1, 0);
@@ -81,23 +91,31 @@ bool LuaEngine::RunString(char * result, size_t resultsize, const char * script,
 	if (error)
 	{
 		luaresult = lua_tolstring(L, -1, &len);
-		strncpy(result, luaresult, resultsize - 1);
-		result[resultsize - 1] = '\0';
+		result = new char[len + 2];
+		if (!result){
+			return NULL;
+		}
+		result[0] = '%';
+		memcpy(&result[1], luaresult, len);
+		result[len] = '\0';
 		lua_pop(L, lua_gettop(L));
-		return false;
+		return result;
 	}
 	else if (lua_gettop(L) >= 1 && !lua_isnoneornil(L, -1))
 	{
 		luaresult = lua_tolstring(L, -1, &len);
-		strncpy(result, luaresult, resultsize - 1);
-		result[resultsize - 1] = '\0';
+		result = new char[len + 1];
+		if (!result){
+			return NULL;
+		}
+		memcpy(result, luaresult, len);
+		result[len] = '\0';
 		lua_pop(L, lua_gettop(L));
-		return true;
+		return result;
 	}
 	else
 	{
-		result[0] = '\0';
 		lua_pop(L, lua_gettop(L));
-		return true;
+		return NULL;
 	}
 }
