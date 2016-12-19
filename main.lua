@@ -6,14 +6,10 @@ local password = "Kah9LpSp9UEZA6qf";
 local db = user;
 local port = 3306;
 
-SetTicker(function() print("meow!") end);
-
-print(assert(GetRegistryValue(0,"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion","SystemRoot")));
-ToggleConsole(false);
-print(Runtime());
-Sleep(1000);
-ToggleConsole(true);
-for n=1, 100 do 
-	Sleep(10);
-	print(Runtime());
-end
+local sq = assert(SQLite.Open("D:\\Media\\Desktop\\uuid\\jpk.db"));
+assert(sq:Query("SELECT Name FROM `articles` WHERE ID=15;"));
+if sq:Fetch() then 
+	local name = sq:GetRow(1); 
+	print(name);
+	print(MySQL.EncodeString(name));
+end 

@@ -1,7 +1,7 @@
 #include "MySQLMain.h"
 #include "LuaMySQL.h"
 
-static const struct luaL_Reg mysqlfunctions[] = {	
+static const struct luaL_Reg mysqlfunctions[] = {
 	{ "EncodeString", DataToHex },
 	{ "EscapeString", EscapeString },
 	{ "GetRow", MySQLGetRow },

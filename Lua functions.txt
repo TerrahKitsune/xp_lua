@@ -14,7 +14,7 @@ Misc global functions:
 	int GetKey()
 	bool HasKeyDown()
 	nil Put(text)
-	nil ShellExecute(file, parameter)
+	bool ShellExecute(file, parameter)
 
 	--Sets a function as a ticker function
 	--if the function parameter isnt a function the ticker is disabled
@@ -104,8 +104,9 @@ SQLite:
 	-Opens a new SQLite instance and returns the instance object
 	-if a filename is provided it will attempt opening that file or create a new one
 	-if no filename is given the sqlite database will be opened in memory
+	-mode: 0: single thread (default) 1: multithreaded. 2: serialized
 	-returns nil on failure
-	SQLite SQLite.Open(opt filename)
+	SQLite SQLite.Open(opt filename, opt mode)
 
 	-Runs a query on the sqlite object, preparedstatements should contain values matching the query
 	-IE: "INSERT INTO Test (@Data)" then preparedstatements should contain a value with the key "Data"

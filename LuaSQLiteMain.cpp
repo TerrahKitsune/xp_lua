@@ -3,13 +3,14 @@
 
 static const struct luaL_Reg lasqlitefunctions[] = {
 	{ "Open", SQLiteConnect },
+	{ "Close", SQLite_GC },
 	{ "Query", SQLiteExecute },	
 	{ "Execute", SQLiteExecuteWithCallback },
 	{ "Fetch", SQLiteFetch },
 	{ "GetRow", SQLiteGetRow },
+	{ "SetBusyHandler", SQLiteSetBusyHandler },
 	{ NULL, NULL }
 };
-
 
 static const luaL_Reg luasqlmeta[] = {
 	{ "__gc", SQLite_GC },

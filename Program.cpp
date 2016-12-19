@@ -217,9 +217,10 @@ static int L_GetMemory(lua_State *L){
 
 static int L_ShellExecute(lua_State *L){
 
-	ShellExecute(NULL, "open", luaL_checkstring(L, 1), luaL_checkstring(L, 2), NULL, SW_SHOW);
+	int ok = (int)ShellExecute(NULL, "open", luaL_checkstring(L, 1), luaL_checkstring(L, 2), NULL, SW_SHOW);
 	lua_pop(L, lua_gettop(L));
-	return 0;
+	lua_pushboolean(L, ok > 32);
+	return 1;
 }
 
 static int hook;
