@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "lua_main_incl.h" 
+#include "networking.h"
 #include <conio.h>
 #include "GFFMain.h"
 #include <windows.h>
@@ -10,6 +11,12 @@
 #include "LuaSQLiteMain.h"
 #include "ERFMain.h"
 #include "MD5Main.h"
+#include "HttpMain.h"
+#include "ProcessMain.h"
+#include "Http.h"
+#include "Shellapi.h"
+#include "LuaClientMain.h"
+#include "LuaServerMain.h"
 
 #define HI_PART(x)  ((x>>4) & 0x0F)
 #define LO_PART(x)  ((x) & 0x0F)
@@ -198,10 +205,14 @@ static int L_put(lua_State *L) {
 
 static int L_Exit(lua_State *L){
 
+	int ExitCode = luaL_optinteger(L, 1, 0);
 	lua_pop(L, lua_gettop(L));
 	lua_gc(L, LUA_GCCOLLECT, 0);
 	lua_close(L);
-	exit(0);
+	ERR_free_strings();
+	EVP_cleanup();
+	WSACleanup();
+	exit(ExitCode);
 }
 
 static int L_GetMemory(lua_State *L){
@@ -213,7 +224,6 @@ static int L_GetMemory(lua_State *L){
 	lua_pushinteger(L, mem);
 	return 1;
 }
-
 
 static int L_ShellExecute(lua_State *L){
 
@@ -364,12 +374,29 @@ static int L_GetRuntime(lua_State *L){
 	return 1;
 }
 
-void main(int argc, char *argv[]){
+int main(int argc, char *argv[]){
+
+	WSADATA wsa;
+	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+	{
+		return -1;
+	}
+
+	SSL_load_error_strings();
+	SSL_library_init();
+	OpenSSL_add_all_algorithms();
 
 	StartCounter();
 	hook = -1;
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
+
+	lua_createtable(L, 0, argc);
+	for (int n = 0; n < argc; n++){
+		lua_pushstring(L, argv[n]);
+		lua_rawseti(L, -2, n + 1);
+	}
+	lua_setglobal(L, "ARGS");
 
 	luaopen_gff(L);
 	lua_setglobal(L, "GFF");
@@ -385,6 +412,14 @@ void main(int argc, char *argv[]){
 	lua_setglobal(L, "MD5");
 	luaopen_erf(L);
 	lua_setglobal(L, "ERF");
+	luaopen_http(L);
+	lua_setglobal(L, "Http");
+	luaopen_process(L);
+	lua_setglobal(L, "Process");
+	luaopen_luaserver(L);
+	lua_setglobal(L, "Server");
+	luaopen_luaclient(L);
+	lua_setglobal(L, "Client");
 
 	lua_pushcfunction(L, L_GetRuntime);
 	lua_setglobal(L, "Runtime");
@@ -407,9 +442,6 @@ void main(int argc, char *argv[]){
 	lua_pushcfunction(L, L_GetMemory);
 	lua_setglobal(L, "GetMemory");
 
-	lua_pushcfunction(L, L_Exit);
-	lua_setglobal(L, "Exit");
-
 	lua_pushcfunction(L, L_GetTextColor);
 	lua_setglobal(L, "GetTextColor");
 
@@ -421,9 +453,15 @@ void main(int argc, char *argv[]){
 
 	lua_pushcfunction(L, L_kbhit);
 	lua_setglobal(L, "HasKeyDown");
-
+	
 	lua_pushcfunction(L, L_put);
 	lua_setglobal(L, "Put");
+
+	lua_pushcfunction(L, L_cls);
+	lua_setglobal(L, "CLS");
+
+	lua_pushcfunction(L, L_Exit);
+	lua_setglobal(L, "Exit");
 
 	//returns nothing
 	luaopen_misc(L);
@@ -438,6 +476,7 @@ void main(int argc, char *argv[]){
 	if (luaL_loadfile(L, file) != 0){
 		puts(lua_tostring(L, 1));
 		lua_pop(L, 1);
+		_getch();
 	}
 	else if (lua_pcall(L, 0, 10, NULL) != 0){
 		puts(lua_tostring(L, 1));
@@ -451,15 +490,31 @@ void main(int argc, char *argv[]){
 		DumpStack(L, true);
 	}
 
+	int ret = 0;
+
+	if (lua_type(L, 1) == LUA_TNUMBER){
+		ret = lua_tointeger(L, 1);
+	}
+
 	lua_pop(L, lua_gettop(L));
 
 	printf("%f", GetCounter());
 
 	lua_getglobal(L, "Exit");
 	if (lua_type(L, 1) == LUA_TFUNCTION){
-		lua_pcall(L, 0, 0, NULL);
+		lua_pushinteger(L, ret);
+		lua_pcall(L, 1, 1, NULL);
+		if (lua_type(L, 1) == LUA_TNUMBER){
+			ret = lua_tointeger(L, 1);
+		}
+	}
+	else{
+		_getch();	
 	}
 
-	lua_close(L);
-	_getch();
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, ret);
+
+	L_Exit(L);	
+	return ret;
 }

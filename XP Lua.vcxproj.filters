@@ -79,6 +79,45 @@
     <Filter Include="LuaMD5\Source Files">
       <UniqueIdentifier>{64426d92-43ad-44e8-93e8-d950fb46b7bc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaHTTP">
+      <UniqueIdentifier>{1d6af272-67e1-4958-9b3c-6e60088e1051}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaHTTP\Header Files">
+      <UniqueIdentifier>{60384e17-e8f2-48f0-a350-26e8b4ed8e17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaHTTP\Source Files">
+      <UniqueIdentifier>{119694b8-3c14-4da7-a256-31887d13a975}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaProcess">
+      <UniqueIdentifier>{3a7232ca-cc2d-4afd-9441-981c5e7dc18d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaProcess\Header Files">
+      <UniqueIdentifier>{b0b0adbc-9053-4d1a-9f59-7c07fae78504}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaProcess\Source Files">
+      <UniqueIdentifier>{6bfa8724-6cf7-4f01-b995-bcc9c87095dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaService">
+      <UniqueIdentifier>{17eaa8c3-c74f-4ee5-96de-0a158d3603ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaService\Client">
+      <UniqueIdentifier>{7329db10-f22b-4aa0-99e4-f2997dd94c97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaService\Server">
+      <UniqueIdentifier>{a61aff54-b6df-4b78-aef2-4f3c5a53f27f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaService\Client\Header Files">
+      <UniqueIdentifier>{de6d8c20-c94a-424b-a29c-567ba192b64f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaService\Server\Header Files">
+      <UniqueIdentifier>{626338c7-32ec-4126-977c-dd66f680038e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaService\Client\Source Files">
+      <UniqueIdentifier>{f75bac87-3de4-4680-a6be-09edf7ce8acc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaService\Server\Source Files">
+      <UniqueIdentifier>{1fe6166b-b8a7-486e-96aa-6b708b36e85f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\plugin.cpp">
@@ -264,6 +303,36 @@
     <ClCompile Include="MD5Main.cpp">
       <Filter>LuaMD5</Filter>
     </ClCompile>
+    <ClCompile Include="Http.cpp">
+      <Filter>LuaHTTP\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HttpMain.cpp">
+      <Filter>LuaHTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="Buffer.cpp">
+      <Filter>LuaHTTP\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessMain.cpp">
+      <Filter>LuaProcess</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaProcess.cpp">
+      <Filter>LuaProcess\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaServer.cpp">
+      <Filter>LuaService\Server\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaClient.cpp">
+      <Filter>LuaService\Client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaClientMain.cpp">
+      <Filter>LuaService\Client</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaServerMain.cpp">
+      <Filter>LuaService\Server</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaFrame.cpp">
+      <Filter>LuaService</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -430,6 +499,39 @@
     </ClInclude>
     <ClInclude Include="MD5Main.h">
       <Filter>LuaMD5</Filter>
+    </ClInclude>
+    <ClInclude Include="Http.h">
+      <Filter>LuaHTTP\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HttpMain.h">
+      <Filter>LuaHTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="Buffer.h">
+      <Filter>LuaHTTP\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessMain.h">
+      <Filter>LuaProcess</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaProcess.h">
+      <Filter>LuaProcess\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaServer.h">
+      <Filter>LuaService\Server\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaClient.h">
+      <Filter>LuaService\Client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaClientMain.h">
+      <Filter>LuaService\Client</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaServerMain.h">
+      <Filter>LuaService\Server</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaFrame.h">
+      <Filter>LuaService</Filter>
+    </ClInclude>
+    <ClInclude Include="networking.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

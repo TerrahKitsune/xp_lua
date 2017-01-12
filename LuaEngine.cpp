@@ -1,3 +1,4 @@
+#include "networking.h"
 #include "LuaEngine.h"
 #include "NWN2LuaLib.h"
 
@@ -9,6 +10,12 @@
 #include "lua_misc.h"
 #include "ERFMain.h"
 #include "MD5Main.h"
+#include "ProcessMain.h"
+#include "Http.h"
+#include "Shellapi.h"
+#include "LuaClientMain.h"
+#include "LuaServerMain.h"
+#include "HttpMain.h"
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 static int print(lua_State *L){
@@ -37,6 +44,14 @@ static int print(lua_State *L){
 
 LuaEngine::LuaEngine()
 {
+	WSADATA wsa;
+	WSAStartup(MAKEWORD(2, 2), &wsa);
+
+	SSL_load_error_strings();
+	SSL_library_init();
+	OpenSSL_add_all_algorithms();
+
+
 	L = luaL_newstate();
 	luaL_openlibs(L);
 	lua_nwn2_openlib(L);
@@ -55,6 +70,14 @@ LuaEngine::LuaEngine()
 	lua_setglobal(L, "ERF");
 	luaopen_md5(L);
 	lua_setglobal(L, "MD5");
+	luaopen_http(L);
+	lua_setglobal(L, "Http");
+	luaopen_process(L);
+	lua_setglobal(L, "Process");
+	luaopen_luaserver(L);
+	lua_setglobal(L, "Server");
+	luaopen_luaclient(L);
+	lua_setglobal(L, "Client");
 
 	luaopen_misc(L);
 
@@ -66,6 +89,9 @@ LuaEngine::LuaEngine()
 LuaEngine::~LuaEngine()
 {
 	lua_close(L);
+	ERR_free_strings();
+	EVP_cleanup();
+	WSACleanup();
 }
 
 char * LuaEngine::RunString(const char * script, const char * name)

@@ -18,13 +18,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -44,7 +44,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\Ancon\Documents\GitHub\xp_lua\mysql\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\mysql\include;$(SolutionDir)\OpenSSL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4703;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -59,7 +59,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\Ancon\Documents\GitHub\xp_lua\mysql\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\mysql\include;$(SolutionDir)\OpenSSL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4703;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -70,6 +70,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Erf.cpp" />
     <ClCompile Include="ERFMain.cpp" />
     <ClCompile Include="GffField.cpp" />
@@ -77,10 +78,18 @@
     <ClCompile Include="GffLabel.cpp" />
     <ClCompile Include="GFFMain.cpp" />
     <ClCompile Include="GffStruct.cpp" />
+    <ClCompile Include="Http.cpp" />
+    <ClCompile Include="HttpMain.cpp" />
+    <ClCompile Include="LuaClient.cpp" />
+    <ClCompile Include="LuaClientMain.cpp" />
     <ClCompile Include="LuaFileSystem.cpp" />
     <ClCompile Include="LuaFileSystemMain.cpp" />
+    <ClCompile Include="LuaFrame.cpp" />
     <ClCompile Include="LuaGff.cpp" />
     <ClCompile Include="LuaMD5.cpp" />
+    <ClCompile Include="LuaProcess.cpp" />
+    <ClCompile Include="LuaServer.cpp" />
+    <ClCompile Include="LuaServerMain.cpp" />
     <ClCompile Include="LuaSQLite.cpp" />
     <ClCompile Include="LuaSQLiteMain.cpp" />
     <ClCompile Include="Lua\lapi.c" />
@@ -121,12 +130,14 @@
     <ClCompile Include="md5.c" />
     <ClCompile Include="MD5Main.cpp" />
     <ClCompile Include="MySQLMain.cpp" />
+    <ClCompile Include="ProcessMain.cpp" />
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="SQLite\sqlite3.c" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimerMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Buffer.h" />
     <ClInclude Include="Erf.h" />
     <ClInclude Include="ERFMain.h" />
     <ClInclude Include="GffField.h" />
@@ -134,10 +145,18 @@
     <ClInclude Include="GffLabel.h" />
     <ClInclude Include="GFFMain.h" />
     <ClInclude Include="GffStruct.h" />
+    <ClInclude Include="Http.h" />
+    <ClInclude Include="HttpMain.h" />
+    <ClInclude Include="LuaClient.h" />
+    <ClInclude Include="LuaClientMain.h" />
     <ClInclude Include="LuaFileSystem.h" />
     <ClInclude Include="LuaFileSystemMain.h" />
+    <ClInclude Include="LuaFrame.h" />
     <ClInclude Include="LuaGff.h" />
     <ClInclude Include="LuaMD5.h" />
+    <ClInclude Include="LuaProcess.h" />
+    <ClInclude Include="LuaServer.h" />
+    <ClInclude Include="LuaServerMain.h" />
     <ClInclude Include="LuaSQLite.h" />
     <ClInclude Include="LuaSQLiteMain.h" />
     <ClInclude Include="Lua\lapi.h" />
@@ -172,6 +191,8 @@
     <ClInclude Include="md5.h" />
     <ClInclude Include="MD5Main.h" />
     <ClInclude Include="MySQLMain.h" />
+    <ClInclude Include="networking.h" />
+    <ClInclude Include="ProcessMain.h" />
     <ClInclude Include="SQLite\sqlite3.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimerMain.h" />

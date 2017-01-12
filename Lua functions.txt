@@ -41,6 +41,112 @@ Misc global functions:
 	SetTitle(newtitle)
 
 	ms Runtime()
+
+Server:
+
+	-Starts listening to port
+	-returns nil and the wsa error on failure
+	-returns a server instance on success (this will cancel if garbage collected)
+	Server Server.Start(port)
+
+	-Attempts connecting a client
+	-returns nil and a wsa error on failure (wsa error is WOULDBLOCK) if there was no connection
+	-returns a socket (intiger) on success
+	socket Server:Accept()
+
+	-Attempts receving data from a socket
+	-Returns nil and a wsa error (1=disconnected, 0=not enough memory)
+	-returns method (a string) and a table containing data from the source
+	method,data Server:Recv(socket)
+
+	-Attempts sending data to the peer, method should be a string max 16 characters
+	-datatable should be a table containing string key with boolean, numeric or string values
+	-returns false and a wsa error on failure (1=disconnected 0=not enough memory)
+	boolean, wsaerror Server:Send(socket, method, datatable)
+
+	-Returns an array containing all connected clients (integer sockets)
+	-is empty if there are no clients
+	array Server:Clients()
+
+	-Returns the ip and port from the socket
+	-returns nil on failure
+	ip,port Server:GetIP(socket)
+
+Client:
+
+	-Attempts connecting to the address at port
+	-on success this returns a client object
+	-on failure it returns nil and a wsa error code
+	Client Client.Connect(address, port)
+
+	-Attempts receving data
+	-Returns nil and a wsa error (1=disconnected, 0=not enough memory)
+	-returns method (a string) and a table containing data from the source
+	method,data Client:Recv()
+
+	-Attempts sending data, method should be a string max 16 characters
+	-datatable should be a table containing string key with boolean, numeric or string values
+	-returns false and a wsa error on failure (1=disconnected 0=not enough memory)
+	boolean, wsaerror Client:Send(method, datatable)
+
+Process:
+
+	-returns a table with process ids as keys and values as names
+	table Process.All()
+
+	-Opens a process, if no process ID is provided it opens the running instance
+	Process Process.Open(opt id)
+
+	-app = path to the application
+	-cmd = commandline to be passed to the application
+	-directory = path to the directory to run in
+	-noconsole if true the process will not spawn its own console
+	Process Process.Start(app,cmd,directory,noconsole)
+
+	-Attempts to stop the process
+	bool Process:Stop()
+
+	-The return code from the process, if the process is still running this returns nil
+	int/nil Process:GetExitCode()
+
+	-Get the process ID
+	int Process:GetID();
+
+	-Get the process name
+	string Process:GetName();
+
+	-Get process utilization in percent since process start or since the last call to GetCPU
+	number Process:GetCPU();
+
+	-Get the current physical memory (ram) utilized by the process
+	number Process:GetRAM();
+
+	-Gets or sets a prio on the process
+	-if no parameter is given this will return the current prio
+	-if a prio is given then it'll attempt setting the prio returning true/false
+	-https://msdn.microsoft.com/en-us/library/ms686219(v=vs.85).aspx
+	int/bool Process:Priority(opt prio)
+
+HTTP:
+
+	-does a http (or https) request, method should be a http method IE "GET"
+	-url = "http(s)://address:port/page"
+	-content = content to tbe passed in the request
+	-headers = key-value table containing the headers, content-length and host is automatically filled
+	code, ok, contents, header HTTP.Request(method, url, content, headers)
+
+	-Set a filepath, if a file is set then content in HTTP.Request will be nil
+	-and the set file will contain the contents instead
+	nil HTTP.SetFile(file)
+
+	-Sets a message function
+	-function(ms,total,processed,reciving)
+	-ms = miliseconds since the request started
+	-total = the total amount of bytes to receive (if content length)
+	-processed = amount of bytes downloaded (or sent)
+	-reciving = true if we're receving data, false if we're sending
+	nil HTTP.SetMessageFunction(func)
+
 MD5:
 	
 	-Returns a newly initilized instance of MD5
@@ -128,6 +234,9 @@ SQLite:
 	-For more accurate data or binary data Query
 	bool, txt SQLite:Execute(querystring, opt callback)
 
+	-closes the database connection, it should not be used afterwards
+	nil SQLite:Close()
+
 FileSystem:
 
 	-Returns an array containing all files that exists in path
@@ -141,7 +250,7 @@ FileSystem:
 	-Size integer
 	-Creation unix time when the file was created
 	-Access unix time when the file was accessed
-	-Writeunix time when the file was written to
+	-Write unix time when the file was written to
 	-returns nil on failure
 	FileInfo FileSystem.GetFileInfo(file)
 

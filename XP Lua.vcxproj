@@ -14,6 +14,7 @@
     <ClCompile Include="..\..\misc\log.cpp" />
     <ClCompile Include="..\plugin.cpp" />
     <ClCompile Include="AssemblyHelper.cpp" />
+    <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Erf.cpp" />
     <ClCompile Include="ERFMain.cpp" />
     <ClCompile Include="GffField.cpp" />
@@ -21,11 +22,19 @@
     <ClCompile Include="GffLabel.cpp" />
     <ClCompile Include="GFFMain.cpp" />
     <ClCompile Include="GffStruct.cpp" />
+    <ClCompile Include="Http.cpp" />
+    <ClCompile Include="HttpMain.cpp" />
+    <ClCompile Include="LuaClient.cpp" />
+    <ClCompile Include="LuaClientMain.cpp" />
     <ClCompile Include="LuaFileSystem.cpp" />
     <ClCompile Include="LuaFileSystemMain.cpp" />
+    <ClCompile Include="LuaFrame.cpp" />
     <ClCompile Include="LuaGff.cpp" />
     <ClCompile Include="LuaMD5.cpp" />
     <ClCompile Include="LuaMySQL.cpp" />
+    <ClCompile Include="LuaProcess.cpp" />
+    <ClCompile Include="LuaServer.cpp" />
+    <ClCompile Include="LuaServerMain.cpp" />
     <ClCompile Include="LuaSQLite.cpp" />
     <ClCompile Include="LuaSQLiteMain.cpp" />
     <ClCompile Include="lua_misc.cpp" />
@@ -69,6 +78,7 @@
     <ClCompile Include="Lua\lutf8lib.c" />
     <ClCompile Include="Lua\lvm.c" />
     <ClCompile Include="Lua\lzio.c" />
+    <ClCompile Include="ProcessMain.cpp" />
     <ClCompile Include="SQLite\sqlite3.c" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimerMain.cpp" />
@@ -77,6 +87,7 @@
     <ClInclude Include="..\..\misc\log.h" />
     <ClInclude Include="..\dbplugin.h" />
     <ClInclude Include="AssemblyHelper.h" />
+    <ClInclude Include="Buffer.h" />
     <ClInclude Include="Erf.h" />
     <ClInclude Include="ERFMain.h" />
     <ClInclude Include="GffField.h" />
@@ -84,11 +95,19 @@
     <ClInclude Include="GffLabel.h" />
     <ClInclude Include="GFFMain.h" />
     <ClInclude Include="GffStruct.h" />
+    <ClInclude Include="Http.h" />
+    <ClInclude Include="HttpMain.h" />
+    <ClInclude Include="LuaClient.h" />
+    <ClInclude Include="LuaClientMain.h" />
     <ClInclude Include="LuaFileSystem.h" />
     <ClInclude Include="LuaFileSystemMain.h" />
+    <ClInclude Include="LuaFrame.h" />
     <ClInclude Include="LuaGff.h" />
     <ClInclude Include="LuaMD5.h" />
     <ClInclude Include="LuaMySQL.h" />
+    <ClInclude Include="LuaProcess.h" />
+    <ClInclude Include="LuaServer.h" />
+    <ClInclude Include="LuaServerMain.h" />
     <ClInclude Include="LuaSQLite.h" />
     <ClInclude Include="LuaSQLiteMain.h" />
     <ClInclude Include="lua_main_incl.h" />
@@ -96,6 +115,7 @@
     <ClInclude Include="md5.h" />
     <ClInclude Include="MD5Main.h" />
     <ClInclude Include="MySQLMain.h" />
+    <ClInclude Include="networking.h" />
     <ClInclude Include="NWN2LuaLib.h" />
     <ClInclude Include="plua.h" />
     <ClInclude Include="LuaEngine.h" />
@@ -125,6 +145,7 @@
     <ClInclude Include="Lua\lundump.h" />
     <ClInclude Include="Lua\lvm.h" />
     <ClInclude Include="Lua\lzio.h" />
+    <ClInclude Include="ProcessMain.h" />
     <ClInclude Include="SQLite\sqlite3.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimerMain.h" />
@@ -170,7 +191,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\plugins\xp_lua\mysql\include;$(SolutionDir)..\lib\wxwidgets\include;$(SolutionDir)..\lib\wxwidgets\lib\vc_lib\mswd</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\plugins\xp_lua\OpenSSL\include;$(SolutionDir)\plugins\xp_lua\mysql\include;$(SolutionDir)..\lib\wxwidgets\include;$(SolutionDir)..\lib\wxwidgets\lib\vc_lib\mswd</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;TIME_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -188,7 +209,7 @@
       </FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\plugins\xp_lua\mysql\include;$(SolutionDir)..\lib\wxwidgets\include;$(SolutionDir)..\lib\wxwidgets\lib\vc_lib\msw</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\plugins\xp_lua\OpenSSL\include;$(SolutionDir)\plugins\xp_lua\mysql\include;$(SolutionDir)..\lib\wxwidgets\include;$(SolutionDir)..\lib\wxwidgets\lib\vc_lib\msw</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>

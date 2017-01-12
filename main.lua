@@ -1,4 +1,4 @@
-local _exit=Exit;Exit=function()GetKey();_exit();end
+local _exit=Exit;Exit=function(ret)print(ret); GetKey(); return ret+1; end
 
 local server = "10.9.23.254";
 local user = "lua";
@@ -6,10 +6,23 @@ local password = "Kah9LpSp9UEZA6qf";
 local db = user;
 local port = 3306;
 
-local sq = assert(SQLite.Open("D:\\Media\\Desktop\\uuid\\jpk.db"));
-assert(sq:Query("SELECT Name FROM `articles` WHERE ID=15;"));
-if sq:Fetch() then 
-	local name = sq:GetRow(1); 
-	print(name);
-	print(MySQL.EncodeString(name));
-end 
+local processes = {};
+local proc = nil;
+for k,v in pairs(Process.All()) do 
+	proc = Process.Open(k);
+	if proc then
+		table.insert(processes,proc);
+	end
+end
+
+while true do
+
+	for k,v in ipairs(processes) do 
+		print(v:GetID(), v:GetName(), v:GetCPU(), v:GetRAM());
+	end
+
+	Sleep(1000);
+	CLS();
+end
+
+return 1;

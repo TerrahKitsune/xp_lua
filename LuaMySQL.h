@@ -1,7 +1,7 @@
 #pragma once
 #pragma warning (disable: 4514 4786)
 #pragma warning( push, 3 )
-#define HAVE_STRUCT_TIMESPEC
+//#define HAVE_STRUCT_TIMESPEC
 #include "lua_main_incl.h"
 #include <my_global.h>
 #include <mysql.h>
