@@ -137,7 +137,7 @@ void lua_pushframe(lua_State *L, LuaFrame * frame){
 	char * data = (char*)frame;
 	data = &data[sizeof(LuaFrame) + (sizeof(LuaFrameKey)*frame->numbkeys)];
 	LUA_NUMBER number;
-
+	char boolean;
 	lua_createtable(L, 0, frame->numbkeys);
 	for (int n = 0; n < frame->numbkeys; n++){
 		if (frame->keys[n].datalength + frame->keys[n].dataoffset >= frame->length ||
@@ -151,7 +151,8 @@ void lua_pushframe(lua_State *L, LuaFrame * frame){
 			lua_pushnumber(L, number);
 			break;
 		case LUA_TBOOLEAN:
-			lua_pushboolean(L, &data[frame->keys[n].dataoffset]>0);
+			boolean = data[frame->keys[n].dataoffset];
+			lua_pushboolean(L, boolean>0);
 			break;
 		case LUA_TSTRING:
 			lua_pushlstring(L, &data[frame->keys[n].dataoffset], frame->keys[n].datalength);

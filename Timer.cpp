@@ -46,8 +46,15 @@ int TimerIsRunning(lua_State *L) {
 int TimerReset(lua_State *L) {
 
 	Timer * timer = luaL_checktimer(L, 1);
+
+	LARGE_INTEGER li;
+	if (!QueryPerformanceFrequency(&li))
+		luaL_error(L, "QueryPerformanceFrequency failed!");
+
 	timer->CounterStart = 0;
 	timer->CounterStop = 0;
+	timer->StoredTime = 0;
+
 	lua_pop(L, 1);
 	return 0;
 }
@@ -59,10 +66,15 @@ int TimerStart(lua_State *L) {
 	if (!QueryPerformanceFrequency(&li))
 		luaL_error(L, "QueryPerformanceFrequency failed!");
 
+	if (timer->CounterStart > 0){
+		timer->StoredTime += (double((timer->CounterStop <= 0 ? li.QuadPart : timer->CounterStop) - timer->CounterStart) / timer->PCFreq);
+	}
+
 	timer->PCFreq = double(li.QuadPart) / 1000.0;
 
 	QueryPerformanceCounter(&li);
 	timer->CounterStart = li.QuadPart;
+	
 	timer->CounterStop = 0;
 
 	lua_pop(L, 1);
@@ -90,18 +102,22 @@ int TimerGetElapsed(lua_State *L) {
 
 	Timer * timer = luaL_checktimer(L, 1);
 
-	if (timer->CounterStop <= 0) {
+	if (timer->CounterStart <= 0){
+		lua_pop(L, 1);
+		lua_pushnumber(L, 0);
+	}
+	else if (timer->CounterStop <= 0) {
 		LARGE_INTEGER li;
 		if (!QueryPerformanceCounter(&li))
 			luaL_error(L, "QueryPerformanceFrequency failed!");
 
 
 		lua_pop(L, 1);
-		lua_pushnumber(L, double(li.QuadPart - timer->CounterStart) / timer->PCFreq);
+		lua_pushnumber(L, timer->StoredTime + (double(li.QuadPart - timer->CounterStart) / timer->PCFreq));
 	}
 	else {
 		lua_pop(L, 1);
-		lua_pushnumber(L, double(timer->CounterStop - timer->CounterStart) / timer->PCFreq);
+		lua_pushnumber(L, timer->StoredTime + (double(timer->CounterStop - timer->CounterStart) / timer->PCFreq));
 	}
 	return 1;
 }

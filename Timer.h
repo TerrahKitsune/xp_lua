@@ -6,6 +6,7 @@ typedef struct Timer {
 	double PCFreq;
 	__int64 CounterStart;
 	__int64 CounterStop;
+	double StoredTime;
 } Timer;
 
 Timer * lua_totimer(lua_State *L, int index);
