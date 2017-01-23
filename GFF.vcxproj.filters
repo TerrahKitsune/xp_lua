@@ -118,6 +118,24 @@
     <Filter Include="LuaService\Client\Source Files">
       <UniqueIdentifier>{908fb6cf-56a3-41a7-a28b-f7d20b349491}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaTLK">
+      <UniqueIdentifier>{2b7cf395-5a5d-4e27-b3b2-5185524e3a8f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaTLK\Header Files">
+      <UniqueIdentifier>{7791ab5a-df3f-462c-980e-f5c354c5cd86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaTLK\Source Files">
+      <UniqueIdentifier>{d16048f4-2d4c-483a-b38f-9a874e380d74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua2DA">
+      <UniqueIdentifier>{ed971ecf-964f-4e93-bb8b-9f6feb614522}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua2DA\Header Files">
+      <UniqueIdentifier>{9e42cf08-d0ec-481f-b5e9-27fcda281c8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua2DA\Source Files">
+      <UniqueIdentifier>{f7e519d6-566e-49be-9360-4812b3bda180}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -315,6 +333,18 @@
     <ClCompile Include="LuaClient.cpp">
       <Filter>LuaService\Client\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tlk.cpp">
+      <Filter>LuaTLK\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TlkMain.cpp">
+      <Filter>LuaTLK</Filter>
+    </ClCompile>
+    <ClCompile Include="2da.cpp">
+      <Filter>Lua2DA\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="2DAMain.cpp">
+      <Filter>Lua2DA</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -493,6 +523,18 @@
     </ClInclude>
     <ClInclude Include="LuaClient.h">
       <Filter>LuaService\Client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tlk.h">
+      <Filter>LuaTLK\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TlkMain.h">
+      <Filter>LuaTLK</Filter>
+    </ClInclude>
+    <ClInclude Include="2da.h">
+      <Filter>Lua2DA\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="2DAMain.h">
+      <Filter>Lua2DA</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

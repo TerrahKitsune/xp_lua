@@ -281,6 +281,36 @@ FileSystem:
 	-Retruns the current active directory in full path (the directory the program lives in)
 	string FileSystem.CurrentDirectory()
 
+TWODA (2da):
+
+	-opens and parses a 2da file, returns nil on failure
+	TWODA TWODA.Open(file);
+
+	-Returns the data from row depending on index (0 based) or columnname (case sensetive)
+	-returns nil on failure
+	string TWODA:Get2DAString(row, index or columnname)
+
+	-Returns a table key-value of the row
+	table TWODA:Get2DARow(row);
+
+	-Returns an array of columnnames, number of rows and version of the 2da
+	array, numbrows, version TWODA:GetInfo();
+
+TLK:
+
+	-Open a tlk file, returns nil if the file is not a valid tlk file
+	TLK TLK.Open(filename)
+
+	-Return all entries in a table key is the strref
+	-index starts at 0 rather then 1
+	-returns nil on failure
+	table TLK:GetAll()
+
+	-Read a single strref of the tlk, returns nil on failure
+	string TLK:Get(strref)
+
+	-return the number of entries, languageid and version of the tlk
+	count,languageid,version TLK:GetInfo()
 ERF:
 	
 	-opens filename as a erf returning a erf object

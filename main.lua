@@ -6,33 +6,9 @@ local password = "Kah9LpSp9UEZA6qf";
 local db = user;
 local port = 3306;
 
-local server = Server.Start(1234);
-local cli;
-local ip,port;
-local method,data;
-
-print(server);
-
-while server do 
-	cli = server:Accept();
-	if cli then 
-		ip,port = server:GetIP(cli);
-		print("Connected",ip,port);
-	end 
-
-	for _,i in ipairs(server:Clients()) do 
-		method,data = server:Recv(i);
-		if method then 
-			print(method);
-			for k,v in pairs(data) do 
-				print(k,v);
-			end
-		end
-
-		server:Send(i,"Test",{Korv="Sås",Nubr=123.4,IsOk=true});
-	end
-
-	Sleep(5);
+local twoda = TWODA.Open("E:/Media/Desktop/Checkbuild/2da/skills.2da");
+assert(twoda,"Unable to load "..tostring(v));
+local columns = twoda:GetInfo();
+for i,v in ipairs(columns) do 
+	print(i,v);
 end 
-
-return 1;

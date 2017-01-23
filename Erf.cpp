@@ -3,8 +3,15 @@
 #include <stdlib.h>
 #include <Windows.h>
 
-static char nullref[17];
-static const char * NullTerminatedResRef(const char * resref){
+static char nullref[33];
+static const char * NullTerminatedResRef(const char * resref, int version){
+
+	if (version==2){
+		nullref[32] = '\0';
+		strncpy(nullref, resref, 32);
+		return nullref;
+	}
+
 	nullref[16] = '\0';
 	strncpy(nullref, resref, 16);
 	return nullref;
@@ -163,14 +170,30 @@ int GetKeys(lua_State *L){
 		luaL_error(L, "Unable to seek in file");
 	}
 
-	unsigned int buffersize = sizeof(ErfKey)*luaerf->Header->EntryCount;
-	ErfKey * keys = (ErfKey*)calloc(luaerf->Header->EntryCount, sizeof(ErfKey));
-	if (!keys){
-		fclose(file);
-		luaL_error(L, "Unable to allocate buffer for key list");
+	unsigned int buffersize = 0;
+	ErfKey * keys = NULL;
+	ErfKeyV2 * keysv2 = NULL;
+	void * readinto;
+	if (luaerf->version == 1){
+		buffersize = sizeof(ErfKey)*luaerf->Header->EntryCount;
+		keys = (ErfKey*)calloc(luaerf->Header->EntryCount, sizeof(ErfKey));
+		if (!keys){
+			fclose(file);
+			luaL_error(L, "Unable to allocate buffer for key list");
+		}
+		readinto = keys;
+	}
+	else {
+		buffersize = sizeof(ErfKeyV2)*luaerf->Header->EntryCount;
+		keysv2 = (ErfKeyV2*)calloc(luaerf->Header->EntryCount, sizeof(ErfKeyV2));
+		if (!keysv2){
+			fclose(file);
+			luaL_error(L, "Unable to allocate buffer for key list");
+		}
+		readinto = keysv2;
 	}
 
-	size_t read = fread(keys, 1, buffersize, file);
+	size_t read = fread(readinto, 1, buffersize, file);
 	if (read != buffersize){
 		fclose(file);
 		free(keys);
@@ -186,22 +209,43 @@ int GetKeys(lua_State *L){
 
 		lua_createtable(L, 4, 0);
 
-		lua_pushstring(L, "ResRef");
-		lua_pushstring(L, NullTerminatedResRef(keys[n].ResRef));
-		lua_settable(L, -3);
+		if (luaerf->version == 1){
 
-		lua_pushstring(L, "ResID");
-		//1 for 1 index
-		lua_pushinteger(L, keys[n].ResID + 1);
-		lua_settable(L, -3);
+			lua_pushstring(L, "ResRef");
+			lua_pushstring(L, NullTerminatedResRef(keys[n].ResRef, 1));
+			lua_settable(L, -3);
 
-		lua_pushstring(L, "ResType");
-		lua_pushinteger(L, keys[n].ResType);
-		lua_settable(L, -3);
+			lua_pushstring(L, "ResID");
+			//1 for 1 index
+			lua_pushinteger(L, keys[n].ResID + 1);
+			lua_settable(L, -3);
 
-		lua_pushstring(L, "Unused");
-		lua_pushinteger(L, keys[n].Unused);
-		lua_settable(L, -3);
+			lua_pushstring(L, "ResType");
+			lua_pushinteger(L, keys[n].ResType);
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "Unused");
+			lua_pushinteger(L, keys[n].Unused);
+			lua_settable(L, -3);
+		}
+		else{
+			lua_pushstring(L, "ResRef");
+			lua_pushstring(L, NullTerminatedResRef(keysv2[n].ResRef, 2));
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "ResID");
+			//1 for 1 index
+			lua_pushinteger(L, keysv2[n].ResID + 1);
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "ResType");
+			lua_pushinteger(L, keysv2[n].ResType);
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "Unused");
+			lua_pushinteger(L, keysv2[n].Unused);
+			lua_settable(L, -3);
+		}
 
 		lua_rawseti(L, -2, n + 1);
 	}
@@ -286,6 +330,7 @@ int GetLocalizedStrings(lua_State *L){
 
 int OpenErf(lua_State *L){
 	size_t len;
+	int version;
 	const char * filename = luaL_checklstring(L, 1, &len);
 	FILE * file = fopen(filename, "rb");
 	if (!file){
@@ -311,6 +356,28 @@ int OpenErf(lua_State *L){
 	}
 	fclose(file);
 
+	if (tolower(header->Version[0]) == 'v' &&
+		tolower(header->Version[1]) == '1' &&
+		tolower(header->Version[2]) == '.' &&
+		tolower(header->Version[3]) == '0')
+	{
+		version = 1;
+	}
+	else if (tolower(header->Version[0]) == 'v' &&
+		tolower(header->Version[1]) == '1' &&
+		tolower(header->Version[2]) == '.' &&
+		tolower(header->Version[3]) == '1')
+	{
+		version = 2;
+	}
+	else{
+		free(header);
+		lua_pop(L, 1);
+		lua_pushnil(L);
+		return 1;
+	}
+
+
 	char * filenamebuffer = (char*)malloc(len + 1);
 	if (!filenamebuffer){
 		free(header);
@@ -324,6 +391,7 @@ int OpenErf(lua_State *L){
 	lua_pop(L, 1);
 
 	ERF * luaerf = lua_pusherf(L);
+	luaerf->version = version;
 
 	if (!luaerf){
 		free(header);

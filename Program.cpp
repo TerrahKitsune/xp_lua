@@ -17,6 +17,8 @@
 #include "Shellapi.h"
 #include "LuaClientMain.h"
 #include "LuaServerMain.h"
+#include "TlkMain.h"
+#include "2DAMain.h"
 
 #define HI_PART(x)  ((x>>4) & 0x0F)
 #define LO_PART(x)  ((x) & 0x0F)
@@ -420,6 +422,10 @@ int main(int argc, char *argv[]){
 	lua_setglobal(L, "Server");
 	luaopen_luaclient(L);
 	lua_setglobal(L, "Client");
+	luaopen_tlk(L);
+	lua_setglobal(L, "TLK");
+	luaopen_twoda(L);
+	lua_setglobal(L, "TWODA");
 
 	lua_pushcfunction(L, L_GetRuntime);
 	lua_setglobal(L, "Runtime");

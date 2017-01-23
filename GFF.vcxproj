@@ -70,6 +70,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="2da.cpp" />
+    <ClCompile Include="2DAMain.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Erf.cpp" />
     <ClCompile Include="ERFMain.cpp" />
@@ -135,8 +137,12 @@
     <ClCompile Include="SQLite\sqlite3.c" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimerMain.cpp" />
+    <ClCompile Include="tlk.cpp" />
+    <ClCompile Include="TlkMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="2da.h" />
+    <ClInclude Include="2DAMain.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Erf.h" />
     <ClInclude Include="ERFMain.h" />
@@ -196,6 +202,8 @@
     <ClInclude Include="SQLite\sqlite3.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimerMain.h" />
+    <ClInclude Include="tlk.h" />
+    <ClInclude Include="TlkMain.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="main.lua" />

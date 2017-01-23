@@ -35,8 +35,16 @@ typedef struct ErfKey {
 	unsigned short Unused;
 }ErfKey;
 
+typedef struct ErfKeyV2 {
+	char ResRef[32];
+	unsigned int ResID;
+	unsigned short ResType;
+	unsigned short Unused;
+}ErfKeyV2;
+
 typedef struct ERF {
 	char * File;
+	int version;
 	ERFHeader * Header;
 }ERF;
 
