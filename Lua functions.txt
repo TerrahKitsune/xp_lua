@@ -133,11 +133,11 @@ HTTP:
 	-url = "http(s)://address:port/page"
 	-content = content to tbe passed in the request
 	-headers = key-value table containing the headers, content-length and host is automatically filled
-	code, ok, contents, header HTTP.Request(method, url, content, headers)
+	code, ok, contents, header Http.Request(method, url, content, headers)
 
 	-Set a filepath, if a file is set then content in HTTP.Request will be nil
 	-and the set file will contain the contents instead
-	nil HTTP.SetFile(file)
+	nil Http.SetFile(file)
 
 	-Sets a message function
 	-function(ms,total,processed,reciving)
@@ -145,7 +145,7 @@ HTTP:
 	-total = the total amount of bytes to receive (if content length)
 	-processed = amount of bytes downloaded (or sent)
 	-reciving = true if we're receving data, false if we're sending
-	nil HTTP.SetMessageFunction(func)
+	nil Http.SetMessageFunction(func)
 
 MD5:
 	

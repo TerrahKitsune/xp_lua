@@ -70,10 +70,13 @@ void Destroy(Buffer * b){
 }
 
 bool PreAlloc(Buffer * b, size_t size){
-	if (b->file || size - b->size <= 0)
+	
+	long newsize = size - b->size;
+	
+	if (b->file || newsize <= 0)
 		return true;
-
-	return Resize(b, size - b->size);
+	
+	return Resize(b, newsize);
 }
 
 bool BufferAdd(Buffer * b, Buffer * t){

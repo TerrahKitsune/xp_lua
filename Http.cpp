@@ -35,7 +35,7 @@ Buffer * CreateRequest(const char * method, const char * page, Buffer * headers,
 	if (!b)
 		goto bad;
 
-	if (!BufferFormat(b, "%s /%s HTTP/1.1\r\n", method, page))
+	if (!BufferFormat(b, "%s /%s HTTP/1.0\r\n", method, page))
 		goto bad;
 	if (!BufferAdd(b, headers))
 		goto bad;
@@ -378,7 +378,7 @@ static Buffer * SendRecv(lua_State *L, Buffer * request, SOCKET ConnectSocket, S
 				endofheader = strstr(c_str(b), "\r\n\r\n");
 				if (endofheader){
 					tosend = GetContentLength(c_str(b));
-					if (!PreAlloc(b, tosend + (endofheader - c_str(b)) + 2))
+					if (tosend != -1 && !PreAlloc(b, tosend + (endofheader - c_str(b)) + 2))
 					{
 						Destroy(b);
 						return NULL;
