@@ -32,6 +32,7 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type){
 	unsigned int result = 0;
 	unsigned long data;
 	double ddata;
+	float fdata;
 	void * ptr;
 	size_t len;
 	size_t size;
@@ -68,8 +69,8 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type){
 		data = lua_tointeger(L, -1);
 		memcpy(ptr, &data, sizeof(long));
 	case 8:
-		ddata = lua_tonumber(L, -1);
-		memcpy(&result, &ddata, sizeof(float));
+		fdata = lua_tonumber(L, -1);
+		memcpy(&result, &fdata, sizeof(float));
 		break;
 	case 9:
 		ptr = &gff->raw[gff->Header.FieldDataOffset + gff->Header.FieldDataCount];
