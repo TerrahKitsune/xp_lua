@@ -33,12 +33,16 @@ int EscapeString(lua_State *L) {
 	size_t len;
 	const char * data = luaL_checklstring(L, 2, &len);
 
+	if (!luamysql->connection && !Reconnect(luamysql)){
+		luaL_error(L, "Mysql is not connected");
+	}
+
 	char * buffer = (char*)malloc((len * 2) + 1);
 	if (!buffer) {
 		luaL_error(L, "Unable to allocate %u bytes for conversion buffer", (len * 2) + 1);
 	}
 
-	unsigned long newlen = mysql_real_escape_string(&luamysql->mysql, buffer, data, len);
+	unsigned long newlen = mysql_real_escape_string(luamysql->connection, buffer, data, len);
 	lua_pop(L, 1);
 	lua_pushlstring(L, buffer, newlen);
 	free(buffer);
@@ -87,12 +91,17 @@ int MySQLGetRow(lua_State *L) {
 
 	lua_pop(L, lua_gettop(L));
 
-	if (luamysql->row == NULL || luamysql->result == NULL || luamysql->columns == NULL) {
+	if (luamysql->row == NULL || luamysql->result == NULL || luamysql->columns == NULL || luamysql->connection == NULL) {
 		lua_pushnil(L);
 		return 1;
 	}
 
 	lengths = mysql_fetch_lengths(luamysql->result);
+
+	if (lengths == NULL){
+		lua_pushnil(L);
+		return 1;
+	}
 
 	if (index > 0) {
 		index--;
@@ -121,7 +130,7 @@ int MySQLFetch(lua_State *L) {
 
 	LuaMySQL * luamysql = luaL_checkmysql(L, 1);
 
-	if (luamysql->result == NULL) {
+	if (luamysql->result == NULL ||luamysql->connection == NULL) {
 		lua_pop(L, 1);
 		lua_pushboolean(L, false);
 		return 1;
@@ -193,7 +202,7 @@ int MySQLExecute(lua_State *L) {
 		}
 	}
 
-	luamysql->result = mysql_store_result(&luamysql->mysql);
+	luamysql->result = mysql_store_result(luamysql->connection);
 	if (luamysql->result) {
 		luamysql->fields = mysql_num_fields(luamysql->result);
 		luamysql->columns = mysql_fetch_fields(luamysql->result);
@@ -206,7 +215,7 @@ int MySQLExecute(lua_State *L) {
 		{
 			lua_pop(L, lua_gettop(L));
 			lua_pushboolean(L, true);
-			lua_pushinteger(L, mysql_affected_rows(&luamysql->mysql));
+			lua_pushinteger(L, mysql_affected_rows(luamysql->connection));
 		}
 		else
 		{
@@ -275,18 +284,37 @@ int MySQLConnect(lua_State *L) {
 		lua_pushnil(L);
 		return 1;
 	}
+	else{
+		luamysql->connection->options.connect_timeout = 5;
+		luamysql->connection->options.read_timeout = 5;
+		luamysql->connection->options.write_timeout = 5;
+	}
 
 	return 1;
 }
 
 bool Reconnect(LuaMySQL *luamysql) {
 
-	mysql_close(&luamysql->mysql);
+	if (luamysql->result) {
+		mysql_free_result(luamysql->result);
+		luamysql->result = NULL;
+		luamysql->row = NULL;
+		luamysql->columns = NULL;
+	}
+
+	if (luamysql->connection)
+		mysql_close(luamysql->connection);
+
 	luamysql->connection = mysql_real_connect(&luamysql->mysql, luamysql->server, luamysql->user, luamysql->password, luamysql->schema, luamysql->port, NULL, NULL);
 	if (luamysql->connection == NULL)
 	{
 		mysql_close(&luamysql->mysql);
 		return FALSE;
+	}
+	else{
+		luamysql->connection->options.connect_timeout = 5;
+		luamysql->connection->options.read_timeout = 5;
+		luamysql->connection->options.write_timeout = 5;
 	}
 
 	return TRUE;
@@ -296,7 +324,7 @@ LuaMySQL * lua_tomysql(lua_State *L, int index) {
 
 	LuaMySQL * luamysql = (LuaMySQL*)lua_touserdata(L, index);
 	if (luamysql == NULL)
-		luaL_error(L, "paramter is not a %s", LUAMYSQL);
+		luaL_error(L, "parameter is not a %s", LUAMYSQL);
 	return luamysql;
 }
 
@@ -304,7 +332,15 @@ LuaMySQL * luaL_checkmysql(lua_State *L, int index) {
 
 	LuaMySQL * luamysql = (LuaMySQL*)luaL_checkudata(L, index, LUAMYSQL);
 	if (luamysql == NULL)
-		luaL_error(L, "paramter is not a %s", LUAMYSQL);
+		luaL_error(L, "parameter is not a %s", LUAMYSQL);
+
+	if (luamysql->user == NULL ||
+		luamysql->password == NULL ||
+		luamysql->schema == NULL ||
+		luamysql->server == NULL){
+		luaL_error(L, "Mysql connection uninitilized!");
+	}
+
 	return luamysql;
 }
 
@@ -316,6 +352,11 @@ LuaMySQL * lua_pushmysql(lua_State *L) {
 	luaL_getmetatable(L, LUAMYSQL);
 	lua_setmetatable(L, -2);
 	memset(luamysql, 0, sizeof(LuaMySQL));
+
+	luamysql->mysql.options.connect_timeout = 5;
+	luamysql->mysql.options.read_timeout = 5;
+	luamysql->mysql.options.write_timeout = 5;
+
 	return luamysql;
 }
 

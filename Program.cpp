@@ -19,6 +19,7 @@
 #include "LuaServerMain.h"
 #include "TlkMain.h"
 #include "2DAMain.h"
+#include "ZIPMain.h"
 
 #define HI_PART(x)  ((x>>4) & 0x0F)
 #define LO_PART(x)  ((x) & 0x0F)
@@ -426,6 +427,8 @@ int main(int argc, char *argv[]){
 	lua_setglobal(L, "TLK");
 	luaopen_twoda(L);
 	lua_setglobal(L, "TWODA");
+	luaopen_zip(L);
+	lua_setglobal(L, "Zip");
 
 	lua_pushcfunction(L, L_GetRuntime);
 	lua_setglobal(L, "Runtime");

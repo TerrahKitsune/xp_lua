@@ -34,6 +34,7 @@
 /* Header files */
 /* #undef HAVE_ALLOCA_H */
 /* #undef HAVE_ARPA_INET_H */
+/* #undef HAVE_DIRENT_H */
 /* #undef HAVE_DLFCN_H */
 /* #undef HAVE_EXECINFO_H */
 /* #undef HAVE_FPU_CONTROL_H */
@@ -115,6 +116,7 @@
 /* #undef HAVE_PREAD */
 /* #undef HAVE_PTHREAD_CONDATTR_SETCLOCK */
 /* #undef HAVE_PTHREAD_SIGMASK */
+/* #undef HAVE_READDIR_R */
 /* #undef HAVE_READLINK */
 /* #undef HAVE_REALPATH */
 /* #undef HAVE_SETFD */
@@ -178,7 +180,7 @@
 /* #undef HAVE_UINT */
 /* #undef HAVE_ULONG */
 /* #undef HAVE_U_INT32_T */
-/* #undef HAVE_STRUCT_TIMESPEC */
+//#define HAVE_STRUCT_TIMESPEC
 
 /* Support for tagging symbols with __attribute__((visibility("hidden"))) */
 /* #undef HAVE_VISIBILITY_HIDDEN */
@@ -191,6 +193,7 @@
 /* #undef HAVE_FAKE_PAUSE_INSTRUCTION */
 /* #undef HAVE_HMT_PRIORITY_INSTRUCTION */
 /* #undef HAVE_ABI_CXA_DEMANGLE */
+/* #undef HAVE_BSS_START */
 /* #undef HAVE_BUILTIN_UNREACHABLE */
 /* #undef HAVE_BUILTIN_EXPECT */
 /* #undef HAVE_BUILTIN_STPCPY */
@@ -233,14 +236,14 @@
 #define ENABLED_PROFILING 1
 /* #undef HAVE_ASAN */
 #define ENABLED_LOCAL_INFILE 1
-#define OPTIMIZER_TRACE 1
-#define DEFAULT_MYSQL_HOME "C:/Program Files/MySQL/MySQL Server 5.7"
+/* #undef OPTIMIZER_TRACE */
+#define DEFAULT_MYSQL_HOME "C:/Program Files/MySQL/MySQL Server 6.1"
 #define SHAREDIR "share"
-#define DEFAULT_BASEDIR "C:/Program Files/MySQL/MySQL Server 5.7"
-#define MYSQL_DATADIR "C:/Program Files/MySQL/MySQL Server 5.7/data"
-#define MYSQL_KEYRINGDIR "C:/Program Files/MySQL/MySQL Server 5.7/keyring"
-#define DEFAULT_CHARSET_HOME "C:/Program Files/MySQL/MySQL Server 5.7"
-#define PLUGINDIR "C:/Program Files/MySQL/MySQL Server 5.7/lib/plugin"
+#define DEFAULT_BASEDIR "C:/Program Files/MySQL/MySQL Server 6.1"
+#define MYSQL_DATADIR "C:/Program Files/MySQL/MySQL Server 6.1/data"
+#define MYSQL_KEYRINGDIR "C:/Program Files/MySQL/MySQL Server 6.1/keyring"
+#define DEFAULT_CHARSET_HOME "C:/Program Files/MySQL/MySQL Server 6.1"
+#define PLUGINDIR "C:/Program Files/MySQL/MySQL Server 6.1/lib/plugin"
 /* #undef DEFAULT_SYSCONFDIR */
 #define DEFAULT_TMPDIR ""
 #define INSTALL_SBINDIR "/bin"
@@ -340,7 +343,7 @@
 /*
  * Performance schema
  */
-#define WITH_PERFSCHEMA_STORAGE_ENGINE 1
+/* #undef WITH_PERFSCHEMA_STORAGE_ENGINE */
 /* #undef DISABLE_PSI_THREAD */
 /* #undef DISABLE_PSI_MUTEX */
 /* #undef DISABLE_PSI_RWLOCK */
@@ -384,17 +387,17 @@
  * MySQL version
  */
 #define DOT_FRM_VERSION 6
-#define MYSQL_VERSION_MAJOR 5
-#define MYSQL_VERSION_MINOR 7
-#define MYSQL_VERSION_PATCH 17
+#define MYSQL_VERSION_MAJOR 6
+#define MYSQL_VERSION_MINOR 1
+#define MYSQL_VERSION_PATCH 10
 #define MYSQL_VERSION_EXTRA ""
 #define PACKAGE "mysql"
 #define PACKAGE_BUGREPORT ""
 #define PACKAGE_NAME "MySQL Server"
-#define PACKAGE_STRING "MySQL Server 5.7.17"
+#define PACKAGE_STRING "MySQL Server 6.1.10"
 #define PACKAGE_TARNAME "mysql"
-#define PACKAGE_VERSION "5.7.17"
-#define VERSION "5.7.17"
+#define PACKAGE_VERSION "6.1.10"
+#define VERSION "6.1.10"
 #define PROTOCOL_VERSION 10
 
 /*

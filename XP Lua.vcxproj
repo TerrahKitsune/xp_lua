@@ -13,6 +13,8 @@
   <ItemGroup>
     <ClCompile Include="..\..\misc\log.cpp" />
     <ClCompile Include="..\plugin.cpp" />
+    <ClCompile Include="2da.cpp" />
+    <ClCompile Include="2DAMain.cpp" />
     <ClCompile Include="AssemblyHelper.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Erf.cpp" />
@@ -32,16 +34,24 @@
     <ClCompile Include="LuaGff.cpp" />
     <ClCompile Include="LuaMD5.cpp" />
     <ClCompile Include="LuaMySQL.cpp" />
+    <ClCompile Include="LuaNWN.cpp" />
+    <ClCompile Include="LuaNWNFunctions.cpp" />
     <ClCompile Include="LuaProcess.cpp" />
     <ClCompile Include="LuaServer.cpp" />
     <ClCompile Include="LuaServerMain.cpp" />
     <ClCompile Include="LuaSQLite.cpp" />
     <ClCompile Include="LuaSQLiteMain.cpp" />
+    <ClCompile Include="luazip.cpp" />
     <ClCompile Include="lua_misc.cpp" />
     <ClCompile Include="md5.c" />
     <ClCompile Include="MD5Main.cpp" />
     <ClCompile Include="MySQLMain.cpp" />
+    <ClCompile Include="NWN2Funcs.cpp" />
     <ClCompile Include="NWN2LuaLib.cpp" />
+    <ClCompile Include="NWN2_API\CExoString.cpp" />
+    <ClCompile Include="NWN2_API\CNWSCreature.cpp" />
+    <ClCompile Include="NWN2_API\CNWSObject.cpp" />
+    <ClCompile Include="NWN2_API\NWN2_API.cpp" />
     <ClCompile Include="plua.cpp" />
     <ClCompile Include="LuaEngine.cpp" />
     <ClCompile Include="Lua\lapi.c" />
@@ -79,13 +89,19 @@
     <ClCompile Include="Lua\lvm.c" />
     <ClCompile Include="Lua\lzio.c" />
     <ClCompile Include="ProcessMain.cpp" />
+    <ClCompile Include="ResourceTypes.cpp" />
     <ClCompile Include="SQLite\sqlite3.c" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimerMain.cpp" />
+    <ClCompile Include="tlk.cpp" />
+    <ClCompile Include="TlkMain.cpp" />
+    <ClCompile Include="ZIPMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\misc\log.h" />
     <ClInclude Include="..\dbplugin.h" />
+    <ClInclude Include="2da.h" />
+    <ClInclude Include="2DAMain.h" />
     <ClInclude Include="AssemblyHelper.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Erf.h" />
@@ -105,18 +121,26 @@
     <ClInclude Include="LuaGff.h" />
     <ClInclude Include="LuaMD5.h" />
     <ClInclude Include="LuaMySQL.h" />
+    <ClInclude Include="LuaNWN.h" />
+    <ClInclude Include="LuaNWNFunctions.h" />
     <ClInclude Include="LuaProcess.h" />
     <ClInclude Include="LuaServer.h" />
     <ClInclude Include="LuaServerMain.h" />
     <ClInclude Include="LuaSQLite.h" />
     <ClInclude Include="LuaSQLiteMain.h" />
+    <ClInclude Include="luazip.h" />
     <ClInclude Include="lua_main_incl.h" />
     <ClInclude Include="lua_misc.h" />
     <ClInclude Include="md5.h" />
     <ClInclude Include="MD5Main.h" />
     <ClInclude Include="MySQLMain.h" />
     <ClInclude Include="networking.h" />
+    <ClInclude Include="NWN2Funcs.h" />
     <ClInclude Include="NWN2LuaLib.h" />
+    <ClInclude Include="NWN2_API\CExoString.h" />
+    <ClInclude Include="NWN2_API\CNWSCreature.h" />
+    <ClInclude Include="NWN2_API\CNWSObject.h" />
+    <ClInclude Include="NWN2_API\NWN2_API.h" />
     <ClInclude Include="plua.h" />
     <ClInclude Include="LuaEngine.h" />
     <ClInclude Include="Lua\lapi.h" />
@@ -146,10 +170,16 @@
     <ClInclude Include="Lua\lvm.h" />
     <ClInclude Include="Lua\lzio.h" />
     <ClInclude Include="ProcessMain.h" />
+    <ClInclude Include="ResourcesTypes.h" />
     <ClInclude Include="SQLite\sqlite3.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimerMain.h" />
+    <ClInclude Include="tlk.h" />
+    <ClInclude Include="TlkMain.h" />
     <ClInclude Include="xp_lua_incl.h" />
+    <ClInclude Include="ZIPMain.h" />
+    <ClInclude Include="zip\zip.h" />
+    <ClInclude Include="zip\zipconf.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Lua\Makefile" />
@@ -191,12 +221,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\plugins\xp_lua\OpenSSL\include;$(SolutionDir)\plugins\xp_lua\mysql\include;$(SolutionDir)..\lib\wxwidgets\include;$(SolutionDir)..\lib\wxwidgets\lib\vc_lib\mswd</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\plugins\xp_lua\OpenSSL\include;$(SolutionDir)\plugins\xp_lua\mysql\include;$(SolutionDir)\plugins\xp_lua\zip;$(SolutionDir)..\lib\wxwidgets\include;$(SolutionDir)..\lib\wxwidgets\lib\vc_lib\mswd;$(SolutionDir)..\lib\NWN2\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;TIME_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\lib\wxwidgets\lib\vc_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\lib\wxwidgets\lib\vc_lib;$(SolutionDir)..\lib\NWN2;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>wxmsw28d_core.lib;wxbase28d_net.lib;wxbase28d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
     </Link>
@@ -209,14 +239,14 @@
       </FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\plugins\xp_lua\OpenSSL\include;$(SolutionDir)\plugins\xp_lua\mysql\include;$(SolutionDir)..\lib\wxwidgets\include;$(SolutionDir)..\lib\wxwidgets\lib\vc_lib\msw</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\plugins\xp_lua\OpenSSL\include;$(SolutionDir)\plugins\xp_lua\mysql\include;$(SolutionDir)\plugins\xp_lua\zip;$(SolutionDir)..\lib\wxwidgets\include;$(SolutionDir)..\lib\wxwidgets\lib\vc_lib\msw;$(SolutionDir)..\lib\NWN2\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\lib\wxwidgets\lib\vc_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\lib\wxwidgets\lib\vc_lib;$(SolutionDir)..\lib\NWN2;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>wxmsw28_core.lib;wxbase28_net.lib;wxbase28.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

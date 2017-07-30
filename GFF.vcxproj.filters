@@ -136,6 +136,15 @@
     <Filter Include="Lua2DA\Source Files">
       <UniqueIdentifier>{f7e519d6-566e-49be-9360-4812b3bda180}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaZIP">
+      <UniqueIdentifier>{3716acaf-984a-49de-bf47-12dc010641b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaZIP\Header Files">
+      <UniqueIdentifier>{f82b5040-a667-404d-8af9-5b0f2a82d073}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaZIP\Source Files">
+      <UniqueIdentifier>{d7427226-cd79-4fc8-97fc-359314db5588}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -345,6 +354,15 @@
     <ClCompile Include="2DAMain.cpp">
       <Filter>Lua2DA</Filter>
     </ClCompile>
+    <ClCompile Include="luazip.cpp">
+      <Filter>LuaZIP\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ZIPMain.cpp">
+      <Filter>LuaZIP</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceTypes.cpp">
+      <Filter>LuaErf</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -535,6 +553,21 @@
     </ClInclude>
     <ClInclude Include="2DAMain.h">
       <Filter>Lua2DA</Filter>
+    </ClInclude>
+    <ClInclude Include="luazip.h">
+      <Filter>LuaZIP\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ZIPMain.h">
+      <Filter>LuaZIP</Filter>
+    </ClInclude>
+    <ClInclude Include="zip\zip.h">
+      <Filter>LuaZIP\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="zip\zipconf.h">
+      <Filter>LuaZIP\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourcesTypes.h">
+      <Filter>LuaErf</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

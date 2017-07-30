@@ -1,12 +1,14 @@
 #include "ERFMain.h"
 #include "Erf.h"
+#include "ResourcesTypes.h"
 
 static const struct luaL_Reg erffunctions[] = {
 	{ "Open", OpenErf },
 	{ "GetResource", GetResource },
+	{ "Extract", ExtractErf },
 	{ "GetStrings", GetLocalizedStrings },
 	{ "GetKeys", GetKeys },
-	//{ "AddFile", AddFile },
+	{ "Create", CreateErf },
 	{ NULL, NULL }
 };
 
@@ -17,6 +19,8 @@ static const luaL_Reg erfmeta[] = {
 };
 
 int luaopen_erf(lua_State *L) {
+
+	lua_pushresourcelist(L);
 
 	luaL_newlibtable(L, erffunctions);
 	luaL_setfuncs(L, erffunctions, 0);

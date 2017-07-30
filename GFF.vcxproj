@@ -44,7 +44,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\mysql\include;$(SolutionDir)\OpenSSL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\mysql\include;$(SolutionDir)\OpenSSL\include;$(SolutionDir)\zip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4703;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -59,7 +59,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\mysql\include;$(SolutionDir)\OpenSSL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\mysql\include;$(SolutionDir)\OpenSSL\include;$(SolutionDir)\zip;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4703;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
@@ -94,6 +94,7 @@
     <ClCompile Include="LuaServerMain.cpp" />
     <ClCompile Include="LuaSQLite.cpp" />
     <ClCompile Include="LuaSQLiteMain.cpp" />
+    <ClCompile Include="luazip.cpp" />
     <ClCompile Include="Lua\lapi.c" />
     <ClCompile Include="Lua\lauxlib.c" />
     <ClCompile Include="Lua\lbaselib.c" />
@@ -134,11 +135,13 @@
     <ClCompile Include="MySQLMain.cpp" />
     <ClCompile Include="ProcessMain.cpp" />
     <ClCompile Include="Program.cpp" />
+    <ClCompile Include="ResourceTypes.cpp" />
     <ClCompile Include="SQLite\sqlite3.c" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimerMain.cpp" />
     <ClCompile Include="tlk.cpp" />
     <ClCompile Include="TlkMain.cpp" />
+    <ClCompile Include="ZIPMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2da.h" />
@@ -199,11 +202,16 @@
     <ClInclude Include="MySQLMain.h" />
     <ClInclude Include="networking.h" />
     <ClInclude Include="ProcessMain.h" />
+    <ClInclude Include="ResourcesTypes.h" />
     <ClInclude Include="SQLite\sqlite3.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimerMain.h" />
     <ClInclude Include="tlk.h" />
     <ClInclude Include="TlkMain.h" />
+    <ClInclude Include="luazip.h" />
+    <ClInclude Include="ZIPMain.h" />
+    <ClInclude Include="zip\zip.h" />
+    <ClInclude Include="zip\zipconf.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="main.lua" />

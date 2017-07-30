@@ -15,6 +15,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 ***************************************************************************/
 
 #include "plua.h"
+#include "./NWN2_API/NWN2_API.h"
 
 /***************************************************************************
 NWNX and DLL specific functions
@@ -52,8 +53,8 @@ Implementation of Lua Plugin
 PLua::PLua()
 {
 	header = _T(
-		"NWNX Lua Plugin V.0.0.6\n" \
-		"(c) 2016 by Robin Karlsson (Terrahkitsune)\n" \
+		"NWNX Lua Plugin V.0.0.8\n" \
+		"(c) 2017 by Robin Karlsson (Terrahkitsune)\n" \
 		"Lua (c) PUC-Rio: https://www.lua.org/ \n"\
 		"visit us at http://www.nwnx.org\n");
 
@@ -61,9 +62,11 @@ PLua::PLua()
 		"This plugin provides a lua engine and environment.");
 
 	subClass = _T("LUA");
-	version = _T("0.0.6");
+	version = _T("0.0.8");
 	buffer = NULL;
 	Engine = new LuaEngine();
+
+	NWN2_InitMem();
 }
 
 PLua::~PLua()
@@ -84,6 +87,7 @@ bool PLua::Init(TCHAR* nwnxhome)
 	logger = new wxLogNWNX(logfile, wxString(header.c_str()));
 
 	wxLogMessage(wxT("* Plugin initialized."));
+
 	return true;
 }
 
@@ -106,10 +110,20 @@ void PLua::SetString(char* sFunction, char* sParam1, int nParam2, char* sValue)
 	wxString timerName(sParam1);
 #endif
 
+
 	if (function == wxT(""))
 	{
 		wxLogMessage(wxT("* Function not specified."));
 		return;
+	}
+	else{
+		wxLogMessage(wxT("* %s(%s, %d, %s)"), sFunction, sParam1, nParam2, sValue);
+
+		char * result = Engine->RunFunction(sFunction, sParam1, nParam2, sValue);
+		if (result)
+			delete[]result;
+		else if (Engine->GetLastError())
+			wxLogMessage(wxT("! %s"), Engine->GetLastError());
 	}
 }
 
@@ -141,7 +155,20 @@ char* PLua::GetString(char* sFunction, char* sParam1, int nParam2)
 		wxLogMessage(wxT("* RunString( %s )"), sParam1);
 		buffer = Engine->RunString(sParam1, "RunString");
 		if (buffer)
-			wxLogMessage(wxT("= %s"), sParam1, buffer);		 			
+			wxLogMessage(wxT("= %s"), buffer);
+		else if (Engine->GetLastError())
+			wxLogMessage(wxT("! %s"), Engine->GetLastError());
+	}
+	else if (function == wxT("LastError"))
+	{
+		const char * err = Engine->GetLastError();
+		if (err){
+			buffer = new char[strlen(err)+1];
+			if (buffer)
+				strcpy(buffer, err);
+		}
+
+		return buffer;
 	}
 
 	return buffer;

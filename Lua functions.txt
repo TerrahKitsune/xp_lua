@@ -42,6 +42,55 @@ Misc global functions:
 
 	ms Runtime()
 
+	-A key(resourceid) value (extension) table used to determine the extensions used for erf containers
+	-can be modifed during runtime
+	table ResList
+
+Zip:
+
+	-Opens/creates a zipfile
+	-returns nil, error on failure
+	Zip Zip.Open(zipfile)
+
+	-Adds a file as key into the zipfile, file should be the path to file
+	-returns nil, error on failure
+	-returns the index the data was placed in on success
+	int Zip:AddFile(key, file)
+
+	-Adds data (a string) as key into the zip file
+	-returns nil, error on failure
+	-returns the index the data was placed in on success
+	int Zip:AddData(key, data)
+
+	-Extract data from a zip file by key or index
+	-if a target file is given the data will be extrated to that file
+	-if no file is given then the data will be returned on success
+	-returns nil, error on failure
+	true/data Zip:Extract(key/index, opt targetfile)
+
+	-Retrive info about a key/index from the zipfile
+	-keys:
+	-comp_method
+	-comp_size
+	-crc
+	-encryption_method
+	-flags
+	-index
+	-mtime
+	-name
+	-size
+	-valid
+	-returns nil on failure
+	table Zip:GetInfo(key/index)
+
+	-Mark a file as deleted within the zip
+	int Zip:Delete(key/index)
+
+	-Retrives all keys existing in the zipfile
+	array Zip:GetFiles()
+
+	-Close an open zipfile
+	nil Zip:Close()
 Server:
 
 	-Starts listening to port
@@ -319,6 +368,14 @@ ERF:
 	-version = what the version is "V1.0"
 	ERF, entries, filetype, version ERF.Open(filename)
 
+	-Create an erf file
+	-filenae = the path+name of the file to create
+	-type header, a 4 character field in the header that describes the file IE "HAK\0"
+	-filelist an array containing the files+path to include in the erf
+	-version default 1. 1 = nwn1 2 = nwn2 erfs
+	-desc default "LUA" what the description should be
+	ERF ERF.Create(filename, typeheader, filelist, opt version, opt desc);
+
 	-Returns an array containing localized strings describing the container
 	-localsized string is a table containing:
 	-LanguageID int
@@ -329,12 +386,17 @@ ERF:
 	-ResRef string (max 16 characters)
 	-ResID int (key to get the actual resource in GetResource)
 	-ResType int (type of resource)
+	-File name of the file with extension
 	-Unused int 0
 	array of keys ERF:GetKeys()
 
 	-Returns a binary string from the ResID provided
 	-ResID is modified to be 1 index'ed instead of 0 indexed
 	binary ERF:GetResource(ResID);
+
+	-Extracts a file to the desired path/folder
+	-will overwrite existing files
+	nil ERF:Extract(ResID, targetfile);
 GFF:
 
 	-Opens file and attempts decodings its content as a gff

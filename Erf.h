@@ -48,14 +48,21 @@ typedef struct ERF {
 	ERFHeader * Header;
 }ERF;
 
+typedef struct ERFBuildEntry {
+	char file[260];
+	FILE * f;
+	size_t len;
+}ERFBuildEntry;
+
 ERF * lua_pusherf(lua_State *L);
 ERF * lua_toerf(lua_State *L, int index);
 
+int ExtractErf(lua_State *L);
 int OpenErf(lua_State *L);
 int GetLocalizedStrings(lua_State *L);
 int GetKeys(lua_State *L);
 int GetResource(lua_State *L);
-int AddFile(lua_State *L);
+int CreateErf(lua_State *L);
 
 int erf_gc(lua_State *L);
 int erf_tostring(lua_State *L);

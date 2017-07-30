@@ -9,8 +9,14 @@ public:
 	LuaEngine();
 	~LuaEngine();
 
+	char * RunFunction(const char * function, const char * param1, int param2, const char * value);
 	char * RunString(const char * script, const char * name);
+	const char * GetLastError();
 
 	lua_State *L;
+private:
+	char * _lasterror;
+	void SetError(const char * err, size_t len=0);
+	char * Luapcall(int params);
 };
 

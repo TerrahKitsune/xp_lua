@@ -16,6 +16,10 @@
 #include "LuaClientMain.h"
 #include "LuaServerMain.h"
 #include "HttpMain.h"
+#include "LuaNWN.h"
+#include "ZIPMain.h"
+#include "TlkMain.h"
+#include "2DAMain.h"
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 static int print(lua_State *L){
@@ -44,6 +48,7 @@ static int print(lua_State *L){
 
 LuaEngine::LuaEngine()
 {
+	_lasterror = NULL;
 	WSADATA wsa;
 	WSAStartup(MAKEWORD(2, 2), &wsa);
 
@@ -62,14 +67,14 @@ LuaEngine::LuaEngine()
 	lua_setglobal(L, "Timer");
 	luaopen_mysql(L);
 	lua_setglobal(L, "MySQL");
-	luaopen_sqlite(L);
-	lua_setglobal(L, "SQLite");
 	luaopen_filesystem(L);
 	lua_setglobal(L, "FileSystem");
-	luaopen_erf(L);
-	lua_setglobal(L, "ERF");
+	luaopen_sqlite(L);
+	lua_setglobal(L, "SQLite");
 	luaopen_md5(L);
 	lua_setglobal(L, "MD5");
+	luaopen_erf(L);
+	lua_setglobal(L, "ERF");
 	luaopen_http(L);
 	lua_setglobal(L, "Http");
 	luaopen_process(L);
@@ -78,6 +83,14 @@ LuaEngine::LuaEngine()
 	lua_setglobal(L, "Server");
 	luaopen_luaclient(L);
 	lua_setglobal(L, "Client");
+	luaopen_tlk(L);
+	lua_setglobal(L, "TLK");
+	luaopen_twoda(L);
+	lua_setglobal(L, "TWODA");
+	luaopen_zip(L);
+	lua_setglobal(L, "Zip");
+	luaopen_nwnfunctions(L);
+	lua_setglobal(L, "NWN");
 
 	luaopen_misc(L);
 
@@ -92,11 +105,58 @@ LuaEngine::~LuaEngine()
 	ERR_free_strings();
 	EVP_cleanup();
 	WSACleanup();
+	SetError(NULL);
 }
 
-char * LuaEngine::RunString(const char * script, const char * name)
-{
-	int error = luaL_loadbuffer(L, script, strlen(script), name);
+void LuaEngine::SetError(const char * err, size_t len){
+
+	if (_lasterror){
+		delete[]_lasterror;
+		_lasterror = NULL;
+	}
+
+	if (err){
+
+		if (len <= 0)
+			len = strlen(err);
+
+		if (len <= 0)
+			return;
+
+		_lasterror = new char[len + 1]; 
+		if (!_lasterror)
+			return;
+		memcpy(_lasterror, err, len);
+		_lasterror[len] = '\0';
+	}
+}
+
+const char * LuaEngine::GetLastError(){
+	return _lasterror;
+}
+
+char * LuaEngine::RunFunction(const char * function, const char * param1, int param2, const char * value){
+	
+	SetError(NULL);
+
+	lua_getglobal(L, function);
+
+	if (lua_type(L, -1) != LUA_TFUNCTION){
+		SetError("Function not found");
+		lua_pop(L, lua_gettop(L));
+		return NULL;
+	}
+
+	lua_pushstring(L, param1);
+	lua_pushinteger(L, param2);
+	lua_pushstring(L, value);
+
+	return Luapcall(3);
+}
+
+char * LuaEngine::Luapcall(int params){
+
+	int error = lua_pcall(L, params, 1, 0);
 	size_t len;
 	const char * luaresult;
 	char * result;
@@ -104,28 +164,11 @@ char * LuaEngine::RunString(const char * script, const char * name)
 	if (error)
 	{
 		luaresult = lua_tolstring(L, -1, &len);
-		result = new char[len+2];
-		result[0] = '%';
-		memcpy(&result[1], luaresult, len);
-		result[len]='\0';
-		lua_pop(L, lua_gettop(L));
-		return result;
-	}
 
-	error = lua_pcall(L, 0, 1, 0);
+		SetError(luaresult, len);
 
-	if (error)
-	{
-		luaresult = lua_tolstring(L, -1, &len);
-		result = new char[len + 2];
-		if (!result){
-			return NULL;
-		}
-		result[0] = '%';
-		memcpy(&result[1], luaresult, len);
-		result[len] = '\0';
 		lua_pop(L, lua_gettop(L));
-		return result;
+		return NULL;
 	}
 	else if (lua_gettop(L) >= 1 && !lua_isnoneornil(L, -1))
 	{
@@ -144,4 +187,25 @@ char * LuaEngine::RunString(const char * script, const char * name)
 		lua_pop(L, lua_gettop(L));
 		return NULL;
 	}
+}
+
+char * LuaEngine::RunString(const char * script, const char * name)
+{
+	SetError(NULL);
+
+	int error = luaL_loadbuffer(L, script, strlen(script), name);
+	size_t len;
+	const char * luaresult;
+
+	if (error)
+	{
+		luaresult = lua_tolstring(L, -1, &len);
+
+		SetError(luaresult, len);
+
+		lua_pop(L, lua_gettop(L));
+		return NULL;
+	}
+
+	return Luapcall(0);
 }

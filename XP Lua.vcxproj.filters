@@ -118,6 +118,48 @@
     <Filter Include="LuaService\Server\Source Files">
       <UniqueIdentifier>{1fe6166b-b8a7-486e-96aa-6b708b36e85f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaNWN">
+      <UniqueIdentifier>{d8e20306-2bba-4dab-8064-7b03879ac0b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaNWN\Header Files">
+      <UniqueIdentifier>{96964f47-16c1-4fc4-a605-09b231b43531}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaNWN\Source Files">
+      <UniqueIdentifier>{d5e9c852-e017-4931-971e-ed8bc1b17ca9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NWN2">
+      <UniqueIdentifier>{5193bdc8-0820-4119-9349-f00c68628e50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NWN2\Objects">
+      <UniqueIdentifier>{e39e9162-a206-4ff0-897e-569edfa40698}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaZIP">
+      <UniqueIdentifier>{08a543d8-84f8-44fe-8d11-d84be22870b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaZIP\Header Files">
+      <UniqueIdentifier>{a1708c23-8fdb-4f50-953a-6ebc32e77591}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaZIP\Source Files">
+      <UniqueIdentifier>{29d63bb4-8a0c-4580-83aa-83b533a9d12d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaTLK">
+      <UniqueIdentifier>{5e35cebb-0295-4015-8660-4da5323cb187}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaTLK\Header Files">
+      <UniqueIdentifier>{b21355dc-bc19-4b38-b3fc-c75d6086454d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaTLK\Source Files">
+      <UniqueIdentifier>{6fd01e37-f571-4e1a-96bb-13b5fff59886}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua2DA">
+      <UniqueIdentifier>{e317cdda-b25b-4345-b6b0-1545369cedef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua2DA\Header Files">
+      <UniqueIdentifier>{c9242ab0-2dab-47ad-a1f5-db6a10314a02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua2DA\Source Files">
+      <UniqueIdentifier>{7049f1df-4ef6-456b-b4f4-8dca26adbf5c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\plugin.cpp">
@@ -333,6 +375,48 @@
     <ClCompile Include="LuaFrame.cpp">
       <Filter>LuaService</Filter>
     </ClCompile>
+    <ClCompile Include="LuaNWN.cpp">
+      <Filter>LuaNWN</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaNWNFunctions.cpp">
+      <Filter>LuaNWN\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NWN2Funcs.cpp">
+      <Filter>NWN2</Filter>
+    </ClCompile>
+    <ClCompile Include="NWN2_API\CNWSCreature.cpp">
+      <Filter>NWN2\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="NWN2_API\CNWSObject.cpp">
+      <Filter>NWN2\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="NWN2_API\CExoString.cpp">
+      <Filter>NWN2\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="NWN2_API\NWN2_API.cpp">
+      <Filter>NWN2\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="luazip.cpp">
+      <Filter>LuaZIP\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ZIPMain.cpp">
+      <Filter>LuaZIP</Filter>
+    </ClCompile>
+    <ClCompile Include="tlk.cpp">
+      <Filter>LuaTLK\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TlkMain.cpp">
+      <Filter>LuaTLK</Filter>
+    </ClCompile>
+    <ClCompile Include="2da.cpp">
+      <Filter>Lua2DA\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="2DAMain.cpp">
+      <Filter>Lua2DA</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceTypes.cpp">
+      <Filter>LuaErf</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -532,6 +616,54 @@
     </ClInclude>
     <ClInclude Include="networking.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaNWN.h">
+      <Filter>LuaNWN</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaNWNFunctions.h">
+      <Filter>LuaNWN\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NWN2Funcs.h">
+      <Filter>NWN2</Filter>
+    </ClInclude>
+    <ClInclude Include="NWN2_API\CNWSCreature.h">
+      <Filter>NWN2\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="NWN2_API\CNWSObject.h">
+      <Filter>NWN2\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="NWN2_API\NWN2_API.h">
+      <Filter>NWN2\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="NWN2_API\CExoString.h">
+      <Filter>NWN2\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="zip\zip.h">
+      <Filter>LuaZIP\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="zip\zipconf.h">
+      <Filter>LuaZIP\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luazip.h">
+      <Filter>LuaZIP\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ZIPMain.h">
+      <Filter>LuaZIP</Filter>
+    </ClInclude>
+    <ClInclude Include="tlk.h">
+      <Filter>LuaTLK\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TlkMain.h">
+      <Filter>LuaTLK</Filter>
+    </ClInclude>
+    <ClInclude Include="2da.h">
+      <Filter>Lua2DA\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="2DAMain.h">
+      <Filter>Lua2DA</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourcesTypes.h">
+      <Filter>LuaErf</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
