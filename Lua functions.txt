@@ -289,6 +289,7 @@ SQLite:
 FileSystem:
 
 	-Returns an array containing all files that exists in path
+	-include filter: ie: "C:/somepath/*.*"
 	Array FileSystem.GetFiles(path)
 
 	-Returns an array containing all directories that exists in path

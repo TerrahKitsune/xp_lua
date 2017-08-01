@@ -8,6 +8,10 @@ int DataToHex(lua_State *L) {
 	size_t len;
 	const char * data = luaL_checklstring(L, 1, &len);
 
+	if (data == NULL){
+		luaL_error(L, "No data given to encode");
+	}
+
 	char * buffer = (char*)malloc((len * 2) + 3);
 	if (!buffer) {
 		luaL_error(L, "Unable to allocate %u bytes for conversion buffer", (len * 2) + 1);
@@ -32,6 +36,10 @@ int EscapeString(lua_State *L) {
 	LuaMySQL * luamysql = luaL_checkmysql(L, 1);
 	size_t len;
 	const char * data = luaL_checklstring(L, 2, &len);
+
+	if (data == NULL){
+		luaL_error(L, "No data given to escape");
+	}
 
 	if (!luamysql->connection && !Reconnect(luamysql)){
 		luaL_error(L, "Mysql is not connected");
