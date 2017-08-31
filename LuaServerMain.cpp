@@ -1,13 +1,13 @@
 #include "LuaServerMain.h"
-#include "LuaServer.h"
 
 static const struct luaL_Reg luaserverfunctions[] = {
-	{ "Start", SvrStartLuaServer },
-	{ "Accept", SvrAcceptConnection },
-	{ "Recv", SvrRecv },
-	{ "Send", SvrSend },
-	{ "Clients", SvrGetClients },
-	{ "GetIP", SrvGetIP },
+	{ "Start", luaserver_start },
+	{ "Stop", luaserver_gc },
+	{ "GetEvent", luaserver_getevent },
+	{ "Disconnect", luaserver_disconnect },
+	{ "Send", luaserver_send },
+	{ "SetStartFunc", SetLuaIndexFunctionToRun },
+	{ "GetClients", luaserver_getclients },
 	{ NULL, NULL }
 };
 

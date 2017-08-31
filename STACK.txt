@@ -1,0 +1,4 @@
+1: USERDATA 0x015BA480
+2: STRING main.lua:5: dingus
+3: NIL
+4: STRING main.lua:5: dingus

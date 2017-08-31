@@ -145,6 +145,9 @@
     <Filter Include="LuaZIP\Source Files">
       <UniqueIdentifier>{d7427226-cd79-4fc8-97fc-359314db5588}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{4c3c8bdb-38d8-4af7-b632-e2a1a5a1a63e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -327,9 +330,6 @@
     <ClCompile Include="LuaProcess.cpp">
       <Filter>LuaProcess\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LuaFrame.cpp">
-      <Filter>LuaService</Filter>
-    </ClCompile>
     <ClCompile Include="LuaServerMain.cpp">
       <Filter>LuaService\Server</Filter>
     </ClCompile>
@@ -362,6 +362,24 @@
     </ClCompile>
     <ClCompile Include="ResourceTypes.cpp">
       <Filter>LuaErf</Filter>
+    </ClCompile>
+    <ClCompile Include="List.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Queue.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Server.cpp">
+      <Filter>LuaService\Server\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="networking.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetEvent.cpp">
+      <Filter>LuaService</Filter>
+    </ClCompile>
+    <ClCompile Include="Client.cpp">
+      <Filter>LuaService\Client\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -527,9 +545,6 @@
     <ClInclude Include="networking.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LuaFrame.h">
-      <Filter>LuaService</Filter>
-    </ClInclude>
     <ClInclude Include="LuaServerMain.h">
       <Filter>LuaService\Server</Filter>
     </ClInclude>
@@ -568,6 +583,21 @@
     </ClInclude>
     <ClInclude Include="ResourcesTypes.h">
       <Filter>LuaErf</Filter>
+    </ClInclude>
+    <ClInclude Include="List.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Queue.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Server.h">
+      <Filter>LuaService\Server\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetEvent.h">
+      <Filter>LuaService</Filter>
+    </ClInclude>
+    <ClInclude Include="Client.h">
+      <Filter>LuaService\Client\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
