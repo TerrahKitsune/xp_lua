@@ -21,10 +21,10 @@ int DataToHex(lua_State *L) {
 	buffer[1] = 'x';
 
 	unsigned long newlen = mysql_hex_string(&buffer[2], data, len);
-	
+
 	lua_pop(L, 1);
 	if (newlen <= 0)
-		lua_pushstring(L,"0x0");
+		lua_pushstring(L, "0x0");
 	else
 		lua_pushlstring(L, buffer, newlen + 2);
 	free(buffer);
@@ -138,7 +138,7 @@ int MySQLFetch(lua_State *L) {
 
 	LuaMySQL * luamysql = luaL_checkmysql(L, 1);
 
-	if (luamysql->result == NULL ||luamysql->connection == NULL) {
+	if (luamysql->result == NULL || luamysql->connection == NULL) {
 		lua_pop(L, 1);
 		lua_pushboolean(L, false);
 		return 1;
@@ -265,6 +265,7 @@ int MySQLConnect(lua_State *L) {
 	memcpy(temp_schema, temp, len);
 
 	int port = luaL_optinteger(L, 5, 3306);
+	int timeout = luaL_optinteger(L, 6, -1);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -277,12 +278,21 @@ int MySQLConnect(lua_State *L) {
 		luaL_error(L, "Unable to initialize mysql");
 	}
 
+	if (timeout <= 0)
+		timeout = 5;
+
+	luamysql->timeout = timeout;
+
 	//Give the memory to lua
 	luamysql->server = temp_server;
 	luamysql->user = temp_user;
 	luamysql->password = temp_password;
 	luamysql->schema = temp_schema;
 	luamysql->port = port;
+
+	luamysql->mysql.options.connect_timeout = timeout;
+	luamysql->mysql.options.read_timeout = timeout;
+	luamysql->mysql.options.write_timeout = timeout;
 
 	luamysql->connection = mysql_real_connect(&luamysql->mysql, temp_server, temp_user, temp_password, temp_schema, port, NULL, NULL);
 	if (luamysql->connection == NULL)
@@ -293,12 +303,36 @@ int MySQLConnect(lua_State *L) {
 		return 1;
 	}
 	else{
-		luamysql->connection->options.connect_timeout = 5;
-		luamysql->connection->options.read_timeout = 5;
-		luamysql->connection->options.write_timeout = 5;
+		luamysql->connection->options.connect_timeout = timeout;
+		luamysql->connection->options.read_timeout = timeout;
+		luamysql->connection->options.write_timeout = timeout;
 	}
 
 	return 1;
+}
+
+int SetTimeout(lua_State *L){
+
+	LuaMySQL * luamysql = luaL_checkmysql(L, 1);
+
+	if (luamysql){
+
+		luamysql->timeout = min(luaL_checkinteger(L, 2), 1);
+		int timeout = luamysql->timeout;
+
+		luamysql->mysql.options.connect_timeout = timeout;
+		luamysql->mysql.options.read_timeout = timeout;
+		luamysql->mysql.options.write_timeout = timeout;
+
+		if (luamysql->connection)
+		{
+			luamysql->connection->options.connect_timeout = timeout;
+			luamysql->connection->options.read_timeout = timeout;
+			luamysql->connection->options.write_timeout = timeout;
+		}
+	}
+
+	return 0;
 }
 
 bool Reconnect(LuaMySQL *luamysql) {
@@ -313,6 +347,10 @@ bool Reconnect(LuaMySQL *luamysql) {
 	if (luamysql->connection)
 		mysql_close(luamysql->connection);
 
+	luamysql->mysql.options.connect_timeout = luamysql->timeout;
+	luamysql->mysql.options.read_timeout = luamysql->timeout;
+	luamysql->mysql.options.write_timeout = luamysql->timeout;
+
 	luamysql->connection = mysql_real_connect(&luamysql->mysql, luamysql->server, luamysql->user, luamysql->password, luamysql->schema, luamysql->port, NULL, NULL);
 	if (luamysql->connection == NULL)
 	{
@@ -320,9 +358,9 @@ bool Reconnect(LuaMySQL *luamysql) {
 		return FALSE;
 	}
 	else{
-		luamysql->connection->options.connect_timeout = 5;
-		luamysql->connection->options.read_timeout = 5;
-		luamysql->connection->options.write_timeout = 5;
+		luamysql->connection->options.connect_timeout = luamysql->timeout;
+		luamysql->connection->options.read_timeout = luamysql->timeout;
+		luamysql->connection->options.write_timeout = luamysql->timeout;
 	}
 
 	return TRUE;
@@ -360,10 +398,6 @@ LuaMySQL * lua_pushmysql(lua_State *L) {
 	luaL_getmetatable(L, LUAMYSQL);
 	lua_setmetatable(L, -2);
 	memset(luamysql, 0, sizeof(LuaMySQL));
-
-	luamysql->mysql.options.connect_timeout = 5;
-	luamysql->mysql.options.read_timeout = 5;
-	luamysql->mysql.options.write_timeout = 5;
 
 	return luamysql;
 }

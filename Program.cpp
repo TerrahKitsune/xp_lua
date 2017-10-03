@@ -395,6 +395,11 @@ int main(int argc, char *argv[]){
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
 
+#ifdef _DEBUG
+	lua_pushboolean(L, TRUE);
+	lua_setglobal(L, "DEBUG");
+#endif
+
 	lua_createtable(L, 0, argc);
 	for (int n = 0; n < argc; n++){
 		lua_pushstring(L, argv[n]);

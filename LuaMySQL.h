@@ -21,6 +21,7 @@ typedef struct LuaMySQL {
 	char * password;
 	char * schema;
 	unsigned int port;
+	int timeout;
 } LuaMySQL;
 
 LuaMySQL * lua_tomysql(lua_State *L, int index);
@@ -31,7 +32,7 @@ int luamysql_gc(lua_State *L);
 int luamysql_tostring(lua_State *L);
 int DataToHex(lua_State *L);
 int EscapeString(lua_State *L);
-
+int SetTimeout(lua_State *L);
 int MySQLConnect(lua_State *L);
 int MySQLExecute(lua_State *L);
 int MySQLFetch(lua_State *L);

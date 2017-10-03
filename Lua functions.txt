@@ -93,51 +93,58 @@ Zip:
 	nil Zip:Close()
 Server:
 
-	-Starts listening to port
-	-returns nil and the wsa error on failure
-	-returns a server instance on success (this will cancel if garbage collected)
+	-Creates a server instance on the port
+	-Returns nil and errormsg on failure
 	Server Server.Start(port)
 
-	-Attempts connecting a client
-	-returns nil and a wsa error on failure (wsa error is WOULDBLOCK) if there was no connection
-	-returns a socket (intiger) on success
-	socket Server:Accept()
+	-Stops the server, terminating the socket and associated resources
+	nil Server:Stop()
 
-	-Attempts receving data from a socket
-	-Returns nil and a wsa error (1=disconnected, 0=not enough memory)
-	-returns method (a string) and a table containing data from the source
-	method,data Server:Recv(socket)
+	-Returns a network event
+	-Returns nil if there are no events
+	-Returns table on success with fields:
+	-socket: client socket
+	-type: event type (see types)
+	-data: binary/string containing the data
+	event/nil Server:GetEvent()
 
-	-Attempts sending data to the peer, method should be a string max 16 characters
-	-datatable should be a table containing string key with boolean, numeric or string values
-	-returns false and a wsa error on failure (1=disconnected 0=not enough memory)
-	boolean, wsaerror Server:Send(socket, method, datatable)
+	-Disconnect a client by socket
+	bool Server:Disconnect(socket)
 
-	-Returns an array containing all connected clients (integer sockets)
-	-is empty if there are no clients
-	array Server:Clients()
+	-Send data (string) to a client by socket
+	bool Server:Send(socket,data)
 
-	-Returns the ip and port from the socket
-	-returns nil on failure
-	ip,port Server:GetIP(socket)
+	-Set a function to run when a server instance is started
+	-function(server) ...
+	nil Server.SetStartFunc(function)
 
+	-Retrive all clients
+	-key = socket
+	-value = address
+	table Server:GetClients()
 Client:
 
-	-Attempts connecting to the address at port
-	-on success this returns a client object
-	-on failure it returns nil and a wsa error code
+	-Start a client
 	Client Client.Connect(address, port)
 
-	-Attempts receving data
-	-Returns nil and a wsa error (1=disconnected, 0=not enough memory)
-	-returns method (a string) and a table containing data from the source
-	method,data Client:Recv()
+	-Retrive the status of the client
+	-first bool is if the client is considered connected or not
+	-second is the last errorcode if any
+	bool/error Client:Status()
+		
+	-Disconenct the client, client object should not be used after this
+	nil Client:Disconnect()
+	
+	-Returns a network event
+	-Returns nil if there are no events
+	-Returns table on success with fields:
+	-socket: client socket
+	-type: event type (see types)
+	-data: binary/string containing the data
+	event/nil Client:GetEvent()
 
-	-Attempts sending data, method should be a string max 16 characters
-	-datatable should be a table containing string key with boolean, numeric or string values
-	-returns false and a wsa error on failure (1=disconnected 0=not enough memory)
-	boolean, wsaerror Client:Send(method, datatable)
-
+	-Send data (string) to the server
+	bool Client:Send(data)
 Process:
 
 	-returns a table with process ids as keys and values as names
@@ -216,10 +223,14 @@ MySQL:
 	-Does *not* need a mysql object
 	string MySQL.EncodeString(string)
 
+	-Set the desired timeout on the connection (read,write and connect)
+	nil MySQL:SetTimeout(timeout)
+
 	-use the mysql library to connect to a server
 	-if successful this returns a MySQL object that other functions are called from
+	-Timeout in seconds, use SetTimeout if you want to change it
 	-returns nil on failure
-	MySQL MySQL.Connect(address, user, password, database, opt port 3306)
+	MySQL MySQL.Connect(address, user, password, database, opt port 3306, opt timeout 5)
 
 	-runs querystring on the opened mysql object
 	-returns true, rowsaffected on success or false and an error message on failure

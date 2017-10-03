@@ -1,39 +1,34 @@
 local _exit=Exit;Exit=function(ret)print(ret); GetKey(); return ret+1; end
 
+if true then return; end
 
-local cli = Client.Connect("localhost", 8001);
+local srv = Server.Start(8001);
 
-while true do
+local n=1;
 
-	local status = cli:Status();
+while true do 
 
-	while status == false do
-		print("Not connected");
+	local ev = srv:GetEvent();
+	while ev do
+
+		print("Type: "..tostring(ev.type));
+		print("Socket: "..tostring(ev.socket));
+		print("Data: "..tostring(ev.data));
+		ev = srv:GetEvent();
 		Sleep(100);
-		status = cli:Status();
 	end
 
-	cli:Send("Hi!");
+	Sleep(100);
 
-	while status do
-
-		local ev = cli:GetEvent();
-		while ev do
-			print("Type: "..tostring(ev.type));
-			print("Socket: "..tostring(ev.socket));
-			print("Data: "..tostring(ev.data));
-			hadevent = true;
-
-			lastevent = ev;
-			Sleep(100);
-
-			ev = cli:GetEvent();
-		end
-
-		status = cli:Status();
+	local clients = srv:GetClients();
+	for k,v in pairs(clients) do 
+		print(k,v);
+		srv:Send(k,tostring(k).." "..v.." "..tostring(n));
+		n = n + 1;
 	end
-	Sleep();
-end
+
+	Sleep(10000);
+end 
 
 GetKey();
 
