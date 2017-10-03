@@ -2,9 +2,12 @@
 #include "LuaClient.h"
 
 static const struct luaL_Reg luaclientfunctions[] = {
-	{ "Connect", CliConnect },
-	{ "Recv", CliRecv },
-	{ "Send", CliSend },
+
+	{ "Status", luaclient_status },
+	{ "Disconnect", luaclient_gc },
+	{ "GetEvent", luaclient_getevent },
+	{ "Send", luaclient_send },
+	{ "Connect", luaclient_connect },
 	{ NULL, NULL }
 };
 

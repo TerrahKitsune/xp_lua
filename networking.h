@@ -1,4 +1,5 @@
 #pragma once
+#define _CRT_SECURE_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN
 #define _WINSOCKAPI_
 #include <winsock2.h>
@@ -17,3 +18,5 @@
 #pragma comment(lib, "OpenSSL/libssl.lib")
 #pragma comment(lib, "OpenSSL/libcrypto.lib")
 #pragma comment(lib, "OpenSSL/openssl.lib")
+
+int GetIP(SOCKET s, char * buffer, size_t max);

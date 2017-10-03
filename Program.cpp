@@ -1,4 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
+
 #include "lua_main_incl.h" 
 #include "networking.h"
 #include <conio.h>
@@ -508,6 +509,8 @@ int main(int argc, char *argv[]){
 	lua_pop(L, lua_gettop(L));
 
 	printf("%f", GetCounter());
+
+	luaserver_KillAll(L);
 
 	lua_getglobal(L, "Exit");
 	if (lua_type(L, 1) == LUA_TFUNCTION){

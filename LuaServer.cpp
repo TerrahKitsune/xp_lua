@@ -1,106 +1,462 @@
 #include "LuaServer.h"
-#include "LuaFrame.h"
+#include "Server.h"
+#include "NetEvent.h"
 
-static double PCFreq = 0.0;
-static __int64 CounterStart = 0;
-static double timeout = 1000.0;
+#define SRV_BUFFERSIZE 1500
 
-static void StartCounter()
-{
-	LARGE_INTEGER li;
-	if (!QueryPerformanceFrequency(&li))
-		puts("QueryPerformanceFrequency failed!");
+int SRV_FUNC_INDEX = LUA_REFNIL;
+int SRV_LIST_INDEX = LUA_REFNIL;
 
-	PCFreq = double(li.QuadPart) / 1000.0;
+int SetLuaIndexFunctionToRun(lua_State *L) {
 
-	QueryPerformanceCounter(&li);
-	CounterStart = li.QuadPart;
-}
-static double GetCounter()
-{
-	LARGE_INTEGER li;
-	QueryPerformanceCounter(&li);
-	return double(li.QuadPart - CounterStart) / PCFreq;
-}
+	if (SRV_FUNC_INDEX != LUA_REFNIL) {
+		luaL_unref(L, LUA_REGISTRYINDEX, SRV_FUNC_INDEX);
+		SRV_FUNC_INDEX = LUA_REFNIL;
+	}
 
-static int CheckTimeout(lua_State *L){
-
-	if (GetCounter() > timeout)
-		return 1;
+	if (!lua_isfunction(L, 1)) {
+		SRV_FUNC_INDEX = -1;
+		return 0;
+	}
+	else
+		SRV_FUNC_INDEX = luaL_ref(L, LUA_REGISTRYINDEX);
 
 	return 0;
 }
 
-static bool AddClient(LuaServer * srv, SOCKET cli){
+List * _SrvList(lua_State *L) {
 
-	if (!srv->Clients){
-		srv->Clients = (SOCKET*)calloc(1, sizeof(SOCKET));
-		if (!srv->Clients)
-			return false;
-		srv->Clients[0] = cli;
-		srv->NumClients++;
-		return true;
-	}
-	else{
-		void * temp = realloc(srv->Clients, (srv->NumClients + 1) * sizeof(SOCKET));
-		if (!temp)
-			return false;
+	if (SRV_LIST_INDEX == LUA_REFNIL) {
 
-		srv->Clients = (SOCKET*)temp;
-		srv->Clients[srv->NumClients] = cli;
-		srv->NumClients++;
+		lua_pushlightuserdata(L, list_CreateList());
+		SRV_LIST_INDEX = luaL_ref(L, LUA_REGISTRYINDEX);
 	}
 
-	return true;
+	lua_rawgeti(L, LUA_REGISTRYINDEX, SRV_LIST_INDEX);
+
+	List * lst = (List *)lua_touserdata(L, -1);
+	lua_pop(L, 1);
+	return lst;
 }
 
-static bool RemoveClient(LuaServer * srv, SOCKET cli){
+int luaserver_KillAll(lua_State *L) {
 
-	if (!srv->Clients){
-		return true;
-	}
+	List * lst = _SrvList(L);
 
-	if (srv->NumClients <= 1){
+	list_Enter(lst);
 
-		free(srv->Clients);
-		srv->Clients = NULL;
-		srv->NumClients = 0;
-		return true;
-	}
-
-	SOCKET * temp = (SOCKET*)calloc(srv->NumClients - 1, sizeof(SOCKET));
-	if (!temp)
-		return false;
-
-	int added = 0;
-	for (int n = 0; n < srv->NumClients; n++){
-		if (srv->Clients[n] == cli)
-			continue;
-
-		temp[added++] = srv->Clients[n];
-	}
-
-	srv->NumClients--;
-	free(srv->Clients);
-	srv->Clients = temp;
-
-	return true;
-}
-
-static bool Exists(LuaServer * srv, SOCKET cli){
-
-	if (!srv->Clients)
-		return false;
-	else{
-		for (int n = 0; n < srv->NumClients; n++){
-			if (srv->Clients[n] == cli)
-				return true;;
+	for (int n = 0; n < lst->len; n++) {
+		if (((LuaServerThread *)lst->data[n])) {
+			((LuaServerThread *)lst->data[n])->IsAlive = false;
 		}
 	}
-	return false;
+
+	list_Leave(lst);
+
+	while (lst->len > 0) { Sleep(1); }
+	luaL_unref(L, LUA_REGISTRYINDEX, SRV_LIST_INDEX);
+	SRV_LIST_INDEX = LUA_REFNIL;
+	list_Destroy(lst);
+
+	return 0;
 }
 
-LuaServer * lua_toluaserver(lua_State *L, int index){
+void Disconnect(LuaServerThread * self, SOCKET client) {
+
+	EnterCriticalSection(&self->CriticalSection);
+	LuaServerClient * srvclient;
+	srvclient = NULL;
+	int index = 0;
+
+	for (int i = 0; i < self->NumbClients; i++) {
+		if (self->Clients[i].Socket == client) {
+			index = i;
+			srvclient = &self->Clients[i];
+			queue_Enqueue(self->Events, NetEvent_Create(client, NETEVENT_DISCONNECTED, srvclient->Address, strlen(srvclient->Address)));
+			break;
+		}
+	}
+
+	if (srvclient) {
+		memmove(&self->Clients[index], &self->Clients[index + 1], (self->NumbClients - index) * sizeof(LuaServerClient));
+		self->NumbClients--;
+	}
+
+	LeaveCriticalSection(&self->CriticalSection);
+}
+
+DWORD WINAPI SrvProc(LPVOID lpParam) {
+
+	LuaServerThread * self = (LuaServerThread *)lpParam;
+
+	void * temp;
+	SOCKET client;
+	Server * srv = CreateServer(self->Port);
+	LuaServerClient * srvclient;
+	char buffer[SRV_BUFFERSIZE];
+	int disc;
+	size_t read;
+	size_t total;
+	int index;
+	NetEvent * ev;
+
+	if (srv) {
+
+		while (self->IsAlive) {
+
+			ev = (NetEvent *)queue_Dequeue(self->Send);
+			while (ev) {
+
+				if (ev->type == NETEVENT_RECEIVE || ev->type == NETEVENT_SEND) {
+					disc = 0;
+					total = 0;
+
+					do {
+
+						read = ServerSend(srv, ev->s, &ev->data[total], ev->len - total, &disc);
+						if (disc) {
+							Disconnect(self, ev->s);
+							break;
+						}
+						else {
+							queue_Enqueue(self->Events, NetEvent_Create(ev->s, NETEVENT_SEND, &ev->data[total], ev->len - total));
+							total += read;
+						}
+
+					} while (total < ev->len);
+				}
+				else if (ev->type == NETEVENT_DISCONNECTED) {
+					ServerDisconnect(srv, ev->s);
+					Disconnect(self, ev->s);
+				}
+
+				free(ev);
+				ev = (NetEvent *)queue_Dequeue(self->Send);
+			}
+
+			client = ServerAccept(srv);
+
+			if (client != INVALID_SOCKET) {
+
+				EnterCriticalSection(&self->CriticalSection);
+
+				temp = realloc(self->Clients, sizeof(LuaServerClient) * (self->NumbClients + 1));
+
+				if (temp) {
+
+					self->Clients = (LuaServerClient*)temp;
+
+					srvclient = &self->Clients[self->NumbClients];
+
+					memset(srvclient, 0, sizeof(LuaServerClient));
+
+					srvclient->Socket = client;
+
+					GetIP(client, srvclient->Address, MAX_ADDRESS_LEN - 1);
+
+					self->NumbClients++;
+
+					queue_Enqueue(self->Events, NetEvent_Create(client, NETEVENT_CONNECTED, srvclient->Address, strlen(srvclient->Address)));
+				}
+				else {
+					ServerDisconnect(srv, client);
+				}
+
+				LeaveCriticalSection(&self->CriticalSection);
+			}
+
+			list_Enter(srv->Clients);
+			for (int n = 0; n < srv->Clients->len; n++) {
+
+				client = *(SOCKET*)srv->Clients->data[n];
+				disc = 0;
+				read = ServerReceive(srv, client, buffer, SRV_BUFFERSIZE, &disc);
+				if (read > 0) {
+					queue_Enqueue(self->Events, NetEvent_Create(client, NETEVENT_RECEIVE, buffer, read));
+				}
+				else if (disc) {
+					Disconnect(self, client);
+				}
+			}
+			list_Leave(srv->Clients);
+
+			Sleep(10);
+		}
+	}
+
+	ServerShutdown(srv);
+
+	HANDLE thread = self->Thread;
+
+	list_Remove(self->All, self);
+
+	queue_Destroy(self->Events);
+	queue_Destroy(self->Send);
+
+	DeleteCriticalSection(&self->CriticalSection);
+
+	free(self);
+
+	CloseHandle(thread);
+
+	return 0;
+}
+
+int luaserver_start(lua_State *L) {
+
+	List * lst = _SrvList(L);
+
+	LuaServerThread * thread = (LuaServerThread*)calloc(1, sizeof(LuaServerThread));
+
+	InitializeCriticalSectionAndSpinCount(&thread->CriticalSection, 0x00000400);
+
+	thread->Events = queue_Create();
+	thread->Send = queue_Create();
+	thread->Port = luaL_checkinteger(L, 1);
+
+	lua_pop(L, lua_gettop(L));
+
+	thread->All = lst;
+	thread->IsAlive = true;
+	thread->Thread = CreateThread(NULL, 0, SrvProc, thread, 0, &thread->ThreadId);
+	if (!thread->Thread) {
+
+
+		DeleteCriticalSection(&thread->CriticalSection);
+		queue_Destroy(thread->Events);
+		queue_Destroy(thread->Send);
+		free(thread);
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, "Unable to start server thread");
+
+		return 2;
+	}
+
+	LuaServer * srv = lua_pushluaserver(L);
+
+	srv->thread = thread;
+
+	list_Add(lst, thread);
+
+	if (SRV_FUNC_INDEX != LUA_REFNIL) {
+
+		lua_rawgeti(L, LUA_REGISTRYINDEX, SRV_FUNC_INDEX);
+		lua_pushvalue(L, -2);
+
+		if (lua_pcall(L, 1, 0, NULL) != 0) {
+			thread->IsAlive = false;
+
+			lua_pushnil(L);
+			lua_pushvalue(L, -2);
+
+			return 2;
+		}
+	}
+
+	return 1;
+}
+
+int luaserver_getclients(lua_State *L) {
+
+	LuaServer * server = lua_toluaserver(L, 1);
+	LuaServerThread * thread;
+	if (!server || !server->thread) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	List * lst = _SrvList(L);
+	list_Enter(lst);
+
+	for (int n = 0; n < lst->len; n++) {
+		if (((LuaServerThread *)lst->data[n]) == server->thread) {
+			thread = (LuaServerThread *)lst->data[n];
+			break;
+		}
+	}
+
+	if (!thread) {
+
+		server->thread = NULL;
+		list_Leave(lst);
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		return 1;
+	}
+	else
+		lua_pop(L, lua_gettop(L));
+
+	EnterCriticalSection(&thread->CriticalSection);
+
+	lua_createtable(L, 0, thread->NumbClients);
+	for (int n = 0; n < thread->NumbClients; n++) {
+
+		lua_pushinteger(L, thread->Clients[n].Socket);
+		lua_pushstring(L, thread->Clients[n].Address);	
+		lua_settable(L, -3);
+	}
+
+	LeaveCriticalSection(&thread->CriticalSection);
+
+	list_Leave(lst);
+
+	return 1;
+}
+
+int luaserver_getevent(lua_State *L) {
+
+	LuaServer * server = lua_toluaserver(L, 1);
+	LuaServerThread * thread;
+	if (!server || !server->thread) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	List * lst = _SrvList(L);
+	list_Enter(lst);
+
+	for (int n = 0; n < lst->len; n++) {
+		if (((LuaServerThread *)lst->data[n]) == server->thread) {
+			thread = (LuaServerThread *)lst->data[n];
+			break;
+		}
+	}
+
+	if (!thread) {
+
+		server->thread = NULL;
+		list_Leave(lst);
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	NetEvent * netevent = (NetEvent *)queue_Dequeue(thread->Events);
+
+	if (!netevent) {
+		list_Leave(lst);
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	lua_pop(L, lua_gettop(L));
+
+	lua_createtable(L, 0, 3);
+
+	lua_pushstring(L, "socket");
+	lua_pushinteger(L, netevent->s);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "type");
+	lua_pushinteger(L, netevent->type);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "data");
+	lua_pushlstring(L, netevent->data, netevent->len);
+	lua_settable(L, -3);
+
+	list_Leave(lst);
+
+	free(netevent);
+
+	return 1;
+}
+
+int luaserver_send(lua_State *L) {
+
+	size_t datalen;
+	LuaServer * server = lua_toluaserver(L, 1);
+	SOCKET s = luaL_checkinteger(L, 2);
+	const char * data = luaL_checklstring(L, 3, &datalen);
+
+	LuaServerThread * thread;
+	if (!server || !server->thread || !data || datalen <= 0) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	List * lst = _SrvList(L);
+	list_Enter(lst);
+
+	for (int n = 0; n < lst->len; n++) {
+		if (((LuaServerThread *)lst->data[n]) == server->thread) {
+			thread = (LuaServerThread *)lst->data[n];
+			break;
+		}
+	}
+
+	if (!thread) {
+
+		server->thread = NULL;
+		list_Leave(lst);
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	queue_Enqueue(thread->Send, NetEvent_Create(s, NETEVENT_SEND, data, datalen));
+
+	list_Leave(lst);
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, true);
+	return 1;
+}
+
+
+int luaserver_disconnect(lua_State *L) {
+
+	LuaServer * server = lua_toluaserver(L, 1);
+	SOCKET s = luaL_checkinteger(L, 2);
+	LuaServerThread * thread;
+	if (!server || !server->thread) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	List * lst = _SrvList(L);
+	list_Enter(lst);
+
+	for (int n = 0; n < lst->len; n++) {
+		if (((LuaServerThread *)lst->data[n]) == server->thread) {
+			thread = (LuaServerThread *)lst->data[n];
+			break;
+		}
+	}
+
+	if (!thread) {
+
+		server->thread = NULL;
+		list_Leave(lst);
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	queue_Enqueue(thread->Send, NetEvent_Create(s, NETEVENT_DISCONNECTED, NULL, 0));
+
+	list_Leave(lst);
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, true);
+	return 1;
+}
+
+LuaServer * lua_toluaserver(lua_State *L, int index) {
 
 	LuaServer * proc = (LuaServer*)lua_touserdata(L, index);
 	if (proc == NULL)
@@ -108,7 +464,7 @@ LuaServer * lua_toluaserver(lua_State *L, int index){
 	return proc;
 }
 
-LuaServer * lua_pushluaserver(lua_State *L){
+LuaServer * lua_pushluaserver(lua_State *L) {
 
 	LuaServer * proc = (LuaServer*)lua_newuserdata(L, sizeof(LuaServer));
 	if (proc == NULL)
@@ -116,373 +472,37 @@ LuaServer * lua_pushluaserver(lua_State *L){
 	luaL_getmetatable(L, LUASERVER);
 	lua_setmetatable(L, -2);
 	memset(proc, 0, sizeof(LuaServer));
-	proc->Listener = INVALID_SOCKET;
+
 	return proc;
 }
 
-int SvrStartLuaServer(lua_State *L){
-
-	int port = luaL_checkinteger(L, 1);
-	SOCKET ListenSocket;
-
-	struct addrinfo *result = NULL;
-	struct addrinfo hints;
-
-	ZeroMemory(&hints, sizeof(hints));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_protocol = IPPROTO_TCP;
-	hints.ai_flags = AI_PASSIVE;
-
-	char portstr[15];
-	sprintf(portstr, "%d", port);
-
-	// Resolve the server address and port
-	int iResult = getaddrinfo(NULL, portstr, &hints, &result);
-	if (iResult != 0) {
-		lua_pop(L, lua_gettop(L));
-		lua_pushnil(L);
-		lua_pushinteger(L, iResult);
-		return 2;
-	}
-
-	ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-	if (ListenSocket == INVALID_SOCKET) {
-		lua_pop(L, lua_gettop(L));
-		lua_pushnil(L);
-		lua_pushinteger(L, WSAGetLastError());
-		freeaddrinfo(result);
-		return 2;
-	}
-
-	iResult = bind(ListenSocket, result->ai_addr, (int)result->ai_addrlen);
-	if (iResult == SOCKET_ERROR) {
-		lua_pop(L, lua_gettop(L));
-		lua_pushnil(L);
-		lua_pushinteger(L, WSAGetLastError());
-		freeaddrinfo(result);
-		closesocket(ListenSocket);
-		return 2;
-	}
-
-	freeaddrinfo(result);
-
-	iResult = listen(ListenSocket, SOMAXCONN);
-	if (iResult == SOCKET_ERROR) {
-		lua_pop(L, lua_gettop(L));
-		lua_pushnil(L);
-		lua_pushinteger(L, WSAGetLastError());
-		closesocket(ListenSocket);
-		return 2;
-	}
-
-	u_long flag = 1;
-	ioctlsocket(ListenSocket, FIONBIO, &flag);
-
-	lua_pop(L, lua_gettop(L));
-	LuaServer * srv = lua_pushluaserver(L);
-	srv->Listener = ListenSocket;
-
-	return 1;
-}
-
-int SvrAcceptConnection(lua_State *L){
+int luaserver_gc(lua_State *L) {
 
 	LuaServer * srv = lua_toluaserver(L, 1);
-	SOCKET ClientSocket = accept(srv->Listener, NULL, NULL);
-	if (ClientSocket == INVALID_SOCKET){
-		lua_pop(L, lua_gettop(L));
-		lua_pushnil(L);
-		lua_pushinteger(L, WSAGetLastError());
-		return 2;
-	}
+	List * lst = _SrvList(L);
 
-	if (!Exists(srv, ClientSocket)){
-		if (!AddClient(srv, ClientSocket)){
-			lua_pop(L, lua_gettop(L));
-			lua_pushnil(L);
-			lua_pushinteger(L, WSAGetLastError());
-			shutdown(ClientSocket, SD_SEND);
-			closesocket(ClientSocket);
-			return 2;
-		}
-		else{
-			u_long flag = 1;
-			ioctlsocket(ClientSocket, FIONBIO, &flag);
-		}
-	}
+	if (srv->thread) {
 
-	lua_pop(L, lua_gettop(L));
-	lua_pushinteger(L, ClientSocket);
-	return 1;
-}
+		list_Enter(lst);
 
-int SvrRecv(lua_State *L){
+		for (int n = 0; n < lst->len; n++) {
+			if (((LuaServerThread *)lst->data[n]) == srv->thread) {
 
-	LuaServer * srv = lua_toluaserver(L, 1);
-	SOCKET target = luaL_checkinteger(L, 2);
-	int read;
-
-	if (!Exists(srv, target)){
-		lua_pop(L, lua_gettop(L));
-		lua_pushnil(L);
-		lua_pushinteger(L, 1);
-		return 2;
-	}
-
-	StartCounter();
-	LuaFrame Frame;
-	int result = recv(target, (char*)&Frame, sizeof(LuaFrame), 0);
-	if (result == 0){
-	disconnect:
-		RemoveClient(srv, target);
-		shutdown(target, SD_SEND);
-		closesocket(target);
-		lua_pop(L, lua_gettop(L));
-		lua_pushnil(L);
-		lua_pushinteger(L, 1);
-		return 2;
-	}
-	else if (result > 0){
-
-		if (result < sizeof(LuaFrame) || Frame.length < sizeof(LuaFrame)){
-			lua_pop(L, lua_gettop(L));
-			lua_pushnil(L);
-			lua_pushinteger(L, WSAEWOULDBLOCK);
-			return 2;
-		}
-
-		char * data = (char*)malloc(Frame.length);
-		if (!data){
-			goto error;
-		}
-
-		memcpy(data, &Frame, result);
-		read = result;
-		while (read < Frame.length){
-			result = recv(target, &data[read], Frame.length - read, 0);
-			if (result == 0){
-				free(data);
-				goto disconnect;
-			}
-			else if (result > 0){
-				read += result;
-			}
-			else if (WSAGetLastError() == WSAEWOULDBLOCK){
-
-				result = CheckTimeout(L);
-				if (result == 0){
-					Sleep(1);
-					continue;
-				}
-
-				if (result != 1){
-					RemoveClient(srv, target);
-					shutdown(target, SD_SEND);
-					closesocket(target);
-				}
-				lua_pop(L, lua_gettop(L));
-				lua_pushnil(L);
-				lua_pushinteger(L, result);
-				return 2;
-			}
-			else{
-				free(data);
-				goto error;
-			}
-		}
-
-		lua_pop(L, lua_gettop(L));
-		for (int n = 0; n < 16; n++){
-			if (n == 15 || ((LuaFrame*)data)->method[n] == '\0'){
-				lua_pushlstring(L, ((LuaFrame*)data)->method, n);
+				srv->thread->IsAlive = false;
 				break;
 			}
 		}
-		lua_pushframe(L, (LuaFrame*)data);
-		free(data);
-	}
-	else{
-	error:
-		lua_pop(L, lua_gettop(L));
-		lua_pushnil(L);
-		lua_pushinteger(L, WSAGetLastError());
-		if (WSAGetLastError() != WSAEWOULDBLOCK)
-		{
-			RemoveClient(srv, target);
-			shutdown(target, SD_SEND);
-			closesocket(target);
-		}
-		return 2;
-	}
 
-	return 2;
-}
+		srv->thread = NULL;
 
-int SvrSend(lua_State *L){
-
-	LuaServer * srv = lua_toluaserver(L, 1);
-	SOCKET target = luaL_checkinteger(L, 2);
-
-	if (!Exists(srv, target)){
-		lua_pop(L, lua_gettop(L));
-		lua_pushboolean(L, false);
-		lua_pushinteger(L, 1);
-		return 2;
-	}
-
-
-	LuaFrame * frame = lua_toframe(L, 4, lua_tostring(L, 3));
-	if (!frame){
-		lua_pop(L, lua_gettop(L));
-		lua_pushboolean(L, false);
-		lua_pushinteger(L, 0);
-		return 2;
-	}
-	int sent = 0;
-	char* buffer = (char*)frame;
-	StartCounter();
-	int result;
-	while (sent < frame->length){
-		result = send(target, &buffer[sent], frame->length - sent, 0);
-		if (result == 0){
-			RemoveClient(srv, target);
-			shutdown(target, SD_SEND);
-			closesocket(target);
-			free(frame);
-			lua_pop(L, lua_gettop(L));
-			lua_pushboolean(L, false);
-			lua_pushinteger(L, 1);
-			return 2;
-		}
-		else if (result > 0){
-			sent += result;
-		}
-		else if (WSAGetLastError() == WSAEWOULDBLOCK){
-			result = CheckTimeout(L);
-			if (result == 0){
-				Sleep(1);
-				continue;
-			}
-
-			if (result != 1){
-				RemoveClient(srv, target);
-				shutdown(target, SD_SEND);
-				closesocket(target);
-			}
-
-			free(frame);
-			lua_pop(L, lua_gettop(L));
-			lua_pushboolean(L, false);
-			lua_pushinteger(L, result);
-			return 2;
-		}
-		else{
-			free(frame);
-			lua_pop(L, lua_gettop(L));
-			lua_pushboolean(L, false);
-			lua_pushinteger(L, WSAGetLastError());
-			RemoveClient(srv, target);
-			shutdown(target, SD_SEND);
-			closesocket(target);
-			return 2;
-		}
-	}
-	free(frame);
-	lua_pop(L, lua_gettop(L));
-	lua_pushboolean(L, true);
-
-	return 1;
-}
-
-int SvrGetClients(lua_State *L){
-
-	LuaServer * srv = lua_toluaserver(L, 1);
-
-	lua_createtable(L, srv->NumClients, 0);
-
-	for (unsigned int n = 0; n < srv->NumClients; n++){
-		lua_pushinteger(L, srv->Clients[n]);
-		lua_rawseti(L, -2, n + 1);
-	}
-
-	return 1;
-}
-
-int SrvGetIP(lua_State *L){
-
-	LuaServer * srv = lua_toluaserver(L, 1);
-	SOCKET target = luaL_checkinteger(L, 2);
-	lua_pop(L, lua_gettop(L));
-
-	if (!Exists(srv, target)){
-		lua_pushnil(L);
-		return 1;
-	}
-	sockaddr res = { 0 };
-	int size = sizeof(sockaddr);
-	if (getpeername(target, (sockaddr*)&res, &size) != 0){
-		lua_pushnil(L);
-	}
-	else{
-		char *s = NULL;
-		int port = 0;
-		switch (res.sa_family) {
-		case AF_INET: {
-			struct sockaddr_in *addr_in = (struct sockaddr_in *)&res;
-			port = addr_in->sin_port;
-			s = (char*)malloc(INET_ADDRSTRLEN);
-			inet_ntop(AF_INET, &(addr_in->sin_addr), s, INET_ADDRSTRLEN);
-			break;
-		}
-		case AF_INET6: {
-			struct sockaddr_in6 *addr_in6 = (struct sockaddr_in6 *)&res;
-			port = addr_in6->sin6_port;
-			s = (char*)malloc(INET6_ADDRSTRLEN);
-			inet_ntop(AF_INET6, &(addr_in6->sin6_addr), s, INET6_ADDRSTRLEN);
-			break;
-		}
-		default:
-			break;
-		}
-		if (s){
-			lua_pushstring(L, s);
-			lua_pushinteger(L, port);
-			free(s);
-			return 2;
-		}
-		else
-			lua_pushnil(L);
-	}
-
-	return 1;
-}
-
-int luaserver_gc(lua_State *L){
-
-	LuaServer * srv = lua_toluaserver(L, 1);
-	if (srv->Listener != INVALID_SOCKET){
-		closesocket(srv->Listener);
-		srv->Listener = INVALID_SOCKET;
-	}
-
-	if (srv->Clients)
-	{
-		for (int n = 0; n < srv->NumClients; n++){
-			shutdown(srv->Clients[n], SD_SEND);
-			closesocket(srv->Clients[n]);
-		}
-
-		free(srv->Clients);
-		srv->Clients = NULL;
-		srv->NumClients = 0;
+		list_Leave(lst);
 	}
 
 	lua_pop(L, 1);
 	return 0;
 }
 
-int luaserver_tostring(lua_State *L){
+int luaserver_tostring(lua_State *L) {
 	char tim[100];
 	sprintf(tim, "LuaServer: 0x%08X", lua_toluaserver(L, 1));
 	lua_pushfstring(L, tim);
