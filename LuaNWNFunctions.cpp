@@ -42,6 +42,21 @@ int GetCreature(lua_State*L){
 	return 1;
 }
 
+int LRunScript(lua_State*L){
+
+	const char * script = luaL_checkstring(L, 1);
+	nwn_objid_t objid = GetObjID(L, 2);
+	
+	if (objid == OJBECT_INVALID)
+		objid = OBJECT_MODULE;
+
+	RunScript(script, objid);
+
+	lua_pop(L, lua_gettop(L));
+
+	return 0;
+}
+
 int Test(lua_State*L){
 
 	void * test = NWN2_Malloc(10000000);

@@ -4,6 +4,7 @@
 static const struct luaL_Reg nwnfuncs[] = {
 
 	{ "GetCreature", GetCreature },
+	{ "RunScript", LRunScript },
 	{ "Test", Test },
 	{ NULL, NULL }
 };

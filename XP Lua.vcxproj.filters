@@ -417,6 +417,9 @@
     <ClCompile Include="ResourceTypes.cpp">
       <Filter>LuaErf</Filter>
     </ClCompile>
+    <ClCompile Include="Hooks.cpp">
+      <Filter>NWN2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -664,6 +667,9 @@
     </ClInclude>
     <ClInclude Include="ResourcesTypes.h">
       <Filter>LuaErf</Filter>
+    </ClInclude>
+    <ClInclude Include="Hooks.h">
+      <Filter>NWN2</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
