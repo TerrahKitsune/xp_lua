@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -17,6 +17,7 @@
     <ClCompile Include="2DAMain.cpp" />
     <ClCompile Include="AssemblyHelper.cpp" />
     <ClCompile Include="Buffer.cpp" />
+    <ClCompile Include="Client.cpp" />
     <ClCompile Include="Erf.cpp" />
     <ClCompile Include="ERFMain.cpp" />
     <ClCompile Include="GffField.cpp" />
@@ -27,11 +28,11 @@
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="Http.cpp" />
     <ClCompile Include="HttpMain.cpp" />
+    <ClCompile Include="List.cpp" />
     <ClCompile Include="LuaClient.cpp" />
     <ClCompile Include="LuaClientMain.cpp" />
     <ClCompile Include="LuaFileSystem.cpp" />
     <ClCompile Include="LuaFileSystemMain.cpp" />
-    <ClCompile Include="LuaFrame.cpp" />
     <ClCompile Include="LuaGff.cpp" />
     <ClCompile Include="LuaMD5.cpp" />
     <ClCompile Include="LuaMySQL.cpp" />
@@ -44,9 +45,12 @@
     <ClCompile Include="LuaSQLiteMain.cpp" />
     <ClCompile Include="luazip.cpp" />
     <ClCompile Include="lua_misc.cpp" />
+    <ClCompile Include="MainLoop.cpp" />
     <ClCompile Include="md5.c" />
     <ClCompile Include="MD5Main.cpp" />
     <ClCompile Include="MySQLMain.cpp" />
+    <ClCompile Include="NetEvent.cpp" />
+    <ClCompile Include="networking.cpp" />
     <ClCompile Include="NWN2Funcs.cpp" />
     <ClCompile Include="NWN2LuaLib.cpp" />
     <ClCompile Include="NWN2_API\CExoString.cpp" />
@@ -90,7 +94,9 @@
     <ClCompile Include="Lua\lvm.c" />
     <ClCompile Include="Lua\lzio.c" />
     <ClCompile Include="ProcessMain.cpp" />
+    <ClCompile Include="Queue.cpp" />
     <ClCompile Include="ResourceTypes.cpp" />
+    <ClCompile Include="Server.cpp" />
     <ClCompile Include="SQLite\sqlite3.c" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimerMain.cpp" />
@@ -105,6 +111,7 @@
     <ClInclude Include="2DAMain.h" />
     <ClInclude Include="AssemblyHelper.h" />
     <ClInclude Include="Buffer.h" />
+    <ClInclude Include="Client.h" />
     <ClInclude Include="Erf.h" />
     <ClInclude Include="ERFMain.h" />
     <ClInclude Include="GffField.h" />
@@ -115,11 +122,11 @@
     <ClInclude Include="Hooks.h" />
     <ClInclude Include="Http.h" />
     <ClInclude Include="HttpMain.h" />
+    <ClInclude Include="List.h" />
     <ClInclude Include="LuaClient.h" />
     <ClInclude Include="LuaClientMain.h" />
     <ClInclude Include="LuaFileSystem.h" />
     <ClInclude Include="LuaFileSystemMain.h" />
-    <ClInclude Include="LuaFrame.h" />
     <ClInclude Include="LuaGff.h" />
     <ClInclude Include="LuaMD5.h" />
     <ClInclude Include="LuaMySQL.h" />
@@ -133,9 +140,11 @@
     <ClInclude Include="luazip.h" />
     <ClInclude Include="lua_main_incl.h" />
     <ClInclude Include="lua_misc.h" />
+    <ClInclude Include="MainLoop.h" />
     <ClInclude Include="md5.h" />
     <ClInclude Include="MD5Main.h" />
     <ClInclude Include="MySQLMain.h" />
+    <ClInclude Include="NetEvent.h" />
     <ClInclude Include="networking.h" />
     <ClInclude Include="NWN2Funcs.h" />
     <ClInclude Include="NWN2LuaLib.h" />
@@ -172,7 +181,9 @@
     <ClInclude Include="Lua\lvm.h" />
     <ClInclude Include="Lua\lzio.h" />
     <ClInclude Include="ProcessMain.h" />
+    <ClInclude Include="Queue.h" />
     <ClInclude Include="ResourcesTypes.h" />
+    <ClInclude Include="Server.h" />
     <ClInclude Include="SQLite\sqlite3.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimerMain.h" />
@@ -189,6 +200,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2B542B5F-2100-4AF9-B9D1-4B19457EA3B8}</ProjectGuid>
     <RootNamespace>XPLua</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

@@ -160,6 +160,9 @@
     <Filter Include="Lua2DA\Source Files">
       <UniqueIdentifier>{7049f1df-4ef6-456b-b4f4-8dca26adbf5c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{ab395c13-4677-4653-85e6-38dd433dd51a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\plugin.cpp">
@@ -372,9 +375,6 @@
     <ClCompile Include="LuaServerMain.cpp">
       <Filter>LuaService\Server</Filter>
     </ClCompile>
-    <ClCompile Include="LuaFrame.cpp">
-      <Filter>LuaService</Filter>
-    </ClCompile>
     <ClCompile Include="LuaNWN.cpp">
       <Filter>LuaNWN</Filter>
     </ClCompile>
@@ -419,6 +419,27 @@
     </ClCompile>
     <ClCompile Include="Hooks.cpp">
       <Filter>NWN2</Filter>
+    </ClCompile>
+    <ClCompile Include="Client.cpp">
+      <Filter>LuaService\Client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Server.cpp">
+      <Filter>LuaService\Server\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NetEvent.cpp">
+      <Filter>LuaService</Filter>
+    </ClCompile>
+    <ClCompile Include="List.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Queue.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="networking.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MainLoop.cpp">
+      <Filter>LuaNWN\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -614,9 +635,6 @@
     <ClInclude Include="LuaServerMain.h">
       <Filter>LuaService\Server</Filter>
     </ClInclude>
-    <ClInclude Include="LuaFrame.h">
-      <Filter>LuaService</Filter>
-    </ClInclude>
     <ClInclude Include="networking.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -670,6 +688,24 @@
     </ClInclude>
     <ClInclude Include="Hooks.h">
       <Filter>NWN2</Filter>
+    </ClInclude>
+    <ClInclude Include="Client.h">
+      <Filter>LuaService\Client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Server.h">
+      <Filter>LuaService\Server\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetEvent.h">
+      <Filter>LuaService</Filter>
+    </ClInclude>
+    <ClInclude Include="List.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Queue.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="MainLoop.h">
+      <Filter>LuaNWN\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
