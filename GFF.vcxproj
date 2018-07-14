@@ -83,6 +83,7 @@
     <ClCompile Include="GFFMain.cpp" />
     <ClCompile Include="GffStruct.cpp" />
     <ClCompile Include="Http.cpp" />
+    <ClCompile Include="_Http.cpp" />
     <ClCompile Include="HttpMain.cpp" />
     <ClCompile Include="List.cpp" />
     <ClCompile Include="LuaClient.cpp" />
@@ -162,6 +163,7 @@
     <ClInclude Include="GFFMain.h" />
     <ClInclude Include="GffStruct.h" />
     <ClInclude Include="Http.h" />
+    <ClInclude Include="_Http.h" />
     <ClInclude Include="HttpMain.h" />
     <ClInclude Include="List.h" />
     <ClInclude Include="LuaClient.h" />

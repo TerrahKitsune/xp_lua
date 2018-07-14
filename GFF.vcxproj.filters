@@ -318,9 +318,6 @@
     <ClCompile Include="HttpMain.cpp">
       <Filter>LuaHTTP</Filter>
     </ClCompile>
-    <ClCompile Include="Http.cpp">
-      <Filter>LuaHTTP\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Buffer.cpp">
       <Filter>LuaHTTP\Source Files</Filter>
     </ClCompile>
@@ -380,6 +377,12 @@
     </ClCompile>
     <ClCompile Include="Client.cpp">
       <Filter>LuaService\Client\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="_Http.cpp">
+      <Filter>LuaHTTP\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Http.cpp">
+      <Filter>LuaHTTP\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -530,9 +533,6 @@
     <ClInclude Include="HttpMain.h">
       <Filter>LuaHTTP</Filter>
     </ClInclude>
-    <ClInclude Include="Http.h">
-      <Filter>LuaHTTP\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Buffer.h">
       <Filter>LuaHTTP\Header Files</Filter>
     </ClInclude>
@@ -598,6 +598,12 @@
     </ClInclude>
     <ClInclude Include="Client.h">
       <Filter>LuaService\Client\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_Http.h">
+      <Filter>LuaHTTP\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Http.h">
+      <Filter>LuaHTTP\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

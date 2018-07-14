@@ -2,14 +2,17 @@
 #include "Http.h"
 
 static const struct luaL_Reg httpfunctions[] = {
-	{ "Request", HTTP },
-	{ "SetFile", SetFile },
-	{ "SetMessageFunction", SetTimeoutFunction },
+	{ "Start", Start },
+	{ "SetTimeout", SetHttpTimeout },
+	{ "GetResult", GetResult },
+	{ "GetStatus", GetStatus },
 	{ NULL, NULL }
 };
 
 static const luaL_Reg httpmeta[] = {
 
+	{ "__gc", luahttp_gc },
+	{ "__tostring", luahttp_tostring },
 	{ NULL, NULL }
 };
 
@@ -18,7 +21,7 @@ int luaopen_http(lua_State *L) {
 	luaL_newlibtable(L, httpfunctions);
 	luaL_setfuncs(L, httpfunctions, 0);
 
-	luaL_newmetatable(L, HTTPLUA);
+	luaL_newmetatable(L, LUAHTTP);
 	luaL_setfuncs(L, httpmeta, 0);
 
 	lua_pushliteral(L, "__index");

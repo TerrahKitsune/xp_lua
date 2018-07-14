@@ -189,19 +189,24 @@ HTTP:
 	-url = "http(s)://address:port/page"
 	-content = content to tbe passed in the request
 	-headers = key-value table containing the headers, content-length and host is automatically filled
-	code, ok, contents, header Http.Request(method, url, content, headers)
+	-Returns http object
+	Http Http.Start(method, url, content, headers)
 
-	-Set a filepath, if a file is set then content in HTTP.Request will be nil
-	-and the set file will contain the contents instead
-	nil Http.SetFile(file)
+	-Sets the timeout on the running request
+	-0 or less = infinite
+	nil Http:SetTimeout(timeout)
 
-	-Sets a message function
-	-function(ms,total,processed,reciving)
-	-ms = miliseconds since the request started
-	-total = the total amount of bytes to receive (if content length)
-	-processed = amount of bytes downloaded (or sent)
-	-reciving = true if we're receving data, false if we're sending
-	nil Http.SetMessageFunction(func)
+	-Retrives the results from the http request
+	-if the http request is still in progress this call will block until its finished
+	-returns nil, msg on error
+	code, ok, contents, header Http:GetResult()
+
+	-Returns the status on a http request
+	-IsRunning bool: is the request still running?
+	-ms: miliseconds the request has been running for
+	-sent: bytes sent
+	-recv: bytes recieved
+	IsRunning, ms, sent, recv Http:GetStatus()
 
 MD5:
 	
@@ -233,10 +238,21 @@ MySQL:
 	MySQL MySQL.Connect(address, user, password, database, opt port 3306, opt timeout 5)
 
 	-runs querystring on the opened mysql object
+	-async is true then the mysql query will run async
+	-use MySQL:IsRunning() and MySQL:GetResult() to evaluate the state of an async query
 	-returns true, rowsaffected on success or false and an error message on failure
-	bool, msg MySQL:Query(querystring)
+	bool, msg MySQL:Query(querystring, async=false)
+
+	-Returns true if the connection is running an async query
+	bool MySQL:IsRunning();
+
+	-Evaluate the result of an async query
+	-If the query is still running this will wait
+	-returns the result MySQL:Query returns on non async queries for async queries
+	bool, msg MySQL:GetResult();
 
 	-Advances the resultset to the next row
+	-Using on an async query will cause blocking until the query is finished
 	-returns false if there is no more rows or there was none to begin with
 	bool MySQL:Fetch()
 

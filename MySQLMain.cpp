@@ -9,6 +9,8 @@ static const struct luaL_Reg mysqlfunctions[] = {
 	{ "Connect", MySQLConnect },
 	{ "Query", MySQLExecute },
 	{ "SetTimeout", SetTimeout },
+	{ "IsRunning", MySQLIsRunningAsync },
+	{ "GetResult", MySQLGetAsyncResults },
 	{ NULL, NULL }
 };
 

@@ -5,8 +5,19 @@
 #include "lua_main_incl.h"
 #include <my_global.h>
 #include <mysql.h>
+#include <ppltasks.h>
+
+using namespace concurrency;
 
 static const char * LUAMYSQL = "LuaMySQL";
+
+typedef struct LuaAsyncResult {
+
+	bool Ok;
+	char * Error;
+	int Rows;
+
+}LuaAsyncResult;
 
 typedef struct LuaMySQL {
 	MYSQL mysql;
@@ -22,6 +33,11 @@ typedef struct LuaMySQL {
 	char * schema;
 	unsigned int port;
 	int timeout;
+
+	volatile bool isRunningAsync;
+	bool hasTask;
+	task<LuaAsyncResult*> task;
+	char * query;
 } LuaMySQL;
 
 LuaMySQL * lua_tomysql(lua_State *L, int index);
@@ -37,5 +53,7 @@ int MySQLConnect(lua_State *L);
 int MySQLExecute(lua_State *L);
 int MySQLFetch(lua_State *L);
 int MySQLGetRow(lua_State *L);
+int MySQLIsRunningAsync(lua_State *L);
+int MySQLGetAsyncResults(lua_State *L);
 
 bool Reconnect(LuaMySQL *luamysql);
