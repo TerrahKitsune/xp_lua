@@ -163,6 +163,7 @@
     <ClInclude Include="GFFMain.h" />
     <ClInclude Include="GffStruct.h" />
     <ClInclude Include="Http.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="_Http.h" />
     <ClInclude Include="HttpMain.h" />
     <ClInclude Include="List.h" />
@@ -232,6 +233,12 @@
   <ItemGroup>
     <Text Include="Lua functions.txt" />
     <Text Include="scrap.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GFF.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Lua\jiiiiiiiiitsu.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

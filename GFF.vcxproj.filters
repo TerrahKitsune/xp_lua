@@ -605,6 +605,9 @@
     <ClInclude Include="Http.h">
       <Filter>LuaHTTP\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="main.lua">
@@ -617,5 +620,15 @@
   <ItemGroup>
     <Text Include="scrap.txt" />
     <Text Include="Lua functions.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GFF.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Lua\jiiiiiiiiitsu.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
