@@ -3,8 +3,13 @@
 #include "MainLoop.h"
 
 static const struct luaL_Reg nwnfuncs[] = {
-
 	{ "GetCreature", GetCreature },
+	{ "GetObject", GetObject },
+	{ "GetEffectData", GetEffectData },
+	{ "EffectSetEffectInt", EffectSetEffectInt },
+	{ "EffectSetExposed", EffectSetExposed },
+	{ "CopyEffectIdsToEffectInts", CopyEffectIdsToEffectInts },
+	{ "GetLocalVariables", GetLocalVariables },
 	{ "RunScript", LRunScript },
 	{ "HookMainloop", HookMainLoop },
 	{ "Test", Test },
@@ -12,7 +17,7 @@ static const struct luaL_Reg nwnfuncs[] = {
 };
 
 
-int luaopen_nwnfunctions(lua_State *L){
+int luaopen_nwnfunctions(lua_State *L) {
 
 	SetStateToUse(L);
 

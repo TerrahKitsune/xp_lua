@@ -524,3 +524,39 @@ CExoLocStringSubString:
 
 	*The string this exolocsubstring contains
 	string String
+
+xp_lua.dll ONLY (Starts with NWN.):
+
+	-returns address of creature or nil of none exists
+	string GetCreature(objid)
+
+	-returns address of any object or nil of none exists
+	string GetObject(objid)
+
+	-retrives all variables in an array
+	-Variable table: Name (Name of the var), Type (string, location, object, int, float), Data depends on the type
+	-Location table: Position vector, Facing vector, Area objid
+	table GetLocalVariables(objid)
+
+	-Copies all effect ids to effectints index to
+	-This can then be retrived using the nwscript function GetEffectInteger(eEffect, 10)
+	bool CopyEffectIdsToEffectInts(objid)
+
+	-Retrives information about an effect where effectid is retrivable using CopyEffectIdsToEffectInts
+	-table keys: 
+	-ID: effect id
+	-Creator: object id of the creator
+	-Duration: float of the duration
+	-ExpireDay: int somesort of internal timekeeping of the current day
+	-ExpireTime: int somesort of interal timekeeping of the time in the ExpireDay to expire the effect
+	-Exposed: bool if the effect is exposed to nwscripts GetFirst/NextEffect
+	-ShowIcon: bool if the icon is shown
+	-SpellID: int the spell id
+	-CasterLevel: int casterlevel (might not be working)
+	-LinkID: int Effects that share the same link share this id
+	-Type: int the *internal* type of the effect
+	-SubType: int *internal* subtype
+	-EffectStrings array containing strings stored on the effect
+	-EffectObjects array containing objectid's stored on the effect
+	-EffectInts array of effect ints stored on the effect
+	table GetEffectData(objid, effectid)

@@ -2,6 +2,7 @@
 #include "NWN2_API.h"
 #include "nwn2heap.h"
 
+
 #ifdef _M_IX86
 #pragma comment(lib, "NWN2_MemoryMgr_amdxp.lib")
 #else

@@ -441,6 +441,9 @@
     <ClCompile Include="MainLoop.cpp">
       <Filter>LuaNWN\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="lua_helper.cpp">
+      <Filter>LuaNWN\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -706,6 +709,15 @@
     </ClInclude>
     <ClInclude Include="MainLoop.h">
       <Filter>LuaNWN\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CGameEffect.h">
+      <Filter>NWN2\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="lua_helper.h">
+      <Filter>LuaNWN\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseObjects.h">
+      <Filter>NWN2\Objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

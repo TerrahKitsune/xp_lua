@@ -362,6 +362,7 @@ int MySQLExecute(lua_State *L) {
 		luamysql->result = NULL;
 		luamysql->row = NULL;
 		luamysql->columns = NULL;
+		luamysql->fields = NULL;
 	}
 
 	if (luamysql->hasTask) {

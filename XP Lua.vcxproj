@@ -44,6 +44,7 @@
     <ClCompile Include="LuaSQLite.cpp" />
     <ClCompile Include="LuaSQLiteMain.cpp" />
     <ClCompile Include="luazip.cpp" />
+    <ClCompile Include="lua_helper.cpp" />
     <ClCompile Include="lua_misc.cpp" />
     <ClCompile Include="MainLoop.cpp" />
     <ClCompile Include="md5.c" />
@@ -110,7 +111,9 @@
     <ClInclude Include="2da.h" />
     <ClInclude Include="2DAMain.h" />
     <ClInclude Include="AssemblyHelper.h" />
+    <ClInclude Include="BaseObjects.h" />
     <ClInclude Include="Buffer.h" />
+    <ClInclude Include="CGameEffect.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="Erf.h" />
     <ClInclude Include="ERFMain.h" />
@@ -138,6 +141,7 @@
     <ClInclude Include="LuaSQLite.h" />
     <ClInclude Include="LuaSQLiteMain.h" />
     <ClInclude Include="luazip.h" />
+    <ClInclude Include="lua_helper.h" />
     <ClInclude Include="lua_main_incl.h" />
     <ClInclude Include="lua_misc.h" />
     <ClInclude Include="MainLoop.h" />
@@ -228,6 +232,9 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <TargetName>xp_lua</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>xp_lua</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

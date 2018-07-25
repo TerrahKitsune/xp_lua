@@ -172,7 +172,21 @@ char * LuaEngine::Luapcall(int params){
 	}
 	else if (lua_gettop(L) >= 1 && !lua_isnoneornil(L, -1))
 	{
-		luaresult = lua_tolstring(L, -1, &len);
+		if (lua_isboolean(L, -1)) {
+
+			if (lua_toboolean(L, -1)) {
+				luaresult = "1";
+			}
+			else {
+				luaresult = "0";
+			}
+
+			len = 1;
+		}
+		else {
+			luaresult = lua_tolstring(L, -1, &len);
+		}
+
 		result = new char[len + 1];
 		if (!result){
 			return NULL;
