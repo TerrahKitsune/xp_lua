@@ -6,6 +6,7 @@ static const struct luaL_Reg mysqlfunctions[] = {
 	{ "EscapeString", EscapeString },
 	{ "GetRow", MySQLGetRow },
 	{ "Fetch", MySQLFetch },
+	{ "ChangeDatabase", MySQLChangeDatabase },
 	{ "Connect", MySQLConnect },
 	{ "Query", MySQLExecute },
 	{ "SetTimeout", SetTimeout },

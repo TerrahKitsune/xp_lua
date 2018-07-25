@@ -197,7 +197,7 @@ int MySQLFetch(lua_State *L) {
 		return 1;
 	}
 
-	if(!luamysql->fields)
+	if (!luamysql->fields)
 		luamysql->fields = mysql_num_fields(luamysql->result);
 	if (!luamysql->columns)
 		luamysql->columns = mysql_fetch_fields(luamysql->result);
@@ -435,6 +435,33 @@ int MySQLExecute(lua_State *L) {
 	}
 
 	return 2;
+}
+
+int MySQLChangeDatabase(lua_State *L) {
+
+	LuaMySQL * luamysql = luaL_checkmysql(L, 1);
+	const char * db = luaL_checkstring(L, 2);
+
+	if (luamysql->hasTask) {
+		luamysql->task.wait();
+	}
+
+	if(luamysql->schema)
+		free(luamysql->schema);
+	luamysql->schema = (char*)calloc(strlen(db) + 1, sizeof(char));
+
+	if (!luamysql->schema) {
+		lua_pop(L, lua_gettop(L));
+		luaL_error(L, "Unable to alloc memory");
+		return 0;
+	}
+
+	strcpy(luamysql->schema, db);
+	lua_pop(L, 1);
+
+	lua_pushfstring(L, "USE `%s`;", luamysql->schema);
+
+	return MySQLExecute(L);
 }
 
 int MySQLConnect(lua_State *L) {

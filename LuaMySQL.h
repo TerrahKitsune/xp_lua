@@ -44,6 +44,7 @@ LuaMySQL * lua_tomysql(lua_State *L, int index);
 LuaMySQL * luaL_checkmysql(lua_State *L, int index);
 LuaMySQL * lua_pushmysql(lua_State *L);
 
+int MySQLChangeDatabase(lua_State *L);
 int luamysql_gc(lua_State *L);
 int luamysql_tostring(lua_State *L);
 int DataToHex(lua_State *L);
