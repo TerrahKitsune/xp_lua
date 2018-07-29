@@ -83,6 +83,8 @@
     <ClCompile Include="GFFMain.cpp" />
     <ClCompile Include="GffStruct.cpp" />
     <ClCompile Include="Http.cpp" />
+    <ClCompile Include="LuaMySQLResult.cpp" />
+    <ClCompile Include="mysql_main_incl.cpp" />
     <ClCompile Include="_Http.cpp" />
     <ClCompile Include="HttpMain.cpp" />
     <ClCompile Include="List.cpp" />
@@ -163,6 +165,8 @@
     <ClInclude Include="GFFMain.h" />
     <ClInclude Include="GffStruct.h" />
     <ClInclude Include="Http.h" />
+    <ClInclude Include="LuaMySQLResult.h" />
+    <ClInclude Include="mysql_main_incl.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="_Http.h" />
     <ClInclude Include="HttpMain.h" />

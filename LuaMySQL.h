@@ -1,11 +1,7 @@
 #pragma once
-#pragma warning (disable: 4514 4786)
-#pragma warning( push, 3 )
-//#define HAVE_STRUCT_TIMESPEC
-#include "lua_main_incl.h"
-#include <my_global.h>
-#include <mysql.h>
+#include "mysql_main_incl.h"
 #include <ppltasks.h>
+#include "LuaMySQLResult.h"
 
 using namespace concurrency;
 
@@ -33,6 +29,7 @@ typedef struct LuaMySQL {
 	char * schema;
 	unsigned int port;
 	int timeout;
+	bool asstring;
 
 	volatile bool isRunningAsync;
 	bool hasTask;
@@ -44,6 +41,7 @@ LuaMySQL * lua_tomysql(lua_State *L, int index);
 LuaMySQL * luaL_checkmysql(lua_State *L, int index);
 LuaMySQL * lua_pushmysql(lua_State *L);
 
+int MySQLSetAsString(lua_State *L);
 int MySQLChangeDatabase(lua_State *L);
 int luamysql_gc(lua_State *L);
 int luamysql_tostring(lua_State *L);
@@ -56,5 +54,6 @@ int MySQLFetch(lua_State *L);
 int MySQLGetRow(lua_State *L);
 int MySQLIsRunningAsync(lua_State *L);
 int MySQLGetAsyncResults(lua_State *L);
+int MySQLForkResult(lua_State *L);
 
 bool Reconnect(LuaMySQL *luamysql);

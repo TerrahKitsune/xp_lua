@@ -384,6 +384,12 @@
     <ClCompile Include="Http.cpp">
       <Filter>LuaHTTP\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LuaMySQLResult.cpp">
+      <Filter>LuaMySQL\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mysql_main_incl.cpp">
+      <Filter>LuaMySQL\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -607,6 +613,12 @@
     </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaMySQLResult.h">
+      <Filter>LuaMySQL\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mysql_main_incl.h">
+      <Filter>LuaMySQL\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

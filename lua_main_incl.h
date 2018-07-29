@@ -1,5 +1,4 @@
 #pragma once
-#define _CRT_SECURE_NO_WARNINGS
 #include "xp_lua_incl.h"
 
 static void DumpStack(lua_State *L, bool untilnil = false){

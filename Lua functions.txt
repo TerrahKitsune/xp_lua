@@ -238,7 +238,7 @@ MySQL:
 	MySQL MySQL.Connect(address, user, password, database, opt port 3306, opt timeout 5)
 
 	-runs querystring on the opened mysql object
-	-async is true then the mysql query will run async
+	-async is true then the mysql query will run async, async results are stored as opposed to used
 	-use MySQL:IsRunning() and MySQL:GetResult() to evaluate the state of an async query
 	-returns true, rowsaffected on success or false and an error message on failure
 	bool, msg MySQL:Query(querystring, async=false)
@@ -256,10 +256,38 @@ MySQL:
 	-returns false if there is no more rows or there was none to begin with
 	bool MySQL:Fetch()
 
+	-Changes the default database to database (the one that gets reconnected to)
+	-and runs "USE DATABASE `database`;"
+	-returns the same as MySQL:Query
+	bool, msg MySQL:ChangeDatabase(database)
+
 	-Returns a table containing the the column names and their values
 	-if an optional index is provided it'll return a single value from that index
 	-1 indexed
 	table (or single value) MySQL:GetRow(opt index)
+
+	-Forks the result into a seperate object
+	-useful for async querries where you wish to process the result while a new query is running
+	MySQLResult MySQL:ForkResult()
+
+	-Toggles if GetRow should always return all data as strings or as their proper typing
+	-default: false
+	nil MySQL:ToggleAsString(bool)
+
+	MySQLResult:
+
+	-Same as MySQL:GetRow()
+	table (or single value) MySQLResult:GetRow(opt index)
+
+	-Same as MySQL:Fetch()
+	bool MySQLResult:Fetch();
+
+	-Retrive the number of rows in a stored result, this is 0 on used results
+	int MySQLResult:Count()
+
+	-Toggles if GetRow should always return all data as strings or as their proper typing
+	-default: inherited from the MySQL object that created the result
+	nil MySQLResult:ToggleAsString(bool)
 
 Timer:
 
