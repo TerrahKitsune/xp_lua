@@ -8,6 +8,10 @@ typedef struct LuaProcess {
 	PROCESS_INFORMATION processInfo;
 	ULARGE_INTEGER lastCPU, lastSysCPU, lastUserCPU;
 	int numProcessors;
+	HANDLE hstdout;
+	HANDLE hstdin;
+	HANDLE hstderr;
+	char * writablebuffer;
 } LuaProcess;
 
 LuaProcess * lua_toprocess(lua_State *L, int index);

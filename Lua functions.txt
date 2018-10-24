@@ -46,6 +46,12 @@ Misc global functions:
 	-can be modifed during runtime
 	table ResList
 
+	-A string variable that is set by io.tmpfile() containing the filename of the created file
+	LAST_TEMP_FILE
+
+	-Array containing commandline parameters passed though to gff.exe
+	ARGS[]
+
 Zip:
 
 	-Opens/creates a zipfile
@@ -157,7 +163,7 @@ Process:
 	-cmd = commandline to be passed to the application
 	-directory = path to the directory to run in
 	-noconsole if true the process will not spawn its own console
-	Process Process.Start(app,cmd,directory,noconsole)
+	Process Process.Start(app,cmd,directory,noconsole, opt outfile, opt infile, opt errfile)
 
 	-Attempts to stop the process
 	bool Process:Stop()
@@ -385,6 +391,10 @@ FileSystem:
 	
 	-Retruns the current active directory in full path (the directory the program lives in)
 	string FileSystem.CurrentDirectory()
+
+	-Returns path+filename of a temporary file
+	-If pathonly is true it'll only return the path to the temp directory
+	string FileSystem.GetTempFileName(optional bool pathonly)
 
 TWODA (2da):
 

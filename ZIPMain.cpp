@@ -10,7 +10,7 @@ static const struct luaL_Reg zipfunctions[] = {
 	{ "GetInfo", zip_getinfo },
 	{ "GetFiles", zip_getfiles},
 	{ "Open", zip_open },
-	{ "Close", zip_gc },
+	{ "Close", zip_close },
 	{ NULL, NULL }
 };
 

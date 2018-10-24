@@ -444,6 +444,12 @@
     <ClCompile Include="lua_helper.cpp">
       <Filter>LuaNWN\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LuaMySQLResult.cpp">
+      <Filter>LuaMySQL\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mysql_main_incl.cpp">
+      <Filter>LuaMySQL\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -718,6 +724,12 @@
     </ClInclude>
     <ClInclude Include="BaseObjects.h">
       <Filter>NWN2\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaMySQLResult.h">
+      <Filter>LuaMySQL\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mysql_main_incl.h">
+      <Filter>LuaMySQL\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

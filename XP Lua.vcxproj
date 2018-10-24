@@ -36,6 +36,7 @@
     <ClCompile Include="LuaGff.cpp" />
     <ClCompile Include="LuaMD5.cpp" />
     <ClCompile Include="LuaMySQL.cpp" />
+    <ClCompile Include="LuaMySQLResult.cpp" />
     <ClCompile Include="LuaNWN.cpp" />
     <ClCompile Include="LuaNWNFunctions.cpp" />
     <ClCompile Include="LuaProcess.cpp" />
@@ -50,6 +51,7 @@
     <ClCompile Include="md5.c" />
     <ClCompile Include="MD5Main.cpp" />
     <ClCompile Include="MySQLMain.cpp" />
+    <ClCompile Include="mysql_main_incl.cpp" />
     <ClCompile Include="NetEvent.cpp" />
     <ClCompile Include="networking.cpp" />
     <ClCompile Include="NWN2Funcs.cpp" />
@@ -133,6 +135,7 @@
     <ClInclude Include="LuaGff.h" />
     <ClInclude Include="LuaMD5.h" />
     <ClInclude Include="LuaMySQL.h" />
+    <ClInclude Include="LuaMySQLResult.h" />
     <ClInclude Include="LuaNWN.h" />
     <ClInclude Include="LuaNWNFunctions.h" />
     <ClInclude Include="LuaProcess.h" />
@@ -148,6 +151,7 @@
     <ClInclude Include="md5.h" />
     <ClInclude Include="MD5Main.h" />
     <ClInclude Include="MySQLMain.h" />
+    <ClInclude Include="mysql_main_incl.h" />
     <ClInclude Include="NetEvent.h" />
     <ClInclude Include="networking.h" />
     <ClInclude Include="NWN2Funcs.h" />

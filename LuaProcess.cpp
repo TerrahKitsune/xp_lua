@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include <psapi.h>
 
-LuaProcess * lua_toprocess(lua_State *L, int index){
+LuaProcess * lua_toprocess(lua_State *L, int index) {
 
 	LuaProcess * proc = (LuaProcess*)lua_touserdata(L, index);
 	if (proc == NULL)
@@ -11,7 +11,7 @@ LuaProcess * lua_toprocess(lua_State *L, int index){
 	return proc;
 }
 
-LuaProcess * lua_pushprocess(lua_State *L){
+LuaProcess * lua_pushprocess(lua_State *L) {
 
 	LuaProcess * proc = (LuaProcess*)lua_newuserdata(L, sizeof(LuaProcess));
 	if (proc == NULL)
@@ -23,7 +23,7 @@ LuaProcess * lua_pushprocess(lua_State *L){
 }
 
 static char procname[MAX_PATH];
-const char * GetProcessName(int id){
+const char * GetProcessName(int id) {
 
 	HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION |
 		PROCESS_VM_READ,
@@ -31,7 +31,7 @@ const char * GetProcessName(int id){
 
 	memset(procname, 0, sizeof(MAX_PATH));
 
-	if (hProcess != NULL){
+	if (hProcess != NULL) {
 		HMODULE hMod;
 		DWORD cbNeeded;
 
@@ -47,7 +47,7 @@ const char * GetProcessName(int id){
 	return procname;
 }
 
-int GetAllProcesses(lua_State *L){
+int GetAllProcesses(lua_State *L) {
 
 	DWORD processes[1024];
 	DWORD needed;
@@ -60,9 +60,9 @@ int GetAllProcesses(lua_State *L){
 
 	needed = needed / sizeof(DWORD);
 	lua_createtable(L, 0, needed);
-	for (int n = 0; n < needed; n++){
+	for (int n = 0; n < needed; n++) {
 		name = GetProcessName(processes[n]);
-		if (name[0] != '\0'){
+		if (name[0] != '\0') {
 			lua_pushinteger(L, processes[n]);
 			lua_pushstring(L, name);
 			lua_settable(L, -3);
@@ -72,20 +72,20 @@ int GetAllProcesses(lua_State *L){
 	return 1;
 }
 
-int LuaOpenProcess(lua_State *L){
+int LuaOpenProcess(lua_State *L) {
 
 	int processid = luaL_optinteger(L, 1, 0);
 	lua_pop(L, lua_gettop(L));
 	HANDLE proc;
-	if (processid == 0){
+	if (processid == 0) {
 		proc = GetCurrentProcess();
 		processid = GetProcessId(proc);
 	}
-	else{
-		proc = OpenProcess(PROCESS_ALL_ACCESS, false, processid);	
+	else {
+		proc = OpenProcess(PROCESS_ALL_ACCESS, false, processid);
 	}
 
-	if (proc){
+	if (proc) {
 		LuaProcess * lproc = lua_pushprocess(L);
 		lproc->processInfo.dwProcessId = processid;
 		lproc->processInfo.hProcess = proc;
@@ -103,22 +103,33 @@ int LuaOpenProcess(lua_State *L){
 		memcpy(&lproc->lastSysCPU, &fsys, sizeof(FILETIME));
 		memcpy(&lproc->lastUserCPU, &fuser, sizeof(FILETIME));
 	}
-	else{
+	else {
 		lua_pushnil(L);
 	}
 
 	return 1;
 }
 
-int StartNewProcess(lua_State *L){
+bool FileExists(const char * szPath)
+{
+	DWORD dwAttrib = GetFileAttributes(szPath);
+
+	return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
+		!(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
+int StartNewProcess(lua_State *L) {
 
 	const char * appname = lua_tostring(L, 1);
 	const char * cmd = lua_tostring(L, 2);
 	const char * dir = lua_tostring(L, 3);
 	bool noconsole = lua_toboolean(L, 4);
+	const char * file_stdout = luaL_optstring(L, 5, NULL);
+	const char * file_stdin = luaL_optstring(L, 6, NULL);
+	const char * file_stderr = luaL_optstring(L, 7, NULL);
 
 	DWORD flag = CREATE_NEW_CONSOLE | NORMAL_PRIORITY_CLASS;
-	if (noconsole){
+	if (noconsole) {
 		flag = NORMAL_PRIORITY_CLASS;
 	}
 
@@ -129,12 +140,68 @@ int StartNewProcess(lua_State *L){
 	info.cb = sizeof(info);
 	ZeroMemory(&processInfo, sizeof(PROCESS_INFORMATION));
 
-	if (CreateProcess(appname, (LPSTR)cmd, NULL, NULL, false, flag, NULL, dir, &info, &processInfo)){
+	bool anyhandle = false;
+
+	SECURITY_ATTRIBUTES sa;
+	sa.nLength = sizeof(sa);
+	sa.lpSecurityDescriptor = NULL;
+	sa.bInheritHandle = TRUE;
+
+	if (file_stderr) {
+
+		if (FileExists(file_stderr))
+			info.hStdError = CreateFileA(file_stderr, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		else
+			info.hStdError = CreateFileA(file_stderr, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+
+		anyhandle = true;
+	}
+	else {
+		info.hStdError = INVALID_HANDLE_VALUE;
+	}
+
+	if (file_stdout) {
+
+		if (FileExists(file_stdout))
+			info.hStdOutput = CreateFileA(file_stdout, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		else
+			info.hStdOutput = CreateFileA(file_stdout, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+
+		anyhandle = true;
+	}
+	else {
+		info.hStdOutput = INVALID_HANDLE_VALUE;
+	}
+
+	if (file_stdin) {
+
+		info.hStdInput = CreateFileA(file_stdin, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, &sa, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+		anyhandle = true;
+	}
+	else {
+		info.hStdInput = INVALID_HANDLE_VALUE;
+	}
+
+	if (anyhandle)
+		info.dwFlags |= STARTF_USESTDHANDLES;
+
+	char * writablebuffer = (char*)calloc(strlen(cmd) + 1, sizeof(LPSTR));
+
+	if (writablebuffer) {
+		strcpy(writablebuffer, cmd);
+	}
+
+	if (CreateProcess(appname, (LPSTR)writablebuffer, NULL, NULL, false, flag, NULL, dir, &info, &processInfo)) {
 
 		lua_pop(L, lua_gettop(L));
 		LuaProcess * proc = lua_pushprocess(L);
+		proc->writablebuffer = writablebuffer;
 		proc->info = info;
 		proc->processInfo = processInfo;
+		proc->hstderr = info.hStdError;
+		proc->hstdin = info.hStdInput;
+		proc->hstdout = info.hStdOutput;
 
 		SYSTEM_INFO sysInfo;
 		FILETIME ftime, fsys, fuser;
@@ -151,7 +218,24 @@ int StartNewProcess(lua_State *L){
 
 		return 1;
 	}
-	else{
+	else {
+
+		if (writablebuffer) {
+			free(writablebuffer);
+		}
+
+		if (info.hStdError != INVALID_HANDLE_VALUE) {
+			CloseHandle(info.hStdError);
+		}
+
+		if (info.hStdOutput != INVALID_HANDLE_VALUE) {
+			CloseHandle(info.hStdOutput);
+		}
+
+		if (info.hStdInput != INVALID_HANDLE_VALUE) {
+			CloseHandle(info.hStdInput);
+		}
+
 		lua_pop(L, lua_gettop(L));
 		lua_pushnil(L);
 		lua_pushfstring(L, "Unable to open process %d", GetLastError());
@@ -159,25 +243,25 @@ int StartNewProcess(lua_State *L){
 	}
 }
 
-int GetSetPriority(lua_State *L){
+int GetSetPriority(lua_State *L) {
 
 	LuaProcess * proc = lua_toprocess(L, 1);
 	DWORD prio = GetPriorityClass(proc->processInfo.hProcess);
 
-	if (lua_type(L, 2) == LUA_TNUMBER){
+	if (lua_type(L, 2) == LUA_TNUMBER) {
 		prio = SetPriorityClass(proc->processInfo.hProcess, lua_tointeger(L, 2));
 		lua_pop(L, lua_gettop(L));
 		lua_pushboolean(L, prio);
 	}
-	else{
+	else {
 		lua_pop(L, lua_gettop(L));
 		lua_pushinteger(L, prio);
 	}
-	
+
 	return 1;
 }
 
-int GetProcId(lua_State *L){
+int GetProcId(lua_State *L) {
 
 	LuaProcess * proc = lua_toprocess(L, 1);
 	DWORD id = proc->processInfo.dwProcessId;
@@ -186,7 +270,7 @@ int GetProcId(lua_State *L){
 	return 1;
 }
 
-int GetProcName(lua_State *L){
+int GetProcName(lua_State *L) {
 
 	LuaProcess * proc = lua_toprocess(L, 1);
 	DWORD id = proc->processInfo.dwProcessId;
@@ -195,7 +279,7 @@ int GetProcName(lua_State *L){
 	return 1;
 }
 
-double getCurrentValue(LuaProcess * proc){
+double getCurrentValue(LuaProcess * proc) {
 	FILETIME ftime, fsys, fuser;
 	ULARGE_INTEGER now, sys, user;
 	double percent;
@@ -217,17 +301,17 @@ double getCurrentValue(LuaProcess * proc){
 	return percent * 100;
 }
 
-int GetCPU(lua_State *L){
+int GetCPU(lua_State *L) {
 
 	LuaProcess * proc = lua_toprocess(L, 1);
-	
+
 	lua_pop(L, lua_gettop(L));
 	lua_pushnumber(L, getCurrentValue(proc));
 
 	return 1;
 }
 
-int GetMemory(lua_State *L){
+int GetMemory(lua_State *L) {
 
 	LuaProcess * proc = lua_toprocess(L, 1);
 
@@ -241,12 +325,12 @@ int GetMemory(lua_State *L){
 	return 1;
 }
 
-int StopProcess(lua_State *L){
+int StopProcess(lua_State *L) {
 
 	LuaProcess * proc = lua_toprocess(L, 1);
-	if (TerminateProcess(proc->processInfo.hProcess, lua_tointeger(L, 2))){
+	if (TerminateProcess(proc->processInfo.hProcess, lua_tointeger(L, 2))) {
 		lua_pop(L, lua_gettop(L));
-		lua_pushboolean(L,true);
+		lua_pushboolean(L, true);
 		return 1;
 	}
 
@@ -255,12 +339,12 @@ int StopProcess(lua_State *L){
 	return 1;
 }
 
-int GetExitCode(lua_State *L){
+int GetExitCode(lua_State *L) {
 	LuaProcess * proc = lua_toprocess(L, 1);
 
 	lua_pop(L, 1);
 	DWORD lpExitCode;
-	if (GetExitCodeProcess(proc->processInfo.hProcess, &lpExitCode)){
+	if (GetExitCodeProcess(proc->processInfo.hProcess, &lpExitCode)) {
 		if (lpExitCode == STILL_ACTIVE)
 			lua_pushnil(L);
 		else
@@ -273,18 +357,36 @@ int GetExitCode(lua_State *L){
 	return 1;
 }
 
-int process_gc(lua_State *L){
+int process_gc(lua_State *L) {
 
 	LuaProcess * proc = lua_toprocess(L, 1);
 	if (proc->processInfo.hProcess)
-		CloseHandle(proc->processInfo.hProcess); 
+		CloseHandle(proc->processInfo.hProcess);
 	if (proc->processInfo.hThread)
-		CloseHandle(proc->processInfo.hThread);	
+		CloseHandle(proc->processInfo.hThread);
+
+	if (proc->hstderr != INVALID_HANDLE_VALUE) {
+		CloseHandle(proc->hstderr);
+	}
+
+	if (proc->hstdin != INVALID_HANDLE_VALUE) {
+		CloseHandle(proc->hstdin);
+	}
+
+	if (proc->hstdout != INVALID_HANDLE_VALUE) {
+		CloseHandle(proc->hstdout);
+	}
+
+	if (proc->writablebuffer) {
+		free(proc->writablebuffer);
+		proc->writablebuffer = NULL;
+	}
+
 	lua_pop(L, 1);
 	return 0;
 }
 
-int process_tostring(lua_State *L){
+int process_tostring(lua_State *L) {
 
 	char tim[100];
 	sprintf(tim, "Process: 0x%08X", lua_toprocess(L, 1));

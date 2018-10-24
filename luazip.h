@@ -17,6 +17,7 @@ int zip_open(lua_State *L);
 int zip_getfiles(lua_State *L);
 int zip_getinfo(lua_State *L);
 int zip_extract(lua_State *L);
+int zip_close(lua_State *L);
 
 LuaZIP * lua_pushzip(lua_State *L);
 LuaZIP * lua_tozip(lua_State *L, int index);

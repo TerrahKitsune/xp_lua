@@ -4,7 +4,7 @@
 
 static char _PATH[MAX_PATH];
 
-const char * lua_topath(lua_State*L, int idx){
+const char * lua_topath(lua_State*L, int idx) {
 	size_t len;
 	const char * fromlua = luaL_checklstring(L, idx, &len);
 
@@ -17,13 +17,13 @@ const char * lua_topath(lua_State*L, int idx){
 	return _PATH;
 }
 
-int GetCurrent(lua_State*L){
+int GetCurrent(lua_State*L) {
 	GetCurrentDirectory(MAX_PATH, _PATH);
 	lua_pushstring(L, _PATH);
 	return 1;
 }
 
-int GetFiles(lua_State*L){
+int GetFiles(lua_State*L) {
 
 	const char * path = lua_topath(L, 1);
 
@@ -35,8 +35,8 @@ int GetFiles(lua_State*L){
 
 	hFind = FindFirstFile(path, &FindFileData);
 	int n = 0;
-	if (hFind != INVALID_HANDLE_VALUE){
-		do{
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
 
 			if (strcmp(FindFileData.cFileName, ".") != 0 &&
 				strcmp(FindFileData.cFileName, "..") != 0 &&
@@ -52,7 +52,7 @@ int GetFiles(lua_State*L){
 	return 1;
 }
 
-int GetDirectories(lua_State*L){
+int GetDirectories(lua_State*L) {
 
 	const char * path = lua_topath(L, 1);
 
@@ -64,8 +64,8 @@ int GetDirectories(lua_State*L){
 
 	hFind = FindFirstFile(path, &FindFileData);
 	int n = 0;
-	if (hFind != INVALID_HANDLE_VALUE){
-		do{
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
 
 			if (strcmp(FindFileData.cFileName, ".") != 0 &&
 				strcmp(FindFileData.cFileName, "..") != 0 &&
@@ -118,12 +118,12 @@ bool get_file_information(const char * path, WIN32_FIND_DATA* data)
 	}
 }
 
-int GetFileInfo(lua_State*L){
+int GetFileInfo(lua_State*L) {
 
 	const char * path = lua_topath(L, 1);
 	WIN32_FIND_DATA data;
 
-	if (get_file_information(path, &data)){
+	if (get_file_information(path, &data)) {
 
 		lua_pop(L, 1);
 
@@ -149,7 +149,7 @@ int GetFileInfo(lua_State*L){
 		lua_pushinteger(L, FILETIME_to_time_t(&data.ftLastWriteTime));
 		lua_settable(L, -3);
 	}
-	else{
+	else {
 		lua_pop(L, 1);
 		lua_pushnil(L);
 	}
@@ -157,7 +157,7 @@ int GetFileInfo(lua_State*L){
 	return 1;
 }
 
-int lua_CopyFile(lua_State *L){
+int lua_CopyFile(lua_State *L) {
 
 	const char * src = luaL_checkstring(L, 1);
 	const char * dst = luaL_checkstring(L, 2);
@@ -170,7 +170,7 @@ int lua_CopyFile(lua_State *L){
 	return 1;
 }
 
-int lua_MoveFile(lua_State *L){
+int lua_MoveFile(lua_State *L) {
 
 	const char * src = luaL_checkstring(L, 1);
 	const char * dst = luaL_checkstring(L, 2);
@@ -183,7 +183,7 @@ int lua_MoveFile(lua_State *L){
 	return 1;
 }
 
-int lua_DeleteFile(lua_State *L){
+int lua_DeleteFile(lua_State *L) {
 
 	const char * src = luaL_checkstring(L, 1);
 
@@ -195,7 +195,7 @@ int lua_DeleteFile(lua_State *L){
 	return 1;
 }
 
-int lua_CreateDirectory(lua_State *L){
+int lua_CreateDirectory(lua_State *L) {
 
 	const char * src = luaL_checkstring(L, 1);
 
@@ -207,7 +207,7 @@ int lua_CreateDirectory(lua_State *L){
 	return 1;
 }
 
-int lua_RemoveDirectory(lua_State *L){
+int lua_RemoveDirectory(lua_State *L) {
 
 	const char * src = luaL_checkstring(L, 1);
 
@@ -219,7 +219,7 @@ int lua_RemoveDirectory(lua_State *L){
 	return 1;
 }
 
-int lua_Rename(lua_State *L){
+int lua_Rename(lua_State *L) {
 
 	const char * src = luaL_checkstring(L, 1);
 	const char * dst = luaL_checkstring(L, 2);
@@ -227,7 +227,23 @@ int lua_Rename(lua_State *L){
 	BOOL ret = rename(src, dst);
 
 	lua_pop(L, lua_gettop(L));
-	lua_pushboolean(L, ret);
+	lua_pushboolean(L, ret == 0);
+
+	return 1;
+}
+
+int lua_TempFile(lua_State *L) {
+
+	char temp[MAX_PATH];
+
+	GetTempPath(MAX_PATH, temp);
+
+	if (lua_gettop(L) <= 0 || !lua_toboolean(L, 1)) {
+
+		GetTempFileName(temp, "gff", 0, temp);
+	}
+
+	lua_pushstring(L, temp);
 
 	return 1;
 }

@@ -12,6 +12,7 @@ static const struct luaL_Reg filesystemfuncs[] = {
 	{ "RemoveDirectory", lua_RemoveDirectory },
 	{ "Rename", lua_Rename },
 	{ "CurrentDirectory", GetCurrent },
+	{ "GetTempFileName", lua_TempFile },
 	{ NULL, NULL }
 };
 
