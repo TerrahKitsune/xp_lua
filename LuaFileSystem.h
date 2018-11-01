@@ -12,3 +12,4 @@ int lua_RemoveDirectory(lua_State *L);
 int lua_Rename(lua_State *L);
 int GetCurrent(lua_State*L);
 int lua_TempFile(lua_State *L);
+int lua_SetCurrentDirectory(lua_State *L);

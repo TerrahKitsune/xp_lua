@@ -13,9 +13,9 @@ static const struct luaL_Reg filesystemfuncs[] = {
 	{ "Rename", lua_Rename },
 	{ "CurrentDirectory", GetCurrent },
 	{ "GetTempFileName", lua_TempFile },
+	{ "SetCurrentDirectory", lua_SetCurrentDirectory },
 	{ NULL, NULL }
 };
-
 
 int luaopen_filesystem(lua_State *L){
 

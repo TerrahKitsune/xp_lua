@@ -247,3 +247,11 @@ int lua_TempFile(lua_State *L) {
 
 	return 1;
 }
+
+int lua_SetCurrentDirectory(lua_State *L) {
+
+	BOOL ok = SetCurrentDirectory(luaL_checkstring(L,1));
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, ok != 0);
+	return 1;
+}

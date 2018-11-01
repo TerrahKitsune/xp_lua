@@ -392,6 +392,10 @@ FileSystem:
 	-Retruns the current active directory in full path (the directory the program lives in)
 	string FileSystem.CurrentDirectory()
 
+	-Sets the current directory (where relative paths start)
+	-returns true/false on success or failure
+	bool FileSystem.SetCurrentDirectory(dir)
+
 	-Returns path+filename of a temporary file
 	-If pathonly is true it'll only return the path to the temp directory
 	string FileSystem.GetTempFileName(optional bool pathonly)
