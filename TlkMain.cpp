@@ -2,9 +2,11 @@
 #include "tlk.h"
 
 static const struct luaL_Reg tlkfunctions[] = {
+	{ "Create", tlk_create },
 	{ "Open", tlk_open },
 	{ "GetAll", tlk_getall },
 	{ "Get", tlk_get },
+	{ "SetSoundInfo", tlk_setsound },
 	{ "GetInfo", tlk_info },
 	{ NULL, NULL }
 };

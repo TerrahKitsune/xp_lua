@@ -417,6 +417,12 @@ TWODA (2da):
 
 TLK:
 
+	-Creates a TLK file from a table and opens it
+	-languageid: default 0(english)
+	-version: must be 4 characters default V3.0
+	-array *MUST* start on 0 and be without gaps, empty strings are used as not present (same as the result from TLK:GetAll)
+	TLK TLK.Create(filename, array, opt languageid, opt version)
+
 	-Open a tlk file, returns nil if the file is not a valid tlk file
 	TLK TLK.Open(filename)
 
@@ -426,7 +432,21 @@ TLK:
 	table TLK:GetAll()
 
 	-Read a single strref of the tlk, returns nil on failure
-	string TLK:Get(strref)
+	-Returns a table containg the stringref data:
+	-Flags: 0x0001 (Texts exists), 0x0002 (Sound exists), 0x0004 (Sound length exists)
+	-SoundResRef: if sound exists this is the resref to it
+	-VolumeVariance: not used
+	-PitchVariance: not used
+	-String: actual string data, is empty string if it doesnt exist
+	-SoundLength: Length of the sound
+	table TLK:Get(strref)
+
+	-Updates the tlk file with new sound info for a strref
+	-if no soundresref is empty sound info will be stripped. soundresref cannot be longer then 16 characters.
+	-soundlength (float) if provided will flag as having a sound length and set it, if not it'll unflag and set to 0
+	-VolumeVariance: not used DWORD
+	-PitchVariance: not used DWORD
+	bool TLK:SetSoundInfo(strref, soundresref, opt soundlength, opt VolumeVariance, opt PitchVariance);
 
 	-return the number of entries, languageid and version of the tlk
 	count,languageid,version TLK:GetInfo()

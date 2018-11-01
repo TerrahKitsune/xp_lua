@@ -27,13 +27,15 @@ typedef struct TlkHeader {
 typedef struct LuaTLK {
 	TlkHeader Header;
 	FILE * file;
+	char * filename;
 } LuaTLK;
 
-
+int tlk_create(lua_State *L);
 int tlk_open(lua_State *L);
 int tlk_getall(lua_State *L);
 int tlk_get(lua_State *L);
 int tlk_info(lua_State *L);
+int tlk_setsound(lua_State *L);
 
 LuaTLK * lua_pushtlk(lua_State *L);
 LuaTLK * lua_totlk(lua_State *L, int index);

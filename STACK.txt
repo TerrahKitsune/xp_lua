@@ -1,1 +1,1 @@
-1: STRING hej
+1: TABLE 0x04EF9970
