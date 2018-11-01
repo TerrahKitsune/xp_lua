@@ -13,27 +13,21 @@ local all = tlk:GetAll();
 	end
 end]]
 
-local new = TLK.Create("G:\\test.tlk", all);
-local newall = new:GetAll();
-local cnt = tlk:GetInfo();
+function TablePrint(tbl)
 
-for k,v in pairs(all) do 
-	local data = tlk:Get(k);
-	
-	if data.Flags & 0x0006 > 0 then 
-		if data.Flags & 0x0004 then
-			new:SetSoundInfo(k, data.SoundResRef, data.SoundLength);
-		else 
-			new:SetSoundInfo(k, data.SoundResRef);
-		end
+	for k,v in pairs(tbl) do 
+		print(k,v);
 	end
+
 end
 
-for n=0,cnt do 
-	if all[n] ~= newall[n] then 
-		print(n, "|"..all[n].."|", "|"..newall[n].."|");
-	end 
-end
+local new = TLK.Create("G:\\test.tlk", all);
 
-print(tlk:GetInfo());
-print(new:GetInfo());
+TablePrint(new:Get(1));
+print("---------");
+print(new:Set(1, ""));
+print("---------");
+TablePrint(new:Get(1));
+print(new:Set(1, "Pizza"));
+print("---------");
+TablePrint(new:Get(1));

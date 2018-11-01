@@ -448,6 +448,11 @@ TLK:
 	-PitchVariance: not used DWORD
 	bool TLK:SetSoundInfo(strref, soundresref, opt soundlength, opt VolumeVariance, opt PitchVariance);
 
+	-sets a stringref in the tlk, if the stringref wasnt present it'll be flagged as such and written at the end
+	-if the string is larger then the original then it will be written at the end of the file instead
+	-if newstring is an empty string the entry will instead be flagged as not present (deleted)
+	bool TLK:Set(strref, newstring);
+
 	-return the number of entries, languageid and version of the tlk
 	count,languageid,version TLK:GetInfo()
 ERF:

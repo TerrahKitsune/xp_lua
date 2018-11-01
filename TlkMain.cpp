@@ -7,6 +7,7 @@ static const struct luaL_Reg tlkfunctions[] = {
 	{ "GetAll", tlk_getall },
 	{ "Get", tlk_get },
 	{ "SetSoundInfo", tlk_setsound },
+	{ "Set", tlk_setstrref },
 	{ "GetInfo", tlk_info },
 	{ NULL, NULL }
 };

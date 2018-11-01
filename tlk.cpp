@@ -226,7 +226,6 @@ int tlk_setsound(lua_State *L) {
 		entry.PitchVariance = luaL_checkinteger(L, 6);
 	}
 
-	rewind(tlk->file);
 	fseek(tlk->file, filepos, SEEK_SET);
 	fwrite(&entry, sizeof(TlkStringData), 1, tlk->file);
 	fflush(tlk->file);
@@ -247,6 +246,82 @@ int tlk_info(lua_State *L) {
 	lua_pushlstring(L, tlk->Header.FileVersion, 4);
 	return 3;
 }
+
+int tlk_setstrref(lua_State *L) {
+
+	LuaTLK * tlk = (LuaTLK*)lua_totlk(L, 1);
+	lua_Integer index = luaL_checkinteger(L, 2);
+	size_t len;
+	const char * data = luaL_checklstring(L, 3, &len);
+
+	if (index > tlk->Header.StringCount || index < 0) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	unsigned int filepos = sizeof(TlkHeader) + (sizeof(TlkStringData) * index);
+	TlkStringData entry;
+	rewind(tlk->file);
+	if (fseek(tlk->file, filepos, SEEK_SET) != 0) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	if (fread(&entry, 1, sizeof(TlkStringData), tlk->file) != sizeof(TlkStringData)) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	fclose(tlk->file);
+	tlk->file = fopen(tlk->filename, "r+b");
+	if (!tlk->file) {
+		tlk->file = fopen(tlk->filename, "rb");
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	if (len <= 0) {
+		entry.OffsetToString = 0;
+		entry.StringSize = 0;
+		entry.Flags &= 0xFFFFFFFFE;
+	}
+	else {
+
+		bool had = entry.Flags & 0x00000001 > 0;
+
+		entry.Flags |= 0x00000001;
+
+		if (len > entry.StringSize || !had) {
+			fseek(tlk->file, 0, SEEK_END);
+			entry.OffsetToString = ftell(tlk->file) - tlk->Header.StringEntriesOffset;
+			entry.StringSize = len;
+			fwrite(data, sizeof(char), len, tlk->file);
+			fflush(tlk->file);
+		}
+		else {
+			fseek(tlk->file, tlk->Header.StringEntriesOffset + entry.OffsetToString, SEEK_SET);
+			entry.StringSize = len;
+			fwrite(data, sizeof(char), len, tlk->file);
+			fflush(tlk->file);
+		}
+	}
+
+	fseek(tlk->file, filepos, SEEK_SET);
+	fwrite(&entry, sizeof(TlkStringData), 1, tlk->file);
+	fflush(tlk->file);
+
+	fclose(tlk->file);
+	tlk->file = fopen(tlk->filename, "rb");
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
 
 int tlk_get(lua_State *L)
 {

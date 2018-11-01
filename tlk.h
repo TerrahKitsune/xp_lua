@@ -36,6 +36,7 @@ int tlk_getall(lua_State *L);
 int tlk_get(lua_State *L);
 int tlk_info(lua_State *L);
 int tlk_setsound(lua_State *L);
+int tlk_setstrref(lua_State *L);
 
 LuaTLK * lua_pushtlk(lua_State *L);
 LuaTLK * lua_totlk(lua_State *L, int index);
