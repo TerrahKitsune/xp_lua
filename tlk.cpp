@@ -155,6 +155,218 @@ int tlk_create(lua_State *L) {
 	return tlk_open(L);
 }
 
+int tlk_defragment(lua_State *L) {
+
+	LuaTLK * tlk = (LuaTLK*)lua_totlk(L, 1);
+	int extra = luaL_optinteger(L, 2, 0);
+
+	rewind(tlk->file);
+	if (fseek(tlk->file, sizeof(TlkHeader), SEEK_SET) != 0) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	FILE * tmp = tmpfile();
+
+	if (!tmp) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	if (fwrite(&tlk->Header, sizeof(TlkHeader), 1, tmp) != 1) {
+		fclose(tmp);
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	TlkHeader header;
+	TlkStringData data;
+	memset(&data, 0, sizeof(TlkStringData));
+	memcpy(&header, &tlk->Header, sizeof(TlkHeader));
+
+	for (size_t i = 0; i < tlk->Header.StringCount + extra; i++)
+	{
+		if (fwrite(&data, sizeof(TlkStringData), 1, tmp) != 1) {
+			fclose(tmp);
+			lua_pop(L, lua_gettop(L));
+			lua_pushboolean(L, false);
+			return 1;
+		}
+	}
+
+	header.StringEntriesOffset = ftell(tmp);
+	header.StringCount = tlk->Header.StringCount + extra;
+
+	rewind(tmp);
+	if (fwrite(&header, sizeof(TlkHeader), 1, tmp) != 1) {
+		fclose(tmp);
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	rewind(tlk->file);
+	if (fseek(tlk->file, sizeof(TlkHeader), SEEK_SET) != 0) {
+		fclose(tmp);
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	size_t buffersize = 1024;
+	char * buffer = (char*)calloc(buffersize, sizeof(char));
+
+	if (!buffer) {
+		fclose(tmp);
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	size_t pos;
+	size_t currentdata = header.StringEntriesOffset;
+
+	for (size_t i = 0; i < tlk->Header.StringCount; i++)
+	{
+		//Read header
+		if (fread(&data, sizeof(TlkStringData), 1, tlk->file) != 1) {
+			free(buffer);
+			fclose(tmp);
+			lua_pop(L, lua_gettop(L));
+			lua_pushboolean(L, false);
+			return 1;
+		}
+
+		if (data.Flags & 0x00000001 > 0 && data.StringSize > 0) {
+
+			//Check buffer size
+			if (data.StringSize > buffersize) {
+				free(buffer);
+				buffersize = data.StringSize + 1;
+				buffer = (char*)calloc(buffersize, sizeof(char));
+				if (!buffer) {
+					fclose(tmp);
+					lua_pop(L, lua_gettop(L));
+					lua_pushboolean(L, false);
+					return 1;
+				}
+			}
+
+			//Store position
+			pos = ftell(tlk->file);
+
+			//Seek to data
+			if (fseek(tlk->file, tlk->Header.StringEntriesOffset + data.OffsetToString, SEEK_SET) != 0) {
+				free(buffer);
+				fclose(tmp);
+				lua_pop(L, lua_gettop(L));
+				lua_pushboolean(L, false);
+				return 1;
+			}
+
+			//Read data
+			if (fread(buffer, sizeof(char), data.StringSize, tlk->file) != data.StringSize) {
+				free(buffer);
+				fclose(tmp);
+				lua_pop(L, lua_gettop(L));
+				lua_pushboolean(L, false);
+				return 1;
+			}
+
+			//Restore position
+			if (fseek(tlk->file, pos, SEEK_SET) != 0) {
+				free(buffer);
+				fclose(tmp);
+				lua_pop(L, lua_gettop(L));
+				lua_pushboolean(L, false);
+				return 1;
+			}
+
+			//Store pos
+			pos = ftell(tmp);
+
+			//Seek to data
+			if (fseek(tmp, currentdata, SEEK_SET) != 0) {
+				free(buffer);
+				fclose(tmp);
+				lua_pop(L, lua_gettop(L));
+				lua_pushboolean(L, false);
+				return 1;
+			}
+
+			//Write data
+			if (fwrite(buffer, sizeof(char), data.StringSize, tmp) != data.StringSize) {
+				free(buffer);
+				fclose(tmp);
+				lua_pop(L, lua_gettop(L));
+				lua_pushboolean(L, false);
+				return 1;
+			}
+
+			//Restore position
+			if (fseek(tmp, pos, SEEK_SET) != 0) {
+				free(buffer);
+				fclose(tmp);
+				lua_pop(L, lua_gettop(L));
+				lua_pushboolean(L, false);
+				return 1;
+			}
+
+			//Corret offsets
+			data.OffsetToString = currentdata - header.StringEntriesOffset;
+			currentdata += data.StringSize;
+		}
+
+		//Write dataheader
+		if (fwrite(&data, sizeof(TlkStringData), 1, tmp) != 1) {
+			free(buffer);
+			fclose(tmp);
+			lua_pop(L, lua_gettop(L));
+			lua_pushboolean(L, false);
+			return 1;
+		}
+	}
+
+	fclose(tlk->file);
+	tlk->file = fopen(tlk->filename, "wb");
+	if (!tlk->file) {
+		tlk->file = fopen(tlk->filename, "rb");
+		free(buffer);
+		fclose(tmp);
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	rewind(tmp);
+
+	pos = 0;
+
+	do {
+
+		pos = fread(buffer, sizeof(char), buffersize, tmp);
+		fwrite(buffer, sizeof(char), pos, tlk->file);
+		fflush(tlk->file);
+
+	} while (pos > 0);
+
+	fclose(tlk->file);
+	tlk->file = fopen(tlk->filename, "rb");
+
+	memcpy(&tlk->Header, &header, sizeof(TlkHeader));
+
+	free(buffer);
+	fclose(tmp);
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
 int tlk_setsound(lua_State *L) {
 
 	LuaTLK * tlk = (LuaTLK*)lua_totlk(L, 1);

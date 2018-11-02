@@ -8,9 +8,10 @@ static const struct luaL_Reg tlkfunctions[] = {
 	{ "Get", tlk_get },
 	{ "SetSoundInfo", tlk_setsound },
 	{ "Set", tlk_setstrref },
+	{ "Defragment", tlk_defragment },
 	{ "GetInfo", tlk_info },
 	{ NULL, NULL }
-};
+}; 
 
 static const luaL_Reg tlkmeta[] = {
 	{ "__gc", tlk_gc },
