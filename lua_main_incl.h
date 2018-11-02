@@ -7,6 +7,8 @@ static void DumpStack(lua_State *L, bool untilnil = false){
 	if (!file)
 		return;
 
+	puts("--------------");
+
 	for (int n = 1; n <= lua_gettop(L); n++){
 
 		if (untilnil && lua_isnil(L, n))

@@ -250,8 +250,87 @@ int lua_TempFile(lua_State *L) {
 
 int lua_SetCurrentDirectory(lua_State *L) {
 
-	BOOL ok = SetCurrentDirectory(luaL_checkstring(L,1));
+	BOOL ok = SetCurrentDirectory(luaL_checkstring(L, 1));
 	lua_pop(L, lua_gettop(L));
 	lua_pushboolean(L, ok != 0);
+	return 1;
+}
+
+int lua_GetAllAvailableDrives(lua_State *L) {
+
+	DWORD drives = GetLogicalDrives();
+	DWORD mask = 1;
+	size_t cnt = 0;
+
+	for (int letter = 'A'; letter < 'Z' + 1; letter++) {
+
+		if (drives & mask) {
+			cnt++;
+		}
+
+		mask *= 2;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_createtable(L, cnt, 0);
+
+	mask = 1;
+
+	int n = 0;
+	DWORD type;
+	char drive[5] = {0};
+	strcpy(drive, "A:\\");
+
+	ULARGE_INTEGER lpFreeBytesAvailableToCaller;
+	ULARGE_INTEGER lpTotalNumberOfBytes;
+	ULARGE_INTEGER lpTotalNumberOfFreeBytes;
+
+	for (int letter = 'A'; letter < 'Z' + 1; letter++) {
+
+		if (drives & mask) {
+			cnt++;
+
+			drive[0] = (char)letter;
+
+			type = GetDriveType(drive);
+
+			if (!GetDiskFreeSpaceExA(drive, &lpFreeBytesAvailableToCaller, &lpTotalNumberOfBytes, &lpTotalNumberOfFreeBytes)) {
+				memset(&lpFreeBytesAvailableToCaller, 0, sizeof(ULARGE_INTEGER));
+				memset(&lpTotalNumberOfBytes, 0, sizeof(ULARGE_INTEGER));
+				memset(&lpTotalNumberOfFreeBytes, 0, sizeof(ULARGE_INTEGER));
+			}
+
+			lua_createtable(L, 0, 6);
+
+			lua_pushstring(L, "Drive");
+			lua_pushfstring(L, "%c", letter);
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "Mask");
+			lua_pushinteger(L, mask);
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "Type");
+			lua_pushinteger(L, type);
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "FreeBytesAvailableToCaller");
+			lua_pushinteger(L, lpFreeBytesAvailableToCaller.QuadPart);
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "TotalNumberOfBytes");
+			lua_pushinteger(L, lpTotalNumberOfBytes.QuadPart);
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "TotalNumberOfFreeBytes");
+			lua_pushinteger(L, lpTotalNumberOfFreeBytes.QuadPart);
+			lua_settable(L, -3);
+
+			lua_rawseti(L, -2, ++n);
+		}
+
+		mask *= 2;
+	}
+
 	return 1;
 }

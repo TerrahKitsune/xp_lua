@@ -1,6 +1,5 @@
 local _exit=Exit;Exit=function(ret) GetKey(); return ret+1; end
 
-
 function TablePrint(tbl)
 
 	for k,v in pairs(tbl) do 
@@ -8,6 +7,18 @@ function TablePrint(tbl)
 	end
 
 end
+
+local arr = FileSystem.GetDrives();
+
+for n=1,#arr do 
+	print(tostring(n).." -----");
+	for k,v in pairs(arr[n]) do 
+		print(k,v);
+	end
+end
+
+if true then return; end 
+
 
 local tlk = TLK.Open("G:\\test.tlk");
 

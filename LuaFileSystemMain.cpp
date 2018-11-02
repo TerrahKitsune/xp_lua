@@ -14,6 +14,7 @@ static const struct luaL_Reg filesystemfuncs[] = {
 	{ "CurrentDirectory", GetCurrent },
 	{ "GetTempFileName", lua_TempFile },
 	{ "SetCurrentDirectory", lua_SetCurrentDirectory },
+	{ "GetDrives", lua_GetAllAvailableDrives },
 	{ NULL, NULL }
 };
 
