@@ -157,6 +157,10 @@ int GetFileInfo(lua_State*L) {
 		lua_pushboolean(L, data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
 		lua_settable(L, -3);
 
+		lua_pushstring(L, "Attributes");
+		lua_pushinteger(L, data.dwFileAttributes);
+		lua_settable(L, -3);
+
 		lua_pushstring(L, "Size");
 		lua_pushinteger(L, data.nFileSizeLow);
 		lua_settable(L, -3);
@@ -186,7 +190,7 @@ int lua_CopyFile(lua_State *L) {
 	const char * src = luaL_checkstring(L, 1);
 	const char * dst = luaL_checkstring(L, 2);
 
-	BOOL ret = CopyFile(src, dst, lua_toboolean(L, 3));
+	BOOL ret = CopyFile(src, dst, !lua_toboolean(L, 3));
 
 	lua_pop(L, lua_gettop(L));
 	lua_pushboolean(L, ret);

@@ -357,6 +357,7 @@ FileSystem:
 
 	-Returns a table containing file info:
 	-isFolder bool
+	-Attributes attribute flags (int)
 	-Size integer
 	-Creation unix time when the file was created
 	-Access unix time when the file was accessed
