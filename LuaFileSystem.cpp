@@ -2,17 +2,41 @@
 #include <Windows.h>
 #include <time.h>
 
-static char _PATH[MAX_PATH];
+static char _PATH[MAX_PATH+2];
 
-const char * lua_topath(lua_State*L, int idx) {
+const char * lua_topath(lua_State*L, int idx, bool wildcard=false) {
 	size_t len;
 	const char * fromlua = luaL_checklstring(L, idx, &len);
-
+	char c;
 	if (len >= MAX_PATH)
 		luaL_error(L, "%s is too long to be a path!", fromlua);
 
-	memset(_PATH, 0, MAX_PATH);
-	memcpy(_PATH, fromlua, len);
+	for (int n = 0; n < len; n++) {
+
+		c = fromlua[n];
+
+		if (c == '/') {
+			_PATH[n] = '\\';
+		}
+		else {
+			_PATH[n] = fromlua[n];
+		}
+	}
+
+	_PATH[len] = '\0';
+
+	if (wildcard) {
+
+		c = _PATH[len-1];
+
+		if (c == '/' || c == '\\') {
+
+			strcat(_PATH, "*");
+		}
+		else {
+			strcat(_PATH, "\\*");		
+		}
+	}
 
 	return _PATH;
 }
@@ -25,7 +49,7 @@ int GetCurrent(lua_State*L) {
 
 int GetFiles(lua_State*L) {
 
-	const char * path = lua_topath(L, 1);
+	const char * path = lua_topath(L, 1, true);
 
 	WIN32_FIND_DATA FindFileData;
 	HANDLE hFind;
@@ -54,7 +78,7 @@ int GetFiles(lua_State*L) {
 
 int GetDirectories(lua_State*L) {
 
-	const char * path = lua_topath(L, 1);
+	const char * path = lua_topath(L, 1, true);
 
 	WIN32_FIND_DATA FindFileData;
 	HANDLE hFind;
