@@ -163,7 +163,18 @@ Process:
 	-cmd = commandline to be passed to the application
 	-directory = path to the directory to run in
 	-noconsole if true the process will not spawn its own console
-	Process Process.Start(app,cmd,directory,noconsole, opt outfile, opt infile, opt errfile)
+	-redirectinputoutput (default false) if true enables ReadFromPipe and WriteToPipe
+	Process Process.Start(app,cmd,directory,noconsole, opt redirectinputoutput)
+
+	-Reads from the the child process stdout
+	-only works if redirectinputoutput was true when a process was started
+	-returns nil on failure
+	string Process:ReadFromPipe(opt buffersize)
+
+	-Writes a string to the childs stdin
+	-only works if redirectinputoutput was true when a process was started
+	-returns number of bytes written
+	int Process:WriteToPipe();
 
 	-Attempts to stop the process
 	bool Process:Stop()

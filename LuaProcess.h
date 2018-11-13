@@ -8,9 +8,12 @@ typedef struct LuaProcess {
 	PROCESS_INFORMATION processInfo;
 	ULARGE_INTEGER lastCPU, lastSysCPU, lastUserCPU;
 	int numProcessors;
-	HANDLE hstdout;
-	HANDLE hstdin;
-	HANDLE hstderr;
+
+	HANDLE hChildStd_OUT_Rd;
+	HANDLE hChildStd_OUT_Wr;
+	HANDLE hChildStd_IN_Rd;
+	HANDLE hChildStd_IN_Wr;
+
 	char * writablebuffer;
 } LuaProcess;
 
@@ -27,6 +30,8 @@ int GetProcName(lua_State *L);
 int GetSetPriority(lua_State *L);
 int GetCPU(lua_State *L);
 int GetMemory(lua_State *L);
+int ReadFromPipe(lua_State *L);
+int WriteToPipe(lua_State *L);
 
 int process_gc(lua_State *L);
 int process_tostring(lua_State *L);

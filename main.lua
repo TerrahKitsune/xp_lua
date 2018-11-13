@@ -15,9 +15,8 @@ function ArrayPrint(arr)
 	end 
 end
 
-local dirs = FileSystem.GetFiles("D:/Pictures");
-local files = FileSystem.GetDirectories("D:/Pictures");
+print("hi");
 
-ArrayPrint(dirs);
-print("-----------");
-ArrayPrint(files);
+local proc = Process.Start(nil,"echo hello world!",FileSystem.CurrentDirectory(),true, true);
+
+print(proc:ReadFromPipe());

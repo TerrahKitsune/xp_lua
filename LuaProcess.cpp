@@ -7,7 +7,7 @@ LuaProcess * lua_toprocess(lua_State *L, int index) {
 
 	LuaProcess * proc = (LuaProcess*)lua_touserdata(L, index);
 	if (proc == NULL)
-		luaL_error(L, "paramter is not a %s", LUAPROCESS);
+		luaL_error(L, "parameter is not a %s", LUAPROCESS);
 	return proc;
 }
 
@@ -15,7 +15,7 @@ LuaProcess * lua_pushprocess(lua_State *L) {
 
 	LuaProcess * proc = (LuaProcess*)lua_newuserdata(L, sizeof(LuaProcess));
 	if (proc == NULL)
-		luaL_error(L, "Unable to create timer");
+		luaL_error(L, "Unable to create processmeta");
 	luaL_getmetatable(L, LUAPROCESS);
 	lua_setmetatable(L, -2);
 	memset(proc, 0, sizeof(LuaProcess));
@@ -124,9 +124,11 @@ int StartNewProcess(lua_State *L) {
 	const char * cmd = lua_tostring(L, 2);
 	const char * dir = lua_tostring(L, 3);
 	bool noconsole = lua_toboolean(L, 4);
-	const char * file_stdout = luaL_optstring(L, 5, NULL);
-	const char * file_stdin = luaL_optstring(L, 6, NULL);
-	const char * file_stderr = luaL_optstring(L, 7, NULL);
+	bool redirect = false;
+
+	if (lua_gettop(L) >= 5) {
+		redirect = lua_toboolean(L, 5);
+	}
 
 	DWORD flag = CREATE_NEW_CONSOLE | NORMAL_PRIORITY_CLASS;
 	if (noconsole) {
@@ -135,73 +137,65 @@ int StartNewProcess(lua_State *L) {
 
 	STARTUPINFO info;
 	PROCESS_INFORMATION processInfo;
+	HANDLE hChildStd_OUT_Rd = NULL;
+	HANDLE hChildStd_OUT_Wr = NULL;
+	HANDLE hChildStd_IN_Rd = NULL;
+	HANDLE hChildStd_IN_Wr = NULL;
 
 	ZeroMemory(&info, sizeof(STARTUPINFO));
 	info.cb = sizeof(info);
 	ZeroMemory(&processInfo, sizeof(PROCESS_INFORMATION));
 
-	bool anyhandle = false;
+	if (redirect) {
 
-	SECURITY_ATTRIBUTES sa;
-	sa.nLength = sizeof(sa);
-	sa.lpSecurityDescriptor = NULL;
-	sa.bInheritHandle = TRUE;
-
-	if (file_stderr) {
-
-		if (FileExists(file_stderr))
-			info.hStdError = CreateFileA(file_stderr, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-		else
-			info.hStdError = CreateFileA(file_stderr, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
-
-		anyhandle = true;
-	}
-	else {
-		info.hStdError = INVALID_HANDLE_VALUE;
-	}
-
-	if (file_stdout) {
-
-		if (FileExists(file_stdout))
-			info.hStdOutput = CreateFileA(file_stdout, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-		else
-			info.hStdOutput = CreateFileA(file_stdout, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
-
-		anyhandle = true;
-	}
-	else {
-		info.hStdOutput = INVALID_HANDLE_VALUE;
-	}
-
-	if (file_stdin) {
-
-		info.hStdInput = CreateFileA(file_stdin, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, &sa, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-
-		anyhandle = true;
-	}
-	else {
-		info.hStdInput = INVALID_HANDLE_VALUE;
-	}
-
-	if (anyhandle)
 		info.dwFlags |= STARTF_USESTDHANDLES;
 
-	char * writablebuffer = (char*)calloc(strlen(cmd) + 1, sizeof(LPSTR));
+		SECURITY_ATTRIBUTES saAttr;
+		saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
+		saAttr.bInheritHandle = TRUE;
+		saAttr.lpSecurityDescriptor = NULL;
 
-	if (writablebuffer) {
-		strcpy(writablebuffer, cmd);
+		if (!CreatePipe(&hChildStd_OUT_Rd, &hChildStd_OUT_Wr, &saAttr, 0)) {
+			lua_pop(L, lua_gettop(L));
+			lua_pushnil(L);
+			lua_pushfstring(L, "Unable to open process %d", GetLastError());
+			return 2;
+		}
+
+		if (!SetHandleInformation(hChildStd_OUT_Rd, HANDLE_FLAG_INHERIT, 0)) {
+
+			lua_pop(L, lua_gettop(L));
+			lua_pushnil(L);
+			lua_pushfstring(L, "Unable to open process %d", GetLastError());
+			return 2;
+		}
+
+		if (!CreatePipe(&hChildStd_IN_Rd, &hChildStd_IN_Wr, &saAttr, 0)) {
+			lua_pop(L, lua_gettop(L));
+			lua_pushnil(L);
+			lua_pushfstring(L, "Unable to open process %d", GetLastError());
+			return 2;
+		}
+
+		if (!SetHandleInformation(hChildStd_IN_Wr, HANDLE_FLAG_INHERIT, 0)) {
+
+			lua_pop(L, lua_gettop(L));
+			lua_pushnil(L);
+			lua_pushfstring(L, "Unable to open process %d", GetLastError());
+			return 2;
+		}
+
+		info.hStdError = hChildStd_OUT_Wr;
+		info.hStdOutput = hChildStd_OUT_Wr;
+		info.hStdInput = hChildStd_IN_Rd;
 	}
 
-	if (CreateProcess(appname, (LPSTR)writablebuffer, NULL, NULL, false, flag, NULL, dir, &info, &processInfo)) {
+	if (CreateProcess(appname, (LPSTR)cmd, NULL, NULL, false, flag, NULL, dir, &info, &processInfo)) {
 
 		lua_pop(L, lua_gettop(L));
 		LuaProcess * proc = lua_pushprocess(L);
-		proc->writablebuffer = writablebuffer;
 		proc->info = info;
 		proc->processInfo = processInfo;
-		proc->hstderr = info.hStdError;
-		proc->hstdin = info.hStdInput;
-		proc->hstdout = info.hStdOutput;
 
 		SYSTEM_INFO sysInfo;
 		FILETIME ftime, fsys, fuser;
@@ -216,31 +210,82 @@ int StartNewProcess(lua_State *L) {
 		memcpy(&proc->lastSysCPU, &fsys, sizeof(FILETIME));
 		memcpy(&proc->lastUserCPU, &fuser, sizeof(FILETIME));
 
+		proc->hChildStd_IN_Rd = hChildStd_IN_Rd;
+		proc->hChildStd_IN_Wr = hChildStd_IN_Wr;
+		proc->hChildStd_OUT_Rd = hChildStd_OUT_Rd;
+		proc->hChildStd_OUT_Wr = hChildStd_OUT_Wr;
+
 		return 1;
 	}
 	else {
-
-		if (writablebuffer) {
-			free(writablebuffer);
-		}
-
-		if (info.hStdError != INVALID_HANDLE_VALUE) {
-			CloseHandle(info.hStdError);
-		}
-
-		if (info.hStdOutput != INVALID_HANDLE_VALUE) {
-			CloseHandle(info.hStdOutput);
-		}
-
-		if (info.hStdInput != INVALID_HANDLE_VALUE) {
-			CloseHandle(info.hStdInput);
-		}
-
 		lua_pop(L, lua_gettop(L));
 		lua_pushnil(L);
 		lua_pushfstring(L, "Unable to open process %d", GetLastError());
 		return 2;
 	}
+}
+
+int WriteToPipe(lua_State *L) {
+	
+	LuaProcess * proc = lua_toprocess(L, 1);
+	size_t len;
+	const char * data = luaL_checklstring(L, 2, &len);
+	DWORD written;
+	if (!proc->hChildStd_IN_Wr) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushinteger(L, -1);
+		return 1;
+	}
+
+	BOOL success = WriteFile(proc->hChildStd_IN_Wr, data, len, &written, NULL);
+
+	if (!success) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushinteger(L, -1);
+		return 1;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, written);
+	return 1;
+}
+
+int ReadFromPipe(lua_State *L) {
+	
+	LuaProcess * proc = lua_toprocess(L, 1);
+	int buffersize = luaL_optinteger(L, 2, 1048576);
+	
+	if (!proc->hChildStd_OUT_Rd) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		return 1;
+	}
+	
+	if (buffersize <= 0) {
+		buffersize = 1;
+	}
+
+	char * data = (char*)malloc(buffersize);
+	if (!data) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	DWORD read;
+	BOOL success = ReadFile(proc->hChildStd_OUT_Rd, data, buffersize, &read, NULL);
+
+	if (!success) {
+		free(data);
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushlstring(L, data, read);
+	free(data);
+	return 1;
 }
 
 int GetSetPriority(lua_State *L) {
@@ -365,22 +410,14 @@ int process_gc(lua_State *L) {
 	if (proc->processInfo.hThread)
 		CloseHandle(proc->processInfo.hThread);
 
-	if (proc->hstderr != INVALID_HANDLE_VALUE) {
-		CloseHandle(proc->hstderr);
-	}
-
-	if (proc->hstdin != INVALID_HANDLE_VALUE) {
-		CloseHandle(proc->hstdin);
-	}
-
-	if (proc->hstdout != INVALID_HANDLE_VALUE) {
-		CloseHandle(proc->hstdout);
-	}
-
-	if (proc->writablebuffer) {
-		free(proc->writablebuffer);
-		proc->writablebuffer = NULL;
-	}
+	if (proc->hChildStd_IN_Rd)
+		CloseHandle(proc->hChildStd_IN_Rd);
+	if (proc->hChildStd_IN_Wr)
+		CloseHandle(proc->hChildStd_IN_Wr);
+	if (proc->hChildStd_OUT_Rd)
+		CloseHandle(proc->hChildStd_OUT_Rd);
+	if (proc->hChildStd_OUT_Wr)
+		CloseHandle(proc->hChildStd_OUT_Wr);
 
 	lua_pop(L, 1);
 	return 0;
