@@ -486,52 +486,82 @@ int main(int argc, char *argv[]){
 		file = argv[1];
 	}
 
-	SetConsoleTitle(file);
+	FILE * exists = NULL;
 
-	if (luaL_loadfile(L, file) != 0){
-		puts(lua_tostring(L, 1));
-		lua_pop(L, 1);
-		_getch();
-	}
-	else if (lua_pcall(L, 0, 10, NULL) != 0){
-		puts(lua_tostring(L, 1));
-		lua_pop(L, 1);
-	}
-	else if (GetResults(L) <= 0){
-		puts("Script returned 0 results");
-	}
-	else{
-		printf("Script returned %d results\n", GetResults(L));
-		DumpStack(L, true);
-	}
+	if(_stricmp(file, "cmd") != 0)
+		exists = fopen(file, "r");
+	
 
-	int ret = 0;
+	if (exists) {
+		fclose(exists);
+		SetConsoleTitle(file);
 
-	if (lua_type(L, 1) == LUA_TNUMBER){
-		ret = lua_tointeger(L, 1);
-	}
+		if (luaL_loadfile(L, file) != 0) {
+			puts(lua_tostring(L, 1));
+			lua_pop(L, 1);
+			_getch();
+		}
+		else if (lua_pcall(L, 0, 10, NULL) != 0) {
+			puts(lua_tostring(L, 1));
+			lua_pop(L, 1);
+		}
+		else if (GetResults(L) <= 0) {
+			puts("Script returned 0 results");
+		}
+		else {
+			printf("Script returned %d results\n", GetResults(L));
+			DumpStack(L, true);
+		}
 
-	lua_pop(L, lua_gettop(L));
+		int ret = 0;
 
-	printf("%f", GetCounter());
-
-	luaserver_KillAll(L);
-
-	lua_getglobal(L, "Exit");
-	if (lua_type(L, 1) == LUA_TFUNCTION){
-		lua_pushinteger(L, ret);
-		lua_pcall(L, 1, 1, NULL);
-		if (lua_type(L, 1) == LUA_TNUMBER){
+		if (lua_type(L, 1) == LUA_TNUMBER) {
 			ret = lua_tointeger(L, 1);
 		}
+
+		lua_pop(L, lua_gettop(L));
+
+		printf("%f", GetCounter());
+
+		luaserver_KillAll(L);
+
+		lua_getglobal(L, "Exit");
+		if (lua_type(L, 1) == LUA_TFUNCTION) {
+			lua_pushinteger(L, ret);
+			lua_pcall(L, 1, 1, NULL);
+			if (lua_type(L, 1) == LUA_TNUMBER) {
+				ret = lua_tointeger(L, 1);
+			}
+		}
+		else {
+			_getch();
+		}
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushinteger(L, ret);
+
+		L_Exit(L);
+
+		return ret;
 	}
-	else{
-		_getch();	
+	else {
+
+		char buf[65536];
+		SetConsoleTitle("GFF");
+
+		while (gets_s(buf, sizeof(buf)) != NULL) {
+
+			int error = luaL_loadbuffer(L, buf, strlen(buf), "line") ||
+				lua_pcall(L, 0, 0, 0);
+			if (error) {
+				fprintf(stderr, "%s\n", lua_tostring(L, -1));
+				fflush(stderr);
+				lua_pop(L, 1); 
+			}
+
+			lua_pop(L, lua_gettop(L));
+		}
 	}
 
-	lua_pop(L, lua_gettop(L));
-	lua_pushinteger(L, ret);
-
-	L_Exit(L);	
-	return ret;
+	return 0;
 }
