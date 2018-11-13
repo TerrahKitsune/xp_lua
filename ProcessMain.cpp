@@ -14,6 +14,7 @@ static const struct luaL_Reg processfunctions[] = {
 	{ "GetRAM", GetMemory },
 	{ "ReadFromPipe", ReadFromPipe },
 	{ "WriteToPipe", WriteToPipe },
+	{ "ReadErrorFromPipe", ErrorFromPipe },
 	{ NULL, NULL }
 }; 
 

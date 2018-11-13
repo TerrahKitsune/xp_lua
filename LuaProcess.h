@@ -13,6 +13,8 @@ typedef struct LuaProcess {
 	HANDLE hChildStd_OUT_Wr;
 	HANDLE hChildStd_IN_Rd;
 	HANDLE hChildStd_IN_Wr;
+	HANDLE hChildStd_ERR_Rd;
+	HANDLE hChildStd_ERR_Wr;
 
 	char * writablebuffer;
 } LuaProcess;
@@ -32,6 +34,7 @@ int GetCPU(lua_State *L);
 int GetMemory(lua_State *L);
 int ReadFromPipe(lua_State *L);
 int WriteToPipe(lua_State *L);
+int ErrorFromPipe(lua_State *L);
 
 int process_gc(lua_State *L);
 int process_tostring(lua_State *L);

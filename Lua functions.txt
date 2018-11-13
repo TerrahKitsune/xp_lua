@@ -176,6 +176,9 @@ Process:
 	-returns number of bytes written
 	int Process:WriteToPipe();
 
+	-Same as ReadFromPipe but reads from stderr
+	string Process:ReadErrorFromPipe(opt buffersize);
+
 	-Attempts to stop the process
 	bool Process:Stop()
 
