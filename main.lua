@@ -14,9 +14,3 @@ function ArrayPrint(arr)
 		print(arr[n]);
 	end 
 end
-
-print("hi");
-
-local proc = Process.Start(nil,"echo hello world!",FileSystem.CurrentDirectory(),true, true);
-
-print(proc:ReadFromPipe());
