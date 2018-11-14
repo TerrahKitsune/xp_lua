@@ -85,6 +85,8 @@
     <ClCompile Include="Http.cpp" />
     <ClCompile Include="LuaMySQLResult.cpp" />
     <ClCompile Include="mysql_main_incl.cpp" />
+    <ClCompile Include="namedpipe.cpp" />
+    <ClCompile Include="NamedPipeMain.cpp" />
     <ClCompile Include="_Http.cpp" />
     <ClCompile Include="HttpMain.cpp" />
     <ClCompile Include="List.cpp" />
@@ -167,6 +169,8 @@
     <ClInclude Include="Http.h" />
     <ClInclude Include="LuaMySQLResult.h" />
     <ClInclude Include="mysql_main_incl.h" />
+    <ClInclude Include="namedpipe.h" />
+    <ClInclude Include="NamedPipeMain.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="_Http.h" />
     <ClInclude Include="HttpMain.h" />
@@ -231,8 +235,10 @@
     <ClInclude Include="zip\zipconf.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="main.lua" />
-    <None Include="xp_craft.lua" />
+    <Text Include="main.lua">
+      <FileType>Document</FileType>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Lua functions.txt" />

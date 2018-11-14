@@ -52,6 +52,8 @@
     <ClCompile Include="MD5Main.cpp" />
     <ClCompile Include="MySQLMain.cpp" />
     <ClCompile Include="mysql_main_incl.cpp" />
+    <ClCompile Include="namedpipe.cpp" />
+    <ClCompile Include="NamedPipeMain.cpp" />
     <ClCompile Include="NetEvent.cpp" />
     <ClCompile Include="networking.cpp" />
     <ClCompile Include="NWN2Funcs.cpp" />
@@ -152,6 +154,8 @@
     <ClInclude Include="MD5Main.h" />
     <ClInclude Include="MySQLMain.h" />
     <ClInclude Include="mysql_main_incl.h" />
+    <ClInclude Include="namedpipe.h" />
+    <ClInclude Include="NamedPipeMain.h" />
     <ClInclude Include="NetEvent.h" />
     <ClInclude Include="networking.h" />
     <ClInclude Include="NWN2Funcs.h" />

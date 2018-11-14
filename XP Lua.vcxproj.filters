@@ -163,6 +163,15 @@
     <Filter Include="Util">
       <UniqueIdentifier>{ab395c13-4677-4653-85e6-38dd433dd51a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="NamedPipes">
+      <UniqueIdentifier>{4aedcb85-8005-4a71-8952-065af7769902}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NamedPipes\Header Files">
+      <UniqueIdentifier>{b514932c-baf3-4638-99d3-f8c9c21d3ba2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NamedPipes\Source Files">
+      <UniqueIdentifier>{7e25cd7a-0a81-4727-83de-ca13ffd62cfb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\plugin.cpp">
@@ -450,6 +459,12 @@
     <ClCompile Include="mysql_main_incl.cpp">
       <Filter>LuaMySQL\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="namedpipe.cpp">
+      <Filter>NamedPipes\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NamedPipeMain.cpp">
+      <Filter>NamedPipes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -730,6 +745,12 @@
     </ClInclude>
     <ClInclude Include="mysql_main_incl.h">
       <Filter>LuaMySQL\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="namedpipe.h">
+      <Filter>NamedPipes\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NamedPipeMain.h">
+      <Filter>NamedPipes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

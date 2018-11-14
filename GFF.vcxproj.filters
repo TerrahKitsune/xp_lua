@@ -148,6 +148,15 @@
     <Filter Include="Util">
       <UniqueIdentifier>{4c3c8bdb-38d8-4af7-b632-e2a1a5a1a63e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="NamedPipes">
+      <UniqueIdentifier>{6b3006b2-b959-491a-a3db-acf5c9e3babd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NamedPipes\Header Files">
+      <UniqueIdentifier>{7ff5c78a-614d-486a-8bc8-6986e09da03a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NamedPipes\Source Files">
+      <UniqueIdentifier>{f46a46ad-45d7-4598-95fa-e909b47a1e1d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -390,6 +399,12 @@
     <ClCompile Include="mysql_main_incl.cpp">
       <Filter>LuaMySQL\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NamedPipeMain.cpp">
+      <Filter>NamedPipes</Filter>
+    </ClCompile>
+    <ClCompile Include="namedpipe.cpp">
+      <Filter>NamedPipes\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -620,14 +635,12 @@
     <ClInclude Include="mysql_main_incl.h">
       <Filter>LuaMySQL\Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="main.lua">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="xp_craft.lua">
-      <Filter>Source Files</Filter>
-    </None>
+    <ClInclude Include="NamedPipeMain.h">
+      <Filter>NamedPipes</Filter>
+    </ClInclude>
+    <ClInclude Include="namedpipe.h">
+      <Filter>NamedPipes\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="scrap.txt" />
@@ -642,5 +655,10 @@
     <Image Include="Lua\jiiiiiiiiitsu.ico">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="main.lua">
+      <Filter>Source Files</Filter>
+    </Media>
   </ItemGroup>
 </Project>

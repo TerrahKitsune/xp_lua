@@ -151,6 +151,33 @@ Client:
 
 	-Send data (string) to the server
 	bool Client:Send(data)
+
+Pipe:
+
+	-Creates a named pipe and opens it
+	-Name should be just the name, no path
+	-default 1 instance, 1024 buffersize, timeout 1000 (miliseconds), write true, read true
+	-returns nil and error code on failure
+	Pipe Pipe.Create(name, opt maxinstances, opt buffersize, opt timeout, opt write, opt read);
+
+	-Opens an existing pipe
+	-Name should be just the name, no path
+	- write true, read true
+	-returns nil and error code on failure
+	Pipe Pipe.Open(name, opt write, opt read)
+
+	-Writes a string to a pipe
+	-returns the number of written bytes
+	-returns nil and error code on failure
+	int Pipe:Write(string)
+
+	-Reads from a pipe
+	-returns nil if there was nothing to read
+	string Pipe:Read(opt buffersize)
+
+	-Closes a pipe, it should not be used after closing
+	nil Pipe:Close();
+
 Process:
 
 	-returns a table with process ids as keys and values as names
