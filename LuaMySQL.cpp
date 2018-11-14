@@ -511,7 +511,7 @@ int MySQLConnect(lua_State *L) {
 	}
 
 	if (timeout <= 0)
-		timeout = 5;
+		timeout = 3600;
 
 	luamysql->timeout = timeout;
 

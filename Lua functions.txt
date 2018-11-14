@@ -255,7 +255,7 @@ MySQL:
 	-if successful this returns a MySQL object that other functions are called from
 	-Timeout in seconds, use SetTimeout if you want to change it
 	-returns nil on failure
-	MySQL MySQL.Connect(address, user, password, database, opt port 3306, opt timeout 5)
+	MySQL MySQL.Connect(address, user, password, database, opt port 3306, opt timeout 3600)
 
 	-runs querystring on the opened mysql object
 	-async is true then the mysql query will run async, async results are stored as opposed to used
