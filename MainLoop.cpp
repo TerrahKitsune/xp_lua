@@ -25,7 +25,7 @@ void __cdecl lua_hook_sleep(DWORD duration) {
 
 	int top = lua_gettop(L);
 
-	if (lua_isboolean(L, 1) || lua_toboolean(L, 1)) {
+	if (lua_isboolean(L, 1) && lua_toboolean(L, 1)) {
 		lua_pop(L, top);
 		return;
 	}
