@@ -7,11 +7,14 @@ Misc global functions:
 	-Sleep for 1 milisecond second or opt int, max 1000 (1 second)
 	nil Sleep(opt int);
 	
+	-Retrives the last error code as a message and code, if no lasterrorcode is provided it'll retrive it
+	string, code GetLastError(opt lasterrorcode)
+
 	--non nwnx functions
 	nil CLS()
 	fore,background GetTextColor()
 	nil SetTextColor(fore,background)
-	int GetKey()
+	int GetKey() -waits for a keystroke or if its a pipe reads a single byte from stdin, returns -1 on failure
 	bool HasKeyDown()
 	nil Put(text)
 	bool ShellExecute(file, parameter)
@@ -175,6 +178,14 @@ Pipe:
 	-returns nil if there was nothing to read
 	string Pipe:Read(opt buffersize)
 
+	-Reads a single byte from the pipe as an int
+	-returns -1 if there was nothing read
+	int Pipe:ReadByte();
+
+	-Writes a single byte (number 0-255) to the stream
+	-returns true/false on success or not
+	bool Pipe:WriteByte(byte);
+
 	-Closes a pipe, it should not be used after closing
 	nil Pipe:Close();
 
@@ -190,7 +201,7 @@ Process:
 	-cmd = commandline to be passed to the application
 	-directory = path to the directory to run in
 	-noconsole if true the process will not spawn its own console
-	-redirectinputoutput (default false) if true enables ReadFromPipe and WriteToPipe
+	-redirectinputoutput (default false) if true enables ReadFromPipe and WriteToPipe, this can also be a mask 0x1 stdin, 0x2 stdout, 0x4 stderr
 	Process Process.Start(app,cmd,directory,noconsole, opt redirectinputoutput)
 
 	-Reads from the the child process stdout

@@ -35,7 +35,26 @@ int lua_sleep(lua_State*L){
 	return 0;
 }
 
+static int GetLastErrorAsMessage(lua_State *L)
+{
+	DWORD lasterror = luaL_optinteger(L, 1, GetLastError());
+	char err[1024];
+
+	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, lasterror,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), err, 1024, NULL);
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushstring(L, err);
+	lua_pushinteger(L, lasterror);
+
+	return 2;
+}
+
+
 int luaopen_misc(lua_State *L){
+
+	lua_pushcfunction(L, GetLastErrorAsMessage);
+	lua_setglobal(L, "GetLastError");
 
 	lua_pushcfunction(L, lua_uuid);
 	lua_setglobal(L, "UUID");

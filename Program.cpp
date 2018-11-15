@@ -22,6 +22,7 @@
 #include "2DAMain.h"
 #include "ZIPMain.h"
 #include "NamedPipeMain.h"
+#include <io.h>
 
 #define HI_PART(x)  ((x>>4) & 0x0F)
 #define LO_PART(x)  ((x) & 0x0F)
@@ -61,6 +62,7 @@ void TickStartCounter()
 	QueryPerformanceCounter(&li);
 	TickCounterStart = li.QuadPart;
 }
+
 double TickGetCounter()
 {
 	LARGE_INTEGER li;
@@ -108,12 +110,31 @@ static int print(lua_State *L){
 
 static int L_kbhit(lua_State *L){
 
-	lua_pushboolean(L, _kbhit());
+	if (_isatty(_fileno(stdin))) {
+		lua_pushboolean(L, _kbhit());
+	}
+	else {
+		lua_pushboolean(L, !feof(stdin));
+	}
+
 	return 1;
 }
 
 static int L_getch(lua_State *L){
-	lua_pushinteger(L, _getch());
+
+	if (_isatty(_fileno(stdin))) {
+		lua_pushinteger(L, _getch());
+	}
+	else {
+
+		char data;
+		if (fread(&data, sizeof(char), 1, stdin) == 1) {
+			lua_pushinteger(L, data);
+		}
+		else {
+			lua_pushinteger(L, -1);
+		}
+	}
 	return 1;
 }
 
@@ -133,6 +154,20 @@ static int L_GetTextColor(lua_State *L){
 	}
 
 	return 2;
+}
+
+const char * ReadStdIn(char * buf, size_t bufsize) {
+	if (_isatty(_fileno(stdin))) {
+		return gets_s(buf, bufsize);
+	}
+	else {
+		size_t size = fread(buf, 1, bufsize-1, stdin);
+		if (size <= 0) {
+			return NULL;
+		}
+		buf[size] = '\0';
+		return buf;
+	}
 }
 
 static int L_SetTextColor(lua_State *L){
@@ -535,9 +570,19 @@ int main(int argc, char *argv[]){
 			if (lua_type(L, 1) == LUA_TNUMBER) {
 				ret = lua_tointeger(L, 1);
 			}
+			else {
+				ret = 0;
+			}
 		}
 		else {
-			_getch();
+			ret = _getch();
+		}
+
+		if (lua_isnumber(L, -1)) {
+			ret = lua_tointeger(L, -1);
+		}
+		else {
+			ret = 0;
 		}
 
 		lua_pop(L, lua_gettop(L));
@@ -552,7 +597,7 @@ int main(int argc, char *argv[]){
 		char buf[65536];
 		SetConsoleTitle("GFF");
 
-		while (gets_s(buf, sizeof(buf)) != NULL) {
+		while (ReadStdIn(buf, sizeof(buf)) != NULL) {
 
 			int error = luaL_loadbuffer(L, buf, strlen(buf), "line") ||
 				lua_pcall(L, 0, 0, 0);

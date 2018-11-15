@@ -5,6 +5,32 @@
 #include <stdlib.h> 
 #include <windows.h> 
 
+int ReadByte(lua_State *L) {
+
+	LuaNamedPipe * pipe = lua_tonamedpipe(L, 1);
+
+	DWORD read = 0;
+	BOOL success = PeekNamedPipe(pipe->Pipe, NULL, 0, NULL, &read, NULL);
+
+	if (success && read > 0) {
+
+		unsigned char data;
+
+		success = ReadFile(pipe->Pipe, &data, 1, &read, NULL);
+
+		if (success && read > 0) {
+
+			lua_pop(L, lua_gettop(L));
+			lua_pushinteger(L, data);
+			return 1;
+		}
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, -1);
+	return 1;
+}
+
 int ReadPipe(lua_State *L) {
 
 	LuaNamedPipe * pipe = lua_tonamedpipe(L, 1);
@@ -33,6 +59,22 @@ int ReadPipe(lua_State *L) {
 	lua_pop(L, lua_gettop(L));
 	lua_pushnil(L);
 	free(buf);
+	return 1;
+}
+
+int WriteByte(lua_State *L) {
+
+	LuaNamedPipe * pipe = lua_tonamedpipe(L, 1);
+	unsigned char byte = luaL_checkinteger(L, 2);
+	DWORD written;
+
+	if (WriteFile(pipe->Pipe, &byte, 1, &written, NULL)) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, written>0);
+		return 1;
+	}
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, false);
 	return 1;
 }
 

@@ -2,6 +2,8 @@
 #include "NamedPipeMain.h"
 
 static const struct luaL_Reg namedpipefunctions[] = {
+	{ "WriteByte", WriteByte },
+	{ "ReadByte", ReadByte },
 	{ "Create", CreateNamedPipe },
 	{ "Open", OpenNamedPipe },
 	{ "Read", ReadPipe },

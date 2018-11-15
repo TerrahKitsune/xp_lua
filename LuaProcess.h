@@ -3,6 +3,10 @@
 #include <Windows.h>
 static const char * LUAPROCESS = "LuaProcess";
 
+#define LUA_PROC_IN 0x1
+#define LUA_PROC_OUT 0x2
+#define LUA_PROC_ERR 0x4
+
 typedef struct LuaProcess {
 	STARTUPINFO info;
 	PROCESS_INFORMATION processInfo;

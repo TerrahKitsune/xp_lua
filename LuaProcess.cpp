@@ -131,9 +131,24 @@ int StartNewProcess(lua_State *L) {
 	const char * dir = lua_tostring(L, 3);
 	bool noconsole = lua_toboolean(L, 4);
 	bool redirect = false;
+	int mask = 0;
+
+	if (!dir) {
+		char defaultdir[MAX_PATH];
+		defaultdir[GetCurrentDirectory(MAX_PATH, defaultdir)] = '\0';
+		dir = defaultdir;
+	}
 
 	if (lua_gettop(L) >= 5) {
-		redirect = lua_toboolean(L, 5);
+
+		if (lua_isboolean(L, 5)) {
+			redirect = lua_toboolean(L, 5);
+			mask = LUA_PROC_IN | LUA_PROC_OUT | LUA_PROC_ERR;
+		}
+		else {
+			mask = lua_tointeger(L, 5) & (LUA_PROC_IN | LUA_PROC_OUT | LUA_PROC_ERR);
+			redirect = mask > 0;
+		}
 	}
 
 	DWORD flag = CREATE_NEW_CONSOLE | NORMAL_PRIORITY_CLASS;
@@ -161,54 +176,67 @@ int StartNewProcess(lua_State *L) {
 		saAttr.bInheritHandle = TRUE;
 		saAttr.lpSecurityDescriptor = NULL;
 
-		if (!CreatePipe(&hChildStd_OUT_Rd, &hChildStd_OUT_Wr, &saAttr, 0)) {
-			lua_pop(L, lua_gettop(L));
-			lua_pushnil(L);
-			lua_pushfstring(L, "Unable to open process %d", GetLastError());
-			return 2;
+		if (mask & LUA_PROC_OUT) {
+
+			if (!CreatePipe(&hChildStd_OUT_Rd, &hChildStd_OUT_Wr, &saAttr, 0)) {
+				lua_pop(L, lua_gettop(L));
+				lua_pushnil(L);
+				lua_pushfstring(L, "Unable to open process %d", GetLastError());
+				return 2;
+			}
+
+			if (!SetHandleInformation(hChildStd_OUT_Rd, HANDLE_FLAG_INHERIT, 0)) {
+
+				lua_pop(L, lua_gettop(L));
+				lua_pushnil(L);
+				lua_pushfstring(L, "Unable to open process %d", GetLastError());
+				return 2;
+			}
+
+			info.hStdOutput = hChildStd_OUT_Wr;
 		}
 
-		if (!SetHandleInformation(hChildStd_OUT_Rd, HANDLE_FLAG_INHERIT, 0)) {
+		if (mask & LUA_PROC_IN) {
 
-			lua_pop(L, lua_gettop(L));
-			lua_pushnil(L);
-			lua_pushfstring(L, "Unable to open process %d", GetLastError());
-			return 2;
+			if (!CreatePipe(&hChildStd_IN_Rd, &hChildStd_IN_Wr, &saAttr, 0)) {
+				lua_pop(L, lua_gettop(L));
+				lua_pushnil(L);
+				lua_pushfstring(L, "Unable to open process %d", GetLastError());
+				return 2;
+			}
+
+			if (!SetHandleInformation(hChildStd_IN_Wr, HANDLE_FLAG_INHERIT, 0)) {
+
+				lua_pop(L, lua_gettop(L));
+				lua_pushnil(L);
+				lua_pushfstring(L, "Unable to open process %d", GetLastError());
+				return 2;
+			}
+
+			info.hStdInput = hChildStd_IN_Rd;
 		}
 
-		if (!CreatePipe(&hChildStd_IN_Rd, &hChildStd_IN_Wr, &saAttr, 0)) {
-			lua_pop(L, lua_gettop(L));
-			lua_pushnil(L);
-			lua_pushfstring(L, "Unable to open process %d", GetLastError());
-			return 2;
+		if (mask & LUA_PROC_ERR) {
+
+			if (!CreatePipe(&hChildStd_ERR_Rd, &hChildStd_ERR_Wr, &saAttr, 0)) {
+				lua_pop(L, lua_gettop(L));
+				lua_pushnil(L);
+				lua_pushfstring(L, "Unable to open process %d", GetLastError());
+				return 2;
+			}
+
+			if (!SetHandleInformation(hChildStd_ERR_Rd, HANDLE_FLAG_INHERIT, 0)) {
+
+				lua_pop(L, lua_gettop(L));
+				lua_pushnil(L);
+				lua_pushfstring(L, "Unable to open process %d", GetLastError());
+				return 2;
+			}
+
+			info.hStdError = hChildStd_ERR_Wr;
 		}
-
-		if (!SetHandleInformation(hChildStd_IN_Wr, HANDLE_FLAG_INHERIT, 0)) {
-
-			lua_pop(L, lua_gettop(L));
-			lua_pushnil(L);
-			lua_pushfstring(L, "Unable to open process %d", GetLastError());
-			return 2;
-		}
-
-		if (!CreatePipe(&hChildStd_ERR_Rd, &hChildStd_ERR_Wr, &saAttr, 0)) {
-			lua_pop(L, lua_gettop(L));
-			lua_pushnil(L);
-			lua_pushfstring(L, "Unable to open process %d", GetLastError());
-			return 2;
-		}
-
-		if (!SetHandleInformation(hChildStd_ERR_Rd, HANDLE_FLAG_INHERIT, 0)) {
-
-			lua_pop(L, lua_gettop(L));
-			lua_pushnil(L);
-			lua_pushfstring(L, "Unable to open process %d", GetLastError());
-			return 2;
-		}
-
-		info.hStdError = hChildStd_ERR_Wr;
-		info.hStdOutput = hChildStd_OUT_Wr;
-		info.hStdInput = hChildStd_IN_Rd;
+		
+		
 		info.dwFlags |= STARTF_USESTDHANDLES;
 	}
 
@@ -268,6 +296,8 @@ int WriteToPipe(lua_State *L) {
 		lua_pushinteger(L, -1);
 		return 1;
 	}
+
+	FlushFileBuffers(proc->hChildStd_IN_Wr);
 
 	lua_pop(L, lua_gettop(L));
 	lua_pushinteger(L, written);
