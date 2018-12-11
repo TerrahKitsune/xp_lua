@@ -1,5 +1,6 @@
 #include "lua_misc.h"
 #include <objbase.h>
+#include <time.h>
 
 int lua_uuid(lua_State*L){
 
@@ -50,6 +51,11 @@ static int GetLastErrorAsMessage(lua_State *L)
 	return 2;
 }
 
+int Time(lua_State *L) {
+
+	lua_pushinteger(L, time(NULL));
+	return 1;
+}
 
 int luaopen_misc(lua_State *L){
 
@@ -61,6 +67,9 @@ int luaopen_misc(lua_State *L){
 
 	lua_pushcfunction(L, lua_sleep);
 	lua_setglobal(L, "Sleep");
+
+	lua_pushcfunction(L, Time);
+	lua_setglobal(L, "Time");
 
 	return 0;
 }
