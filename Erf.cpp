@@ -741,7 +741,7 @@ int erf_gc(lua_State *L){
 int erf_tostring(lua_State *L){
 
 	ERF * luaerf = lua_toerf(L, 1);
-	char tim[100];
+	char tim[1024];
 	sprintf(tim, "Erf: 0x%08X File: %s", luaerf, luaerf->File);
 	lua_pushfstring(L, tim);
 	return 1;

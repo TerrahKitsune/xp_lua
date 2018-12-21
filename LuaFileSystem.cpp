@@ -7,8 +7,9 @@ static char _PATH[MAX_PATH+2];
 const char * lua_topath(lua_State*L, int idx, bool wildcard=false) {
 	size_t len;
 	const char * fromlua = luaL_checklstring(L, idx, &len);
+	const char * filter = wildcard ? luaL_optstring(L, idx+1, "*") : "*";
 	char c;
-	if (len >= MAX_PATH)
+	if (len+strlen(filter) >= MAX_PATH)
 		luaL_error(L, "%s is too long to be a path!", fromlua);
 
 	for (int n = 0; n < len; n++) {
@@ -31,10 +32,11 @@ const char * lua_topath(lua_State*L, int idx, bool wildcard=false) {
 
 		if (c == '/' || c == '\\') {
 
-			strcat(_PATH, "*");
+			strcat(_PATH, filter);
 		}
 		else {
-			strcat(_PATH, "\\*");		
+			strcat(_PATH, "\\");		
+			strcat(_PATH, filter);
 		}
 	}
 

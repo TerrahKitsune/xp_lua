@@ -402,10 +402,10 @@ SQLite:
 FileSystem:
 
 	-Returns an array containing all files that exists in path
-	Array FileSystem.GetFiles(path)
+	Array FileSystem.GetFiles(path, opt filter)
 
 	-Returns an array containing all directories that exists in path
-	Array FileSystem.GetDirectories(path)
+	Array FileSystem.GetDirectories(path, opt filter)
 
 	-Returns a table containing file info:
 	-isFolder bool
