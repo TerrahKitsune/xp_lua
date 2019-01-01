@@ -31,6 +31,12 @@ struct CNWSGenericObject {
 	nwn_objid_t ObjectId; //A0
 };
 
+struct CNWSVarTable {
+	CScriptVariable * vartable; //190
+	int vartable_len; //194
+	int vartable_alloc; //198
+};
+
 struct CNWSObject{
 	CNWSGenericObject GenericObj;
 	DWORD dwordPadding;
@@ -95,9 +101,9 @@ struct CNWSObject{
 	void * action; //184
 	DWORD dword188; //188
 	int ActionRounds; //18C
-	CScriptVariable * vartable; //190
-	int vartable_len; //194
-	int vartable_alloc; //198
+	CNWSVarTable vartable; //190
+	//int vartable_len; //194
+	//int vartable_alloc; //198
 	void * ptr19C; //19C
 	CGameEffect ** effects; //1A0
 	int effects_len; //1A4

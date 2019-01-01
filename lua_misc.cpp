@@ -2,6 +2,9 @@
 #include <objbase.h>
 #include <time.h>
 
+static int env_table = -1;
+static int env_original = -1;
+
 int lua_uuid(lua_State*L){
 
 	GUID guid;
@@ -57,7 +60,66 @@ int Time(lua_State *L) {
 	return 1;
 }
 
+int NewEnvironment(lua_State *L) {
+
+	if (!lua_isstring(L, 1) || lua_gettop(L)!=1) {
+		luaL_error(L, "Invalid parameters");
+		return 0;
+	}
+
+	lua_newtable(L);
+
+	lua_rawgeti(L, LUA_REGISTRYINDEX, env_table);
+	
+	lua_pushvalue(L, 1);
+	lua_pushvalue(L, 2);
+	lua_settable(L, -3);
+
+	lua_pushvalue(L, 2);
+	lua_copy(L, 2, 1);
+	lua_pop(L, 3);
+
+	return 1;
+}
+
+int GetEnvironment(lua_State *L) {
+
+	if (!lua_isstring(L, 1) || lua_gettop(L) != 1) {
+		luaL_error(L, "Invalid parameters");
+		return 0;
+	}
+
+	lua_rawgeti(L, LUA_REGISTRYINDEX, env_table);
+
+	lua_pushvalue(L, 1);
+	lua_gettable(L, -2);
+
+	lua_copy(L, 3, 1);
+
+	lua_pop(L, 2);
+
+	return 1;
+}
+
+int GetCreateEnvironment(lua_State *L) {
+
+	const char * name = luaL_checkstring(L, 1);
+
+	GetEnvironment(L);
+	if (lua_istable(L, 1)) {
+		return 1;
+	}
+	else {
+		lua_pop(L, lua_gettop(L));
+		lua_pushstring(L, name);
+		return NewEnvironment(L);
+	}
+}
+
 int luaopen_misc(lua_State *L){
+
+	lua_newtable(L);
+	env_table = luaL_ref(L, LUA_REGISTRYINDEX);
 
 	lua_pushcfunction(L, GetLastErrorAsMessage);
 	lua_setglobal(L, "GetLastError");
@@ -70,6 +132,22 @@ int luaopen_misc(lua_State *L){
 
 	lua_pushcfunction(L, Time);
 	lua_setglobal(L, "Time");
+
+	lua_newtable(L);
+
+	lua_pushstring(L, "Create");
+	lua_pushcfunction(L, NewEnvironment);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "Get");
+	lua_pushcfunction(L, GetEnvironment);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "GetOrCreate");
+	lua_pushcfunction(L, GetCreateEnvironment);
+	lua_settable(L, -3);
+
+	lua_setglobal(L, "Env");
 
 	return 0;
 }

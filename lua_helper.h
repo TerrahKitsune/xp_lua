@@ -5,3 +5,4 @@
 void lua_pushlocation(lua_State*L, Location loc);
 void lua_pushvector(lua_State*L, Vector vec);
 void lua_pushobject(lua_State*L, nwn_objid_t obj);
+void lua_pushcexostring(lua_State*L, CExoString* str);

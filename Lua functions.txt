@@ -680,8 +680,8 @@ xp_lua.dll ONLY (Starts with NWN.):
 	-ID: effect id
 	-Creator: object id of the creator
 	-Duration: float of the duration
-	-ExpireDay: int somesort of internal timekeeping of the current day
-	-ExpireTime: int somesort of interal timekeeping of the time in the ExpireDay to expire the effect
+	-ExpireDay: int some sort of internal timekeeping of the current day
+	-ExpireTime: int some sort of interal timekeeping of the time in the ExpireDay to expire the effect
 	-Exposed: bool if the effect is exposed to nwscripts GetFirst/NextEffect
 	-ShowIcon: bool if the icon is shown
 	-SpellID: int the spell id
@@ -693,3 +693,22 @@ xp_lua.dll ONLY (Starts with NWN.):
 	-EffectObjects array containing objectid's stored on the effect
 	-EffectInts array of effect ints stored on the effect
 	table GetEffectData(objid, effectid)
+
+	-Sets the effect string on target index of the effect to newstring
+	-idx must be between 0 and 5
+	-Returns true/false
+	bool SetEffectString(objid, effectid, idx, newstring)
+
+	-Sets if the effect is to be considered exposed
+	-an effect that is *not* exposed will not be returned by nwn2's GetFirst/NextEffect
+	void EffectSetExposed(objid, effectid, bool)
+
+	-Sets the effect int on target index of the effect to newint
+	-idx must be between 0 and 9
+	-Returns true/false
+	bool EffectSetEffectInt(objid, effectid, idx, newint);
+
+	-Sets the effect object on target index of the effect to object
+	-idx must be between 0 and 3
+	-Returns true/false
+	bool SetEffectObject(objid, effectid, idx, newobjid);

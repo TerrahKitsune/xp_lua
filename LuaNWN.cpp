@@ -8,6 +8,8 @@ static const struct luaL_Reg nwnfuncs[] = {
 	{ "GetEffectData", GetEffectData },
 	{ "EffectSetEffectInt", EffectSetEffectInt },
 	{ "EffectSetExposed", EffectSetExposed },
+	{ "SetEffectString", SetEffectString },
+	{ "SetEffectObject", SetEffectObject },
 	{ "CopyEffectIdsToEffectInts", CopyEffectIdsToEffectInts },
 	{ "GetLocalVariables", GetLocalVariables },
 	{ "RunScript", LRunScript },

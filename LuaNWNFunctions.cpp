@@ -38,8 +38,10 @@ bool ApplyEffectId(CGameEffect * effect) {
 		effect->effectInts = temp;
 		effect->NumbEffectInts = 11;
 		effect->AllocEffectInts = 11;
-		effect->effectInts[10] = (int)effect;
 	}
+
+	effect->effectInts[10] = (int)effect;
+
 	return true;
 }
 
@@ -165,6 +167,46 @@ void lua_pusheffectdata(lua_State*L, CGameEffect * effect) {
 	lua_settable(L, -3);
 }
 
+int SetEffectString(lua_State*L) {
+
+	size_t len;
+	CGameEffect * effect = GetEffect(L);
+	int idx = lua_tointeger(L, 3);
+	const char * str = lua_tolstring(L, 4, &len);
+
+	if (!effect) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, 0);
+		return 1;
+	}
+	else if (idx < 0 || idx >= 6) {
+
+		luaL_error(L, "SetEffectString index must be between 0 and 5");
+		return 0;
+	}
+
+	if (effect->EffectString[idx].text) {
+		NWN2_Free(effect->EffectString[idx].text);
+		effect->EffectString[idx].text = NULL;
+		effect->EffectString[idx].len = 0;
+	}
+	
+	if (str && len > 0) {
+		effect->EffectString[idx].text = (char*)NWN2_Malloc(len + 1);
+		if (!effect->EffectString[idx].text) {
+			lua_pop(L, lua_gettop(L));
+			lua_pushboolean(L, 0);
+			return 1;
+		}
+		memcpy(effect->EffectString[idx].text, str, len);
+		effect->EffectString[idx].text[len] = '\0';
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
 int GetCreature(lua_State*L) {
 
 	nwn_objid_t objid = GetObjID(L, 1);
@@ -218,15 +260,32 @@ int LRunScript(lua_State*L) {
 
 int EffectSetExposed(lua_State*L) {
 
-
 	CGameEffect * effect = GetEffect(L);
 
 	if (effect) {
-		effect->IsExposed = lua_toboolean(L,3);
+		effect->IsExposed = lua_toboolean(L, 3);
 		effect->ShowIcon = effect->IsExposed;
 	}
 
 	return 0;
+}
+
+int SetEffectObject(lua_State*L) {
+
+	CGameEffect * effect = GetEffect(L);
+	int idx = luaL_checkinteger(L, 3);
+	nwn_objid_t newobject = GetObjID(L, 4);
+	lua_pop(L, lua_gettop(L));
+
+	if (!effect || idx < 0 || idx >= 4) {
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	effect->EffectObjects[idx] = newobject;
+
+	lua_pushboolean(L, true);
+	return 1;
 }
 
 int EffectSetEffectInt(lua_State*L) {
@@ -240,8 +299,11 @@ int EffectSetEffectInt(lua_State*L) {
 		lua_pushboolean(L, false);
 		return 1;
 	}
-	
-	ApplyEffectId(effect);
+
+	if (!ApplyEffectId(effect)) {
+		lua_pushboolean(L, false);
+		return 1;
+	}
 
 	effect->effectInts[idx] = newint;
 
@@ -337,16 +399,16 @@ int GetLocalVariables(lua_State*L) {
 		return 1;
 	}
 
-	lua_createtable(L, object->vartable_len, 0);
+	lua_createtable(L, object->vartable.vartable_len, 0);
 
-	for (int n = 0; n < object->vartable_len; n++) {
+	for (int n = 0; n < object->vartable.vartable_len; n++) {
 
 		lua_createtable(L, 0, 3);
 
-		CScriptVariable * var = &object->vartable[n];
+		CScriptVariable * var = &object->vartable.vartable[n];
 
 		lua_pushstring(L, "Name");
-		lua_pushstring(L, var->Name.text);
+		lua_pushcexostring(L, &var->Name);
 		lua_settable(L, -3);
 
 		lua_pushstring(L, "Type");
@@ -377,10 +439,12 @@ int GetLocalVariables(lua_State*L) {
 		switch (var->Type)
 		{
 		case 3: //string
-			lua_pushstring(L, (char*)var->Data);
+			lua_pushcexostring(L, (CExoString*)var->Data);
 			break;
 		case 2: //float
-			lua_pushnumber(L, (float)var->Data);
+			float numb;
+			memcpy(&numb, &var->Data, sizeof(float));
+			lua_pushnumber(L, numb);
 			break;
 		case 5: //location
 			lua_pushlocation(L, *(Location*)var->Data);

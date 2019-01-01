@@ -14,3 +14,5 @@ int CopyEffectIdsToEffectInts(lua_State*L);
 int EffectSetExposed(lua_State*L);
 int GetEffectData(lua_State*L);
 int GetLocalVariables(lua_State*L);
+int SetEffectString(lua_State*L); 
+int SetEffectObject(lua_State*L);

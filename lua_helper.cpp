@@ -7,6 +7,21 @@ void lua_pushobject(lua_State*L, nwn_objid_t obj) {
 	lua_pushstring(L, t);
 }
 
+void lua_pushcexostring(lua_State*L, CExoString* str) {
+
+	if (!str || !str->text || str->len <= 0) {
+		lua_pushlstring(L, "", 0);
+	}
+
+	size_t len = str->len;
+
+	if (str->text[len - 1] == '\0') {
+		len--;
+	}
+
+	lua_pushlstring(L, str->text, len);
+}
+
 void lua_pushlocation(lua_State*L, Location loc) {
 
 	lua_createtable(L, 0, 3);
