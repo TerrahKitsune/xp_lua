@@ -1,4 +1,5 @@
 #include "LuaNWNFunctions.h"
+#include "NwnLuaHooks.h"
 #include "lua_helper.h"
 
 nwn_objid_t GetObjID(lua_State*L, int idx) {
@@ -23,6 +24,49 @@ nwn_objid_t GetObjID(lua_State*L, int idx) {
 	else {
 		return OJBECT_INVALID;
 	}
+}
+
+int GetABVs(lua_State*L) {
+
+	nwn_objid_t objid = GetObjID(L, 1);
+	nwn_objid_t objidtarget = GetObjID(L, 2);
+
+	if (objid == OJBECT_INVALID || objidtarget == OJBECT_INVALID) {
+
+		lua_pop(L,lua_gettop(L));
+		lua_pushinteger(L, 0);
+		return 1;
+	}
+
+	CNWSObject * object = (CNWSObject*)GetObjectByGameObjectID(objid);
+
+	if (!object) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushinteger(L, 0);
+		return 1;
+	}
+
+	CNWSObject * target = (CNWSObject*)GetObjectByGameObjectID(objidtarget);
+
+	if (!target) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushinteger(L, 0);
+		return 1;
+	}
+
+	CNWSCreatureStats* stats = GetCreatureStats(object);
+
+	if (!stats) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushinteger(L, 0);
+		return 1;
+	}
+
+	int result = OriginalGetAttackModifierVersus(stats, NULL, target);
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, result);
+	return 1;
 }
 
 bool ApplyEffectId(CGameEffect * effect) {

@@ -1,6 +1,7 @@
 #include "LuaNWN.h"
 #include "LuaNWNFunctions.h"
 #include "MainLoop.h"
+#include "NwnLuaHooks.h"
 
 static const struct luaL_Reg nwnfuncs[] = {
 	{ "GetCreature", GetCreature },
@@ -13,7 +14,10 @@ static const struct luaL_Reg nwnfuncs[] = {
 	{ "CopyEffectIdsToEffectInts", CopyEffectIdsToEffectInts },
 	{ "GetLocalVariables", GetLocalVariables },
 	{ "RunScript", LRunScript },
+	{ "GetABVs", GetABVs },
+	{ "HookDisconnectPlayer", HookDisconnectPlayer },
 	{ "HookMainloop", HookMainLoop },
+	{ "HookResolveBonusCombatDamage", HookResolveBonusCombatDamage },
 	{ "Test", Test },
 	{ NULL, NULL }
 };

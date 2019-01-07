@@ -27,6 +27,16 @@ void * GetCVirtualMachine(){
 	return *NWN_VirtualMachine;
 }
 
+CNWSCreatureStats* GetCreatureStats(CNWSObject * obj) {
+
+	if (!obj || obj->ObjectType != CGameObject__OBJECT_TYPE_CREATURE) {
+		return NULL;
+	}
+
+	CNWSCreatureStats * stats = (CNWSCreatureStats *)*(DWORD *)(obj + 0x1FC4);
+
+	return stats;
+}
 
 CNWSGenericObject * GetObjectByGameObjectID(nwn_objid_t objectid) {
 

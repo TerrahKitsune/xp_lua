@@ -465,6 +465,12 @@
     <ClCompile Include="NamedPipeMain.cpp">
       <Filter>NamedPipes</Filter>
     </ClCompile>
+    <ClCompile Include="NwnLuaHooks.cpp">
+      <Filter>LuaNWN\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NWN2_API\CNWSCreatureStats.cpp">
+      <Filter>NWN2\Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -731,14 +737,8 @@
     <ClInclude Include="MainLoop.h">
       <Filter>LuaNWN\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CGameEffect.h">
-      <Filter>NWN2\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="lua_helper.h">
       <Filter>LuaNWN\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseObjects.h">
-      <Filter>NWN2\Objects</Filter>
     </ClInclude>
     <ClInclude Include="LuaMySQLResult.h">
       <Filter>LuaMySQL\Header Files</Filter>
@@ -751,6 +751,18 @@
     </ClInclude>
     <ClInclude Include="NamedPipeMain.h">
       <Filter>NamedPipes</Filter>
+    </ClInclude>
+    <ClInclude Include="NwnLuaHooks.h">
+      <Filter>LuaNWN\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NWN2_API\BaseObjects.h">
+      <Filter>NWN2\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="NWN2_API\CGameEffect.h">
+      <Filter>NWN2\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="NWN2_API\CNWSCreatureStats.h">
+      <Filter>NWN2\Objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

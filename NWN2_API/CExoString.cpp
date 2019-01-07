@@ -1,8 +1,8 @@
-#include "NWN2_API.h"
+#include "CExoString.h"
 
 
 CExoString::CExoString() {
-	text = NULL;
+	text = 0;
 	len = 0;
 }
 

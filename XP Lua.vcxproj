@@ -60,8 +60,10 @@
     <ClCompile Include="NWN2LuaLib.cpp" />
     <ClCompile Include="NWN2_API\CExoString.cpp" />
     <ClCompile Include="NWN2_API\CNWSCreature.cpp" />
+    <ClCompile Include="NWN2_API\CNWSCreatureStats.cpp" />
     <ClCompile Include="NWN2_API\CNWSObject.cpp" />
     <ClCompile Include="NWN2_API\NWN2_API.cpp" />
+    <ClCompile Include="NwnLuaHooks.cpp" />
     <ClCompile Include="plua.cpp" />
     <ClCompile Include="LuaEngine.cpp" />
     <ClCompile Include="Lua\lapi.c" />
@@ -115,9 +117,7 @@
     <ClInclude Include="2da.h" />
     <ClInclude Include="2DAMain.h" />
     <ClInclude Include="AssemblyHelper.h" />
-    <ClInclude Include="BaseObjects.h" />
     <ClInclude Include="Buffer.h" />
-    <ClInclude Include="CGameEffect.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="Erf.h" />
     <ClInclude Include="ERFMain.h" />
@@ -160,10 +160,14 @@
     <ClInclude Include="networking.h" />
     <ClInclude Include="NWN2Funcs.h" />
     <ClInclude Include="NWN2LuaLib.h" />
+    <ClInclude Include="NWN2_API\BaseObjects.h" />
     <ClInclude Include="NWN2_API\CExoString.h" />
+    <ClInclude Include="NWN2_API\CGameEffect.h" />
     <ClInclude Include="NWN2_API\CNWSCreature.h" />
+    <ClInclude Include="NWN2_API\CNWSCreatureStats.h" />
     <ClInclude Include="NWN2_API\CNWSObject.h" />
     <ClInclude Include="NWN2_API\NWN2_API.h" />
+    <ClInclude Include="NwnLuaHooks.h" />
     <ClInclude Include="plua.h" />
     <ClInclude Include="LuaEngine.h" />
     <ClInclude Include="Lua\lapi.h" />

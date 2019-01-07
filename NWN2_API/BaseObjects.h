@@ -1,6 +1,4 @@
 #pragma once
-#include "NWN2_API.h"
-#include "CExoString.h"
 
 struct CScriptVariable {
 	CExoString Name;

@@ -1,8 +1,8 @@
 #pragma once
-#include "NWN2_API.h"
+#include "CNWSObject.h"
 
 struct CNWSCreature{
-	CNWSObject Object;
+	void* Object;
 	DWORD dword1AC; //1AC
 	DWORD dword1B0; //1B0
 	DWORD dword1B4; //1B4

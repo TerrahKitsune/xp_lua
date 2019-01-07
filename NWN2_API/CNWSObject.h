@@ -1,5 +1,6 @@
 #pragma once
 #include "CGameEffect.h"
+
 #define CGameObject__OBJECT_TYPE_GUI 0x1
 #define CGameObject__OBJECT_TYPE_TILE 0x2
 #define CGameObject__OBJECT_TYPE_MODULE 0x3
