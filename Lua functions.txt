@@ -55,6 +55,20 @@ Misc global functions:
 	-Array containing commandline parameters passed though to gff.exe
 	ARGS[]
 
+Env:
+
+	-Creates a new environment table with said name, discards any old
+	table Env.Create(name);	
+
+	-Retrives an environment table by name, nil if none exists
+	table Env.Get(name);
+
+	-Returns an existing table or creates a new one if it does not exist
+	table Env.GetOrCreate(name);
+
+	-Gets the table that contains all other environment tables
+	table Env.Meta();
+
 Zip:
 
 	-Opens/creates a zipfile
@@ -676,6 +690,7 @@ xp_lua.dll ONLY (Starts with NWN.):
 	bool CopyEffectIdsToEffectInts(objid)
 
 	-Retrives information about an effect where effectid is retrivable using CopyEffectIdsToEffectInts
+	-if effectid is not provided all effects will be provided in an array
 	-table keys: 
 	-ID: effect id
 	-Creator: object id of the creator

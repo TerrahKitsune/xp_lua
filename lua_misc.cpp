@@ -116,6 +116,13 @@ int GetCreateEnvironment(lua_State *L) {
 	}
 }
 
+int GetAllEnvironment(lua_State *L) {
+
+	lua_rawgeti(L, LUA_REGISTRYINDEX, env_table);
+
+	return 1;
+}
+
 int luaopen_misc(lua_State *L){
 
 	lua_newtable(L);
@@ -145,6 +152,10 @@ int luaopen_misc(lua_State *L){
 
 	lua_pushstring(L, "GetOrCreate");
 	lua_pushcfunction(L, GetCreateEnvironment);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "Meta");
+	lua_pushcfunction(L, GetAllEnvironment);
 	lua_settable(L, -3);
 
 	lua_setglobal(L, "Env");
