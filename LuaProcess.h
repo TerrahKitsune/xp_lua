@@ -26,6 +26,7 @@ typedef struct LuaProcess {
 LuaProcess * lua_toprocess(lua_State *L, int index);
 LuaProcess * lua_pushprocess(lua_State *L);
 
+int GetSetAffinity(lua_State *L);
 int LuaOpenProcess(lua_State *L);
 int GetAllProcesses(lua_State *L);
 int StartNewProcess(lua_State *L);
@@ -39,6 +40,7 @@ int GetMemory(lua_State *L);
 int ReadFromPipe(lua_State *L);
 int WriteToPipe(lua_State *L);
 int ErrorFromPipe(lua_State *L);
+int GetThreads(lua_State *L);
 
 int process_gc(lua_State *L);
 int process_tostring(lua_State *L);

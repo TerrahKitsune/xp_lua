@@ -1,5 +1,6 @@
 #pragma once
 #include "CGameEffect.h"
+#include "CNWSVarTable.h"
 
 #define CGameObject__OBJECT_TYPE_GUI 0x1
 #define CGameObject__OBJECT_TYPE_TILE 0x2
@@ -32,13 +33,7 @@ struct CNWSGenericObject {
 	nwn_objid_t ObjectId; //A0
 };
 
-struct CNWSVarTable {
-	CScriptVariable * vartable; //190
-	int vartable_len; //194
-	int vartable_alloc; //198
-};
-
-struct CNWSObject{
+struct CNWSObject {
 	CNWSGenericObject GenericObj;
 	DWORD dwordPadding;
 	BYTE byteA4; //A4

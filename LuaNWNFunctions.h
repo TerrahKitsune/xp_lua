@@ -17,3 +17,5 @@ int GetLocalVariables(lua_State*L);
 int SetEffectString(lua_State*L); 
 int SetEffectObject(lua_State*L);
 int GetABVs(lua_State*L);
+int ClearLocalVariables(lua_State*L);
+int GetLocalVariable(lua_State*L);

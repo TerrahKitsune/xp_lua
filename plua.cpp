@@ -53,7 +53,7 @@ Implementation of Lua Plugin
 PLua::PLua()
 {
 	header = _T(
-		"NWNX Lua Plugin V.0.3.1\n" \
+		"NWNX Lua Plugin V.0.3.2\n" \
 		"(c) 2019 by Robin Karlsson (Terrahkitsune)\n" \
 		"Lua (c) PUC-Rio: https://www.lua.org/ \n"\
 		"visit us at http://www.nwnx.org\n");
@@ -62,7 +62,7 @@ PLua::PLua()
 		"This plugin provides a lua engine and environment.");
 
 	subClass = _T("LUA");
-	version = _T("0.3.1");
+	version = _T("0.3.2");
 	buffer = NULL;
 	Engine = new LuaEngine();
 
@@ -98,7 +98,7 @@ void PLua::GetFunctionClass(TCHAR* fClass)
 
 void PLua::SetString(char* sFunction, char* sParam1, int nParam2, char* sValue)
 {
-	wxLogTrace(TRACE_VERBOSE, wxT("* Plugin SetString(0x%x, %s, %d, %s)"), 0x0, sParam1, nParam2, sValue);
+	//wxLogTrace(TRACE_VERBOSE, wxT("* Plugin SetString(0x%x, %s, %d, %s)"), 0x0, sParam1, nParam2, sValue);
 
 #ifdef UNICODE
 	wxString wxRequest(sFunction, wxConvUTF8);
@@ -116,20 +116,28 @@ void PLua::SetString(char* sFunction, char* sParam1, int nParam2, char* sValue)
 		wxLogMessage(wxT("* Function not specified."));
 		return;
 	}
+	else if (function == wxT("Log")) {
+		Engine->Log = nParam2 > 0;
+		wxLogMessage(wxT("* Logging Set to = %d"), Engine->Log);
+	}
 	else{
-		wxLogMessage(wxT("* %s(%s, %d, %s)"), sFunction, sParam1, nParam2, sValue);
+
+		if(Engine->Log)
+			wxLogMessage(wxT("* %s(%s, %d, %s)"), sFunction, sParam1, nParam2, sValue);
 
 		char * result = Engine->RunFunction(sFunction, sParam1, nParam2, sValue);
 		if (result)
 			delete[]result;
-		else if (Engine->GetLastError())
-			wxLogMessage(wxT("! %s"), Engine->GetLastError());
+		else if (Engine->GetLastError()) {
+			if (Engine->Log)
+				wxLogMessage(wxT("! %s"), Engine->GetLastError());
+		}
 	}
 }
 
 char* PLua::GetString(char* sFunction, char* sParam1, int nParam2)
 {
-	wxLogTrace(TRACE_VERBOSE, wxT("* Plugin GetString(0x%x, %s, %d)"), 0x0, sParam1, nParam2);
+	//wxLogTrace(TRACE_VERBOSE, wxT("* Plugin GetString(0x%x, %s, %d)"), 0x0, sParam1, nParam2);
 
 #ifdef UNICODE
 	wxString wxRequest(sFunction, wxConvUTF8);
@@ -147,17 +155,23 @@ char* PLua::GetString(char* sFunction, char* sParam1, int nParam2)
 
 	if (function == wxT(""))
 	{
-		wxLogMessage(wxT("* Function not specified."));
+		if (Engine->Log)
+			wxLogMessage(wxT("* Function not specified."));
 		return NULL;
 	}
 	else if (function == wxT("RunString"))
 	{
-		wxLogMessage(wxT("* RunString( %s )"), sParam1);
+		if (Engine->Log)
+			wxLogMessage(wxT("* RunString( %s )"), sParam1);
 		buffer = Engine->RunString(sParam1, "RunString");
-		if (buffer)
-			wxLogMessage(wxT("= %s"), buffer);
-		else if (Engine->GetLastError())
-			wxLogMessage(wxT("! %s"), Engine->GetLastError());
+		if (buffer) {
+			if (Engine->Log)
+				wxLogMessage(wxT("= %s"), buffer);
+		}
+		else if (Engine->GetLastError()) {
+			if (Engine->Log)
+				wxLogMessage(wxT("! %s"), Engine->GetLastError());
+		}
 	}
 	else if (function == wxT("LastError"))
 	{

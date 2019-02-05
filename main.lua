@@ -30,3 +30,15 @@ end
 for n=1, #ARGS do 
 	print(n, ARGS[n]);
 end
+
+local proc=Process.Open();
+print(proc:Affinity());
+
+local threads = proc:Threads();
+
+for n=1, #threads do 
+	print("-----");
+	for k,v in pairs(threads[n]) do 
+		print(k,v);
+	end
+end

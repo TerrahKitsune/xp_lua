@@ -49,6 +49,13 @@ static int print(lua_State *L){
 
 LuaEngine::LuaEngine()
 {
+
+#ifdef _DEBUG
+	Log = true;
+#else
+	Log = false;
+#endif
+
 	_lasterror = NULL;
 	WSADATA wsa;
 	WSAStartup(MAKEWORD(2, 2), &wsa);

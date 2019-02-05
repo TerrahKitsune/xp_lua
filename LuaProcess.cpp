@@ -2,6 +2,7 @@
 #include <string.h>
 #include <Windows.h>
 #include <psapi.h>
+#include <tlhelp32.h>
 
 LuaProcess * lua_toprocess(lua_State *L, int index) {
 
@@ -235,8 +236,8 @@ int StartNewProcess(lua_State *L) {
 
 			info.hStdError = hChildStd_ERR_Wr;
 		}
-		
-		
+
+
 		info.dwFlags |= STARTF_USESTDHANDLES;
 	}
 
@@ -338,7 +339,7 @@ int ReadFromPipe(lua_State *L) {
 			return 1;
 		}
 
-		success = ReadFile(proc->hChildStd_OUT_Rd, data, buffersize-1, &read, NULL);
+		success = ReadFile(proc->hChildStd_OUT_Rd, data, buffersize - 1, &read, NULL);
 		data[read] = '\0';
 	}
 
@@ -422,6 +423,95 @@ int GetSetPriority(lua_State *L) {
 	}
 
 	return 1;
+}
+
+int GetThreads(lua_State *L) {
+
+	LuaProcess * proc = lua_toprocess(L, 1);
+
+	HANDLE hThreadSnap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+	THREADENTRY32 te32;
+
+	if (hThreadSnap == INVALID_HANDLE_VALUE) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, "Unable to retrive snapshot");
+		return 2;
+	}
+
+	te32.dwSize = sizeof(THREADENTRY32);
+
+	if (!Thread32First(hThreadSnap, &te32))
+	{
+		CloseHandle(hThreadSnap);
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, "Unable to retrive any threads");
+		return 2;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_newtable(L);
+	int n = 0;
+	do
+	{
+		if (te32.th32OwnerProcessID == proc->processInfo.dwProcessId)
+		{
+			lua_createtable(L, 0, 3);
+
+			lua_pushstring(L, "ID");
+			lua_pushinteger(L, te32.th32ThreadID);
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "BasePrio");
+			lua_pushinteger(L, te32.tpBasePri);
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "DeltaPrio");
+			lua_pushinteger(L, te32.tpDeltaPri);
+			lua_settable(L, -3);
+
+			lua_rawseti(L, -2, ++n);
+		}
+	} while (Thread32Next(hThreadSnap, &te32));
+
+	CloseHandle(hThreadSnap);
+
+	return 1;
+}
+
+int GetSetAffinity(lua_State *L) {
+
+	LuaProcess * proc = lua_toprocess(L, 1);
+	DWORD newmask;
+	DWORD process, system;
+
+	bool ok = GetProcessAffinityMask(proc->processInfo.hProcess, &process, &system);
+
+	if (!ok) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, "Unable to retrive process affinity mask");
+		return 1;
+	}
+
+	if (lua_isnumber(L, 2)) {
+		newmask = (DWORD)lua_tointeger(L, 2);
+		ok = SetProcessAffinityMask(proc->processInfo.hProcess, newmask);
+
+		if (!ok) {
+			lua_pop(L, lua_gettop(L));
+			lua_pushnil(L);
+			lua_pushstring(L, "Unable to set process affinity mask");
+			return 1;
+		}
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, process);
+	lua_pushinteger(L, system);
+
+	return 2;
 }
 
 int GetProcId(lua_State *L) {

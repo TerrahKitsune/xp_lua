@@ -62,6 +62,7 @@
     <ClCompile Include="NWN2_API\CNWSCreature.cpp" />
     <ClCompile Include="NWN2_API\CNWSCreatureStats.cpp" />
     <ClCompile Include="NWN2_API\CNWSObject.cpp" />
+    <ClCompile Include="NWN2_API\CNWSVarTable.cpp" />
     <ClCompile Include="NWN2_API\NWN2_API.cpp" />
     <ClCompile Include="NwnLuaHooks.cpp" />
     <ClCompile Include="plua.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="NWN2_API\CNWSCreature.h" />
     <ClInclude Include="NWN2_API\CNWSCreatureStats.h" />
     <ClInclude Include="NWN2_API\CNWSObject.h" />
+    <ClInclude Include="NWN2_API\CNWSVarTable.h" />
     <ClInclude Include="NWN2_API\NWN2_API.h" />
     <ClInclude Include="NwnLuaHooks.h" />
     <ClInclude Include="plua.h" />

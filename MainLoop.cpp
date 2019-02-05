@@ -7,8 +7,10 @@ DWORD hook_address;
 
 void __cdecl lua_hook_sleep(DWORD duration) {
 
-	if (hook == -1 || !external_lua)
+	if (hook == -1 || !external_lua) {
+		Sleep(duration);
 		return;
+	}
 
 	lua_State * L = external_lua;
 
@@ -25,14 +27,28 @@ void __cdecl lua_hook_sleep(DWORD duration) {
 
 	int top = lua_gettop(L);
 
-	if (lua_isboolean(L, 1) && lua_toboolean(L, 1)) {
-		lua_pop(L, top);
-		return;
+	if (top > 0) {
+		if (lua_isboolean(L, 1) && lua_toboolean(L, 1)) {
+			lua_pop(L, top);
+			return;
+		}
+		else if (lua_isnumber(L, 1)) {
+
+			int sleeptime = lua_tointeger(L, 1);
+
+			if (sleeptime > 1000)
+				sleeptime = 1000;
+			else if (sleeptime < 0)
+				sleeptime = 0;
+
+			Sleep(sleeptime);
+			lua_pop(L, top);
+			return;
+		}
 	}
-	else {
-		lua_pop(L, top);
-		Sleep(duration);
-	}
+
+	lua_pop(L, top);
+	Sleep(duration);
 }
 
 void SetStateToUse(lua_State*L) {

@@ -422,6 +422,95 @@ int CopyEffectIdsToEffectInts(lua_State*L) {
 	lua_pushboolean(L, true);
 	return 1;
 }
+
+int ClearLocalVariables(lua_State*L) {
+
+	nwn_objid_t objid = GetObjID(L, 1);
+
+	if (objid == OJBECT_INVALID) {
+
+		lua_pop(L, lua_gettop(L));
+		return 0;
+	}
+	else
+		lua_pop(L, lua_gettop(L));
+
+	CNWSObject * object = (CNWSObject*)GetObjectByGameObjectID(objid);
+
+	if (!object) {
+		return 0;
+	}
+
+	ClearVariables(&object->vartable);
+
+	return 0;
+}
+
+int GetLocalVariable(lua_State*L) {
+
+	nwn_objid_t objid = GetObjID(L, 1);
+	const char * name = luaL_checkstring(L, 2);
+	int type = luaL_optinteger(L, 3, -1);
+
+	if (objid == OJBECT_INVALID) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		return 1;
+	}
+	else
+		lua_pop(L, lua_gettop(L));
+
+	CNWSObject * object = (CNWSObject*)GetObjectByGameObjectID(objid);
+
+	if (!object) {
+
+		lua_pushnil(L);
+		return 1;
+	}
+
+	for (int n = 0; n < object->vartable.vartable_len; n++) {
+
+		CScriptVariable * var = &object->vartable.vartable[n];
+
+		if ((type == -1 || type == var->Type) && strcmp(var->Name.text, name) == 0) {
+			
+			lua_pop(L, lua_gettop(L));
+
+			switch (var->Type)
+			{
+			case 3: //string
+				lua_pushcexostring(L, (CExoString*)var->Data);
+				break;
+			case 2: //float
+				float numb;
+				memcpy(&numb, &var->Data, sizeof(float));
+				lua_pushnumber(L, numb);
+				break;
+			case 5: //location
+				lua_pushlocation(L, *(Location*)var->Data);
+				break;
+			case 4: //object
+				lua_pushobject(L, var->Data);
+				break;
+			case 1: //int
+				lua_pushinteger(L, (int)var->Data);
+				break;
+			default:
+				lua_pushnil(L);
+				break;
+			}
+
+			return 1;
+		}
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushnil(L);
+
+	return 1;
+}
+
 int GetLocalVariables(lua_State*L) {
 
 	nwn_objid_t objid = GetObjID(L, 1);

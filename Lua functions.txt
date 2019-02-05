@@ -255,6 +255,18 @@ Process:
 	-https://msdn.microsoft.com/en-us/library/ms686219(v=vs.85).aspx
 	int/bool Process:Priority(opt prio)
 
+	-Gets or sets the affinity mask for the process
+	-Returns the process and system affinity masks
+	-returns nil on failure
+	int, int Process:Affinity(opt newmask);
+
+	-Retrives an array of all threads in the process
+	-Thread object:
+	-ID: int id of the thread
+	-BasePrio: Priority for the thread
+	-DeltaPrio: 
+	array Process:Threads();
+
 HTTP:
 
 	-does a http (or https) request, method should be a http method IE "GET"
@@ -727,3 +739,14 @@ xp_lua.dll ONLY (Starts with NWN.):
 	-idx must be between 0 and 3
 	-Returns true/false
 	bool SetEffectObject(objid, effectid, idx, newobjid);
+
+	-Retrive a single variable from an object by name
+	-if type is not given (or -1) it'll use the first variable by name
+	-if a type is given it need to match too
+	-types:
+	-1: int
+	-2: float
+	-3: string
+	-4: object
+	-5: location
+	value GetLocalVariable(objid, name, opt type)
