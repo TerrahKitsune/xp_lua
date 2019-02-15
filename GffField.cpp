@@ -408,6 +408,9 @@ void PushField(lua_State *L, Gff * gff, unsigned int fieldindex){
 
 void PushFieldData(lua_State *L, Gff * gff, GffField *gfffield){
 
+	char bytedata;
+	short shortdata;
+	int intdata;
 	float fdata;
 	unsigned long uldata;
 	long ldata;
@@ -419,6 +422,18 @@ void PushFieldData(lua_State *L, Gff * gff, GffField *gfffield){
 
 	switch (gfffield->Type)
 	{
+	case 1:
+		memcpy(&bytedata, &gfffield->DataOrDataOffset, sizeof(char));
+		lua_pushinteger(L, bytedata);
+		break;
+	case 3:
+		memcpy(&shortdata, &gfffield->DataOrDataOffset, sizeof(short));
+		lua_pushinteger(L, shortdata);
+		break;
+	case 5:
+		memcpy(&intdata, &gfffield->DataOrDataOffset, sizeof(int));
+		lua_pushinteger(L, intdata);
+		break;
 	case 6:
 		CopyFromData(L, gff, gfffield->DataOrDataOffset, &uldata, sizeof(unsigned long));
 		lua_pushinteger(L, uldata);

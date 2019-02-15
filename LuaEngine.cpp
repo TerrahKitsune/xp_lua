@@ -53,7 +53,7 @@ LuaEngine::LuaEngine()
 #ifdef _DEBUG
 	Log = true;
 #else
-	Log = false;
+	Log = true;
 #endif
 
 	_lasterror = NULL;

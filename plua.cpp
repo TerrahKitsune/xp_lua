@@ -62,7 +62,7 @@ PLua::PLua()
 		"This plugin provides a lua engine and environment.");
 
 	subClass = _T("LUA");
-	version = _T("0.3.2");
+	version = _T("0.3.3");
 	buffer = NULL;
 	Engine = new LuaEngine();
 
