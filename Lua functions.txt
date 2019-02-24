@@ -425,6 +425,46 @@ SQLite:
 	-closes the database connection, it should not be used afterwards
 	nil SQLite:Close()
 
+Image: 
+	
+	-Take a screenshot with the desired width and height on a monitor
+	-If no parameters are given it'll take a full screenshot of the first monitor
+	Image Image.Screenshot(width, height, startx, starty, monitor)
+
+	-Saves an image as a bitmap (bmp)
+	bool Image:Save(filename)
+
+	-Loads a bmp file
+	-returns nil, message on failure
+	Image Image.Load(filename);
+
+	-Create an empty bmp with the desired width and height
+	-Returns nil, message on failure
+	Image Image.Create(Width, Height)
+
+	-Create a cropped image from another image
+	-returns nil, message on failure
+	Image Image:Crop(Width, Height, StartX, StartY)
+
+	-Returns raw bit map vector
+	-e.g array[1].r = first red, array[1].g, array[1].b
+	array Image:GetPixels()
+
+	-Sets the raw pixles to that of the given array
+	-returns false, message on failure
+	bool Image:SetPixels(pixel)
+
+	-Returns pixels in a matrix
+	-matrix[1][1].r = first red, matrix[1][1].g, matrix[1][1].b
+	matrix Image:GetPixelMatrix()
+
+	-Sets the raw pixles to that of the given matrix
+	-returns false, message on failure
+	bool Image:SetPixelMatrix(pixelmatrix)
+
+	-Retrive the dimentions of an image
+	width, height Image:GetSize()
+
 FileSystem:
 
 	-Returns an array containing all files that exists in path

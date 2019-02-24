@@ -157,6 +157,15 @@
     <Filter Include="NamedPipes\Source Files">
       <UniqueIdentifier>{f46a46ad-45d7-4598-95fa-e909b47a1e1d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaImage">
+      <UniqueIdentifier>{60a4a8f7-98b4-48e5-9e10-7c739c70d239}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaImage\Header Files">
+      <UniqueIdentifier>{a496c177-8d4c-4a83-b0be-39db090529d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaImage\Source Files">
+      <UniqueIdentifier>{c5bb357b-5495-44fd-a868-9524bb024628}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -405,6 +414,12 @@
     <ClCompile Include="namedpipe.cpp">
       <Filter>NamedPipes\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LuaImageMain.cpp">
+      <Filter>LuaImage</Filter>
+    </ClCompile>
+    <ClCompile Include="image.cpp">
+      <Filter>LuaImage\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -641,10 +656,17 @@
     <ClInclude Include="namedpipe.h">
       <Filter>NamedPipes\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LuaImageMain.h">
+      <Filter>LuaImage</Filter>
+    </ClInclude>
+    <ClInclude Include="image.h">
+      <Filter>LuaImage\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="scrap.txt" />
     <Text Include="Lua functions.txt" />
+    <Text Include="main.lua" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GFF.rc">
@@ -655,10 +677,5 @@
     <Image Include="Lua\jiiiiiiiiitsu.ico">
       <Filter>Resource Files</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Media Include="main.lua">
-      <Filter>Source Files</Filter>
-    </Media>
   </ItemGroup>
 </Project>

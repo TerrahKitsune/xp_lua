@@ -172,6 +172,15 @@
     <Filter Include="NamedPipes\Source Files">
       <UniqueIdentifier>{7e25cd7a-0a81-4727-83de-ca13ffd62cfb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaImage">
+      <UniqueIdentifier>{c1b85932-9ff0-4dd7-8d4c-c99814266181}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaImage\Header Files">
+      <UniqueIdentifier>{a65ac2b6-6a6d-47b7-a5a7-6b4cc2ff6048}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaImage\Source Files">
+      <UniqueIdentifier>{6b093fe2-e618-44a7-8d76-c6a6ff855f13}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\plugin.cpp">
@@ -474,6 +483,12 @@
     <ClCompile Include="NWN2_API\CNWSVarTable.cpp">
       <Filter>NWN2\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="LuaImageMain.cpp">
+      <Filter>LuaImage</Filter>
+    </ClCompile>
+    <ClCompile Include="image.cpp">
+      <Filter>LuaImage\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -769,6 +784,12 @@
     </ClInclude>
     <ClInclude Include="NWN2_API\CNWSVarTable.h">
       <Filter>NWN2\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaImageMain.h">
+      <Filter>LuaImage</Filter>
+    </ClInclude>
+    <ClInclude Include="image.h">
+      <Filter>LuaImage\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
