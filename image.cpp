@@ -81,9 +81,23 @@ BOOL CALLBACK MonitorEnumProcCallback(_In_  HMONITOR hMonitor, _In_  HDC DevC, _
 	return TRUE;
 }
 
+int asserthasimagedata(lua_State *L, LuaImage * img) {
+
+	if (!img || !img->Data) {
+		luaL_error(L, "Image does not contain any image data");
+		return false;
+	}
+
+	return true;
+}
+
 int lua_setpixels(lua_State *L) {
 
 	LuaImage * img = lua_toimage(L, 1);
+
+	if (!asserthasimagedata(L, img)) {
+		return 0;
+	}
 
 	size_t arraylen = lua_rawlen(L, 2);
 	size_t imglen = img->Height * img->Width;
@@ -177,6 +191,10 @@ int lua_getpixels(lua_State *L) {
 
 	LuaImage * img = lua_toimage(L, 1);
 
+	if (!asserthasimagedata(L, img)) {
+		return 0;
+	}
+
 	PBITMAPFILEHEADER BFileHeader = (PBITMAPFILEHEADER)img->Data;
 	PBITMAPINFOHEADER  BInfoHeader = (PBITMAPINFOHEADER)&img->Data[sizeof(BITMAPFILEHEADER)];
 
@@ -255,6 +273,10 @@ int lua_getsize(lua_State *L) {
 
 	LuaImage * img = lua_toimage(L, 1);
 
+	if (!asserthasimagedata(L, img)) {
+		return 0;
+	}
+
 	lua_pop(L, lua_gettop(L));
 
 	lua_pushinteger(L, img->Width);
@@ -266,6 +288,11 @@ int lua_getsize(lua_State *L) {
 int lua_crop(lua_State *L) {
 
 	LuaImage * original = lua_toimage(L, 1);
+
+	if (!asserthasimagedata(L, original)) {
+		return 0;
+	}
+
 	int w = luaL_checkinteger(L, 2);
 	int h = luaL_checkinteger(L, 3);
 	int x = luaL_checkinteger(L, 4) - 1;
@@ -402,6 +429,11 @@ int lua_createimage(lua_State *L) {
 int lua_getpixel(lua_State *L) {
 
 	LuaImage * img = lua_toimage(L, 1);
+
+	if (!asserthasimagedata(L, img)) {
+		return 0;
+	}
+
 	int y = luaL_checkinteger(L, 2) - 1;
 	int x = luaL_checkinteger(L, 3) - 1;
 
@@ -448,6 +480,11 @@ int lua_getpixel(lua_State *L) {
 int lua_setpixel(lua_State *L) {
 
 	LuaImage * img = lua_toimage(L, 1);
+
+	if (!asserthasimagedata(L, img)) {
+		return 0;
+	}
+
 	int y = luaL_checkinteger(L, 2) - 1;
 	int x = luaL_checkinteger(L, 3) - 1;
 
@@ -524,6 +561,10 @@ int lua_setpixel(lua_State *L) {
 int lua_setpixelmatrix(lua_State *L) {
 
 	LuaImage * img = lua_toimage(L, 1);
+
+	if (!asserthasimagedata(L, img)) {
+		return 0;
+	}
 
 	PBITMAPFILEHEADER BFileHeader = (PBITMAPFILEHEADER)img->Data;
 	PBITMAPINFOHEADER  BInfoHeader = (PBITMAPINFOHEADER)&img->Data[sizeof(BITMAPFILEHEADER)];
@@ -623,6 +664,10 @@ int lua_setpixelmatrix(lua_State *L) {
 int lua_getpixelmatrix(lua_State *L) {
 
 	LuaImage * img = lua_toimage(L, 1);
+
+	if (!asserthasimagedata(L, img)) {
+		return 0;
+	}
 
 	size_t i = 0;
 	PBITMAPFILEHEADER BFileHeader = (PBITMAPFILEHEADER)img->Data;
@@ -764,6 +809,11 @@ int lua_loadfromfile(lua_State *L) {
 int lua_savetofile(lua_State *L) {
 
 	LuaImage * img = lua_toimage(L, 1);
+
+	if (!asserthasimagedata(L, img)) {
+		return 0;
+	}
+
 	const char * file = luaL_checkstring(L, 2);
 
 	DWORD Junk;

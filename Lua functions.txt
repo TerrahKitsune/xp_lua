@@ -475,6 +475,10 @@ Image:
 	-Retrive the dimentions of an image
 	width, height Image:GetSize()
 
+	-Discards the image from memory
+	-the image item should *not* be used after this
+	void Image:Close();
+
 FileSystem:
 
 	-Returns an array containing all files that exists in path

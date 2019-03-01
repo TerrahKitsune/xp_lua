@@ -14,6 +14,7 @@ static const struct luaL_Reg namedpipefunctions[] = {
 	{ "GetPixelMatrix", lua_getpixelmatrix },
 	{ "SetPixelMatrix", lua_setpixelmatrix },
 	{ "GetSize", lua_getsize },
+	{ "Close", image_gc },
 	{ NULL, NULL }
 };
 
