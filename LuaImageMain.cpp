@@ -7,6 +7,8 @@ static const struct luaL_Reg namedpipefunctions[] = {
 	{ "Load", lua_loadfromfile },
 	{ "Create", lua_createimage },
 	{ "Crop", lua_crop },
+	{ "GetPixel", lua_getpixel },
+	{ "SetPixel", lua_setpixel },
 	{ "GetPixels", lua_getpixels },
 	{ "SetPixels", lua_setpixels },
 	{ "GetPixelMatrix", lua_getpixelmatrix },

@@ -399,6 +399,127 @@ int lua_createimage(lua_State *L) {
 	return 1;
 }
 
+int lua_getpixel(lua_State *L) {
+
+	LuaImage * img = lua_toimage(L, 1);
+	int y = luaL_checkinteger(L, 2);
+	int x = luaL_checkinteger(L, 3);
+
+	if (y < 0 || x < 0 || y >= img->Height || x >= img->Width) {
+		luaL_error(L, "Argument out of range");
+		return 0;
+	}
+
+	PBITMAPFILEHEADER BFileHeader = (PBITMAPFILEHEADER)img->Data;
+	PBITMAPINFOHEADER  BInfoHeader = (PBITMAPINFOHEADER)&img->Data[sizeof(BITMAPFILEHEADER)];
+
+	RGBTRIPLE * Image = (RGBTRIPLE*)&img->Data[BFileHeader->bfOffBits];
+	RGBTRIPLE * rgb;
+
+	int pitch = ((img->Width * BInfoHeader->biBitCount) + 31) / 32 * 4;
+	int padding = pitch - (img->Width * (BInfoHeader->biBitCount / 8));
+	int inpad = y * padding;
+	int i = x + img->Width * y;
+	rgb = &Image[i];
+
+	rgb = (RGBTRIPLE*)((BYTE*)rgb + inpad);
+
+	lua_createtable(L, 0, 3);
+
+	lua_pushstring(L, "r");
+	lua_pushinteger(L, rgb->rgbtRed);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "g");
+	lua_pushinteger(L, rgb->rgbtGreen);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "b");
+	lua_pushinteger(L, rgb->rgbtBlue);
+	lua_settable(L, -3);
+
+	lua_copy(L, -1, 1);
+	lua_pop(L, lua_gettop(L) - 1);
+
+	return 1;
+}
+
+int lua_setpixel(lua_State *L) {
+
+	LuaImage * img = lua_toimage(L, 1);
+	int y = luaL_checkinteger(L, 2);
+	int x = luaL_checkinteger(L, 3);
+
+	if (y < 0 || x < 0 || y >= img->Height || x >= img->Width) {
+		luaL_error(L, "Argument out of range");
+		return 0;
+	}
+	else if (!lua_istable(L, 4)) {
+		luaL_error(L, "pixel is not a table");
+		return 0;
+	}
+
+	PBITMAPFILEHEADER BFileHeader = (PBITMAPFILEHEADER)img->Data;
+	PBITMAPINFOHEADER  BInfoHeader = (PBITMAPINFOHEADER)&img->Data[sizeof(BITMAPFILEHEADER)];
+
+	RGBTRIPLE * Image = (RGBTRIPLE*)&img->Data[BFileHeader->bfOffBits];
+	RGBTRIPLE * rgb;
+
+	int i = x + img->Width * (img->Height - y - 1);
+	int pitch = ((img->Width * BInfoHeader->biBitCount) + 31) / 32 * 4;
+	int padding = pitch - (img->Width * (BInfoHeader->biBitCount / 8));
+	int inpad = (img->Height - y - 1)*padding;
+
+	rgb = &Image[i];
+
+	rgb = (RGBTRIPLE*)((BYTE*)rgb + inpad);
+
+	lua_pushstring(L, "r");
+	lua_gettable(L, -2);
+
+	if (lua_isnumber(L, -1)) {
+		rgb->rgbtRed = max(min(lua_tonumber(L, -1), 255), 0);
+	}
+	else {
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		lua_pushstring(L, "Missing pixel value");
+		return 2;
+	}
+
+	lua_pop(L, 1);
+	lua_pushstring(L, "g");
+	lua_gettable(L, -2);
+
+	if (lua_isnumber(L, -1)) {
+		rgb->rgbtGreen = max(min(lua_tonumber(L, -1), 255), 0);
+	}
+	else {
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		lua_pushstring(L, "Missing pixel value");
+		return 2;
+	}
+
+	lua_pop(L, 1);
+	lua_pushstring(L, "b");
+	lua_gettable(L, -2);
+
+	if (lua_isnumber(L, -1)) {
+		rgb->rgbtBlue = max(min(lua_tonumber(L, -1), 255), 0);
+	}
+	else {
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		lua_pushstring(L, "Missing pixel value");
+		return 2;
+	}
+
+	lua_pop(L, lua_gettop(L));
+
+	return 0;
+}
+
 int lua_setpixelmatrix(lua_State *L) {
 
 	LuaImage * img = lua_toimage(L, 1);

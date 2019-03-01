@@ -462,6 +462,14 @@ Image:
 	-returns false, message on failure
 	bool Image:SetPixelMatrix(pixelmatrix)
 
+	-Get a single pixel
+	-Returns a table containing r,g,b
+	pixel Image:GetPixel(y, x);
+
+	-Set a single pixel
+	-pixel should be a table containing r,g,b
+	void Image:SetPixel(y, x, pixel);
+
 	-Retrive the dimentions of an image
 	width, height Image:GetSize()
 

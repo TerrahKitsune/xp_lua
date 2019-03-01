@@ -29,6 +29,8 @@ int lua_createimage(lua_State *L);
 int lua_crop(lua_State *L);
 int lua_getpixelmatrix(lua_State *L);
 int lua_setpixelmatrix(lua_State *L);
+int lua_getpixel(lua_State *L);
+int lua_setpixel(lua_State *L);
 
 int image_gc(lua_State *L);
 int image_tostring(lua_State *L);
