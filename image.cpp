@@ -96,15 +96,20 @@ int lua_setpixels(lua_State *L) {
 	}
 
 	PBITMAPFILEHEADER BFileHeader = (PBITMAPFILEHEADER)img->Data;
+	PBITMAPINFOHEADER  BInfoHeader = (PBITMAPINFOHEADER)&img->Data[sizeof(BITMAPFILEHEADER)];
 
 	RGBTRIPLE * Image = (RGBTRIPLE*)&img->Data[BFileHeader->bfOffBits];
 	RGBTRIPLE * rgb;
 	size_t n = 0;
 
+	int pitch = ((img->Width * BInfoHeader->biBitCount) + 31) / 32 * 4;
+	int padding = pitch - (img->Width * (BInfoHeader->biBitCount / 8));
+	int inpad;
+
 	lua_pushnil(L);
 	while (lua_next(L, -2) != 0) {
 
-		n = lua_tointeger(L, -2) - 1;
+		n = lua_tointeger(L, -2)-1;
 
 		if (n < 0 || n >= imglen) {
 			lua_pop(L, lua_gettop(L));
@@ -113,7 +118,10 @@ int lua_setpixels(lua_State *L) {
 			return 2;
 		}
 
+		inpad = (n / img->Width)*padding;
 		rgb = &Image[n];
+
+		rgb = (RGBTRIPLE*)((BYTE*)rgb + inpad);
 
 		lua_pushstring(L, "r");
 		lua_gettable(L, -2);
@@ -170,17 +178,25 @@ int lua_getpixels(lua_State *L) {
 	LuaImage * img = lua_toimage(L, 1);
 
 	PBITMAPFILEHEADER BFileHeader = (PBITMAPFILEHEADER)img->Data;
+	PBITMAPINFOHEADER  BInfoHeader = (PBITMAPINFOHEADER)&img->Data[sizeof(BITMAPFILEHEADER)];
 
 	RGBTRIPLE * Image = (RGBTRIPLE*)&img->Data[BFileHeader->bfOffBits];
 	RGBTRIPLE * rgb;
 	size_t len = img->Height * img->Width;
 
-	lua_pop(L, lua_gettop(L));
+	int pitch = ((img->Width * BInfoHeader->biBitCount) + 31) / 32 * 4;
+	int padding = pitch - (img->Width * (BInfoHeader->biBitCount / 8));
+	int inpad;
 
 	lua_createtable(L, len, 0);
 
 	for (size_t n = 0; n < len; n++) {
-		rgb = &Image[n];
+
+		inpad = (n / img->Width)*padding;
+
+		rgb = &Image[n];//(RGBTRIPLE*)(Image + ((sizeof(RGBTRIPLE) * n) + inpad));
+
+		rgb = (RGBTRIPLE*)((BYTE*)rgb + inpad);
 
 		lua_createtable(L, 0, 3);
 
@@ -198,6 +214,9 @@ int lua_getpixels(lua_State *L) {
 
 		lua_rawseti(L, -2, n + 1);
 	}
+
+	lua_copy(L, -1, 1);
+	lua_pop(L, lua_gettop(L)-1);
 
 	return 1;
 }
@@ -291,35 +310,48 @@ int lua_crop(lua_State *L) {
 	BInfoHeader->biHeight = image->Height;
 	BInfoHeader->biWidth = image->Width;
 
-	RGBTRIPLE *Original = (RGBTRIPLE*)&original->Data[sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER)];
-	RGBTRIPLE *Image = (RGBTRIPLE*)&image->Data[sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER)];
+	PBITMAPFILEHEADER oriBFileHeader = (PBITMAPFILEHEADER)original->Data;
+	PBITMAPINFOHEADER  oriBInfoHeader = (PBITMAPINFOHEADER)&original->Data[sizeof(BITMAPFILEHEADER)];
 
-	size_t coord_x, coord_y;
+	BYTE *Original = (BYTE*)&original->Data[oriBFileHeader->bfOffBits];
+	BYTE *Image = (BYTE*)&image->Data[BFileHeader->bfOffBits];
+
+	int coord_x, coord_y;
 	size_t i = 0;
 	size_t n;
 	size_t hoffset = (original->Height - h) - y;
-	
-	for (coord_y = hoffset; coord_y < h + hoffset; coord_y++) {
-		for (coord_x = x; coord_x < w + x; coord_x++) {
-			n = coord_x + original->Width * coord_y;
-			memcpy(&Image[i++], &Original[n], sizeof(RGBTRIPLE));
+	size_t woffset = x;
+
+	RGBTRIPLE * dst;
+	RGBTRIPLE * src;
+
+	int pitch = ((original->Width * oriBInfoHeader->biBitCount) + 31) / 32 * 4;
+	int padding_out = pitch - (original->Width * (oriBInfoHeader->biBitCount / 8));
+
+	pitch = ((image->Width * BInfoHeader->biBitCount) + 31) / 32 * 4;
+	int padding_in = pitch - (image->Width * (BInfoHeader->biBitCount / 8));
+
+	int inpad = 0;
+	int outpad = 0;
+
+	for (coord_y = 0; coord_y < h; coord_y++) {
+
+		inpad = (coord_y*padding_in);
+		outpad = ((coord_y + hoffset)*padding_out);
+
+		for (coord_x = 0; coord_x < w; coord_x++) {
+
+			n = (coord_x + woffset) + (original->Width * (coord_y + hoffset));
+			i = coord_x + (image->Width * coord_y);
+
+
+			dst = (RGBTRIPLE*)(Image + ((sizeof(RGBTRIPLE) * i) + inpad));
+
+			src = (RGBTRIPLE*)(Original + ((sizeof(RGBTRIPLE) * n) + outpad));
+
+			memcpy(dst, src, sizeof(RGBTRIPLE));
 		}
 	}
-
-	//bool ok;
-	//for (size_t n = 0; n < original->DataSize; n++) {
-
-	//	coord_y = (n / original->Width);
-	//	coord_x = (n % original->Width);
-
-	//	ok = coord_y >= y && coord_y - y < h && coord_x >= x && coord_x - x < w;
-
-	//	//printf("%u | %u = %d\n", coord_x, coord_y, ok);
-
-	//	if (ok) {
-	//		memcpy(&Image[i++], &Original[coord_x + original->Width * coord_y], sizeof(RGBTRIPLE));
-	//	}
-	//}
 
 	lua_copy(L, lua_gettop(L), 1);
 	lua_pop(L, lua_gettop(L) - 1);
@@ -372,10 +404,15 @@ int lua_setpixelmatrix(lua_State *L) {
 	LuaImage * img = lua_toimage(L, 1);
 
 	PBITMAPFILEHEADER BFileHeader = (PBITMAPFILEHEADER)img->Data;
+	PBITMAPINFOHEADER  BInfoHeader = (PBITMAPINFOHEADER)&img->Data[sizeof(BITMAPFILEHEADER)];
 
 	RGBTRIPLE * Image = (RGBTRIPLE*)&img->Data[BFileHeader->bfOffBits];
 	RGBTRIPLE * rgb;
 	int x, y, i;
+
+	int pitch = ((img->Width * BInfoHeader->biBitCount) + 31) / 32 * 4;
+	int padding = pitch - (img->Width * (BInfoHeader->biBitCount / 8));
+	int inpad;
 
 	lua_pushnil(L);
 	while (lua_next(L, -2) != 0) {
@@ -403,7 +440,10 @@ int lua_setpixelmatrix(lua_State *L) {
 
 			i = x + img->Width * (img->Height - y - 1);
 
+			inpad = (img->Height - y - 1)*padding;
 			rgb = &Image[i];
+
+			rgb = (RGBTRIPLE*)((BYTE*)rgb + inpad);
 
 			lua_pushstring(L, "r");
 			lua_gettable(L, -2);
@@ -464,21 +504,30 @@ int lua_getpixelmatrix(lua_State *L) {
 
 	size_t i = 0;
 	PBITMAPFILEHEADER BFileHeader = (PBITMAPFILEHEADER)img->Data;
+	PBITMAPINFOHEADER  BInfoHeader = (PBITMAPINFOHEADER)&img->Data[sizeof(BITMAPFILEHEADER)];
 
 	RGBTRIPLE * Image = (RGBTRIPLE*)&img->Data[BFileHeader->bfOffBits];
 	RGBTRIPLE * rgb;
 
+	int pitch = ((img->Width * BInfoHeader->biBitCount) + 31) / 32 * 4;
+	int padding = pitch - (img->Width * (BInfoHeader->biBitCount / 8));
+	int inpad;
+
 	lua_createtable(L, img->Height, 0);
 
-	for (int coord_y = img->Height-1; coord_y >= 0; coord_y--) {
+	for (int coord_y = img->Height - 1; coord_y >= 0; coord_y--) {
 
 		lua_createtable(L, img->Width, 0);
 
 		for (int coord_x = 0; coord_x < img->Width; coord_x++) {
-			
+
 			i = coord_x + img->Width * coord_y;
 
 			rgb = &Image[i];
+
+			inpad = coord_y*padding;
+
+			rgb = (RGBTRIPLE*)((BYTE*)rgb + inpad);
 
 			lua_createtable(L, 0, 3);
 
@@ -497,7 +546,7 @@ int lua_getpixelmatrix(lua_State *L) {
 			lua_rawseti(L, -2, coord_x + 1);
 		}
 
-		lua_rawseti(L, -2, (img->Height-coord_y));
+		lua_rawseti(L, -2, (img->Height - coord_y));
 	}
 
 	lua_copy(L, lua_gettop(L), 1);
@@ -604,7 +653,7 @@ int lua_savetofile(lua_State *L) {
 	}
 
 	if (WriteFile(FH, img->Data, img->DataSize, &Junk, 0) && Junk == img->DataSize) {
-		
+
 		lua_pop(L, lua_gettop(L));
 		lua_pushboolean(L, true);
 	}
