@@ -109,7 +109,7 @@ int lua_setpixels(lua_State *L) {
 	lua_pushnil(L);
 	while (lua_next(L, -2) != 0) {
 
-		n = lua_tointeger(L, -2)-1;
+		n = lua_tointeger(L, -2) - 1;
 
 		if (n < 0 || n >= imglen) {
 			lua_pop(L, lua_gettop(L));
@@ -216,7 +216,7 @@ int lua_getpixels(lua_State *L) {
 	}
 
 	lua_copy(L, -1, 1);
-	lua_pop(L, lua_gettop(L)-1);
+	lua_pop(L, lua_gettop(L) - 1);
 
 	return 1;
 }
@@ -226,8 +226,8 @@ int lua_screenshot(lua_State *L) {
 	int x, y, startx, starty;
 	x = luaL_optinteger(L, 1, 0);
 	y = luaL_optinteger(L, 2, 0);
-	startx = luaL_optinteger(L, 3, 0);
-	starty = luaL_optinteger(L, 4, 0);
+	startx = max(luaL_optinteger(L, 3, 1) - 1, 0);
+	starty = max(luaL_optinteger(L, 4, 1) - 1, 0);
 	int screen = luaL_optinteger(L, 5, 1);
 
 	lua_pop(L, lua_gettop(L));
@@ -268,8 +268,8 @@ int lua_crop(lua_State *L) {
 	LuaImage * original = lua_toimage(L, 1);
 	int w = luaL_checkinteger(L, 2);
 	int h = luaL_checkinteger(L, 3);
-	int x = luaL_checkinteger(L, 4);
-	int y = luaL_checkinteger(L, 5);
+	int x = luaL_checkinteger(L, 4) - 1;
+	int y = luaL_checkinteger(L, 5) - 1;
 
 	if (w + x > original->Width || h + y > original->Height || x < 0 || y < 0 || w <= 0 || h <= 0) {
 
@@ -402,8 +402,8 @@ int lua_createimage(lua_State *L) {
 int lua_getpixel(lua_State *L) {
 
 	LuaImage * img = lua_toimage(L, 1);
-	int y = luaL_checkinteger(L, 2);
-	int x = luaL_checkinteger(L, 3);
+	int y = luaL_checkinteger(L, 2) - 1;
+	int x = luaL_checkinteger(L, 3) - 1;
 
 	if (y < 0 || x < 0 || y >= img->Height || x >= img->Width) {
 		luaL_error(L, "Argument out of range");
@@ -416,10 +416,11 @@ int lua_getpixel(lua_State *L) {
 	RGBTRIPLE * Image = (RGBTRIPLE*)&img->Data[BFileHeader->bfOffBits];
 	RGBTRIPLE * rgb;
 
+	int i = x + img->Width * (img->Height - y - 1);
 	int pitch = ((img->Width * BInfoHeader->biBitCount) + 31) / 32 * 4;
 	int padding = pitch - (img->Width * (BInfoHeader->biBitCount / 8));
-	int inpad = y * padding;
-	int i = x + img->Width * y;
+	int inpad = (img->Height - y - 1)*padding;
+
 	rgb = &Image[i];
 
 	rgb = (RGBTRIPLE*)((BYTE*)rgb + inpad);
@@ -447,8 +448,8 @@ int lua_getpixel(lua_State *L) {
 int lua_setpixel(lua_State *L) {
 
 	LuaImage * img = lua_toimage(L, 1);
-	int y = luaL_checkinteger(L, 2);
-	int x = luaL_checkinteger(L, 3);
+	int y = luaL_checkinteger(L, 2) - 1;
+	int x = luaL_checkinteger(L, 3) - 1;
 
 	if (y < 0 || x < 0 || y >= img->Height || x >= img->Width) {
 		luaL_error(L, "Argument out of range");
@@ -642,11 +643,11 @@ int lua_getpixelmatrix(lua_State *L) {
 
 		for (int coord_x = 0; coord_x < img->Width; coord_x++) {
 
-			i = coord_x + img->Width * coord_y;
+			i = coord_x + img->Width * (img->Height - coord_y - 1);
 
 			rgb = &Image[i];
 
-			inpad = coord_y*padding;
+			inpad = (img->Height - coord_y - 1)*padding;
 
 			rgb = (RGBTRIPLE*)((BYTE*)rgb + inpad);
 
@@ -667,7 +668,7 @@ int lua_getpixelmatrix(lua_State *L) {
 			lua_rawseti(L, -2, coord_x + 1);
 		}
 
-		lua_rawseti(L, -2, (img->Height - coord_y));
+		lua_rawseti(L, -2, coord_y + 1);
 	}
 
 	lua_copy(L, lua_gettop(L), 1);

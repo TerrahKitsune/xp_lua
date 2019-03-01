@@ -427,6 +427,8 @@ SQLite:
 
 Image: 
 	
+	--ALL COORDINATES ARE 1 INDEXED
+
 	-Take a screenshot with the desired width and height on a monitor
 	-If no parameters are given it'll take a full screenshot of the first monitor
 	Image Image.Screenshot(width, height, startx, starty, monitor)
