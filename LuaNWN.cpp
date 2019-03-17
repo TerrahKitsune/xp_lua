@@ -16,14 +16,16 @@ static const struct luaL_Reg nwnfuncs[] = {
 	{ "GetLocalVariable", GetLocalVariable },
 	{ "ClearLocalVariables", ClearLocalVariables },
 	{ "RunScript", LRunScript },
+	{ "SetGetCreatureScript", SetGetCreatureScript },
 	{ "GetABVs", GetABVs },
 	{ "HookDisconnectPlayer", HookDisconnectPlayer },
 	{ "HookMainloop", HookMainLoop },
 	{ "HookResolveBonusCombatDamage", HookResolveBonusCombatDamage },
+	{ "GetTempHP", GetTempHP },
+	{ "SetTempHP", SetTempHP },
 	{ "Test", Test },
 	{ NULL, NULL }
 };
-
 
 int luaopen_nwnfunctions(lua_State *L) {
 

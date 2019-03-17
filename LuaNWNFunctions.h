@@ -19,3 +19,6 @@ int SetEffectObject(lua_State*L);
 int GetABVs(lua_State*L);
 int ClearLocalVariables(lua_State*L);
 int GetLocalVariable(lua_State*L);
+int SetGetCreatureScript(lua_State*L);
+int GetTempHP(lua_State*L);
+int SetTempHP(lua_State*L);

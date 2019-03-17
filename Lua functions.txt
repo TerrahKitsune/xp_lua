@@ -804,3 +804,15 @@ xp_lua.dll ONLY (Starts with NWN.):
 	-4: object
 	-5: location
 	value GetLocalVariable(objid, name, opt type)
+
+	-Get or Set a creature script
+	-If newscript is nil then no new script is set
+	-returns the old script
+	-Max index >= 25
+	string SetGetCreatureScript(objid, index, opt newscript)
+
+	-retrive the temp hp of a creature
+	int GetTempHP(objid)
+
+	-Set the temp hp of a creature
+	void GetTempHP(objid, newhp)

@@ -53,7 +53,7 @@ Implementation of Lua Plugin
 PLua::PLua()
 {
 	header = _T(
-		"NWNX Lua Plugin V.0.3.2\n" \
+		"NWNX Lua Plugin V.0.3.3\n" \
 		"(c) 2019 by Robin Karlsson (Terrahkitsune)\n" \
 		"Lua (c) PUC-Rio: https://www.lua.org/ \n"\
 		"visit us at http://www.nwnx.org\n");

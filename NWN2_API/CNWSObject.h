@@ -35,11 +35,14 @@ struct CNWSGenericObject {
 
 struct CNWSObject {
 	CNWSGenericObject GenericObj;
-	DWORD dwordPadding;
-	BYTE byteA4; //A4
-	BYTE byteA5;
-	BYTE byteA6;
 	BYTE ObjectType;
+	BYTE pad2;
+	BYTE pad3;
+	BYTE pad4;
+	BYTE pad5;
+	BYTE pad6;
+	BYTE pad7;
+	BYTE pad8;
 	DWORD dwordA8; //A8
 	DWORD dwordAC; //AC
 	void * obj_vtable; //B0

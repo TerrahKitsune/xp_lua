@@ -390,6 +390,100 @@ int GetEffectData(lua_State*L) {
 	return 1;
 }
 
+int GetTempHP(lua_State*L) {
+
+	nwn_objid_t objid = GetObjID(L, 1);
+	CNWSObject * object = (CNWSObject*)GetObjectByGameObjectID(objid);
+
+	if (objid == OJBECT_INVALID || !object || object->ObjectType != CGameObject__OBJECT_TYPE_CREATURE) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushinteger(L, 0);
+		return 1;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, object->TempHp);
+
+	return 1;
+}
+
+int SetTempHP(lua_State*L) {
+
+	nwn_objid_t objid = GetObjID(L, 1);
+	int temphp = luaL_checkinteger(L, 2);
+	CNWSObject * object = (CNWSObject*)GetObjectByGameObjectID(objid);
+
+	if (objid == OJBECT_INVALID || !object || object->ObjectType != CGameObject__OBJECT_TYPE_CREATURE) {
+		lua_pop(L, lua_gettop(L));
+		return 0;
+	}
+
+	object->TempHp = temphp;
+
+	lua_pop(L, lua_gettop(L));
+	return 0;
+}
+
+int SetGetCreatureScript(lua_State*L){
+
+	nwn_objid_t objid = GetObjID(L, 1);
+	int idx = luaL_checkinteger(L, 2);
+	size_t len;
+	const char * script = luaL_optlstring(L, 3, NULL, &len);
+
+	if (idx > 25 || idx < 0) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	BYTE * raw = (BYTE*)GetObjectByGameObjectID(objid);
+	CNWSObject * object = (CNWSObject*)raw;
+
+	if (objid == OJBECT_INVALID || !object || object->ObjectType != CGameObject__OBJECT_TYPE_CREATURE) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	CExoString* scripts = (CExoString*)(raw + 0x418);
+	CExoString* target = &scripts[idx];
+
+	if (!scripts->text) {
+		lua_pushstring(L, "");
+	}
+	else {
+		lua_pushstring(L, target->text);
+	}
+
+	if (script) {
+
+		if (target->text) {
+			NWN2_Free(target->text);
+			target->text = NULL;
+			target->len = 0;
+		}
+
+		if (script[0] != '\0') {
+			target->len = len + 1;
+			target->text = (char*)NWN2_Malloc(target->len);
+			
+			if (!target->text) {
+				target->len = 0;
+			}
+			else {
+				memcpy(target->text, script, len);
+				target->text[len] = '\0';
+			}
+		}
+	}
+
+	lua_copy(L, -1, 1);
+	lua_pop(L, lua_gettop(L)-1);
+
+	return 1;
+}
+
 int CopyEffectIdsToEffectInts(lua_State*L) {
 
 	nwn_objid_t objid = GetObjID(L, 1);
