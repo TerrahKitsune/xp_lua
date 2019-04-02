@@ -128,6 +128,123 @@ int luaopen_misc(lua_State *L){
 	lua_newtable(L);
 	env_table = luaL_ref(L, LUA_REGISTRYINDEX);
 
+	char esc[2] = {0,0};
+
+	lua_createtable(L, 0, 3);
+	
+	lua_pushstring(L, "NUL");
+	lua_pushlstring(L, esc, 1);
+	lua_settable(L, -3);
+
+	for (esc[0] = 1; esc[0] < 32; esc[0]++) {
+
+		switch (esc[0]) {
+
+		case 1:
+			lua_pushstring(L, "SOH");
+			break;
+		case 2:
+			lua_pushstring(L, "STX");
+			break;
+		case 3:
+			lua_pushstring(L, "ETX");
+			break;
+		case 4:
+			lua_pushstring(L, "EOT");
+			break;
+		case 5:
+			lua_pushstring(L, "ENQ");
+			break;
+		case 6:
+			lua_pushstring(L, "ACK");
+			break;
+		case 7:
+			lua_pushstring(L, "BEL");
+			break;
+		case 8:
+			lua_pushstring(L, "BS");
+			break;
+		case 9:
+			lua_pushstring(L, "TAB");
+			break;
+		case 10:
+			lua_pushstring(L, "LF");
+			break;
+		case 11:
+			lua_pushstring(L, "VT");
+			break;
+		case 12:
+			lua_pushstring(L, "FF");
+			break;
+		case 13:
+			lua_pushstring(L, "CR");
+			break;
+		case 14:
+			lua_pushstring(L, "SO");
+			break;
+		case 15:
+			lua_pushstring(L, "SI");
+			break;
+		case 16:
+			lua_pushstring(L, "DLE");
+			break;
+		case 17:
+			lua_pushstring(L, "DC1");
+			break;
+		case 18:
+			lua_pushstring(L, "DC2");
+			break;
+		case 19:
+			lua_pushstring(L, "DC3");
+			break;
+		case 20:
+			lua_pushstring(L, "DC4");
+			break;
+		case 21:
+			lua_pushstring(L, "NAK");
+			break;
+		case 22:
+			lua_pushstring(L, "SYN");
+			break;
+		case 23:
+			lua_pushstring(L, "ETB");
+			break;
+		case 24:
+			lua_pushstring(L, "CAN");
+			break;
+		case 25:
+			lua_pushstring(L, "EM");
+			break;
+		case 26:
+			lua_pushstring(L, "SUB");
+			break;
+		case 27:
+			lua_pushstring(L, "ESC");
+			break;
+		case 28:
+			lua_pushstring(L, "FS");
+			break;
+		case 29:
+			lua_pushstring(L, "GS");
+			break;
+		case 30:
+			lua_pushstring(L, "RS");
+			break;
+		case 31:
+			lua_pushstring(L, "US");
+			break;
+		case 32:
+			lua_pushstring(L, "Space");
+			break;
+		}
+
+		lua_pushstring(L, esc);
+		lua_settable(L, -3);
+	}
+
+
+	lua_setglobal(L, "c");
+
 	lua_pushcfunction(L, GetLastErrorAsMessage);
 	lua_setglobal(L, "GetLastError");
 

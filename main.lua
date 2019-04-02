@@ -37,6 +37,14 @@ function PrintPixel(px)
 	print(px.b .. "} ");
 end
 
+print("bla"..c.LF.."bla");
+
+for k,v in pairs(c) do 
+	print(k, string.byte(v));
+end
+
+print(UUID());
+
 local img = Image.Screenshot();
 local data = img:GetPixelMatrix();
 img:Close();

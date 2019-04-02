@@ -45,6 +45,10 @@ Misc global functions:
 
 	ms Runtime()
 
+	-Contains special characters 0 - 31 (http://www.asciitable.com/)
+	-Example c.LF = '\n'
+	table c
+
 	-A key(resourceid) value (extension) table used to determine the extensions used for erf containers
 	-can be modifed during runtime
 	table ResList
