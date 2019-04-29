@@ -12,9 +12,9 @@ Lua2daLine GetRow(const char * original, const char * end)
 	if (original >= end)
 		return line;
 
-	for (const char * c = original; c < end; c++){
+	for (const char * c = original; c < end; c++) {
 
-		if (*c == '\n'){
+		if (*c == '\n') {
 
 			line.start = original;
 			line.len = c - original;
@@ -22,7 +22,7 @@ Lua2daLine GetRow(const char * original, const char * end)
 		}
 	}
 
-	if (!line.start){
+	if (!line.start) {
 		line.start = original;
 		line.len = end - original;
 	}
@@ -41,13 +41,13 @@ Lua2daLine GetField(const char * original, const char * end)
 	const char * start = NULL;
 	bool isinescape = false;
 
-	for (const char * c = original; c < end; c++){
+	for (const char * c = original; c < end; c++) {
 
-		if (start){
+		if (start) {
 
-			if (isinescape){
+			if (isinescape) {
 
-				if (*c == '"'){
+				if (*c == '"') {
 					line.start = start;
 					line.len = c - start;
 					break;
@@ -60,11 +60,11 @@ Lua2daLine GetField(const char * original, const char * end)
 				break;
 			}
 		}
-		else{
-			if (*c != ' ' && *c != '\t'){
+		else {
+			if (*c != ' ' && *c != '\t') {
 				start = c;
 
-				if (*c == '"'){
+				if (*c == '"') {
 					isinescape = true;
 					start++;
 				}
@@ -75,41 +75,41 @@ Lua2daLine GetField(const char * original, const char * end)
 	return line;
 }
 
-void AddToList(Linked * root, void * data){
+void AddToList(Linked * root, void * data) {
 
 	Linked * newlinked = NULL;
 
-	if (root->data == NULL){
+	if (root->data == NULL) {
 		root->data = data;
 		return;
 	}
 
 	newlinked = (Linked *)calloc(1, sizeof(Linked));
 
-	if (root->next == NULL){		
+	if (root->next == NULL) {
 		root->next = newlinked;
 	}
-	else{
+	else {
 		root->bottom->next = newlinked;
 	}
 
-	if (newlinked){
+	if (newlinked) {
 		newlinked->data = data;
 		root->bottom = newlinked;
 	}
 }
 
-void freelinked(Linked * root){
+void freelinked(Linked * root) {
 	Linked * l = root;
 	Linked * temp;
-	while (l){
+	while (l) {
 		temp = l;
 		l = l->next;
 		free(temp);
 	}
 }
 
-int twoda_open(lua_State *L){
+int twoda_open(lua_State *L) {
 
 	size_t len;
 	const char * raw = luaL_checklstring(L, 1, &len);
@@ -117,7 +117,7 @@ int twoda_open(lua_State *L){
 
 	memset(&header, 0, sizeof(Lua2da));
 
-	if (len < sizeof(Lua2da)){
+	if (len < sizeof(Lua2da)) {
 
 		lua_pop(L, lua_gettop(L));
 		lua_pushnil(L);
@@ -145,7 +145,7 @@ int twoda_open(lua_State *L){
 	const char * cursor;
 
 	Lua2daLine first = GetRow(raw, end);
-	Lua2daLine second = GetRow(&first.start[first.len]+1, end);
+	Lua2daLine second = GetRow(&first.start[first.len] + 1, end);
 
 	if (!first.start ||
 		!second.start)
@@ -155,8 +155,17 @@ int twoda_open(lua_State *L){
 		lua_pushstring(L, "2da is malformed");
 		return 2;
 	}
-	else
+	else {
+
+		if (!second.start) {
+			lua_pop(L, lua_gettop(L));
+			lua_pushnil(L);
+			lua_pushstring(L, "2da is malformed");
+			return 2;
+		}
+
 		cursor = &second.start[second.len] + 1;
+	}
 
 	Lua2daLine columns = GetRow(cursor, end);
 	const char * lineend = &columns.start[columns.len + 1];
@@ -166,19 +175,27 @@ int twoda_open(lua_State *L){
 
 	while (field.start)
 	{
-		fielddata = (char*)calloc(field.len+1, sizeof(char));
+		fielddata = (char*)calloc(field.len + 1, sizeof(char));
 		memcpy(fielddata, field.start, field.len);
-		
+
 		AddToList(list, fielddata);
 
 		header.numbcols++;
 		field = GetField(&field.start[field.len + 1], lineend);
 	}
 
+	if (header.numbcols <= 0) {
+		freelinked(list);
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, "No columns found");
+		return 2;
+	}
+
 	int cnt = 0;
 
 	header.columns = (char**)calloc(header.numbcols, sizeof(char*));
-	for (Linked * l = list; l; l = l->next){
+	for (Linked * l = list; l; l = l->next) {
 		header.columns[cnt++] = (char*)l->data;
 	}
 
@@ -187,8 +204,8 @@ int twoda_open(lua_State *L){
 
 	Linked * sub;
 	Lua2daLine line = GetRow(&columns.start[columns.len + 1], end);
-	
-	while (line.start){
+
+	while (line.start) {
 
 		sub = (Linked*)calloc(1, sizeof(Linked));
 		lineend = &line.start[line.len + 1];
@@ -197,7 +214,7 @@ int twoda_open(lua_State *L){
 
 		while (field.start)
 		{
-			fielddata = (char*)calloc(field.len+1, sizeof(char));
+			fielddata = (char*)calloc(field.len + 1, sizeof(char));
 			memcpy(fielddata, field.start, field.len);
 
 			AddToList(sub, fielddata);
@@ -214,26 +231,31 @@ int twoda_open(lua_State *L){
 
 	cnt = 0;
 	int subcnt;
-	header.rows = (char***)calloc(header.numbrows, sizeof(char**));
-	for (Linked * l = list; l; l = l->next){
+	if (header.numbrows > 0) {
+		header.rows = (char***)calloc(header.numbrows, sizeof(char**));
+		for (Linked * l = list; l; l = l->next) {
 
-		sub = (Linked*)l->data;
+			sub = (Linked*)l->data;
 
-		subcnt = 0;
-		
-		header.rows[cnt] = (char**)calloc(header.numbcols, sizeof(char*));
+			subcnt = 0;
 
-		if (sub){
+			header.rows[cnt] = (char**)calloc(header.numbcols, sizeof(char*));
 
-			for (Linked * s = sub->next; s; s = s->next){
-				header.rows[cnt][subcnt] = (char*)s->data;
-				if (++subcnt >= header.numbcols)
-					break;
+			if (sub) {
+
+				for (Linked * s = sub->next; s; s = s->next) {
+					header.rows[cnt][subcnt] = (char*)s->data;
+					if (++subcnt >= header.numbcols)
+						break;
+				}
+				freelinked(sub);
 			}
-			freelinked(sub);
-		}
 
-		cnt++;
+			cnt++;
+		}
+	}
+	else {
+		header.rows = NULL;
 	}
 
 	freelinked(list);
@@ -245,7 +267,7 @@ int twoda_open(lua_State *L){
 	return 1;
 }
 
-Lua2da * lua_pushtwoda(lua_State *L){
+Lua2da * lua_pushtwoda(lua_State *L) {
 	Lua2da * twoda = (Lua2da*)lua_newuserdata(L, sizeof(Lua2da));
 	if (twoda == NULL)
 		luaL_error(L, "Unable to push 2da");
@@ -255,37 +277,37 @@ Lua2da * lua_pushtwoda(lua_State *L){
 	return twoda;
 }
 
-Lua2da * lua_totwoda(lua_State *L, int index){
+Lua2da * lua_totwoda(lua_State *L, int index) {
 	Lua2da * tlk = (Lua2da*)luaL_checkudata(L, index, TWODA);
 	if (tlk == NULL)
 		luaL_error(L, "parameter is not a %s", TWODA);
 	return tlk;
 }
 
-int twoda_get2dastring(lua_State *L){
+int twoda_get2dastring(lua_State *L) {
 
 	Lua2da * twoda = lua_totwoda(L, 1);
 	int row = luaL_checkinteger(L, 2);
 	int col = -1;
 
-	if (lua_type(L, 3) == LUA_TNUMBER){
+	if (lua_type(L, 3) == LUA_TNUMBER) {
 		col = lua_tointeger(L, 3);
 	}
-	else if (lua_type(L, 3) == LUA_TSTRING){
+	else if (lua_type(L, 3) == LUA_TSTRING) {
 		const char * colname = lua_tostring(L, 3);
-		for (int n = 0; n < twoda->numbcols; n++){
-			if (strcmp(colname, twoda->columns[n]) == 0){
+		for (int n = 0; n < twoda->numbcols; n++) {
+			if (strcmp(colname, twoda->columns[n]) == 0) {
 				col = n;
 				break;
 			}
 		}
 	}
-	else{
+	else {
 		luaL_error(L, "get2dastring parameter 3 must be a number or string");
 	}
 
 
-	if (col < 0 || row < 0 || row >= twoda->numbrows){
+	if (col < 0 || row < 0 || row >= twoda->numbrows) {
 		lua_pop(L, lua_gettop(L));
 		lua_pushnil(L);
 		return 1;
@@ -301,19 +323,19 @@ int twoda_get2dastring(lua_State *L){
 	return 1;
 }
 
-int twoda_get2darow(lua_State *L){
+int twoda_get2darow(lua_State *L) {
 
 	Lua2da * twoda = lua_totwoda(L, 1);
 	int index = luaL_checkinteger(L, 2);
 
-	if (index < 0 || index >= twoda->numbrows){
+	if (index < 0 || index >= twoda->numbrows) {
 		lua_pop(L, lua_gettop(L));
 		lua_pushnil(L);
 		return 1;
 	}
 
 	char ** row = twoda->rows[index];
-	if (!row){
+	if (!row) {
 		lua_pop(L, lua_gettop(L));
 		lua_pushnil(L);
 		return 1;
@@ -334,13 +356,13 @@ int twoda_get2darow(lua_State *L){
 	return 1;
 }
 
-int twoda_get2dainfo(lua_State *L){
+int twoda_get2dainfo(lua_State *L) {
 
 	Lua2da * twoda = lua_totwoda(L, 1);
 	lua_pop(L, lua_gettop(L));
 	lua_createtable(L, twoda->numbcols, 0);
 
-	for (int n = 0; n < twoda->numbcols; n++){
+	for (int n = 0; n < twoda->numbcols; n++) {
 		lua_pushstring(L, twoda->columns[n]);
 		lua_rawseti(L, -2, n + 1);
 	}
@@ -351,18 +373,19 @@ int twoda_get2dainfo(lua_State *L){
 	return 3;
 }
 
-void freelua2dasubdata(Lua2da * data){
-	
-	if (data->columns){
-		for (int n = 0; n < data->numbcols; n++){
+void freelua2dasubdata(Lua2da * data) {
+
+	if (data->columns) {
+		for (int n = 0; n < data->numbcols; n++) {
 			if (data->columns[n])
 				free(data->columns[n]);
 		}
 		free(data->columns);
 		data->columns = NULL;
 	}
-	if (data->rows){
-		for (int row = 0; row < data->numbrows; row++){
+
+	if (data->rows) {
+		for (int row = 0; row < data->numbrows; row++) {
 			if (data->rows[row])
 			{
 				for (int col = 0; col < data->numbcols; col++)
@@ -378,14 +401,14 @@ void freelua2dasubdata(Lua2da * data){
 	}
 }
 
-int twoda_gc(lua_State *L){
+int twoda_gc(lua_State *L) {
 
 	Lua2da * tlk = lua_totwoda(L, 1);
 	freelua2dasubdata(tlk);
 	return 0;
 }
 
-int twoda_tostring(lua_State *L){
+int twoda_tostring(lua_State *L) {
 	char tim[100];
 	sprintf(tim, "2DA: 0x%08X", lua_totwoda(L, 1));
 	lua_pushfstring(L, tim);
