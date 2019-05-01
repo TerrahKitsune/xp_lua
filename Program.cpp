@@ -24,6 +24,7 @@
 #include "NamedPipeMain.h"
 #include <io.h>
 #include "LuaImageMain.h"
+#include "StreamMain.h"
 
 #define HI_PART(x)  ((x>>4) & 0x0F)
 #define LO_PART(x)  ((x) & 0x0F)
@@ -476,6 +477,8 @@ int main(int argc, char *argv[]){
 	lua_setglobal(L, "Pipe");
 	luaopen_image(L);
 	lua_setglobal(L, "Image");
+	luaopen_stream(L);
+	lua_setglobal(L, "Stream");
 
 	lua_pushcfunction(L, L_GetRuntime);
 	lua_setglobal(L, "Runtime");

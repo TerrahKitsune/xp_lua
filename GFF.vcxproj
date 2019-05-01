@@ -89,6 +89,8 @@
     <ClCompile Include="mysql_main_incl.cpp" />
     <ClCompile Include="namedpipe.cpp" />
     <ClCompile Include="NamedPipeMain.cpp" />
+    <ClCompile Include="stream.cpp" />
+    <ClCompile Include="StreamMain.cpp" />
     <ClCompile Include="_Http.cpp" />
     <ClCompile Include="HttpMain.cpp" />
     <ClCompile Include="List.cpp" />
@@ -176,6 +178,8 @@
     <ClInclude Include="namedpipe.h" />
     <ClInclude Include="NamedPipeMain.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="stream.h" />
+    <ClInclude Include="StreamMain.h" />
     <ClInclude Include="_Http.h" />
     <ClInclude Include="HttpMain.h" />
     <ClInclude Include="List.h" />

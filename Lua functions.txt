@@ -59,6 +59,56 @@ Misc global functions:
 	-Array containing commandline parameters passed though to gff.exe
 	ARGS[]
 
+Stream:
+
+	-Create a new stream object
+	-initialsize is the size that should be allocated at the start (default 1 mb)
+	Stream Stream.Create(opt initialsize);
+
+	-Write a byte at the current position in the stream and advance the position
+	-byte should be between 0-255
+	-returns false if unable to write and an error message
+	bool, err Stream:WriteByte(byte);
+
+	-Read the byte at the current position and advance the position
+	-byte 0-255 returns -1 on failure (such as end of stream)
+	byte Stream:ReadByte();
+
+	-Writes a number, string, bool or other stream (from position to end)
+	-returns number of bytes written
+	int Stream:Write(obj, opt size);
+
+	-Retrives the current position and the length of the stream
+	position, length Stream:GetInfo();
+
+	-Sets the current position in the stream
+	-If no position is given the stream is rewinded to 0
+	void Stream:Seek(opt pos)
+
+	bool Stream:WriteFloat()
+	number Stream:ReadFloat()
+
+	bool Stream:WriteDouble()
+	number Stream:ReadDouble()
+
+	bool Stream:WriteShort()
+	int Stream:ReadShort()
+
+	bool Stream:WriteUnsignedShort()
+	int Stream:ReadUnsignedShort()
+
+	bool Stream:WriteInt()
+	int Stream:ReadInt()
+
+	bool Stream:WriteUnsignedInt()
+	int Stream:ReadUnsignedInt()
+
+	bool Stream:WriteLong()
+	int Stream:ReadLong()
+
+	bool Stream:WriteUnsignedLong()
+	int Stream:ReadUnsignedLong()
+
 Env:
 
 	-Creates a new environment table with said name, discards any old

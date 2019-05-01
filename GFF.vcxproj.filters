@@ -166,6 +166,15 @@
     <Filter Include="LuaImage\Source Files">
       <UniqueIdentifier>{c5bb357b-5495-44fd-a868-9524bb024628}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaStream">
+      <UniqueIdentifier>{434db58b-05c4-45f3-acd1-f35be75015db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaStream\Header Files">
+      <UniqueIdentifier>{8f795216-a0dc-4ed3-b84a-992467e47584}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaStream\Source Files">
+      <UniqueIdentifier>{8fb4bfcd-53c0-4139-8dcd-d2882af0022e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -420,6 +429,12 @@
     <ClCompile Include="image.cpp">
       <Filter>LuaImage\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="stream.cpp">
+      <Filter>LuaStream\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StreamMain.cpp">
+      <Filter>LuaStream</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -661,6 +676,12 @@
     </ClInclude>
     <ClInclude Include="image.h">
       <Filter>LuaImage\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stream.h">
+      <Filter>LuaStream\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StreamMain.h">
+      <Filter>LuaStream</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
