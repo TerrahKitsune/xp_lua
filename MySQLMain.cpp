@@ -14,6 +14,7 @@ static const struct luaL_Reg mysqlfunctions[] = {
 	{ "GetResult", MySQLGetAsyncResults },
 	{ "ForkResult", MySQLForkResult },
 	{ "ToggleAsString", MySQLSetAsString },
+	{ "Close", luamysql_gc },
 	{ NULL, NULL }
 };
 

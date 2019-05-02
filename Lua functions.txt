@@ -375,6 +375,9 @@ MySQL:
 	-returns nil on failure
 	MySQL MySQL.Connect(address, user, password, database, opt port 3306, opt timeout 3600)
 
+	-Closes the connection, it should *NOT* be used afterwards
+	MySQL:Close();
+
 	-runs querystring on the opened mysql object
 	-async is true then the mysql query will run async, async results are stored as opposed to used
 	-use MySQL:IsRunning() and MySQL:GetResult() to evaluate the state of an async query
