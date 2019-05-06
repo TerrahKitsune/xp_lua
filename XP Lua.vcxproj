@@ -108,6 +108,8 @@
     <ClCompile Include="ResourceTypes.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="SQLite\sqlite3.c" />
+    <ClCompile Include="stream.cpp" />
+    <ClCompile Include="StreamMain.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimerMain.cpp" />
     <ClCompile Include="tlk.cpp" />
@@ -207,6 +209,8 @@
     <ClInclude Include="ResourcesTypes.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="SQLite\sqlite3.h" />
+    <ClInclude Include="stream.h" />
+    <ClInclude Include="StreamMain.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimerMain.h" />
     <ClInclude Include="tlk.h" />
