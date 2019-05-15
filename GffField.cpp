@@ -68,6 +68,7 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type){
 		gff->Header.FieldDataCount += sizeof(long);
 		data = lua_tointeger(L, -1);
 		memcpy(ptr, &data, sizeof(long));
+		break;
 	case 8:
 		fdata = lua_tonumber(L, -1);
 		memcpy(&result, &fdata, sizeof(float));

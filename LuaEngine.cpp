@@ -22,6 +22,7 @@
 #include "2DAMain.h"
 #include "NamedPipeMain.h"
 #include "LuaImageMain.h"
+#include "StreamMain.h"
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 static int print(lua_State *L){
@@ -104,7 +105,8 @@ LuaEngine::LuaEngine()
 	lua_setglobal(L, "Pipe");
 	luaopen_image(L);
 	lua_setglobal(L, "Image");
-
+	luaopen_stream(L);
+	lua_setglobal(L, "Stream");
 	luaopen_misc(L);
 
 	lua_pushcfunction(L, print);
