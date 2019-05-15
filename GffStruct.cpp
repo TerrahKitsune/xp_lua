@@ -128,14 +128,14 @@ size_t CalculateStructSize(lua_State*L, Gff* gff){
 	lua_pushstring(L, "Type");
 	lua_gettable(L, -2);
 	if (!lua_isinteger(L, -1)){
-		Bail(gff, L, "Type field missing from table");
+		Bail(gff, L, "Type field missing from struct");
 	}
 	lua_pop(L, 1);
 
 	lua_pushstring(L, "Fields");
 	lua_gettable(L, -2);
 	if (!lua_istable(L, -1)){
-		Bail(gff, L, "Fields missing from table");
+		Bail(gff, L, "Fields missing from struct");
 	}
 	size_t size = CalculateStructFields(L, gff);
 	//NO POP

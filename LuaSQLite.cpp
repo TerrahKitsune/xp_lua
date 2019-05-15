@@ -6,7 +6,7 @@ LuaSQLite * luaL_checksqlite(lua_State *L, int index) {
 
 	LuaSQLite * luasqlite = (LuaSQLite*)luaL_checkudata(L, index, LUASQLITE);
 	if (luasqlite == NULL)
-		luaL_error(L, "paramter is not a %s", LUASQLITE);
+		luaL_error(L, "parameter is not a %s", LUASQLITE);
 	return luasqlite;
 }
 
@@ -14,7 +14,7 @@ LuaSQLite * lua_pushsqlite(lua_State *L) {
 
 	LuaSQLite * luasqlite = (LuaSQLite*)lua_newuserdata(L, sizeof(LuaSQLite));
 	if (luasqlite == NULL)
-		luaL_error(L, "Unable to create mysql connection");
+		luaL_error(L, "Unable to create sqlite connection");
 	luaL_getmetatable(L, LUASQLITE);
 	lua_setmetatable(L, -2);
 	memset(luasqlite, 0, sizeof(LuaSQLite));
@@ -363,6 +363,15 @@ int SQLiteConnect(lua_State *L) {
 		free(file);
 		luaL_error(L, "SQLite error %s", sqlite3_errmsg(luasqlite->db));
 	}
+
+	if (mode != 0) {
+		sqlite3_exec(luasqlite->db, "PRAGMA journal_mode=WAL;", 0, 0, 0);
+	}
+	else {
+		sqlite3_exec(luasqlite->db, "PRAGMA journal_mode=DELETE;", 0, 0, 0);
+	}
+
+	sqlite3_exec(luasqlite->db, "PRAGMA synchronous=NORMAL;", 0, 0, 0);
 
 	luasqlite->file = file;
 
