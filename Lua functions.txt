@@ -590,14 +590,14 @@ FileSystem:
 	string FileSystem.GetTempFileName(optional bool pathonly)
 
 	-Returns an array of drives
+	-If a drive is specified it returns a table containing info for that drive
 	-each drive is a table containing:
 	-Drive: string letter (A,B,C,D)
-	-Mask: Drive mask
 	-Type: int (0 unknown, 1 not mounted, 2 removable, 3 fixed, 4 remote, 5 cdrom, 6 ramdisk)
 	-FreeBytesAvailableToCaller: number of bytes available to the caller (this environment)
 	-TotalNumberOfBytes: Total size in bytes of the drive
 	-TotalNumberOfFreeBytes: total number of free bytes
-	array FileSystem.GetDrives()
+	array FileSystem.GetDrives(opt drive)
 
 TWODA (2da):
 
