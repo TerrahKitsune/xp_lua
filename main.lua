@@ -43,7 +43,20 @@ for k,v in pairs(c) do
 	print(k, string.byte(v));
 end
 
-print(UUID());
+local u, r = UUID();
+local t = string.format("%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x", string.byte(r,1,16));
+print(u, r);
+print(t, r);
 
-FileSystem.SetCurrentDirectory("C:/Users/Terrah/Desktop/Lua");
-dofile("gffeditor.lua");
+for n=1, r:len() do 
+	print(r:byte(n));
+end
+
+local stream = Stream.Create();
+stream:Write("abc123");
+print("-------------------");
+stream:Seek();
+for n=1, stream:len() do 
+	print(stream:pos(), stream:ReadByte(), stream:len());
+	stream:Shrink();
+end

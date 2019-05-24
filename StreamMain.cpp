@@ -4,9 +4,13 @@
 static const struct luaL_Reg streamfunctions[] = {
 	{ "Close",  luastream_gc },
 	{ "Create",  NewStream },
+	{ "len",  StreamLen },
+	{ "pos",  StreamPos },
 	{ "WriteByte",  WriteStreamByte },
 	{ "ReadByte",  ReadStreamByte },
+	{ "PeekByte",  PeekStreamByte },
 	{ "GetInfo",  GetStreamInfo },
+	{ "Shrink",  StreamShrink },
 	{ "Seek",  StreamSetPos },
 	{ "Write",  WriteLuaValue },
 	{ "Read",  ReadLuaStream },

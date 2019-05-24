@@ -373,6 +373,60 @@ int GetStreamInfo(lua_State * L) {
 	return 2;
 }
 
+int StreamShrink(lua_State* L) {
+	
+	LuaStream* stream = lua_toluastream(L, 1);
+
+	if (stream->pos <= 0) {
+		return 0;
+	}
+	else if (stream->pos >= stream->len) {
+		stream->len = 0;
+		stream->pos = 0;
+	}
+	else {
+		size_t mod = stream->len - stream->pos;
+		memcpy(&stream->data[0], &stream->data[stream->pos], mod);
+		stream->len = mod;
+		stream->pos = 0;
+	}
+
+	return 0;
+}
+
+int PeekStreamByte(lua_State* L) {
+	
+	LuaStream* stream = lua_toluastream(L, 1);
+	size_t pos = luaL_optinteger(L, 2, stream->pos);
+
+	lua_pop(L, lua_gettop(L));
+
+	if (pos >= stream->len || pos < 0) {	
+		lua_pushinteger(L, -1);
+	}
+	else {
+		lua_pushinteger(L, stream->data[pos]);
+	}
+
+	return 1;
+}
+
+int StreamLen(lua_State* L) {
+
+	LuaStream* stream = lua_toluastream(L, 1);
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, stream->len);
+	return 1;
+}
+
+int StreamPos(lua_State* L) {
+
+	LuaStream* stream = lua_toluastream(L, 1);
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, stream->pos);
+	return 1;
+}
+
 int ReadStreamByte(lua_State * L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);

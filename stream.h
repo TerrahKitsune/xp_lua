@@ -16,9 +16,13 @@ typedef struct LuaStream {
 LuaStream* lua_pushluastream(lua_State* L);
 LuaStream* lua_toluastream(lua_State* L, int index);
 
+int StreamPos(lua_State* L);
+int StreamLen(lua_State* L);
+int StreamShrink(lua_State* L);
 int NewStream(lua_State *L);
 int WriteStreamByte(lua_State *L);
 int ReadStreamByte(lua_State *L);
+int PeekStreamByte(lua_State* L);
 int GetStreamInfo(lua_State *L);
 int StreamSetPos(lua_State* L);
 int WriteLuaValue(lua_State* L);
