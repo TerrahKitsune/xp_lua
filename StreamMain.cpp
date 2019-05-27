@@ -12,6 +12,7 @@ static const struct luaL_Reg streamfunctions[] = {
 	{ "GetInfo",  GetStreamInfo },
 	{ "Shrink",  StreamShrink },
 	{ "Seek",  StreamSetPos },
+	{ "Buffer",  StreamBuffer },
 	{ "Write",  WriteLuaValue },
 	{ "Read",  ReadLuaStream },
 	{ "WriteFloat",  WriteFloat },

@@ -57,6 +57,18 @@ stream:Write("abc123");
 print("-------------------");
 stream:Seek();
 for n=1, stream:len() do 
-	print(stream:pos(), stream:ReadByte(), stream:len());
+	print(stream:pos(), string.char(stream:ReadByte()), stream:len());
 	stream:Shrink();
 end
+print("-------------------");
+stream:Seek();
+stream:Buffer("Meowcat 1000");
+for n=1, stream:len() do 
+	print(stream:pos(), string.char(stream:ReadByte()), stream:len());
+end
+
+for n=1, 100000 do 
+	stream:Buffer("Meowcat 1000");
+end
+
+print(stream:Read());

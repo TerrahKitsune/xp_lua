@@ -63,6 +63,35 @@ bool StreamWrite(LuaStream * stream, BYTE * data, size_t len) {
 	return true;
 }
 
+int StreamBuffer(lua_State* L) {
+
+	LuaStream* stream = lua_toluastream(L, 1);
+	size_t len;
+	size_t current = stream->pos;
+	const char* data = lua_tolstring(L, 2, &len);
+
+	if (len <= 0 || !data) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushinteger(L, 0);
+		return 1;
+	}
+	
+	stream->pos = stream->len;
+
+	if (StreamWrite(stream, (BYTE*)data, len)) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushinteger(L, len);
+	}
+	else {
+		lua_pop(L, lua_gettop(L));
+		lua_pushinteger(L, 0);
+	}
+
+	stream->pos = current;
+
+	return 1;
+}
+
 const BYTE* ReadStream(LuaStream* stream, size_t len) {
 
 	if (len <= 0 || !stream || !stream->data || (stream->pos+len) > stream->len) {

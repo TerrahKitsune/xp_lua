@@ -83,6 +83,9 @@ Stream:
 	-returns number of bytes written
 	int Stream:Write(obj, opt size);
 
+	-Writes a string to the end of the stream reguardless of position
+	int Stream:Buffer(str);
+
 	-Reads a number of bytes and returns it as a string
 	-Reads from the current position, if length is omitted it reads to the end
 	string Stream:Read(opt length);
