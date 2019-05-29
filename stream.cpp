@@ -300,7 +300,7 @@ int ReadLong(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
 
-	const BYTE* raw = ReadStream(stream, sizeof(long));
+	const BYTE* raw = ReadStream(stream, sizeof(long long));
 
 	lua_pop(L, lua_gettop(L));
 
@@ -308,8 +308,8 @@ int ReadLong(lua_State* L) {
 		lua_pushnil(L);
 	}
 	else {
-		long f;
-		memcpy(&f, raw, sizeof(long));
+		long long f;
+		memcpy(&f, raw, sizeof(long long));
 		lua_pushinteger(L, f);
 	}
 
@@ -319,11 +319,11 @@ int ReadLong(lua_State* L) {
 int WriteLong(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
-	long n = lua_tointeger(L, 2);
+	long long n = lua_tointeger(L, 2);
 
 	lua_pop(L, lua_gettop(L));
 
-	lua_pushboolean(L, StreamWrite(stream, (BYTE*)& n, sizeof(long)));
+	lua_pushboolean(L, StreamWrite(stream, (BYTE*)& n, sizeof(long long)));
 
 	return 1;
 }
@@ -331,11 +331,11 @@ int WriteLong(lua_State* L) {
 int WriteUnsignedLong(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
-	unsigned long n = lua_tointeger(L, 2);
+	unsigned long long n = lua_tointeger(L, 2);
 
 	lua_pop(L, lua_gettop(L));
 
-	lua_pushboolean(L, StreamWrite(stream, (BYTE*)& n, sizeof(unsigned long)));
+	lua_pushboolean(L, StreamWrite(stream, (BYTE*)& n, sizeof(unsigned long long)));
 
 	return 1;
 }
@@ -344,7 +344,7 @@ int ReadUnsignedLong(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
 
-	const BYTE* raw = ReadStream(stream, sizeof(unsigned long));
+	const BYTE* raw = ReadStream(stream, sizeof(unsigned long long));
 
 	lua_pop(L, lua_gettop(L));
 
@@ -352,8 +352,8 @@ int ReadUnsignedLong(lua_State* L) {
 		lua_pushnil(L);
 	}
 	else {
-		unsigned long f;
-		memcpy(&f, raw, sizeof(unsigned long));
+		unsigned long long f;
+		memcpy(&f, raw, sizeof(unsigned long long));
 		lua_pushinteger(L, f);
 	}
 
