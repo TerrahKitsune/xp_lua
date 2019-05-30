@@ -92,7 +92,7 @@ DWORD WINAPI CliProc(LPVOID lpParam) {
 			queue_Enqueue(self->Events, NetEvent_Create(cli->s, NETEVENT_RECEIVE, buffer, read));
 		}
 
-		Sleep(10);
+		Sleep(1);
 	}
 
 	ClientDisconnect(cli);
