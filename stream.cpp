@@ -423,6 +423,21 @@ int StreamShrink(lua_State* L) {
 	return 0;
 }
 
+int SetStreamByte(lua_State* L) {
+
+	LuaStream* stream = lua_toluastream(L, 1);
+	BYTE data = (BYTE)lua_tointeger(L, 2);
+	size_t pos = luaL_optinteger(L, 3, stream->pos);
+
+	lua_pop(L, lua_gettop(L));
+
+	if (pos >= stream->len || pos < 0) {
+		stream->data[pos] = data;
+	}
+
+	return 0;
+}
+
 int PeekStreamByte(lua_State* L) {
 	
 	LuaStream* stream = lua_toluastream(L, 1);

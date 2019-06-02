@@ -8,6 +8,7 @@ static const struct luaL_Reg streamfunctions[] = {
 	{ "pos",  StreamPos },
 	{ "WriteByte",  WriteStreamByte },
 	{ "ReadByte",  ReadStreamByte },
+	{ "SetByte",  SetStreamByte },
 	{ "PeekByte",  PeekStreamByte },
 	{ "GetInfo",  GetStreamInfo },
 	{ "Shrink",  StreamShrink },

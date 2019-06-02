@@ -79,6 +79,9 @@ Stream:
 	-If pos is omitted it reads the current position, 0 indexed
 	byte Stream:PeekByte(opt pos);
 
+	-Sets a byte in positon, does nothing if position is out of range
+	void Stream:SetByte(byte, position)
+
 	-Writes a number, string, bool or other stream (from position to end)
 	-returns number of bytes written
 	int Stream:Write(obj, opt size);

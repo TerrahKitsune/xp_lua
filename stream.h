@@ -28,6 +28,7 @@ int GetStreamInfo(lua_State *L);
 int StreamSetPos(lua_State* L);
 int WriteLuaValue(lua_State* L);
 int ReadLuaStream(lua_State* L);
+int SetStreamByte(lua_State* L);
 
 int WriteFloat(lua_State* L);
 int ReadFloat(lua_State* L);
