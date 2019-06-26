@@ -7,7 +7,30 @@
 
 const size_t MIN_STREAM_SIZE = 1024;
 
-bool CheckStreamSize(LuaStream* stream, size_t requestedsize) {
+size_t AllocAddSize(lua_State* L, LuaStream* stream, size_t requestedsize) {
+
+	if (stream && stream->allocfunc != LUA_NOREF) {
+
+		lua_rawgeti(L, LUA_REGISTRYINDEX, stream->allocfunc);
+		lua_pushinteger(L, requestedsize);
+
+		if (lua_pcall(L, 1, 1, NULL) != 0) {
+
+			lua_error(L);
+			return 0;
+		}
+
+		if (lua_type(L, -1) == LUA_TNUMBER) {
+			size_t t = lua_tointeger(L, -1);
+			lua_pop(L, 1);
+			return t;
+		}
+	}
+
+	return MIN_STREAM_SIZE;
+}
+
+bool CheckStreamSize(lua_State* L, LuaStream* stream, size_t requestedsize) {
 
 	if (!stream->data) {
 		return false;
@@ -18,19 +41,23 @@ bool CheckStreamSize(LuaStream* stream, size_t requestedsize) {
 
 	if (stream->len + requestedsize > stream->alloc) {
 
+		size_t ne = AllocAddSize(L, stream, requestedsize);
+
+		if (ne > requestedsize) {
+			requestedsize = ne;
+		}
+
 		size_t newsize = (stream->len + requestedsize) - stream->alloc;
 
-		if (newsize < MIN_STREAM_SIZE) {
+		if (ne == 0 && newsize < MIN_STREAM_SIZE) {
 			newsize = MIN_STREAM_SIZE;
 		}
 
-		void* temp = malloc(stream->alloc + newsize);
+		void* temp = realloc(stream->data, stream->alloc + newsize);
 		if (!temp) {
 			return false;
 		}
 		else {
-			memcpy(temp, stream->data, stream->len);
-			free(stream->data);
 			stream->data = (BYTE*)temp;
 			stream->alloc = stream->alloc + newsize;
 			return true;
@@ -41,12 +68,12 @@ bool CheckStreamSize(LuaStream* stream, size_t requestedsize) {
 	}
 }
 
-bool StreamWrite(LuaStream * stream, BYTE * data, size_t len) {
+bool StreamWrite(lua_State* L, LuaStream* stream, BYTE* data, size_t len) {
 
 	if (!stream || !stream->data) {
 		return false;
 	}
-	else if (!CheckStreamSize(stream, len)) {
+	else if (!CheckStreamSize(L, stream, len)) {
 		return false;
 	}
 
@@ -75,10 +102,10 @@ int StreamBuffer(lua_State* L) {
 		lua_pushinteger(L, 0);
 		return 1;
 	}
-	
+
 	stream->pos = stream->len;
 
-	if (StreamWrite(stream, (BYTE*)data, len)) {
+	if (StreamWrite(L, stream, (BYTE*)data, len)) {
 		lua_pop(L, lua_gettop(L));
 		lua_pushinteger(L, len);
 	}
@@ -94,7 +121,7 @@ int StreamBuffer(lua_State* L) {
 
 const BYTE* ReadStream(LuaStream* stream, size_t len) {
 
-	if (len <= 0 || !stream || !stream->data || (stream->pos+len) > stream->len) {
+	if (len <= 0 || !stream || !stream->data || (stream->pos + len) > stream->len) {
 		return NULL;
 	}
 
@@ -111,13 +138,13 @@ int WriteFloat(lua_State* L) {
 
 	lua_pop(L, lua_gettop(L));
 
-	lua_pushboolean(L, StreamWrite(stream, (BYTE*)& f, sizeof(float)));
+	lua_pushboolean(L, StreamWrite(L, stream, (BYTE*)& f, sizeof(float)));
 
 	return 1;
 }
 
 int ReadFloat(lua_State* L) {
-	
+
 	LuaStream* stream = lua_toluastream(L, 1);
 
 	const BYTE* raw = ReadStream(stream, sizeof(float));
@@ -143,7 +170,7 @@ int WriteDouble(lua_State* L) {
 
 	lua_pop(L, lua_gettop(L));
 
-	lua_pushboolean(L, StreamWrite(stream, (BYTE*)& f, sizeof(double)));
+	lua_pushboolean(L, StreamWrite(L, stream, (BYTE*)& f, sizeof(double)));
 
 	return 1;
 }
@@ -175,7 +202,7 @@ int WriteShort(lua_State* L) {
 
 	lua_pop(L, lua_gettop(L));
 
-	lua_pushboolean(L, StreamWrite(stream, (BYTE*)& n, sizeof(short)));
+	lua_pushboolean(L, StreamWrite(L, stream, (BYTE*)& n, sizeof(short)));
 
 	return 1;
 }
@@ -207,7 +234,7 @@ int WriteUShort(lua_State* L) {
 
 	lua_pop(L, lua_gettop(L));
 
-	lua_pushboolean(L, StreamWrite(stream, (BYTE*)& n, sizeof(unsigned short)));
+	lua_pushboolean(L, StreamWrite(L, stream, (BYTE*)& n, sizeof(unsigned short)));
 
 	return 1;
 }
@@ -239,7 +266,7 @@ int WriteInt(lua_State* L) {
 
 	lua_pop(L, lua_gettop(L));
 
-	lua_pushboolean(L, StreamWrite(stream, (BYTE*)& n, sizeof(int)));
+	lua_pushboolean(L, StreamWrite(L, stream, (BYTE*)& n, sizeof(int)));
 
 	return 1;
 }
@@ -271,7 +298,7 @@ int WriteUInt(lua_State* L) {
 
 	lua_pop(L, lua_gettop(L));
 
-	lua_pushboolean(L, StreamWrite(stream, (BYTE*)& n, sizeof(unsigned int)));
+	lua_pushboolean(L, StreamWrite(L, stream, (BYTE*)& n, sizeof(unsigned int)));
 
 	return 1;
 }
@@ -323,7 +350,7 @@ int WriteLong(lua_State* L) {
 
 	lua_pop(L, lua_gettop(L));
 
-	lua_pushboolean(L, StreamWrite(stream, (BYTE*)& n, sizeof(long long)));
+	lua_pushboolean(L, StreamWrite(L, stream, (BYTE*)& n, sizeof(long long)));
 
 	return 1;
 }
@@ -335,7 +362,7 @@ int WriteUnsignedLong(lua_State* L) {
 
 	lua_pop(L, lua_gettop(L));
 
-	lua_pushboolean(L, StreamWrite(stream, (BYTE*)& n, sizeof(unsigned long long)));
+	lua_pushboolean(L, StreamWrite(L, stream, (BYTE*)& n, sizeof(unsigned long long)));
 
 	return 1;
 }
@@ -360,7 +387,7 @@ int ReadUnsignedLong(lua_State* L) {
 	return 1;
 }
 
-int StreamSetPos(lua_State * L) {
+int StreamSetPos(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
 	int newpos = luaL_optinteger(L, 2, 0);
@@ -384,7 +411,7 @@ int StreamSetPos(lua_State * L) {
 	return 0;
 }
 
-int GetStreamInfo(lua_State * L) {
+int GetStreamInfo(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
 
@@ -398,12 +425,13 @@ int GetStreamInfo(lua_State * L) {
 
 	lua_pushinteger(L, stream->pos);
 	lua_pushinteger(L, stream->len);
+	lua_pushinteger(L, stream->alloc);
 
-	return 2;
+	return 3;
 }
 
 int StreamShrink(lua_State* L) {
-	
+
 	LuaStream* stream = lua_toluastream(L, 1);
 
 	if (stream->pos <= 0) {
@@ -439,13 +467,13 @@ int SetStreamByte(lua_State* L) {
 }
 
 int PeekStreamByte(lua_State* L) {
-	
+
 	LuaStream* stream = lua_toluastream(L, 1);
 	size_t pos = luaL_optinteger(L, 2, stream->pos);
 
 	lua_pop(L, lua_gettop(L));
 
-	if (pos >= stream->len || pos < 0) {	
+	if (pos >= stream->len || pos < 0) {
 		lua_pushinteger(L, -1);
 	}
 	else {
@@ -471,7 +499,7 @@ int StreamPos(lua_State* L) {
 	return 1;
 }
 
-int ReadStreamByte(lua_State * L) {
+int ReadStreamByte(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
 	const BYTE* result = ReadStream(stream, 1);
@@ -488,7 +516,7 @@ int ReadStreamByte(lua_State * L) {
 	return 1;
 }
 
-int ReadLuaStream(lua_State * L) {
+int ReadLuaStream(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
 	long len = luaL_optinteger(L, 2, stream->len - stream->pos);
@@ -506,7 +534,7 @@ int ReadLuaStream(lua_State * L) {
 	return 1;
 }
 
-int WriteLuaValue(lua_State * L) {
+int WriteLuaValue(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
 	long size = luaL_optinteger(L, 3, 0);
@@ -563,7 +591,7 @@ int WriteLuaValue(lua_State * L) {
 		len = size;
 	}
 
-	if (len <= 0 || !raw || !StreamWrite(stream, raw, len)) {
+	if (len <= 0 || !raw || !StreamWrite(L, stream, raw, len)) {
 		lua_pushinteger(L, 0);
 	}
 	else {
@@ -573,7 +601,7 @@ int WriteLuaValue(lua_State * L) {
 	return 1;
 }
 
-int WriteStreamByte(lua_State * L) {
+int WriteStreamByte(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
 	int byte = lua_tointeger(L, 2);
@@ -588,7 +616,7 @@ int WriteStreamByte(lua_State * L) {
 
 	BYTE raw = byte;
 
-	if (!StreamWrite(stream, &raw, 1)) {
+	if (!StreamWrite(L, stream, &raw, 1)) {
 
 		lua_pop(L, lua_gettop(L));
 		lua_pushboolean(L, false);
@@ -602,7 +630,26 @@ int WriteStreamByte(lua_State * L) {
 	return 1;
 }
 
-int NewStream(lua_State * L) {
+int NewStream(lua_State* L) {
+
+	if (lua_type(L, 1) == LUA_TFUNCTION) {
+
+		int ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+		LuaStream* stream = lua_pushluastream(L);
+		stream->allocfunc = ref;
+		size_t size = AllocAddSize(L, stream, MIN_STREAM_SIZE);
+
+		stream->data = (BYTE*)malloc(size);
+		if (!stream->data) {
+			luaL_error(L, "Unable to allocate memory");
+			return 0;
+		}
+		stream->alloc = size;
+		stream->len = 0;
+
+		return 1;
+	}
 
 	int init = luaL_optinteger(L, 1, 1048576);
 
@@ -623,11 +670,12 @@ int NewStream(lua_State * L) {
 	stream->alloc = init;
 	stream->len = 0;
 	stream->pos = 0;
+	stream->allocfunc = LUA_NOREF;
 
 	return 1;
 }
 
-LuaStream* lua_pushluastream(lua_State * L) {
+LuaStream* lua_pushluastream(lua_State* L) {
 
 	LuaStream* stream = (LuaStream*)lua_newuserdata(L, sizeof(LuaStream));
 
@@ -642,7 +690,7 @@ LuaStream* lua_pushluastream(lua_State * L) {
 	return stream;
 }
 
-LuaStream * lua_toluastream(lua_State * L, int index) {
+LuaStream* lua_toluastream(lua_State* L, int index) {
 
 	LuaStream* pipe = (LuaStream*)luaL_checkudata(L, index, STREAM);
 
@@ -652,7 +700,7 @@ LuaStream * lua_toluastream(lua_State * L, int index) {
 	return pipe;
 }
 
-int luastream_gc(lua_State * L) {
+int luastream_gc(lua_State* L) {
 
 	LuaStream* pipe = lua_toluastream(L, 1);
 
@@ -661,10 +709,15 @@ int luastream_gc(lua_State * L) {
 		ZeroMemory(pipe, sizeof(LuaStream));
 	}
 
+	if (pipe && pipe->allocfunc != LUA_NOREF) {
+		luaL_unref(L, LUA_REGISTRYINDEX, pipe->allocfunc);
+		pipe->allocfunc = 0;
+	}
+
 	return 0;
 }
 
-int luastream_tostring(lua_State * L) {
+int luastream_tostring(lua_State* L) {
 	char tim[100];
 	sprintf(tim, "Stream: 0x%08X", lua_toluastream(L, 1));
 	lua_pushfstring(L, tim);

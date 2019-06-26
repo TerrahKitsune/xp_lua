@@ -63,7 +63,9 @@ Stream:
 
 	-Create a new stream object
 	-initialsize is the size that should be allocated at the start (default 1 mb)
-	Stream Stream.Create(opt initialsize);
+	-if a function is provided instead it'll be passed the first argument as the requested size
+	-function(size) return size; end
+	Stream Stream.Create(opt initialsize/allocfunc);
 
 	-Write a byte at the current position in the stream and advance the position
 	-byte should be between 0-255
@@ -93,8 +95,8 @@ Stream:
 	-Reads from the current position, if length is omitted it reads to the end
 	string Stream:Read(opt length);
 
-	-Retrives the current position and the length of the stream
-	position, length Stream:GetInfo();
+	-Retrives the current position, length and the current allocated size of the stream
+	position, length, allocated Stream:GetInfo();
 
 	length Stream:len();
 	pos Stream:pos();
