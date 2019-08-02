@@ -42,5 +42,3 @@ print("bla"..c.LF.."bla");
 for k,v in pairs(c) do 
 	print(k, string.byte(v));
 end
-
-dofile("C:\\Users\\Terrah\\Desktop\\Lua\\main.lua");
