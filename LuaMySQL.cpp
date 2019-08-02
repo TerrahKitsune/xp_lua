@@ -254,24 +254,31 @@ LuaAsyncResult* Execute(LuaMySQL * luamysql, bool store) {
 	{
 		if (!Reconnect(luamysql))
 		{
-			SetResult(result, mysql_error(&luamysql->mysql), 0);
+			SetResult(result, luamysql->lastError, 0);
 			return result;
 		}
 	}
 
 	if (mysql_query(luamysql->connection, luamysql->query) != 0) {
 
-		unsigned int error_no = mysql_errno(&luamysql->mysql);
+		unsigned int error_no = mysql_errno(luamysql->mysql);
 		if (error_no == CR_SERVER_GONE_ERROR && Reconnect(luamysql)) {
 			if (mysql_query(luamysql->connection, (const char *)luamysql->query) != 0) {
 
-				SetResult(result, mysql_error(&luamysql->mysql), 0);
+				SetResult(result, mysql_error(luamysql->mysql), 0);
 				return result;
 			}
 		}
 		else {
 
-			SetResult(result, mysql_error(&luamysql->mysql), 0);
+			const char * err = mysql_error(luamysql->mysql);
+
+			if (err && luamysql->mysql) {
+				SetResult(result, err, 0);
+			}
+			else {
+				SetResult(result, luamysql->lastError, 0);
+			}
 			return result;
 		}
 	}
@@ -282,14 +289,14 @@ LuaAsyncResult* Execute(LuaMySQL * luamysql, bool store) {
 		return result;
 	}
 	else {
-		if (mysql_field_count(&luamysql->mysql) == 0)
+		if (mysql_field_count(luamysql->mysql) == 0)
 		{
 			SetResult(result, NULL, mysql_affected_rows(luamysql->connection));
 			return result;
 		}
 		else
 		{
-			SetResult(result, mysql_error(&luamysql->mysql), 0);
+			SetResult(result, mysql_error(luamysql->mysql), 0);
 		}
 	}
 
@@ -502,13 +509,26 @@ int MySQLConnect(lua_State *L) {
 	lua_pop(L, lua_gettop(L));
 
 	LuaMySQL * luamysql = lua_pushmysql(L);
-	if (!mysql_init(&luamysql->mysql)) {
+
+	luamysql->mysql = (MYSQL*)calloc(1, sizeof(MYSQL));
+
+	if (!luamysql->mysql) {
+		free(temp_server);
+		free(temp_user);
+		free(temp_password);
+		free(temp_schema);
+		luaL_error(L, "Unable to allocate memory for mysql");
+	}
+
+	if (!mysql_init(luamysql->mysql)) {
 		free(temp_server);
 		free(temp_user);
 		free(temp_password);
 		free(temp_schema);
 		luaL_error(L, "Unable to initialize mysql");
 	}
+
+	
 
 	if (timeout <= 0)
 		timeout = 3600;
@@ -522,14 +542,17 @@ int MySQLConnect(lua_State *L) {
 	luamysql->schema = temp_schema;
 	luamysql->port = port;
 
-	mysql_options(&luamysql->mysql, MYSQL_OPT_CONNECT_TIMEOUT, &timeout);
-	mysql_options(&luamysql->mysql, MYSQL_OPT_READ_TIMEOUT, &timeout);
-	mysql_options(&luamysql->mysql, MYSQL_OPT_WRITE_TIMEOUT, &timeout);
+	mysql_options(luamysql->mysql, MYSQL_OPT_CONNECT_TIMEOUT, &timeout);
+	mysql_options(luamysql->mysql, MYSQL_OPT_READ_TIMEOUT, &timeout);
+	mysql_options(luamysql->mysql, MYSQL_OPT_WRITE_TIMEOUT, &timeout);
 
-	luamysql->connection = mysql_real_connect(&luamysql->mysql, temp_server, temp_user, temp_password, temp_schema, port, NULL, NULL);
+	luamysql->connection = mysql_real_connect(luamysql->mysql, temp_server, temp_user, temp_password, temp_schema, port, NULL, NULL);
 	if (luamysql->connection == NULL)
 	{
-		mysql_close(&luamysql->mysql);
+		mysql_close(luamysql->mysql);
+		free(luamysql->mysql);
+		luamysql->mysql = NULL;
+
 		lua_pop(L, 1);
 		lua_pushnil(L);
 		return 1;
@@ -555,9 +578,9 @@ int SetTimeout(lua_State *L) {
 
 		luamysql->timeout = min(luaL_checkinteger(L, 2), 1);
 
-		mysql_options(&luamysql->mysql, MYSQL_OPT_CONNECT_TIMEOUT, &luamysql->timeout);
-		mysql_options(&luamysql->mysql, MYSQL_OPT_READ_TIMEOUT, &luamysql->timeout);
-		mysql_options(&luamysql->mysql, MYSQL_OPT_WRITE_TIMEOUT, &luamysql->timeout);
+		mysql_options(luamysql->mysql, MYSQL_OPT_CONNECT_TIMEOUT, &luamysql->timeout);
+		mysql_options(luamysql->mysql, MYSQL_OPT_READ_TIMEOUT, &luamysql->timeout);
+		mysql_options(luamysql->mysql, MYSQL_OPT_WRITE_TIMEOUT, &luamysql->timeout);
 
 		if (luamysql->connection)
 		{
@@ -573,23 +596,56 @@ int SetTimeout(lua_State *L) {
 bool Reconnect(LuaMySQL *luamysql) {
 
 	if (luamysql->result) {
+
 		mysql_free_result(luamysql->result);
+
 		luamysql->result = NULL;
 		luamysql->row = NULL;
 		luamysql->columns = NULL;
+		luamysql->fields = NULL;
 	}
 
 	if (luamysql->connection)
 		mysql_close(luamysql->connection);
 
-	mysql_options(&luamysql->mysql, MYSQL_OPT_CONNECT_TIMEOUT, &luamysql->timeout);
-	mysql_options(&luamysql->mysql, MYSQL_OPT_READ_TIMEOUT, &luamysql->timeout);
-	mysql_options(&luamysql->mysql, MYSQL_OPT_WRITE_TIMEOUT, &luamysql->timeout);
+	if (luamysql->mysql) {
+		mysql_close(luamysql->mysql);
+		free(luamysql->mysql);
+		luamysql->mysql = NULL;
+	}
 
-	luamysql->connection = mysql_real_connect(&luamysql->mysql, luamysql->server, luamysql->user, luamysql->password, luamysql->schema, luamysql->port, NULL, NULL);
+	luamysql->mysql = (MYSQL*)calloc(1, sizeof(MYSQL));
+
+	if (!luamysql->mysql || !mysql_init(luamysql->mysql)) {
+		return FALSE;
+	}
+
+	mysql_options(luamysql->mysql, MYSQL_OPT_CONNECT_TIMEOUT, &luamysql->timeout);
+	mysql_options(luamysql->mysql, MYSQL_OPT_READ_TIMEOUT, &luamysql->timeout);
+	mysql_options(luamysql->mysql, MYSQL_OPT_WRITE_TIMEOUT, &luamysql->timeout);
+
+	luamysql->connection = mysql_real_connect(luamysql->mysql, luamysql->server, luamysql->user, luamysql->password, luamysql->schema, luamysql->port, NULL, NULL);
 	if (luamysql->connection == NULL)
 	{
-		mysql_close(&luamysql->mysql);
+		const char * err = mysql_error(luamysql->mysql);
+
+		if (!err) {
+			err = "Unknown error reconnecting";
+		}
+
+		if (luamysql->lastError) {
+			free(luamysql->lastError);
+		}
+
+		luamysql->lastError = (char*)malloc(strlen(err)+1);
+
+		if (luamysql->lastError) {
+			strcpy(luamysql->lastError, err);
+		}
+
+		mysql_close(luamysql->mysql);
+		free(luamysql->mysql);
+		luamysql->mysql = NULL;
 		return FALSE;
 	}
 
@@ -650,7 +706,8 @@ int luamysql_gc(lua_State *L) {
 	}
 
 	if (luamysql->connection) {
-		mysql_close(&luamysql->mysql);
+		mysql_close(luamysql->mysql);
+		free(luamysql->mysql);
 		luamysql->connection = NULL;
 	}
 
@@ -677,6 +734,10 @@ int luamysql_gc(lua_State *L) {
 	if (luamysql->query) {
 		free(luamysql->query);
 		luamysql->query = NULL;
+	}
+
+	if (luamysql->lastError) {
+		free(luamysql->lastError);
 	}
 
 	return 0;

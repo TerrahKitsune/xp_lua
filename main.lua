@@ -42,3 +42,23 @@ print("bla"..c.LF.."bla");
 for k,v in pairs(c) do 
 	print(k, string.byte(v));
 end
+
+local ok, err;
+local db = assert(MySQL.Connect("10.9.23.252", "Terrah", , "kitsunebot"));
+while true do 
+
+	local test={};
+
+	ok, err = db:Query("SELECT * FROM messages;");
+
+	if ok then 
+		
+		while db:Fetch() do 
+			table.insert(test, db:GetRow());
+		end 
+
+		print("Rows: "..tostring(#test));
+	else 
+		print(err);
+	end 
+end 
