@@ -17,7 +17,7 @@ function TablePrint(tbl, depth)
 	end
 
 	for k,v in pairs(tbl) do 
-		print(k,v);
+		print(padding..tostring(k)..": "..tostring(v));
 
 		if type(v)=="table" then 
 			TablePrint(v, depth+1);
@@ -55,3 +55,13 @@ for k,v in pairs(c) do
 	print(k, string.byte(v));
 end
 
+local f=io.open("E:/leioana22.bic", "rb");
+local raw = f:read("*all");
+f:close();
+
+local gff = assert(GFF.OpenString(raw));
+
+gff = assert(GFF.OpenFile("E:/leioana22.bic"));
+
+
+--TablePrint(gff);
