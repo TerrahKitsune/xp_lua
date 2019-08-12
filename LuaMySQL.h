@@ -16,7 +16,7 @@ typedef struct LuaAsyncResult {
 }LuaAsyncResult;
 
 typedef struct LuaMySQL {
-	MYSQL mysql;
+	MYSQL* mysql;
 	MYSQL* connection;
 	MYSQL_RES* result;
 	MYSQL_FIELD * columns;
@@ -30,6 +30,8 @@ typedef struct LuaMySQL {
 	unsigned int port;
 	int timeout;
 	bool asstring;
+
+	char * lastError;
 
 	volatile bool isRunningAsync;
 	bool hasTask;

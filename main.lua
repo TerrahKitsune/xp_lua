@@ -1,15 +1,27 @@
 local _exit=Exit;Exit=function(ret) GetKey(); return ret; end
 
-function TablePrint(tbl)
+function TablePrint(tbl, depth)
 
-	print(tostring(tbl));
+	depth = depth or 0;
+
+	local padding="";
+
+	for n=0, depth do 
+		padding = padding.." ";
+	end
+
+	print(padding..tostring(tbl));
 
 	if type(tbl)~="table" then 	
 		return;
 	end
 
 	for k,v in pairs(tbl) do 
-		print(k,v);
+		print(padding..tostring(k)..": "..tostring(v));
+
+		if type(v)=="table" then 
+			TablePrint(v, depth+1);
+		end
 	end
 
 end
@@ -43,4 +55,13 @@ for k,v in pairs(c) do
 	print(k, string.byte(v));
 end
 
-dofile("C:\\Users\\Terrah\\Desktop\\Lua\\main.lua");
+local f=io.open("E:/leioana22.bic", "rb");
+local raw = f:read("*all");
+f:close();
+
+local gff = assert(GFF.OpenString(raw));
+
+gff = assert(GFF.OpenFile("E:/leioana22.bic"));
+
+
+--TablePrint(gff);
