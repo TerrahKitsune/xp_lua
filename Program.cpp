@@ -25,6 +25,7 @@
 #include <io.h>
 #include "LuaImageMain.h"
 #include "StreamMain.h"
+#include "ODBCMain.h"
 
 #define HI_PART(x)  ((x>>4) & 0x0F)
 #define LO_PART(x)  ((x) & 0x0F)
@@ -174,8 +175,8 @@ const char * ReadStdIn(char * buf, size_t bufsize) {
 
 static int L_SetTextColor(lua_State *L){
 
-	int BackC = luaL_checknumber(L, 1);
-	int ForgC = luaL_checknumber(L, 2);
+	int BackC = (int)luaL_checknumber(L, 1);
+	int ForgC = (int)luaL_checknumber(L, 2);
 
 	lua_pop(L, 2);
 
@@ -247,7 +248,7 @@ static int L_put(lua_State *L) {
 
 static int L_Exit(lua_State *L){
 
-	int ExitCode = luaL_optinteger(L, 1, 0);
+	int ExitCode = (int)luaL_optinteger(L, 1, 0);
 	lua_pop(L, lua_gettop(L));
 	lua_gc(L, LUA_GCCOLLECT, 0);
 	lua_close(L);
@@ -311,7 +312,7 @@ static int L_SetTick(lua_State *L){
 	lua_pop(L, lua_gettop(L));
 	TickStartCounter();
 
-	int maskcnt = ticktime;
+	int maskcnt = (int)ticktime;
 	if (maskcnt <= 0)
 		maskcnt = 1;
 	else if (maskcnt > 1000)
@@ -393,7 +394,7 @@ static int L_GetReg(lua_State *L){
 
 static int L_ToggleConsole(lua_State *L){
 
-	bool toggle = lua_toboolean(L, 1);
+	bool toggle = lua_toboolean(L, 1) > 0;
 	HWND console = GetConsoleWindow();
 	if (toggle){		
 		ShowWindow(console, SW_RESTORE);
@@ -479,6 +480,8 @@ int main(int argc, char *argv[]){
 	lua_setglobal(L, "Image");
 	luaopen_stream(L);
 	lua_setglobal(L, "Stream");
+	luaopen_odbc(L);
+	lua_setglobal(L, "ODBC");
 
 	lua_pushcfunction(L, L_GetRuntime);
 	lua_setglobal(L, "Runtime");
@@ -560,7 +563,7 @@ int main(int argc, char *argv[]){
 		int ret = 0;
 
 		if (lua_type(L, 1) == LUA_TNUMBER) {
-			ret = lua_tointeger(L, 1);
+			ret = (int)lua_tointeger(L, 1);
 		}
 
 		lua_pop(L, lua_gettop(L));
@@ -574,7 +577,7 @@ int main(int argc, char *argv[]){
 			lua_pushinteger(L, ret);
 			lua_pcall(L, 1, 1, NULL);
 			if (lua_type(L, 1) == LUA_TNUMBER) {
-				ret = lua_tointeger(L, 1);
+				ret = (int)lua_tointeger(L, 1);
 			}
 			else {
 				ret = 0;
@@ -585,7 +588,7 @@ int main(int argc, char *argv[]){
 		}
 
 		if (lua_isnumber(L, -1)) {
-			ret = lua_tointeger(L, -1);
+			ret = (int)lua_tointeger(L, -1);
 		}
 		else {
 			ret = 0;

@@ -59,6 +59,43 @@ Misc global functions:
 	-Array containing commandline parameters passed though to gff.exe
 	ARGS[]
 
+ODBC:
+
+	-Return an array of all available drivers
+	array ODBC.GetAllDrivers()
+
+	-Connect to a driver using a connectionstring
+	-returns nil, error on failure
+	ODBC ODBC.DriverConnect(connectionstring)
+
+	-Prepare an SQL query
+	-EG: "SELECT * FROM ... WHERE Col1=? AND Col2=?;"
+	-returns false and an error message on failure
+	bool, error ODBC:Prepare(sql)
+
+	-Bind data to a prepared statement
+	-Bind will bind the parameters in order left to right
+	bool, error ODBC:Bind(data)
+
+	-Executes the prepared statement
+	bool, error ODBC:Execute()
+
+	-Advance the cursor in the resultset
+	-returns false when there is no more data
+	-returns false and an error on failure
+	bool, error ODBC:Fetch()
+
+	-Returns a table containing key values with the column names and its data
+	table, error ODBC:GetRow()
+
+	-Retrive the column names and their types 
+	-https://docs.microsoft.com/en-us/sql/odbc/reference/appendixes/sql-data-types?view=sql-server-2017
+	table ODBC:GetRowColumnTypes()
+
+	-Disconnects the ODBC object, it should not be used afterwards
+	-This is done automatically by the GC but this closes it earlier
+	nil ODBC:Disconnect();
+
 Stream:
 
 	-Create a new stream object

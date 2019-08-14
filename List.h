@@ -7,7 +7,7 @@ typedef struct List {
 	volatile size_t len;
 	size_t alloc;
 	void ** data;
-};
+}List;
 
 //Enter the critical section
 //Do this before enumerating the list in a multithreaded environment

@@ -2,7 +2,7 @@
 
 int MySQLResultSetAsString(lua_State *L) {
 	LuaMySQLResult * luamysql = luaL_checkmysqlresult(L, 1);
-	luamysql->asstring = lua_toboolean(L, 2);
+	luamysql->asstring = lua_toboolean(L, 2) > 0;
 	lua_pop(L, lua_gettop(L));
 	return 0;
 }
@@ -55,7 +55,7 @@ int MySQLResultGetRow(lua_State *L) {
 	LuaMySQLResult * luamysql = luaL_checkmysqlresult(L, 1);
 
 	unsigned long *lengths;
-	int index = luaL_optinteger(L, 2, -1);
+	int index = (int)luaL_optinteger(L, 2, -1);
 
 	lua_pop(L, lua_gettop(L));
 

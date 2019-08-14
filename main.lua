@@ -6,7 +6,7 @@ function TablePrint(tbl, depth)
 
 	local padding="";
 
-	for n=0, depth do 
+	for n=1, depth do 
 		padding = padding.." ";
 	end
 
@@ -28,9 +28,9 @@ end
 
 function ArrayPrint(arr)
 
-	print(tostring(arr));
+	print(tostring(arr).." "..tostring(#arr));
 
-	if type(tbl)~="table" then 
+	if type(arr)~="table" then 
 		return;
 	end
 
@@ -55,13 +55,20 @@ for k,v in pairs(c) do
 	print(k, string.byte(v));
 end
 
-local f=io.open("E:/leioana22.bic", "rb");
-local raw = f:read("*all");
-f:close();
+ArrayPrint(ODBC.GetAllDrivers());
 
-local gff = assert(GFF.OpenString(raw));
+TablePrint(ODBC);
+local odbc = assert(ODBC.DriverConnect("DRIVER={PostgreSQL ODBC Driver(ANSI)};Server=192.168.1.207;Port=5432;Database=bleh_core;Uid=ancon;Pwd=ancon;"));
+TablePrint(odbc);
 
-gff = assert(GFF.OpenFile("E:/leioana22.bic"));
+assert(odbc:Prepare('SELECT * FROM public."Tenant" WHERE "Name"=?;'));
+assert(odbc:Bind("KFC"));
+assert(odbc:Execute());
+while odbc:Fetch() do 
 
+	TablePrint(odbc:GetRowColumnTypes());
+	TablePrint(odbc:GetRow());
 
---TablePrint(gff);
+end 
+
+odbc:Disconnect();

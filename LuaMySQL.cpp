@@ -77,7 +77,7 @@ int EscapeString(lua_State *L) {
 
 int MySQLSetAsString(lua_State *L) {
 	LuaMySQL * luamysql = luaL_checkmysql(L, 1);
-	luamysql->asstring = lua_toboolean(L, 2);
+	luamysql->asstring = lua_toboolean(L, 2) > 0;
 	lua_pop(L, lua_gettop(L));
 	return 0;
 }
@@ -92,7 +92,7 @@ int MySQLGetRow(lua_State *L) {
 	}
 
 	unsigned long *lengths;
-	int index = luaL_optinteger(L, 2, -1);
+	int index = (int)luaL_optinteger(L, 2, -1);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -213,7 +213,7 @@ int MySQLForkResult(lua_State *L) {
 	result->columns = luamysql->columns;
 	result->fields = luamysql->fields;
 	result->row = luamysql->row;
-	result->rows = luamysql->result ? mysql_num_rows(luamysql->result) : 0;
+	result->rows = (int)(luamysql->result ? mysql_num_rows(luamysql->result) : 0);
 	result->asstring = luamysql->asstring;
 
 	luamysql->result = NULL;
@@ -285,13 +285,13 @@ LuaAsyncResult* Execute(LuaMySQL * luamysql, bool store) {
 	
 	luamysql->result = store ? mysql_store_result(luamysql->connection) : mysql_use_result(luamysql->connection);
 	if (luamysql->result) {
-		SetResult(result, NULL, mysql_num_rows(luamysql->result));
+		SetResult(result, NULL, (int)mysql_num_rows(luamysql->result));
 		return result;
 	}
 	else {
 		if (mysql_field_count(luamysql->mysql) == 0)
 		{
-			SetResult(result, NULL, mysql_affected_rows(luamysql->connection));
+			SetResult(result, NULL, (int)mysql_affected_rows(luamysql->connection));
 			return result;
 		}
 		else
@@ -350,7 +350,6 @@ int MySQLGetAsyncResults(lua_State *L) {
 int MySQLExecute(lua_State *L) {
 
 	size_t len;
-	unsigned long strlen;
 	LuaMySQL * luamysql = luaL_checkmysql(L, 1);
 
 	if (luamysql->hasTask) {
@@ -439,6 +438,8 @@ int MySQLExecute(lua_State *L) {
 				//	mysql_free_result(luamysql->result);
 				luamysql->isRunningAsync = false;
 			}
+
+			return (LuaAsyncResult*)NULL;
 		});
 
 		lua_pushboolean(L, true);
@@ -503,8 +504,8 @@ int MySQLConnect(lua_State *L) {
 	temp_schema[len] = '\0';
 	memcpy(temp_schema, temp, len);
 
-	int port = luaL_optinteger(L, 5, 3306);
-	int timeout = luaL_optinteger(L, 6, -1);
+	int port = (int)luaL_optinteger(L, 5, 3306);
+	int timeout = (int)luaL_optinteger(L, 6, -1);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -576,7 +577,7 @@ int SetTimeout(lua_State *L) {
 
 	if (luamysql) {
 
-		luamysql->timeout = min(luaL_checkinteger(L, 2), 1);
+		luamysql->timeout = (int)min(luaL_checkinteger(L, 2), 1);
 
 		mysql_options(luamysql->mysql, MYSQL_OPT_CONNECT_TIMEOUT, &luamysql->timeout);
 		mysql_options(luamysql->mysql, MYSQL_OPT_READ_TIMEOUT, &luamysql->timeout);
