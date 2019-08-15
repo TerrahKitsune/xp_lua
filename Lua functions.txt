@@ -106,6 +106,41 @@ ODBC:
 	-Rollbacks a transaction and toggles autocommit on
 	bool, error ODBC:Rollback();
 
+	-Querries ODCB for all tables
+	-parameters optional: driver dependant
+	-This generates a resultset use Fetch/GetRow to iterate
+	bool, error ODBC:Tables(schema);
+
+	-Querries ODCB for all columns on a table
+	-parameters optional: driver dependant
+	-This generates a resultset use Fetch/GetRow to iterate
+	bool, error ODBC:Columns(table, schema);
+
+	-Querries ODCB for all special (usually hidden) columns on a table such as ROWID
+	-parameters optional: driver dependant
+	-This generates a resultset use Fetch/GetRow to iterate
+	bool, error ODBC:SpecialColumns(table, schema);
+	
+	-Querries ODCB for all primary keys on a table
+	-parameters optional: driver dependant
+	-This generates a resultset use Fetch/GetRow to iterate
+	bool, error ODBC:PrimaryKeys(table, schema);
+
+	-Querries ODCB for all foreign keys
+	-parameters optional: driver dependant
+	-This generates a resultset use Fetch/GetRow to iterate
+	bool, error ODBC:ForeignKeys(table, schema);
+
+	-Querries ODCB for all procedures
+	-parameters optional: driver dependant
+	-This generates a resultset use Fetch/GetRow to iterate
+	bool, error ODBC:Procedures(schema);
+
+	-Querries ODCB for all procedure info
+	-parameters optional: driver dependant
+	-This generates a resultset use Fetch/GetRow to iterate
+	bool, error ODBC:ProcedureColumns(procedure, schema);
+
 	-Disconnects the ODBC object, it should not be used afterwards
 	-This is done automatically by the GC but this closes it earlier
 	nil ODBC:Disconnect();

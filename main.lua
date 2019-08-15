@@ -79,7 +79,7 @@ local testid = id;
 
 assert(odbc:Begin());
 assert(odbc:Prepare([[INSERT INTO public.pizza("Id", "Radius", "Thickness", "Data", "Name", "GuidId")	VALUES (?, ?, ?, ?, ?, ?);]]));
-for n=1,40000 do
+for n=1,1 do
 	
 	count = count + 1;
 	assert(odbc:Bind(count));
@@ -92,7 +92,7 @@ for n=1,40000 do
 	id = UUID();
 end
 
-assert(odbc:Commit());
+assert(odbc:Rollback());
 
 assert(odbc:Prepare('select * from public.pizza WHERE "Id"=? OR "GuidId"=?;'));
 assert(odbc:Bind(count-1));
@@ -105,10 +105,78 @@ while odbc:Fetch() do
 
 end 
 
-assert(odbc:Prepare('select * from public.pizza;'));
-assert(odbc:Execute());
-while odbc:Fetch() do 
-	print(odbc:GetRow().GuidId);
-end 
+--assert(odbc:Prepare('select * from public.pizza;'));
+--assert(odbc:Execute());
+--while odbc:Fetch() do 
+	--print(odbc:GetRow().GuidId);
+--end 
 
+local xls = assert(ODBC.DriverConnect([[Driver={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};
+DBQ=C:\\Users\\Terrah\\Desktop\\Haven healing formula calculator.xlsx;]]));
+xls = odbc;
+print("\nTables:\n");
+assert(xls:Tables());
+local testtable = nil;
+local row;
+while xls:Fetch() do 
+	row = xls:GetRow();
+	TablePrint(row);
+	if not testtable then 
+		testtable = row.TABLE_NAME;
+	end 
+	print("\n");
+end 
+print("\nColumn: "..tostring(testtable).."\n");
+
+assert(xls:Columns(testtable));
+
+while xls:Fetch() do 
+	TablePrint(xls:GetRow());
+	print("\n");
+end 
+print("\nKeys:\n");
+
+assert(xls:PrimaryKeys(testtable));
+
+while xls:Fetch() do 
+	TablePrint(xls:GetRow());
+	print("\n");
+end
+print("\nFK:\n");
+
+assert(xls:ForeignKeys(testtable));
+
+while xls:Fetch() do 
+	TablePrint(xls:GetRow());
+	print("\n");
+end
+
+print("\nProcedures:\n");
+
+assert(xls:Procedures());
+local testprc;
+while xls:Fetch() do 
+	row = xls:GetRow();
+	TablePrint(row);
+	print("\n");
+	testprc = row.procedure_name;
+end
+
+print("\nProcedure Columns: "..testprc.."\n");
+
+assert(xls:ProcedureColumns(testprc));
+while xls:Fetch() do 
+	row = xls:GetRow();
+	TablePrint(row);
+	print("\n");
+end
+print("\nSpecialColumns:\n");
+
+assert(xls:SpecialColumns(testtable));
+
+while xls:Fetch() do 
+	TablePrint(xls:GetRow());
+	print("\n");
+end
+xls:Disconnect();
 odbc:Disconnect();

@@ -31,6 +31,13 @@ int ODBCToggleAutoCommit(lua_State* L);
 int ODBCBegin(lua_State* L);
 int ODBCCommit(lua_State* L);
 int ODBCRollback(lua_State* L);
+int ODBCTables(lua_State* L);
+int ODBCColumns(lua_State* L);
+int ODBCForeignKeys(lua_State* L);
+int ODBCPrimaryKeys(lua_State* L);
+int ODBCProcedures(lua_State* L);
+int ODBCProcedureColumns(lua_State* L);
+int ODBCSpecialColumns(lua_State* L);
 
 LuaOdbc* lua_pushodbc(lua_State* L);
 LuaOdbc* lua_toodbc(lua_State* L, int index);

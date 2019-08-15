@@ -15,6 +15,13 @@ static const struct luaL_Reg odbcfunctions[] = {
 	{ "Begin",  ODBCBegin },
 	{ "Commit",  ODBCCommit },
 	{ "Rollback",  ODBCRollback },
+	{ "Tables",  ODBCTables },
+	{ "Columns",  ODBCColumns },
+	{ "ForeignKeys",  ODBCForeignKeys },
+	{ "PrimaryKeys",  ODBCPrimaryKeys },
+	{ "Procedures",  ODBCProcedures },
+	{ "ProcedureColumns",  ODBCProcedureColumns },
+	{ "SpecialColumns",  ODBCSpecialColumns },
 	{ "Disconnect",  odbc_gc },
 	{ NULL, NULL }
 }; 

@@ -138,17 +138,7 @@ int ODBCRollback(lua_State* L) {
 	return 1;
 }
 
-int ODBCPrepare(lua_State* L) {
-
-	LuaOdbc* odbc = AssertIsOpen(L, 1);
-	size_t len;
-	const char* sql = luaL_checklstring(L, 2, &len);
-	SQLSMALLINT params;
-
-	if (odbc->stmt) {
-		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
-		odbc->stmt = NULL;
-	}
+void ClearStatement(LuaOdbc* odbc) {
 
 	if (odbc->params) {
 
@@ -163,6 +153,26 @@ int ODBCPrepare(lua_State* L) {
 		odbc->params = NULL;
 		odbc->numbparams = 0;
 	}
+
+	if (odbc->stmt) {
+		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
+		odbc->stmt = NULL;
+	}
+}
+
+int ODBCPrepare(lua_State* L) {
+
+	LuaOdbc* odbc = AssertIsOpen(L, 1);
+	size_t len;
+	const char* sql = luaL_checklstring(L, 2, &len);
+	SQLSMALLINT params;
+
+	if (odbc->stmt) {
+		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
+		odbc->stmt = NULL;
+	}
+
+	ClearStatement(odbc);
 
 	if (SQLAllocHandle(SQL_HANDLE_STMT, odbc->dbc, &odbc->stmt) != SQL_SUCCESS) {
 
@@ -325,6 +335,252 @@ int ODBCBind(lua_State* L) {
 	}
 
 	if (SQLBindParameter(odbc->stmt, ++odbc->paramnumber, SQL_PARAM_INPUT, valuetype, paramtype, len, decimal, data, len + 1, NULL) != SQL_SUCCESS) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_STMT, odbc->stmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
+		return 2;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
+int ODBCProcedureColumns(lua_State* L) {
+
+	LuaOdbc* odbc = AssertIsOpen(L, 1);
+	size_t proclen;
+	SQLCHAR* procedure = (SQLCHAR*)luaL_optlstring(L, 2, NULL, &proclen);
+
+	size_t schemalen;
+	SQLCHAR* schema = (SQLCHAR*)luaL_optlstring(L, 3, NULL, &schemalen);
+
+	ClearStatement(odbc);
+
+	if (SQLAllocHandle(SQL_HANDLE_STMT, odbc->dbc, &odbc->stmt) != SQL_SUCCESS) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_STMT, odbc->stmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
+		return 2;
+	}
+	else if (!SUCCEEDED(SQLProcedureColumns(odbc->stmt, NULL, 0, schema, (SQLSMALLINT)schemalen, procedure, (SQLSMALLINT)proclen, NULL, 0))) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_STMT, odbc->stmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
+		return 2;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
+int ODBCProcedures(lua_State* L) {
+
+	LuaOdbc* odbc = AssertIsOpen(L, 1);
+	size_t schemalen;
+	SQLCHAR* schema = (SQLCHAR*)luaL_optlstring(L, 2, NULL, &schemalen);
+
+	ClearStatement(odbc);
+
+	if (SQLAllocHandle(SQL_HANDLE_STMT, odbc->dbc, &odbc->stmt) != SQL_SUCCESS) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_STMT, odbc->stmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
+		return 2;
+	}
+	else if (!SUCCEEDED(SQLProcedures(odbc->stmt, NULL, 0, schema, (SQLSMALLINT)schemalen, NULL, 0))) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_STMT, odbc->stmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
+		return 2;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
+int ODBCForeignKeys(lua_State* L) {
+
+	LuaOdbc* odbc = AssertIsOpen(L, 1);
+	size_t len;
+	SQLCHAR* table = (SQLCHAR*)luaL_tolstring(L, 2, &len);
+	size_t schemalen;
+	SQLCHAR* schema = (SQLCHAR*)luaL_optlstring(L, 3, NULL, &schemalen);
+
+	ClearStatement(odbc);
+
+	if (SQLAllocHandle(SQL_HANDLE_STMT, odbc->dbc, &odbc->stmt) != SQL_SUCCESS) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_STMT, odbc->stmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
+		return 2;
+	}
+	else if (!SUCCEEDED(SQLForeignKeys(odbc->stmt, NULL, 0, NULL, 0, NULL, 0, NULL, 0, schema, (SQLSMALLINT)schemalen, table, (SQLSMALLINT)len))) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_STMT, odbc->stmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
+		return 2;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
+int ODBCPrimaryKeys(lua_State* L) {
+
+	LuaOdbc* odbc = AssertIsOpen(L, 1);
+	size_t len;
+	SQLCHAR* table = (SQLCHAR*)luaL_tolstring(L, 2, &len);
+	size_t schemalen;
+	SQLCHAR* schema = (SQLCHAR*)luaL_optlstring(L, 3, NULL, &schemalen);
+
+
+	ClearStatement(odbc);
+
+	if (SQLAllocHandle(SQL_HANDLE_STMT, odbc->dbc, &odbc->stmt) != SQL_SUCCESS) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_STMT, odbc->stmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
+		return 2;
+	}
+	else if (!SUCCEEDED(SQLPrimaryKeys(odbc->stmt, NULL, 0, schema, (SQLSMALLINT)schemalen, table, (SQLSMALLINT)len))) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_STMT, odbc->stmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
+		return 2;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
+int ODBCSpecialColumns(lua_State* L) {
+
+	LuaOdbc* odbc = AssertIsOpen(L, 1);
+	size_t len;
+	SQLCHAR* table = (SQLCHAR*)luaL_optlstring(L, 2, NULL, &len);
+
+	size_t schemalen;
+	SQLCHAR* schema = (SQLCHAR*)luaL_optlstring(L, 3, NULL, &schemalen);
+
+	ClearStatement(odbc);
+
+	if (SQLAllocHandle(SQL_HANDLE_STMT, odbc->dbc, &odbc->stmt) != SQL_SUCCESS) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_STMT, odbc->stmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
+		return 2;
+	}
+	else if (!SUCCEEDED(SQLSpecialColumns(odbc->stmt, SQL_BEST_ROWID, NULL, 0, schema, (SQLSMALLINT)schemalen, table, (SQLSMALLINT)len, SQL_SCOPE_SESSION, SQL_NULLABLE))) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_STMT, odbc->stmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
+		return 2;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
+int ODBCColumns(lua_State* L) {
+
+	LuaOdbc* odbc = AssertIsOpen(L, 1);
+	size_t len;
+	SQLCHAR* table = (SQLCHAR*)luaL_optlstring(L, 2, NULL, &len);
+
+	size_t schemalen;
+	SQLCHAR* schema = (SQLCHAR*)luaL_optlstring(L, 3, NULL, &schemalen);
+
+	ClearStatement(odbc);
+
+	if (SQLAllocHandle(SQL_HANDLE_STMT, odbc->dbc, &odbc->stmt) != SQL_SUCCESS) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_STMT, odbc->stmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
+		return 2;
+	}
+	else if (!SUCCEEDED(SQLColumns(odbc->stmt, NULL, 0, schema, (SQLSMALLINT)schemalen, table, (SQLSMALLINT)len, NULL, 0))) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_STMT, odbc->stmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
+		return 2;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, true);
+
+	return 1;
+}
+
+int ODBCTables(lua_State* L) {
+
+	LuaOdbc* odbc = AssertIsOpen(L, 1);
+
+	size_t schemalen;
+	SQLCHAR* schema = (SQLCHAR*)luaL_optlstring(L, 2, NULL, &schemalen);
+
+	ClearStatement(odbc);
+
+	if (SQLAllocHandle(SQL_HANDLE_STMT, odbc->dbc, &odbc->stmt) != SQL_SUCCESS) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_STMT, odbc->stmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
+		return 2;
+	}
+	else if (!SUCCEEDED(SQLTables(odbc->stmt, NULL, 0, schema, (SQLSMALLINT)schemalen, NULL, 0, NULL, 0))) {
 
 		lua_pop(L, lua_gettop(L));
 		lua_pushboolean(L, false);
@@ -731,24 +987,7 @@ int odbc_gc(lua_State* L) {
 		odbc->ConnectionString = NULL;
 	}
 
-	if (odbc->stmt) {
-		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
-		odbc->stmt = NULL;
-	}
-
-	if (odbc->params) {
-
-		for (unsigned int i = 0; i < odbc->numbparams; i++)
-		{
-			if (odbc->params[i])
-				free(odbc->params[i]);
-		}
-
-		free(odbc->params);
-
-		odbc->params = NULL;
-		odbc->numbparams = 0;
-	}
+	ClearStatement(odbc);
 
 	if (odbc->dbc) {
 		SQLDisconnect(odbc->dbc);
