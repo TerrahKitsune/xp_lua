@@ -75,7 +75,8 @@ ODBC:
 
 	-Bind data to a prepared statement
 	-Bind will bind the parameters in order left to right
-	bool, error ODBC:Bind(data)
+	-Optional bool (default false) if true it will interpret the data as binary
+	bool, error ODBC:Bind(data, opt bool asbinary)
 
 	-Executes the prepared statement
 	bool, error ODBC:Execute()
@@ -91,6 +92,19 @@ ODBC:
 	-Retrive the column names and their types 
 	-https://docs.microsoft.com/en-us/sql/odbc/reference/appendixes/sql-data-types?view=sql-server-2017
 	table ODBC:GetRowColumnTypes()
+
+	-Toggles autocommiting on or off
+	-true=on, false=off
+	bool, error ODBC:ToggleAutoCommit(bool)
+
+	-Begins a transaction and toggles autocommit off
+	bool, error ODBC:Begin();
+
+	-Commits a transaction and toggles autocommit on
+	bool, error ODBC:Begin();
+
+	-Rollbacks a transaction and toggles autocommit on
+	bool, error ODBC:Rollback();
 
 	-Disconnects the ODBC object, it should not be used afterwards
 	-This is done automatically by the GC but this closes it earlier

@@ -153,7 +153,6 @@ bad:
 SOCKET Connect(const char * ip, int port) {
 
 	int iResult;
-	SOCKET s;
 	struct addrinfo *result = NULL,
 		*ptr = NULL,
 		hints;
@@ -340,7 +339,7 @@ HttpResult * SendRecv(LuaHttp* luahttp, SOCKET ConnectSocket, SSL* ssl) {
 			}
 		}
 
-	} while (tosend == -1 || max(b->length, b->filelength) < tosend);
+	} while (tosend == -1 || (int)max(b->length, b->filelength) < tosend);
 
 	return CreateResult(NULL, b);
 }
@@ -373,7 +372,6 @@ HttpResult * DoHttps(LuaHttp* luahttp, SOCKET ConnectSocket) {
 
 	SSL_CTX* ctx;
 	SSL* ssl;
-	X509* server_cert;
 	int result;
 	int total = 0;
 
@@ -476,6 +474,8 @@ int Start(lua_State *L) {
 		}
 		catch (...) {
 		}
+
+		return (HttpResult*)NULL;
 	});
 
 	return 1;

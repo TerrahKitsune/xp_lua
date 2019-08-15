@@ -11,6 +11,10 @@ static const struct luaL_Reg odbcfunctions[] = {
 	{ "Fetch",  ODBCFetch },
 	{ "GetRow",  ODBCGetRow },
 	{ "GetRowColumnTypes",  ODBCGetResultColumns },
+	{ "ToggleAutoCommit",  ODBCToggleAutoCommit },
+	{ "Begin",  ODBCBegin },
+	{ "Commit",  ODBCCommit },
+	{ "Rollback",  ODBCRollback },
 	{ "Disconnect",  odbc_gc },
 	{ NULL, NULL }
 }; 

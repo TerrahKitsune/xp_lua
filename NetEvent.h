@@ -12,6 +12,6 @@ typedef struct NetEvent {
 	int type;
 	int len;
 	char data[];
-};
+}NetEvent;
 
 NetEvent * NetEvent_Create(SOCKET s, int type, const char * data, int len);

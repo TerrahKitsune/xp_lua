@@ -38,7 +38,7 @@ int lua_uuid(lua_State* L) {
 
 int lua_sleep(lua_State * L) {
 
-	int zzz = luaL_optinteger(L, 1, 1);
+	int zzz = (int)luaL_optinteger(L, 1, 1);
 
 	if (zzz <= 0)
 		zzz = 1;
@@ -52,7 +52,7 @@ int lua_sleep(lua_State * L) {
 
 static int GetLastErrorAsMessage(lua_State * L)
 {
-	DWORD lasterror = luaL_optinteger(L, 1, GetLastError());
+	DWORD lasterror = (DWORD)luaL_optinteger(L, 1, GetLastError());
 	char err[1024];
 
 	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, lasterror,

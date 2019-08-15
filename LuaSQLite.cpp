@@ -135,7 +135,7 @@ int SQLiteGetRow(lua_State *L) {
 		lua_pushnil(L);
 	}
 
-	int idx = luaL_optinteger(L, 2, -1);
+	int idx = (int)luaL_optinteger(L, 2, -1);
 	if (idx > 0) {
 		idx--;
 		if (idx >= sqlite3_column_count(luasqlite->stmt)) {
@@ -293,7 +293,7 @@ static int BusyHandler(void * d, int retries) {
 		if (lua_pcall(L, 2, 1, NULL)) {
 			return 0;
 		}		
-		bool ok = lua_toboolean(L, -1);
+		bool ok = lua_toboolean(L, -1)>0;
 		lua_pop(L, 1);
 		return 1;
 	}	
@@ -328,7 +328,7 @@ int SQLiteConnect(lua_State *L) {
 	file[len] = '\0';
 	memcpy(file, db, len);
 
-	int mode = luaL_optinteger(L, 2, 0);
+	int mode = (int)luaL_optinteger(L, 2, 0);
 
 	lua_pop(L, lua_gettop(L));
 	LuaSQLite * luasqlite = lua_pushsqlite(L);

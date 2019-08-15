@@ -74,7 +74,7 @@ SOCKET ServerAccept(Server  * srv) {
 
 	list_Enter(srv->Clients);
 
-	for (int n = 0; n < srv->Clients->len; n++) {
+	for (unsigned int n = 0; n < srv->Clients->len; n++) {
 
 		if (*(SOCKET*)srv->Clients->data[n] == result) {
 			list_Leave(srv->Clients);
@@ -105,7 +105,7 @@ size_t ServerReceive(Server * srv, SOCKET socket, char * buffer, size_t buffersi
 
 	list_Enter(srv->Clients);
 
-	for (int n = 0; n < srv->Clients->len; n++) {
+	for (unsigned int n = 0; n < srv->Clients->len; n++) {
 
 		if (*(SOCKET*)srv->Clients->data[n] == socket) {
 			real = (SOCKET*)&srv->Clients->data[n];
@@ -151,7 +151,7 @@ size_t ServerSend(Server * srv, SOCKET socket, char * buffer, size_t buffersize,
 
 	list_Enter(srv->Clients);
 
-	for (int n = 0; n < srv->Clients->len; n++) {
+	for (unsigned int n = 0; n < srv->Clients->len; n++) {
 
 		if (*(SOCKET*)srv->Clients->data[n] == socket) {
 			real = (SOCKET*)srv->Clients->data[n];
@@ -198,7 +198,7 @@ void ServerDisconnect(Server * srv, SOCKET socket) {
 
 	list_Enter(srv->Clients);
 
-	for (int n = 0; n < srv->Clients->len; n++) {
+	for (unsigned int n = 0; n < srv->Clients->len; n++) {
 
 		if (*(SOCKET*)srv->Clients->data[n] == socket) {
 			real = (SOCKET*)srv->Clients->data[n];
@@ -225,7 +225,7 @@ void ServerShutdown(Server * srv) {
 
 	list_Enter(srv->Clients);
 
-	for (int n = 0; n < srv->Clients->len; n++) {
+	for (unsigned int n = 0; n < srv->Clients->len; n++) {
 
 		if (srv->Clients->data[n] != NULL) {
 			free(srv->Clients->data[n]);

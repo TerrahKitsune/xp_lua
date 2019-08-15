@@ -11,7 +11,7 @@ unsigned int WriteField(lua_State *L, Gff * gff){
 
 	lua_pushstring(L, "Type");
 	lua_gettable(L, -2);
-	field->Type = lua_tointeger(L, -1);
+	field->Type = (unsigned int)lua_tointeger(L, -1);
 	lua_pop(L, 1);
 
 	lua_pushstring(L, "Label");
@@ -48,17 +48,17 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type){
 	{
 	case 0:
 	case 1:
-		data = lua_tointeger(L, -1);
+		data = (unsigned int)lua_tointeger(L, -1);
 		memcpy(&result, &data, sizeof(unsigned char));
 		break;
 	case 2:
 	case 3:
-		data = lua_tointeger(L, -1);
+		data = (unsigned int)lua_tointeger(L, -1);
 		memcpy(&result, &data, sizeof(unsigned short));
 		break;
 	case 4:
 	case 5:
-		data = lua_tointeger(L, -1);
+		data = (unsigned int)lua_tointeger(L, -1);
 		memcpy(&result, &data, sizeof(unsigned int));
 		break;
 	case 6:
@@ -66,18 +66,18 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type){
 		ptr = &gff->raw[gff->Header.FieldDataOffset + gff->Header.FieldDataCount];
 		result = gff->Header.FieldDataCount;
 		gff->Header.FieldDataCount += sizeof(long);
-		data = lua_tointeger(L, -1);
+		data = (unsigned int)lua_tointeger(L, -1);
 		memcpy(ptr, &data, sizeof(long));
 		break;
 	case 8:
-		fdata = lua_tonumber(L, -1);
+		fdata = (float)lua_tonumber(L, -1);
 		memcpy(&result, &fdata, sizeof(float));
 		break;
 	case 9:
 		ptr = &gff->raw[gff->Header.FieldDataOffset + gff->Header.FieldDataCount];
 		result = gff->Header.FieldDataCount;
 		gff->Header.FieldDataCount += sizeof(double);
-		ddata = lua_tonumber(L, -1);
+		ddata = (unsigned int)lua_tonumber(L, -1);
 		memcpy(ptr, &ddata, sizeof(double));
 		break;
 	case 13:
@@ -108,7 +108,7 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type){
 		lua_pushstring(L, "StringRef");
 		lua_gettable(L, -2);
 		if (lua_isinteger(L, -1))
-			exolocstring->StringRef = lua_tointeger(L, -1);
+			exolocstring->StringRef = (unsigned int)lua_tointeger(L, -1);
 		else
 			exolocstring->StringRef = -1;
 		lua_pop(L, 1);
@@ -134,7 +134,7 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type){
 				lua_pushstring(L, "StringID");
 				lua_gettable(L, -2);
 				if (lua_isinteger(L, -1))
-					exolocsubstring->StringID = lua_tointeger(L, -1);
+					exolocsubstring->StringID = (int)lua_tointeger(L, -1);
 				else
 					exolocsubstring->StringID = 0;
 				lua_pop(L, 1);
@@ -349,7 +349,7 @@ size_t CalculateFieldSize(lua_State *L, Gff * gff){
 		Bail(gff, L, "Type field missing from field table");
 	}
 	else
-		type = lua_tointeger(L, -1);
+		type = (int)lua_tointeger(L, -1);
 	lua_pop(L, 1);
 
 	lua_pushstring(L, "Label");
@@ -419,7 +419,6 @@ void PushFieldData(lua_State *L, Gff * gff, GffField *gfffield){
 	CExoString * cdata;
 	ResRef * rdata;
 	CExoLocString * lsdata;
-	StructList * sldata;
 
 	switch (gfffield->Type)
 	{
@@ -529,7 +528,7 @@ void PushCExoLocString(lua_State *L, CExoLocString * locstr, Gff * gff, unsigned
 	lua_pushstring(L, "Strings");
 	lua_createtable(L, locstr->StringCount, 0);
 
-	for (int n = 0; n < locstr->StringCount; n++){
+	for (unsigned int n = 0; n < locstr->StringCount; n++){
 
 		if (sizeof(CExoLocStringSubString) + originaloffset > gff->Header.FieldDataCount ||
 			sizeof(CExoLocStringSubString) + originaloffset + gff->Header.FieldDataOffset > gff->size){

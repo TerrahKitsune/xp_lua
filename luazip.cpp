@@ -204,7 +204,7 @@ int zip_extract(lua_State *L) {
 		char buf[1000];
 
 		zip_int64_t len;
-		zip_int64_t sum = 0;
+		zip_uint64_t sum = 0;
 
 		while (sum < sb.size) {
 
@@ -222,7 +222,7 @@ int zip_extract(lua_State *L) {
 				return 2;
 			}
 
-			fwrite(buf, 1, len, file);
+			fwrite(buf, 1, (size_t)len, file);
 			fflush(file);
 			sum += len;
 		}
@@ -235,7 +235,7 @@ int zip_extract(lua_State *L) {
 	}
 	else {
 
-		char * buffer = (char*)malloc(sb.size);
+		char * buffer = (char*)malloc((size_t)sb.size);
 		if (!buffer) {
 
 			zip_fclose(zf);
@@ -258,7 +258,7 @@ int zip_extract(lua_State *L) {
 		}
 
 		lua_pop(L, lua_gettop(L));
-		lua_pushlstring(L, buffer, sb.size);
+		lua_pushlstring(L, buffer, (size_t)sb.size);
 		free(buffer);
 	}
 
@@ -365,7 +365,7 @@ int zip_getfiles(lua_State *L) {
 	zip_int64_t entries = zip_get_num_entries(zip->z, 0);
 
 	lua_pop(L, lua_gettop(L));
-	lua_createtable(L, entries, 0);
+	lua_createtable(L, (int)entries, 0);
 
 	for (int n = 0; n < entries; n++) {
 		if (zip_stat_index(zip->z, n, 0, &sb) != 0) {

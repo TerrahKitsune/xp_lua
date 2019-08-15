@@ -49,7 +49,7 @@ void GetResRef(char * buffer, const char * file, int lmax){
 		len = dot - start;
 	}
 
-	memcpy(buffer, start, min(len, lmax));
+	memcpy(buffer, start, min(len, (size_t)lmax));
 }
 
 void FillKey(void * data, int index, int version, ERFHeader * header, ERFBuildEntry * file, lua_State *L){
@@ -106,7 +106,7 @@ int CreateErf(lua_State *L){
 	size_t desclen = 3;
 	const char * file = luaL_checklstring(L, 1, &len);
 	const char * filetype = luaL_checklstring(L, 2, &typelen);
-	int version = luaL_optinteger(L, 4, 1);
+	int version = (int)luaL_optinteger(L, 4, 1);
 	const char * desc = luaL_optlstring(L, 5, "LUA", &desclen);
 
 	luaL_checktype(L, 3, LUA_TTABLE);
@@ -307,7 +307,7 @@ int CreateErf(lua_State *L){
 int ExtractErf(lua_State *L){
 
 	ERF * luaerf = (ERF*)lua_toerf(L, 1);
-	int key = luaL_checkinteger(L, 2);
+	unsigned int key = (unsigned int)luaL_checkinteger(L, 2);
 	const char * path = luaL_checkstring(L, 3);
 
 	//1 index -> 0 index
@@ -377,7 +377,7 @@ int ExtractErf(lua_State *L){
 int GetResource(lua_State *L){
 
 	ERF * luaerf = (ERF*)lua_toerf(L, 1);
-	int key = luaL_checkinteger(L, 2);
+	unsigned int key = (unsigned int)luaL_checkinteger(L, 2);
 
 	//1 index -> 0 index
 	key--;
@@ -488,7 +488,7 @@ int GetKeys(lua_State *L){
 	lua_pop(L, 1);
 	lua_createtable(L, 0, luaerf->Header->EntryCount);
 
-	for (int n = 0; n < luaerf->Header->EntryCount; n++){
+	for (unsigned int n = 0; n < luaerf->Header->EntryCount; n++){
 
 		lua_createtable(L, 0, 4);
 
@@ -584,9 +584,9 @@ int GetLocalizedStrings(lua_State *L){
 	lua_pop(L, 1);
 	lua_createtable(L, 0, luaerf->Header->LanguageCount);
 
-	int next = 0;
+	unsigned int next = 0;
 	ErfLocString * locstr;
-	for (int n = 0; n < luaerf->Header->LanguageCount; n++){
+	for (unsigned int n = 0; n < luaerf->Header->LanguageCount; n++){
 
 		if (next >= buffersize){
 			free(buffer);

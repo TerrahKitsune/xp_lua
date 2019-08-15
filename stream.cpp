@@ -21,7 +21,7 @@ size_t AllocAddSize(lua_State* L, LuaStream* stream, size_t requestedsize) {
 		}
 
 		if (lua_type(L, -1) == LUA_TNUMBER) {
-			size_t t = lua_tointeger(L, -1);
+			size_t t = (size_t)lua_tointeger(L, -1);
 			lua_pop(L, 1);
 			return t;
 		}
@@ -134,7 +134,7 @@ const BYTE* ReadStream(LuaStream* stream, size_t len) {
 int WriteFloat(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
-	float f = lua_tonumber(L, 2);
+	float f = (float)lua_tonumber(L, 2);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -198,7 +198,7 @@ int ReadDouble(lua_State* L) {
 int WriteShort(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
-	short n = lua_tointeger(L, 2);
+	short n = (short)lua_tointeger(L, 2);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -230,7 +230,7 @@ int ReadShort(lua_State* L) {
 int WriteUShort(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
-	unsigned short n = lua_tointeger(L, 2);
+	unsigned short n = (unsigned short)lua_tointeger(L, 2);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -262,7 +262,7 @@ int ReadUShort(lua_State* L) {
 int WriteInt(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
-	int n = lua_tointeger(L, 2);
+	int n = (int)lua_tointeger(L, 2);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -294,7 +294,7 @@ int ReadInt(lua_State* L) {
 int WriteUInt(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
-	unsigned int n = lua_tointeger(L, 2);
+	unsigned int n = (unsigned int)lua_tointeger(L, 2);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -390,7 +390,7 @@ int ReadUnsignedLong(lua_State* L) {
 int StreamSetPos(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
-	int newpos = luaL_optinteger(L, 2, 0);
+	size_t newpos = (size_t)luaL_optinteger(L, 2, 0);
 
 	if (!stream->data) {
 		lua_pop(L, lua_gettop(L));
@@ -455,7 +455,7 @@ int SetStreamByte(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
 	BYTE data = (BYTE)lua_tointeger(L, 2);
-	size_t pos = luaL_optinteger(L, 3, stream->pos);
+	size_t pos = (size_t)luaL_optinteger(L, 3, stream->pos);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -469,7 +469,7 @@ int SetStreamByte(lua_State* L) {
 int PeekStreamByte(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
-	size_t pos = luaL_optinteger(L, 2, stream->pos);
+	size_t pos = (size_t)luaL_optinteger(L, 2, stream->pos);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -519,7 +519,7 @@ int ReadStreamByte(lua_State* L) {
 int ReadLuaStream(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
-	long len = luaL_optinteger(L, 2, stream->len - stream->pos);
+	long len = (long)luaL_optinteger(L, 2, stream->len - stream->pos);
 	const BYTE* result = ReadStream(stream, len);
 
 	if (!result) {
@@ -537,7 +537,7 @@ int ReadLuaStream(lua_State* L) {
 int WriteLuaValue(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
-	long size = luaL_optinteger(L, 3, 0);
+	size_t size = (size_t)luaL_optinteger(L, 3, 0);
 
 	LUA_NUMBER number;
 	BYTE boolean;
@@ -604,7 +604,7 @@ int WriteLuaValue(lua_State* L) {
 int WriteStreamByte(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
-	int byte = lua_tointeger(L, 2);
+	int byte = (int)lua_tointeger(L, 2);
 
 	if (byte > 255 || byte < 0) {
 
@@ -651,7 +651,7 @@ int NewStream(lua_State* L) {
 		return 1;
 	}
 
-	int init = luaL_optinteger(L, 1, 1048576);
+	int init = (int)luaL_optinteger(L, 1, 1048576);
 
 	if (init <= 0) {
 		init = MIN_STREAM_SIZE;

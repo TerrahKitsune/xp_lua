@@ -53,7 +53,7 @@ int tlk_create(lua_State *L) {
 		return 0;
 	}
 
-	int languageid = luaL_optinteger(L, 3, 0);
+	int languageid = (int)luaL_optinteger(L, 3, 0);
 	const char * version = luaL_optstring(L, 4, "V3.0");
 
 	if (strlen(version) != 4) {
@@ -158,7 +158,7 @@ int tlk_create(lua_State *L) {
 int tlk_defragment(lua_State *L) {
 
 	LuaTLK * tlk = (LuaTLK*)lua_totlk(L, 1);
-	int extra = luaL_optinteger(L, 2, 0);
+	int extra = (int)luaL_optinteger(L, 2, 0);
 
 	rewind(tlk->file);
 	if (fseek(tlk->file, sizeof(TlkHeader), SEEK_SET) != 0) {
@@ -240,7 +240,7 @@ int tlk_defragment(lua_State *L) {
 			return 1;
 		}
 
-		if (data.Flags & 0x00000001 > 0 && data.StringSize > 0) {
+		if ((data.Flags & 0x00000001) > 0 && data.StringSize > 0) {
 
 			//Check buffer size
 			if (data.StringSize > buffersize) {
@@ -370,7 +370,7 @@ int tlk_defragment(lua_State *L) {
 int tlk_setsound(lua_State *L) {
 
 	LuaTLK * tlk = (LuaTLK*)lua_totlk(L, 1);
-	lua_Integer index = luaL_checkinteger(L, 2);
+	unsigned int index = (unsigned int)luaL_checkinteger(L, 2);
 
 	if (index > tlk->Header.StringCount || index < 0) {
 		lua_pop(L, lua_gettop(L));
@@ -422,7 +422,7 @@ int tlk_setsound(lua_State *L) {
 
 		if (lua_gettop(L) >= 4 && lua_type(L, 4) == LUA_TNUMBER) {
 			entry.Flags |= 0x00000004;
-			entry.SoundLength = (float)lua_tonumber(L, 4, 0);
+			entry.SoundLength = (float)luaL_optnumber(L, 4, 0);
 		}
 		else {
 			entry.Flags &= 0xFFFFFFFB;
@@ -431,11 +431,11 @@ int tlk_setsound(lua_State *L) {
 	}
 
 	if (lua_gettop(L) >= 5) {
-		entry.VolumeVariance = luaL_checkinteger(L, 5);
+		entry.VolumeVariance = (unsigned int)luaL_checkinteger(L, 5);
 	}
 
 	if (lua_gettop(L) >= 6) {
-		entry.PitchVariance = luaL_checkinteger(L, 6);
+		entry.PitchVariance = (unsigned int)luaL_checkinteger(L, 6);
 	}
 
 	fseek(tlk->file, filepos, SEEK_SET);
@@ -462,7 +462,7 @@ int tlk_info(lua_State *L) {
 int tlk_setstrref(lua_State *L) {
 
 	LuaTLK * tlk = (LuaTLK*)lua_totlk(L, 1);
-	lua_Integer index = luaL_checkinteger(L, 2);
+	unsigned int index = (unsigned int)luaL_checkinteger(L, 2);
 	size_t len;
 	const char * data = luaL_checklstring(L, 3, &len);
 
@@ -503,7 +503,7 @@ int tlk_setstrref(lua_State *L) {
 	}
 	else {
 
-		bool had = entry.Flags & 0x00000001 > 0;
+		bool had = (entry.Flags & 0x00000001) > 0;
 
 		entry.Flags |= 0x00000001;
 
@@ -548,7 +548,7 @@ int tlk_get(lua_State *L)
 
 	TlkStringData entry;
 	rewind(tlk->file);
-	if (fseek(tlk->file, sizeof(TlkHeader) + (sizeof(TlkStringData) * index), SEEK_SET) != 0) {
+	if (fseek(tlk->file, sizeof(TlkHeader) + (sizeof(TlkStringData) * (long)index), SEEK_SET) != 0) {
 		lua_pop(L, lua_gettop(L));
 		lua_pushnil(L);
 		return 1;
@@ -644,7 +644,7 @@ int tlk_getall(lua_State *L) {
 	lua_pop(L, lua_gettop(L));
 	lua_createtable(L, tlk->Header.StringCount, 0);
 
-	for (int n = 0; n < tlk->Header.StringCount; n++) {
+	for (unsigned int n = 0; n < tlk->Header.StringCount; n++) {
 
 		if (fread(&entry, 1, sizeof(TlkStringData), tlk->file) != sizeof(TlkStringData)) {
 			lua_pop(L, lua_gettop(L));

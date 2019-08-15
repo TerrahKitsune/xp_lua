@@ -67,7 +67,7 @@ DWORD WINAPI CliProc(LPVOID lpParam) {
 							total += read;
 						}
 
-					} while (total < ev->len);
+					} while (total < (size_t)ev->len);
 				}
 				else if (ev->type == NETEVENT_DISCONNECTED) {
 					queue_Enqueue(self->Events, NetEvent_Create(cli->s, NETEVENT_DISCONNECTED, NULL, 0));
@@ -137,7 +137,7 @@ LuaClient * lua_toluaclient(lua_State *L, int index) {
 int luaclient_connect(lua_State *L) {
 
 	const char * addr = luaL_checkstring(L, 1);
-	int port = luaL_checkinteger(L, 2);
+	int port = (int)luaL_checkinteger(L, 2);
 
 	LuaClientThread * thread = (LuaClientThread*)calloc(1, sizeof(LuaClientThread));
 
@@ -190,7 +190,7 @@ int luaclient_getevent(lua_State *L) {
 	List * lst = _CliList(L);
 	list_Enter(lst);
 
-	for (int n = 0; n < lst->len; n++) {
+	for (unsigned int n = 0; n < lst->len; n++) {
 		if (((LuaClientThread *)lst->data[n]) == cli->Thread) {
 			thread = (LuaClientThread *)lst->data[n];
 			break;
@@ -257,7 +257,7 @@ int luaclient_send(lua_State *L) {
 	List * lst = _CliList(L);
 	list_Enter(lst);
 
-	for (int n = 0; n < lst->len; n++) {
+	for (unsigned int n = 0; n < lst->len; n++) {
 		if (((LuaClientThread *)lst->data[n]) == cli->Thread) {
 			thread = (LuaClientThread *)lst->data[n];
 			break;
@@ -297,7 +297,7 @@ int luaclient_status(lua_State *L) {
 	List * lst = _CliList(L);
 	list_Enter(lst);
 
-	for (int n = 0; n < lst->len; n++) {
+	for (unsigned int n = 0; n < lst->len; n++) {
 		if (((LuaClientThread *)lst->data[n]) == cli->Thread) {
 			thread = (LuaClientThread *)lst->data[n];
 			break;
@@ -344,7 +344,7 @@ int luaclient_gc(lua_State *L) {
 
 		list_Enter(lst);
 
-		for (int n = 0; n < lst->len; n++) {
+		for (unsigned int n = 0; n < lst->len; n++) {
 			if (((LuaClientThread *)lst->data[n]) == cli->Thread) {
 
 				cli->Thread->IsAlive = false;

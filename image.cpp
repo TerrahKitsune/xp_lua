@@ -62,7 +62,6 @@ BOOL CALLBACK MonitorEnumProcCallback(_In_  HMONITOR hMonitor, _In_  HDC DevC, _
 		BInfoHeader->biWidth = image->Width;
 
 		RGBTRIPLE *Image = (RGBTRIPLE*)&image->Data[sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER)];
-		RGBTRIPLE color;
 
 		HDC CaptureDC = CreateCompatibleDC(DevC);
 		HBITMAP CaptureBitmap = CreateCompatibleBitmap(DevC, image->Width, image->Height);
@@ -123,7 +122,7 @@ int lua_setpixels(lua_State *L) {
 	lua_pushnil(L);
 	while (lua_next(L, -2) != 0) {
 
-		n = lua_tointeger(L, -2) - 1;
+		n = (size_t)lua_tointeger(L, -2) - 1;
 
 		if (n < 0 || n >= imglen) {
 			lua_pop(L, lua_gettop(L));
@@ -141,7 +140,7 @@ int lua_setpixels(lua_State *L) {
 		lua_gettable(L, -2);
 
 		if (lua_isnumber(L, -1)) {
-			rgb->rgbtRed = max(min(lua_tonumber(L, -1), 255), 0);
+			rgb->rgbtRed = (BYTE)max(min(lua_tonumber(L, -1), 255), 0);
 		}
 		else {
 			lua_pop(L, lua_gettop(L));
@@ -155,7 +154,7 @@ int lua_setpixels(lua_State *L) {
 		lua_gettable(L, -2);
 
 		if (lua_isnumber(L, -1)) {
-			rgb->rgbtGreen = max(min(lua_tonumber(L, -1), 255), 0);
+			rgb->rgbtGreen = (BYTE)max(min(lua_tonumber(L, -1), 255), 0);
 		}
 		else {
 			lua_pop(L, lua_gettop(L));
@@ -169,7 +168,7 @@ int lua_setpixels(lua_State *L) {
 		lua_gettable(L, -2);
 
 		if (lua_isnumber(L, -1)) {
-			rgb->rgbtBlue = max(min(lua_tonumber(L, -1), 255), 0);
+			rgb->rgbtBlue = (BYTE)max(min(lua_tonumber(L, -1), 255), 0);
 		}
 		else {
 			lua_pop(L, lua_gettop(L));
@@ -242,11 +241,11 @@ int lua_getpixels(lua_State *L) {
 int lua_screenshot(lua_State *L) {
 
 	int x, y, startx, starty;
-	x = luaL_optinteger(L, 1, 0);
-	y = luaL_optinteger(L, 2, 0);
-	startx = max(luaL_optinteger(L, 3, 1) - 1, 0);
-	starty = max(luaL_optinteger(L, 4, 1) - 1, 0);
-	int screen = luaL_optinteger(L, 5, 1);
+	x = (int)luaL_optinteger(L, 1, 0);
+	y = (int)luaL_optinteger(L, 2, 0);
+	startx = (int)max(luaL_optinteger(L, 3, 1) - 1, 0);
+	starty = (int)max(luaL_optinteger(L, 4, 1) - 1, 0);
+	int screen = (int)luaL_optinteger(L, 5, 1);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -293,12 +292,12 @@ int lua_crop(lua_State *L) {
 		return 0;
 	}
 
-	int w = luaL_checkinteger(L, 2);
-	int h = luaL_checkinteger(L, 3);
-	int x = luaL_checkinteger(L, 4) - 1;
-	int y = luaL_checkinteger(L, 5) - 1;
+	int w = (int)luaL_checkinteger(L, 2);
+	int h = (int)luaL_checkinteger(L, 3);
+	int x = (int)luaL_checkinteger(L, 4) - 1;
+	int y = (int)luaL_checkinteger(L, 5) - 1;
 
-	if (w + x > original->Width || h + y > original->Height || x < 0 || y < 0 || w <= 0 || h <= 0) {
+	if (w + x > (int)original->Width || h + y > (int)original->Height || x < 0 || y < 0 || w <= 0 || h <= 0) {
 
 		lua_pop(L, lua_gettop(L));
 		lua_pushnil(L);
@@ -388,8 +387,8 @@ int lua_crop(lua_State *L) {
 
 int lua_createimage(lua_State *L) {
 
-	int w = luaL_checkinteger(L, 1);
-	int h = luaL_checkinteger(L, 2);
+	int w = (int)luaL_checkinteger(L, 1);
+	int h = (int)luaL_checkinteger(L, 2);
 
 	lua_pop(L, lua_gettop(L));
 	LuaImage * image = lua_pushimage(L);
@@ -434,10 +433,10 @@ int lua_getpixel(lua_State *L) {
 		return 0;
 	}
 
-	int y = luaL_checkinteger(L, 2) - 1;
-	int x = luaL_checkinteger(L, 3) - 1;
+	int y = (int)luaL_checkinteger(L, 2) - 1;
+	int x = (int)luaL_checkinteger(L, 3) - 1;
 
-	if (y < 0 || x < 0 || y >= img->Height || x >= img->Width) {
+	if (y < 0 || x < 0 || y >= (int)img->Height || x >= (int)img->Width) {
 		luaL_error(L, "Argument out of range");
 		return 0;
 	}
@@ -485,10 +484,10 @@ int lua_setpixel(lua_State *L) {
 		return 0;
 	}
 
-	int y = luaL_checkinteger(L, 2) - 1;
-	int x = luaL_checkinteger(L, 3) - 1;
+	int y = (int)luaL_checkinteger(L, 2) - 1;
+	int x = (int)luaL_checkinteger(L, 3) - 1;
 
-	if (y < 0 || x < 0 || y >= img->Height || x >= img->Width) {
+	if (y < 0 || x < 0 || y >= (int)img->Height || x >= (int)img->Width) {
 		luaL_error(L, "Argument out of range");
 		return 0;
 	}
@@ -516,7 +515,7 @@ int lua_setpixel(lua_State *L) {
 	lua_gettable(L, -2);
 
 	if (lua_isnumber(L, -1)) {
-		rgb->rgbtRed = max(min(lua_tonumber(L, -1), 255), 0);
+		rgb->rgbtRed = (BYTE)max(min(lua_tonumber(L, -1), 255), 0);
 	}
 	else {
 		lua_pop(L, lua_gettop(L));
@@ -530,7 +529,7 @@ int lua_setpixel(lua_State *L) {
 	lua_gettable(L, -2);
 
 	if (lua_isnumber(L, -1)) {
-		rgb->rgbtGreen = max(min(lua_tonumber(L, -1), 255), 0);
+		rgb->rgbtGreen = (BYTE)max(min(lua_tonumber(L, -1), 255), 0);
 	}
 	else {
 		lua_pop(L, lua_gettop(L));
@@ -544,7 +543,7 @@ int lua_setpixel(lua_State *L) {
 	lua_gettable(L, -2);
 
 	if (lua_isnumber(L, -1)) {
-		rgb->rgbtBlue = max(min(lua_tonumber(L, -1), 255), 0);
+		rgb->rgbtBlue = (BYTE)max(min(lua_tonumber(L, -1), 255), 0);
 	}
 	else {
 		lua_pop(L, lua_gettop(L));
@@ -580,9 +579,9 @@ int lua_setpixelmatrix(lua_State *L) {
 	lua_pushnil(L);
 	while (lua_next(L, -2) != 0) {
 
-		y = lua_tointeger(L, -2) - 1;
+		y = (int)lua_tointeger(L, -2) - 1;
 
-		if (y < 0 || y >= img->Height) {
+		if (y < 0 || y >= (int)img->Height) {
 			lua_pop(L, lua_gettop(L));
 			lua_pushboolean(L, false);
 			lua_pushstring(L, "Invalid array key");
@@ -592,9 +591,9 @@ int lua_setpixelmatrix(lua_State *L) {
 		lua_pushnil(L);
 		while (lua_next(L, -2) != 0) {
 
-			x = lua_tointeger(L, -2) - 1;
+			x = (int)lua_tointeger(L, -2) - 1;
 
-			if (x < 0 || x >= img->Width) {
+			if (x < 0 || x >= (int)img->Width) {
 				lua_pop(L, lua_gettop(L));
 				lua_pushboolean(L, false);
 				lua_pushstring(L, "Invalid array key");
@@ -612,7 +611,7 @@ int lua_setpixelmatrix(lua_State *L) {
 			lua_gettable(L, -2);
 
 			if (lua_isnumber(L, -1)) {
-				rgb->rgbtRed = max(min(lua_tonumber(L, -1), 255), 0);
+				rgb->rgbtRed = (BYTE)max(min(lua_tonumber(L, -1), 255), 0);
 			}
 			else {
 				lua_pop(L, lua_gettop(L));
@@ -626,7 +625,7 @@ int lua_setpixelmatrix(lua_State *L) {
 			lua_gettable(L, -2);
 
 			if (lua_isnumber(L, -1)) {
-				rgb->rgbtGreen = max(min(lua_tonumber(L, -1), 255), 0);
+				rgb->rgbtGreen = (BYTE)max(min(lua_tonumber(L, -1), 255), 0);
 			}
 			else {
 				lua_pop(L, lua_gettop(L));
@@ -640,7 +639,7 @@ int lua_setpixelmatrix(lua_State *L) {
 			lua_gettable(L, -2);
 
 			if (lua_isnumber(L, -1)) {
-				rgb->rgbtBlue = max(min(lua_tonumber(L, -1), 255), 0);
+				rgb->rgbtBlue = (BYTE)max(min(lua_tonumber(L, -1), 255), 0);
 			}
 			else {
 				lua_pop(L, lua_gettop(L));
@@ -682,11 +681,11 @@ int lua_getpixelmatrix(lua_State *L) {
 
 	lua_createtable(L, img->Height, 0);
 
-	for (int coord_y = img->Height - 1; coord_y >= 0; coord_y--) {
+	for (DWORD coord_y = img->Height - 1; coord_y >= 0; coord_y--) {
 
 		lua_createtable(L, img->Width, 0);
 
-		for (int coord_x = 0; coord_x < img->Width; coord_x++) {
+		for (DWORD coord_x = 0; coord_x < img->Width; coord_x++) {
 
 			i = coord_x + img->Width * (img->Height - coord_y - 1);
 

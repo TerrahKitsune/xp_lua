@@ -12,7 +12,7 @@ const char * lua_topath(lua_State*L, int idx, bool wildcard=false) {
 	if (len+strlen(filter) >= MAX_PATH)
 		luaL_error(L, "%s is too long to be a path!", fromlua);
 
-	for (int n = 0; n < len; n++) {
+	for (size_t n = 0; n < len; n++) {
 
 		c = fromlua[n];
 

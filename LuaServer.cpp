@@ -45,7 +45,7 @@ int luaserver_KillAll(lua_State *L) {
 
 	list_Enter(lst);
 
-	for (int n = 0; n < lst->len; n++) {
+	for (unsigned int n = 0; n < lst->len; n++) {
 		if (((LuaServerThread *)lst->data[n])) {
 			((LuaServerThread *)lst->data[n])->IsAlive = false;
 		}
@@ -97,7 +97,6 @@ DWORD WINAPI SrvProc(LPVOID lpParam) {
 	int disc;
 	size_t read;
 	size_t total;
-	int index;
 	NetEvent * ev;
 
 	if (srv) {
@@ -113,7 +112,7 @@ DWORD WINAPI SrvProc(LPVOID lpParam) {
 
 					do {
 
-						read = ServerSend(srv, ev->s, &ev->data[total], ev->len - total, &disc);
+						read = ServerSend(srv, ev->s, &ev->data[total], (size_t)ev->len - total, &disc);
 						if (disc) {
 							Disconnect(self, ev->s);
 							break;
@@ -123,7 +122,7 @@ DWORD WINAPI SrvProc(LPVOID lpParam) {
 							total += read;
 						}
 
-					} while (total < ev->len);
+					} while (total < (size_t)ev->len);
 				}
 				else if (ev->type == NETEVENT_DISCONNECTED) {
 					ServerDisconnect(srv, ev->s);
@@ -166,7 +165,7 @@ DWORD WINAPI SrvProc(LPVOID lpParam) {
 			}
 
 			list_Enter(srv->Clients);
-			for (int n = 0; n < srv->Clients->len; n++) {
+			for (unsigned int n = 0; n < srv->Clients->len; n++) {
 
 				client = *(SOCKET*)srv->Clients->data[n];
 				disc = 0;
@@ -212,7 +211,7 @@ int luaserver_start(lua_State *L) {
 
 	thread->Events = queue_Create();
 	thread->Send = queue_Create();
-	thread->Port = luaL_checkinteger(L, 1);
+	thread->Port = (int)luaL_checkinteger(L, 1);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -272,7 +271,7 @@ int luaserver_getclients(lua_State *L) {
 	List * lst = _SrvList(L);
 	list_Enter(lst);
 
-	for (int n = 0; n < lst->len; n++) {
+	for (unsigned int n = 0; n < lst->len; n++) {
 		if (((LuaServerThread *)lst->data[n]) == server->thread) {
 			thread = (LuaServerThread *)lst->data[n];
 			break;
@@ -322,7 +321,7 @@ int luaserver_getevent(lua_State *L) {
 	List * lst = _SrvList(L);
 	list_Enter(lst);
 
-	for (int n = 0; n < lst->len; n++) {
+	for (unsigned int n = 0; n < lst->len; n++) {
 		if (((LuaServerThread *)lst->data[n]) == server->thread) {
 			thread = (LuaServerThread *)lst->data[n];
 			break;
@@ -376,7 +375,7 @@ int luaserver_send(lua_State *L) {
 
 	size_t datalen;
 	LuaServer * server = lua_toluaserver(L, 1);
-	SOCKET s = luaL_checkinteger(L, 2);
+	SOCKET s = (SOCKET)luaL_checkinteger(L, 2);
 	const char * data = luaL_checklstring(L, 3, &datalen);
 
 	LuaServerThread * thread;
@@ -390,7 +389,7 @@ int luaserver_send(lua_State *L) {
 	List * lst = _SrvList(L);
 	list_Enter(lst);
 
-	for (int n = 0; n < lst->len; n++) {
+	for (unsigned int n = 0; n < lst->len; n++) {
 		if (((LuaServerThread *)lst->data[n]) == server->thread) {
 			thread = (LuaServerThread *)lst->data[n];
 			break;
@@ -419,7 +418,7 @@ int luaserver_send(lua_State *L) {
 int luaserver_disconnect(lua_State *L) {
 
 	LuaServer * server = lua_toluaserver(L, 1);
-	SOCKET s = luaL_checkinteger(L, 2);
+	SOCKET s = (SOCKET)luaL_checkinteger(L, 2);
 	LuaServerThread * thread;
 	if (!server || !server->thread) {
 
@@ -431,7 +430,7 @@ int luaserver_disconnect(lua_State *L) {
 	List * lst = _SrvList(L);
 	list_Enter(lst);
 
-	for (int n = 0; n < lst->len; n++) {
+	for (unsigned int n = 0; n < lst->len; n++) {
 		if (((LuaServerThread *)lst->data[n]) == server->thread) {
 			thread = (LuaServerThread *)lst->data[n];
 			break;
@@ -485,7 +484,7 @@ int luaserver_gc(lua_State *L) {
 
 		list_Enter(lst);
 
-		for (int n = 0; n < lst->len; n++) {
+		for (unsigned int n = 0; n < lst->len; n++) {
 			if (((LuaServerThread *)lst->data[n]) == srv->thread) {
 
 				srv->thread->IsAlive = false;

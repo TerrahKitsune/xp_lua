@@ -11,7 +11,7 @@ static const char * LUASERVER = "LuaServer";
 typedef struct LuaServerClient {
 	SOCKET Socket;
 	char Address[MAX_ADDRESS_LEN];
-};
+}LuaServerClient;
 
 typedef struct LuaServerThread {
 

@@ -12,7 +12,10 @@ typedef struct LuaOdbc {
 	SQLHENV env;
 	SQLHDBC dbc;
 	SQLHSTMT stmt;
-	int paramnumber;
+	unsigned int paramnumber;
+
+	void** params;
+	unsigned int numbparams;
 
 } LuaOdbc;
 
@@ -24,6 +27,10 @@ int ODBCExecute(lua_State* L);
 int ODBCFetch(lua_State* L);
 int ODBCGetRow(lua_State* L);
 int ODBCGetResultColumns(lua_State* L);
+int ODBCToggleAutoCommit(lua_State* L);
+int ODBCBegin(lua_State* L);
+int ODBCCommit(lua_State* L);
+int ODBCRollback(lua_State* L);
 
 LuaOdbc* lua_pushodbc(lua_State* L);
 LuaOdbc* lua_toodbc(lua_State* L, int index);

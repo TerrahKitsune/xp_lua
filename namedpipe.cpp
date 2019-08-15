@@ -34,7 +34,7 @@ int ReadByte(lua_State *L) {
 int ReadPipe(lua_State *L) {
 
 	LuaNamedPipe * pipe = lua_tonamedpipe(L, 1);
-	int buffersize = max(luaL_optinteger(L, 2, 1024),1024);
+	int buffersize = (int)max(luaL_optinteger(L, 2, 1024),1024);
 
 	char * buf = (char*)malloc(buffersize);
 
@@ -65,7 +65,7 @@ int ReadPipe(lua_State *L) {
 int WriteByte(lua_State *L) {
 
 	LuaNamedPipe * pipe = lua_tonamedpipe(L, 1);
-	unsigned char byte = luaL_checkinteger(L, 2);
+	unsigned char byte = (unsigned char)luaL_checkinteger(L, 2);
 	DWORD written;
 
 	if (WriteFile(pipe->Pipe, &byte, 1, &written, NULL)) {
@@ -147,9 +147,9 @@ int CreateNamedPipe(lua_State *L) {
 
 	size_t len;
 	const char * pipename = luaL_checklstring(L, 1, &len);
-	int maxinstances = luaL_optinteger(L, 2, 1);
-	int buffersize = luaL_optinteger(L, 3, 1024);
-	int timeout = luaL_optinteger(L, 4, 1000);
+	int maxinstances = (int)luaL_optinteger(L, 2, 1);
+	int buffersize = (int)luaL_optinteger(L, 3, 1024);
+	int timeout = (int)luaL_optinteger(L, 4, 1000);
 	DWORD access = 0;
 
 	if (len >= MAX_PATH - 9) {

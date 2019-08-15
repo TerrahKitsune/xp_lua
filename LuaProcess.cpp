@@ -67,7 +67,7 @@ int GetAllProcesses(lua_State *L) {
 
 	needed = needed / sizeof(DWORD);
 	lua_createtable(L, 0, needed);
-	for (int n = 0; n < needed; n++) {
+	for (unsigned int n = 0; n < needed; n++) {
 		name = GetProcessName(processes[n]);
 		if (name[0] != '\0') {
 			lua_pushinteger(L, processes[n]);
@@ -81,7 +81,7 @@ int GetAllProcesses(lua_State *L) {
 
 int LuaOpenProcess(lua_State *L) {
 
-	int processid = luaL_optinteger(L, 1, 0);
+	int processid = (int)luaL_optinteger(L, 1, 0);
 	lua_pop(L, lua_gettop(L));
 	HANDLE proc;
 	if (processid == 0) {
@@ -130,7 +130,7 @@ int StartNewProcess(lua_State *L) {
 	const char * appname = lua_tostring(L, 1);
 	const char * cmd = lua_tostring(L, 2);
 	const char * dir = lua_tostring(L, 3);
-	bool noconsole = lua_toboolean(L, 4);
+	bool noconsole = lua_toboolean(L, 4) > 0;
 	bool redirect = false;
 	int mask = 0;
 
@@ -143,7 +143,7 @@ int StartNewProcess(lua_State *L) {
 	if (lua_gettop(L) >= 5) {
 
 		if (lua_isboolean(L, 5)) {
-			redirect = lua_toboolean(L, 5);
+			redirect = lua_toboolean(L, 5) > 0;
 			mask = LUA_PROC_IN | LUA_PROC_OUT | LUA_PROC_ERR;
 		}
 		else {
@@ -308,7 +308,7 @@ int WriteToPipe(lua_State *L) {
 int ReadFromPipe(lua_State *L) {
 
 	LuaProcess * proc = lua_toprocess(L, 1);
-	int buffersize = luaL_optinteger(L, 2, 1048576);
+	unsigned int buffersize = (unsigned int)luaL_optinteger(L, 2, 1048576);
 
 	if (proc->hChildStd_OUT_Rd == INVALID_HANDLE_VALUE) {
 		lua_pop(L, lua_gettop(L));
@@ -359,7 +359,7 @@ int ReadFromPipe(lua_State *L) {
 int ErrorFromPipe(lua_State *L) {
 
 	LuaProcess * proc = lua_toprocess(L, 1);
-	int buffersize = luaL_optinteger(L, 2, 1048576);
+	unsigned int buffersize = (unsigned int)luaL_optinteger(L, 2, 1048576);
 
 	if (proc->hChildStd_ERR_Rd == INVALID_HANDLE_VALUE) {
 		lua_pop(L, lua_gettop(L));
@@ -413,13 +413,13 @@ int GetSetPriority(lua_State *L) {
 	DWORD prio = GetPriorityClass(proc->processInfo.hProcess);
 
 	if (lua_type(L, 2) == LUA_TNUMBER) {
-		prio = SetPriorityClass(proc->processInfo.hProcess, lua_tointeger(L, 2));
+		prio = (DWORD)SetPriorityClass(proc->processInfo.hProcess, (DWORD)lua_tointeger(L, 2));
 		lua_pop(L, lua_gettop(L));
-		lua_pushboolean(L, prio);
+		lua_pushboolean(L, prio > 0);
 	}
 	else {
 		lua_pop(L, lua_gettop(L));
-		lua_pushinteger(L, prio);
+		lua_pushinteger(L, prio > 0);
 	}
 
 	return 1;
@@ -486,7 +486,7 @@ int GetSetAffinity(lua_State *L) {
 	DWORD newmask;
 	DWORD process, system;
 
-	bool ok = GetProcessAffinityMask(proc->processInfo.hProcess, &process, &system);
+	bool ok = GetProcessAffinityMask(proc->processInfo.hProcess, &process, &system) > 0;
 
 	if (!ok) {
 		lua_pop(L, lua_gettop(L));
@@ -497,7 +497,7 @@ int GetSetAffinity(lua_State *L) {
 
 	if (lua_isnumber(L, 2)) {
 		newmask = (DWORD)lua_tointeger(L, 2);
-		ok = SetProcessAffinityMask(proc->processInfo.hProcess, newmask);
+		ok = SetProcessAffinityMask(proc->processInfo.hProcess, newmask) > 0;
 
 		if (!ok) {
 			lua_pop(L, lua_gettop(L));
@@ -543,7 +543,7 @@ double getCurrentValue(LuaProcess * proc) {
 	GetProcessTimes(proc->processInfo.hProcess, &ftime, &ftime, &fsys, &fuser);
 	memcpy(&sys, &fsys, sizeof(FILETIME));
 	memcpy(&user, &fuser, sizeof(FILETIME));
-	percent = (sys.QuadPart - proc->lastSysCPU.QuadPart) +
+	percent = (double)(sys.QuadPart - proc->lastSysCPU.QuadPart) +
 		(user.QuadPart - proc->lastUserCPU.QuadPart);
 	percent /= (now.QuadPart - proc->lastCPU.QuadPart);
 	percent /= proc->numProcessors;
@@ -581,7 +581,7 @@ int GetMemory(lua_State *L) {
 int StopProcess(lua_State *L) {
 
 	LuaProcess * proc = lua_toprocess(L, 1);
-	if (TerminateProcess(proc->processInfo.hProcess, lua_tointeger(L, 2))) {
+	if (TerminateProcess(proc->processInfo.hProcess, (UINT)lua_tointeger(L, 2))) {
 		lua_pop(L, lua_gettop(L));
 		lua_pushboolean(L, true);
 		return 1;

@@ -57,12 +57,12 @@ unsigned int WriteStruct(lua_State*L, Gff* gff){
 
 	lua_pushstring(L, "FieldCount");
 	lua_gettable(L, -2);
-	gffstruct->FieldCount = lua_tointeger(L, -1);
+	gffstruct->FieldCount = (unsigned int)lua_tointeger(L, -1);
 	lua_pop(L, 1);
 
 	lua_pushstring(L, "Type");
 	lua_gettable(L, -2);
-	gffstruct->Type = lua_tointeger(L, -1);
+	gffstruct->Type = (unsigned int)lua_tointeger(L, -1);
 	lua_pop(L, 1);
 
 	lua_pushstring(L, "Fields");

@@ -65,7 +65,7 @@ int list_Remove(List * list, void * data) {
 
 	int index = -1;
 
-	for (int n = 0; n < list->len; n++) {
+	for (unsigned int n = 0; n < list->len; n++) {
 		if (list->data[n] == data) {
 			index = n;
 			break;
@@ -84,7 +84,7 @@ int list_Remove(List * list, int index) {
 
 	EnterCriticalSection(&list->CriticalSection);
 
-	if (index < 0 || index >= list->len)
+	if (index < 0 || index >= (int)list->len)
 		return 0;
 
 	if (index == list->len - 1) {

@@ -77,8 +77,6 @@ int lua_resource_getresourceid(lua_State * L, const char * file, size_t len){
 	else
 		memcpy(ext, start, remainderlength);
 
-	const char * comparison;
-
 	pushvalidate(L);
 
 	lua_pushnil(L);
@@ -86,7 +84,7 @@ int lua_resource_getresourceid(lua_State * L, const char * file, size_t len){
 	while (lua_next(L, -2) != 0) {
 
 		if (lua_isstring(L, -1) && lua_isnumber(L, -2) && _stricmp(ext, lua_tostring(L, -1)) == 0){
-			result = lua_tointeger(L, -2);
+			result = (int)lua_tointeger(L, -2);
 			//pop key and value and end iteration
 			lua_pop(L, 2);
 			break;

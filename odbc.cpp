@@ -1,8 +1,9 @@
 #include "odbc.h"
+#include <math.h>
 
 LuaOdbc* AssertIsOpen(lua_State* L, int idx) {
 
-	LuaOdbc * odbc = lua_toodbc(L, 1);
+	LuaOdbc* odbc = lua_toodbc(L, 1);
 
 	if (!odbc || !odbc->dbc) {
 		lua_pop(L, lua_gettop(L));
@@ -20,14 +21,14 @@ void PushDiagonstics(lua_State* L, SQLSMALLINT handleType, SQLHANDLE handle) {
 	SQLSMALLINT size;
 
 	if (SQLGetDiagRec(handleType, handle, 1, state, nativeError, msg, sizeof(msg), &size) == SQL_SUCCESS) {
-		
-		msg[sizeof(msg)-1]='\0';
-		
+
+		msg[sizeof(msg) - 1] = '\0';
+
 		if (size > sizeof(msg)) {
 			size = sizeof(msg);
 		}
 
-		for (size_t i = size-1; i >= 0; i--)
+		for (size_t i = size - 1; i >= 0; i--)
 		{
 			if (msg[i] == '\n' || msg[i] == '\r' || msg[i] == ' ') {
 				msg[i] = '\0';
@@ -35,13 +36,106 @@ void PushDiagonstics(lua_State* L, SQLSMALLINT handleType, SQLHANDLE handle) {
 			else {
 				break;
 			}
-		}	
+		}
 
-		lua_pushfstring(L,"%s: %s", (const char*)state, (const char*)msg);
+		lua_pushfstring(L, "%s: %s", (const char*)state, (const char*)msg);
 	}
 	else {
 		lua_pushstring(L, "No Message");
 	}
+}
+
+int ODBCToggleAutoCommit(lua_State* L) {
+
+	LuaOdbc* odbc = AssertIsOpen(L, 1);
+	bool autocommit = lua_toboolean(L, 2) > 0;
+	SQLPOINTER val = autocommit ? (SQLPOINTER)SQL_AUTOCOMMIT_ON : (SQLPOINTER)SQL_AUTOCOMMIT_OFF;
+
+
+	if (!SQL_SUCCEEDED(SQLSetConnectAttr(odbc->dbc, SQL_ATTR_AUTOCOMMIT, val, SQL_IS_UINTEGER))) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_DBC, odbc->dbc);
+		SQLFreeHandle(SQL_HANDLE_DBC, odbc->dbc);
+		return 2;
+	}
+
+	lua_pushboolean(L, true);
+	return 1;
+}
+
+int ODBCBegin(lua_State* L) {
+
+	LuaOdbc* odbc = AssertIsOpen(L, 1);
+
+	if (!SQL_SUCCEEDED(SQLSetConnectAttr(odbc->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_OFF, SQL_IS_UINTEGER))) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_DBC, odbc->dbc);
+		SQLFreeHandle(SQL_HANDLE_DBC, odbc->dbc);
+		return 2;
+	}
+
+	lua_pushboolean(L, true);
+	return 1;
+}
+
+int ODBCCommit(lua_State* L) {
+
+	LuaOdbc* odbc = AssertIsOpen(L, 1);
+
+	if (!SQL_SUCCEEDED(SQLEndTran(SQL_HANDLE_DBC, odbc->dbc, SQL_COMMIT))) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_DBC, odbc->dbc);
+		SQLFreeHandle(SQL_HANDLE_DBC, odbc->dbc);
+		return 2;
+	}
+	else if (!SQL_SUCCEEDED(SQLSetConnectAttr(odbc->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_ON, SQL_IS_UINTEGER))) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_DBC, odbc->dbc);
+		SQLFreeHandle(SQL_HANDLE_DBC, odbc->dbc);
+		return 2;
+	}
+
+	lua_pushboolean(L, true);
+	return 1;
+}
+
+int ODBCRollback(lua_State* L) {
+
+	LuaOdbc* odbc = AssertIsOpen(L, 1);
+
+	if (!SQL_SUCCEEDED(SQLEndTran(SQL_HANDLE_DBC, odbc->dbc, SQL_ROLLBACK))) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_DBC, odbc->dbc);
+		SQLFreeHandle(SQL_HANDLE_DBC, odbc->dbc);
+		return 2;
+	}
+	else if (!SQL_SUCCEEDED(SQLSetConnectAttr(odbc->dbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER)SQL_AUTOCOMMIT_ON, SQL_IS_UINTEGER))) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_DBC, odbc->dbc);
+		SQLFreeHandle(SQL_HANDLE_DBC, odbc->dbc);
+		return 2;
+	}
+
+	lua_pushboolean(L, true);
+	return 1;
 }
 
 int ODBCPrepare(lua_State* L) {
@@ -49,13 +143,28 @@ int ODBCPrepare(lua_State* L) {
 	LuaOdbc* odbc = AssertIsOpen(L, 1);
 	size_t len;
 	const char* sql = luaL_checklstring(L, 2, &len);
+	SQLSMALLINT params;
 
 	if (odbc->stmt) {
 		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
 		odbc->stmt = NULL;
 	}
 
-	else if (SQLAllocHandle(SQL_HANDLE_STMT, odbc->dbc, &odbc->stmt) != SQL_SUCCESS) {
+	if (odbc->params) {
+
+		for (unsigned int i = 0; i < odbc->numbparams; i++)
+		{
+			if (odbc->params[i])
+				free(odbc->params[i]);
+		}
+
+		free(odbc->params);
+
+		odbc->params = NULL;
+		odbc->numbparams = 0;
+	}
+
+	if (SQLAllocHandle(SQL_HANDLE_STMT, odbc->dbc, &odbc->stmt) != SQL_SUCCESS) {
 
 		lua_pop(L, lua_gettop(L));
 		lua_pushboolean(L, false);
@@ -73,6 +182,25 @@ int ODBCPrepare(lua_State* L) {
 		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
 		return 2;
 	}
+	else if (SQLNumParams(odbc->stmt, &params)) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+
+		PushDiagonstics(L, SQL_HANDLE_STMT, odbc->stmt);
+		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
+		return 2;
+	}
+
+	odbc->numbparams = (unsigned int)params;
+
+	if (odbc->numbparams > 0) {
+		odbc->params = (void**)calloc(odbc->numbparams, sizeof(void*));
+
+		if (!odbc->params) {
+			luaL_error(L, "Unable to allocate memory for parameters");
+		}
+	}
 
 	lua_pop(L, lua_gettop(L));
 	lua_pushboolean(L, true);
@@ -85,30 +213,118 @@ int ODBCPrepare(lua_State* L) {
 int ODBCBind(lua_State* L) {
 
 	LuaOdbc* odbc = AssertIsOpen(L, 1);
+	bool asBinary = lua_toboolean(L, 3);
 
 	if (!odbc->stmt) {
 		luaL_error(L, "No statement is prepared, run Prepare first");
 	}
+	else if (odbc->paramnumber >= odbc->numbparams) {
+		luaL_error(L, "Too many parameters");
+	}
 
 	SQLSMALLINT valuetype;
 	SQLSMALLINT paramtype;
-	SQLSMALLINT paramlen;
 	SQLSMALLINT decimal = 0;
-	SQLUINTEGER len;
+	SQLUINTEGER len = 0;
 	SQLPOINTER data;
+	SQLDOUBLE ddata;
+	SQLINTEGER idata;
+
+	size_t rawlen;
+	const char* cdata;
 
 	switch (lua_type(L, 2)) {
 
-		default:
-			valuetype = SQL_C_CHAR;
-			paramtype = SQL_CHAR;
-			size_t rawlen;
-			data = (SQLPOINTER)lua_tolstring(L, 2, &rawlen);
-			len = rawlen;
-			break;
+	case LUA_TNIL:
+	case LUA_TNONE:
+
+		valuetype = SQL_C_DEFAULT;
+		paramtype = SQL_NULL_DATA;
+		len = 0;
+		data = NULL;
+		break;
+
+	case LUA_TBOOLEAN:
+
+		odbc->params[odbc->paramnumber] = calloc(1, sizeof(SQLINTEGER));
+
+		if (!odbc->params[odbc->paramnumber]) {
+			luaL_error(L, "Failed to allocate memory");
+		}
+
+		memcpy(odbc->params[odbc->paramnumber], &idata, sizeof(SQLINTEGER));
+
+		valuetype = SQL_C_SLONG;
+		paramtype = SQL_INTEGER;
+		len = sizeof(SQLINTEGER);
+		data = odbc->params[odbc->paramnumber];
+
+		break;
+
+	case LUA_TNUMBER:
+
+		ddata = (SQLDOUBLE)lua_tonumber(L, 2);
+		idata = (SQLINTEGER)lua_tointeger(L, 2);
+
+		if (idata == (SQLINTEGER)ceil(ddata)) {
+
+			odbc->params[odbc->paramnumber] = calloc(1, sizeof(SQLINTEGER));
+
+			if (!odbc->params[odbc->paramnumber]) {
+				luaL_error(L, "Failed to allocate memory");
+			}
+
+			memcpy(odbc->params[odbc->paramnumber], &idata, sizeof(SQLINTEGER));
+
+			valuetype = SQL_C_SLONG;
+			paramtype = SQL_INTEGER;
+			len = sizeof(SQLINTEGER);
+			data = odbc->params[odbc->paramnumber];
+		}
+		else {
+
+			odbc->params[odbc->paramnumber] = calloc(1, sizeof(SQLDOUBLE));
+
+			if (!odbc->params[odbc->paramnumber]) {
+				luaL_error(L, "Failed to allocate memory");
+			}
+
+			memcpy(odbc->params[odbc->paramnumber], &ddata, sizeof(SQLDOUBLE));
+
+			valuetype = SQL_C_DOUBLE;
+			paramtype = SQL_DOUBLE;
+			len = sizeof(SQLDOUBLE);
+			data = odbc->params[odbc->paramnumber];
+		}
+		break;
+
+	default:
+
+		cdata = luaL_tolstring(L, 2, &rawlen);
+
+		odbc->params[odbc->paramnumber] = calloc(rawlen + 1, sizeof(char));
+
+		if (!odbc->params[odbc->paramnumber]) {
+			luaL_error(L, "Failed to allocate memory");
+		}
+
+		memcpy(odbc->params[odbc->paramnumber], cdata, rawlen);
+
+		valuetype = SQL_C_CHAR;
+		paramtype = SQL_CHAR;
+
+		data = (SQLPOINTER)odbc->params[odbc->paramnumber];
+		len = rawlen;
+
+		break;
 	}
 
-	if (SQLBindParameter(odbc->stmt, ++odbc->paramnumber, SQL_PARAM_INPUT, valuetype, paramtype, len, decimal, data, len+1, NULL) != SQL_SUCCESS) {
+	if (asBinary) {
+		valuetype = SQL_C_DEFAULT;
+		paramtype = SQL_BINARY;
+	}
+
+	if (SQLBindParameter(odbc->stmt, ++odbc->paramnumber, SQL_PARAM_INPUT, valuetype, paramtype, len, decimal, data, len + 1, NULL) != SQL_SUCCESS) {
 
 		lua_pop(L, lua_gettop(L));
 		lua_pushboolean(L, false);
@@ -131,6 +347,11 @@ int ODBCExecute(lua_State* L) {
 	if (!odbc->stmt) {
 		luaL_error(L, "No statement is prepared, run Prepare first");
 	}
+	else if (odbc->numbparams != odbc->paramnumber) {
+		luaL_error(L, "Number of bound parameters does not match expected parameters");
+	}
+
+	int result = 1;
 
 	if (!SUCCEEDED(SQLExecute(odbc->stmt))) {
 
@@ -139,13 +360,28 @@ int ODBCExecute(lua_State* L) {
 
 		PushDiagonstics(L, SQL_HANDLE_STMT, odbc->stmt);
 		SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
-		return 2;
+		result = 2;
+	}
+	else {
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, true);
 	}
 
-	lua_pop(L, lua_gettop(L));
-	lua_pushboolean(L, true);
+	if (odbc->params) {
 
-	return 1;
+		for (unsigned int i = 0; i < odbc->numbparams; i++)
+		{
+			if (odbc->params[i]) {
+				free(odbc->params[i]);
+				odbc->params[i] = NULL;
+			}
+		}
+
+		memset(odbc->params, 0, sizeof(void*) * odbc->numbparams);
+		odbc->paramnumber = 0;
+	}
+
+	return result;
 }
 
 int ODBCFetch(lua_State* L) {
@@ -188,8 +424,6 @@ int ODBCGetResultColumns(lua_State* L) {
 	SQLUINTEGER columnsize;
 	SQLSMALLINT decimaldigits;
 	SQLSMALLINT nullable;
-	SQLPOINTER data;
-	SQLINTEGER datalen;
 
 	if (!SUCCEEDED(SQLNumResultCols(odbc->stmt, &cols))) {
 		lua_pop(L, lua_gettop(L));
@@ -202,7 +436,7 @@ int ODBCGetResultColumns(lua_State* L) {
 
 	lua_pop(L, lua_gettop(L));
 	lua_createtable(L, 0, cols);
-	for (size_t i = 0; i < cols; i++)
+	for (SQLSMALLINT i = 0; i < cols; i++)
 	{
 		if (!SUCCEEDED(SQLDescribeCol(odbc->stmt, i + 1, columnname, sizeof(columnname), &columnnamesize, &datatype, &columnsize, &decimaldigits, &nullable))) {
 			lua_pop(L, lua_gettop(L));
@@ -254,9 +488,9 @@ int ODBCGetRow(lua_State* L) {
 
 	lua_pop(L, lua_gettop(L));
 	lua_createtable(L, 0, cols);
-	for (size_t i = 0; i < cols; i++)
+	for (SQLSMALLINT i = 0; i < cols; i++)
 	{
-		if (!SUCCEEDED(SQLDescribeCol(odbc->stmt, i+1, columnname, sizeof(columnname), &columnnamesize, &datatype, &columnsize, &decimaldigits, &nullable))) {
+		if (!SUCCEEDED(SQLDescribeCol(odbc->stmt, i + 1, columnname, sizeof(columnname), &columnnamesize, &datatype, &columnsize, &decimaldigits, &nullable))) {
 			lua_pop(L, lua_gettop(L));
 			lua_pushboolean(L, false);
 
@@ -264,18 +498,18 @@ int ODBCGetRow(lua_State* L) {
 			SQLFreeHandle(SQL_HANDLE_STMT, odbc->stmt);
 			return 2;
 		}
-		
+
 		lua_pushlstring(L, (const char*)columnname, columnnamesize);
 
 		if (datatype == SQL_DECIMAL || datatype == SQL_NUMERIC || datatype == SQL_REAL || datatype == SQL_FLOAT || datatype == SQL_DOUBLE) {
-			
+
 			data = (SQLPOINTER)calloc(1, sizeof(lua_Number));
 
 			if (!data) {
 				luaL_error(L, "Unable to allocate memory");
 			}
 
-			if (!SUCCEEDED(SQLGetData(odbc->stmt, i+1, SQL_C_DOUBLE, data, sizeof(lua_Number), &datalen))) {
+			if (!SUCCEEDED(SQLGetData(odbc->stmt, i + 1, SQL_C_DOUBLE, data, sizeof(lua_Number), &datalen))) {
 
 				lua_pop(L, lua_gettop(L));
 				lua_pushboolean(L, false);
@@ -292,7 +526,7 @@ int ODBCGetRow(lua_State* L) {
 				lua_pushnumber(L, (lua_Number) * (lua_Number*)data);
 			}
 		}
-		else if (datatype == SQL_SMALLINT || datatype == SQL_INTEGER ||datatype == SQL_TINYINT || datatype == SQL_BIGINT) {
+		else if (datatype == SQL_SMALLINT || datatype == SQL_INTEGER || datatype == SQL_TINYINT || datatype == SQL_BIGINT) {
 
 			data = (SQLPOINTER)calloc(1, sizeof(lua_Integer));
 
@@ -502,12 +736,26 @@ int odbc_gc(lua_State* L) {
 		odbc->stmt = NULL;
 	}
 
+	if (odbc->params) {
+
+		for (unsigned int i = 0; i < odbc->numbparams; i++)
+		{
+			if (odbc->params[i])
+				free(odbc->params[i]);
+		}
+
+		free(odbc->params);
+
+		odbc->params = NULL;
+		odbc->numbparams = 0;
+	}
+
 	if (odbc->dbc) {
 		SQLDisconnect(odbc->dbc);
 		SQLFreeHandle(SQL_HANDLE_DBC, odbc->dbc);
 		odbc->dbc = NULL;
 	}
-	
+
 	if (odbc->env) {
 		SQLFreeHandle(SQL_HANDLE_ENV, odbc->env);
 		odbc->env = NULL;

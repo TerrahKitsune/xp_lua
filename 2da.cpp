@@ -287,11 +287,11 @@ Lua2da * lua_totwoda(lua_State *L, int index) {
 int twoda_get2dastring(lua_State *L) {
 
 	Lua2da * twoda = lua_totwoda(L, 1);
-	int row = luaL_checkinteger(L, 2);
+	int row = (int)luaL_checkinteger(L, 2);
 	int col = -1;
 
 	if (lua_type(L, 3) == LUA_TNUMBER) {
-		col = lua_tointeger(L, 3);
+		col = (int)lua_tointeger(L, 3);
 	}
 	else if (lua_type(L, 3) == LUA_TSTRING) {
 		const char * colname = lua_tostring(L, 3);
@@ -326,7 +326,7 @@ int twoda_get2dastring(lua_State *L) {
 int twoda_get2darow(lua_State *L) {
 
 	Lua2da * twoda = lua_totwoda(L, 1);
-	int index = luaL_checkinteger(L, 2);
+	int index = (int)luaL_checkinteger(L, 2);
 
 	if (index < 0 || index >= twoda->numbrows) {
 		lua_pop(L, lua_gettop(L));
