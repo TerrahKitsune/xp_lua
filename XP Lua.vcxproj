@@ -67,6 +67,8 @@
     <ClCompile Include="NWN2_API\CNWSVarTable.cpp" />
     <ClCompile Include="NWN2_API\NWN2_API.cpp" />
     <ClCompile Include="NwnLuaHooks.cpp" />
+    <ClCompile Include="odbc.cpp" />
+    <ClCompile Include="ODBCMain.cpp" />
     <ClCompile Include="plua.cpp" />
     <ClCompile Include="LuaEngine.cpp" />
     <ClCompile Include="Lua\lapi.c" />
@@ -176,6 +178,8 @@
     <ClInclude Include="NWN2_API\CNWSVarTable.h" />
     <ClInclude Include="NWN2_API\NWN2_API.h" />
     <ClInclude Include="NwnLuaHooks.h" />
+    <ClInclude Include="odbc.h" />
+    <ClInclude Include="ODBCMain.h" />
     <ClInclude Include="plua.h" />
     <ClInclude Include="LuaEngine.h" />
     <ClInclude Include="Lua\lapi.h" />

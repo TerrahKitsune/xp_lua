@@ -257,6 +257,7 @@ int ODBCBind(lua_State* L) {
 	case LUA_TBOOLEAN:
 
 		odbc->params[odbc->paramnumber] = calloc(1, sizeof(SQLINTEGER));
+		idata = (SQLINTEGER)lua_toboolean(L, 2);
 
 		if (!odbc->params[odbc->paramnumber]) {
 			luaL_error(L, "Failed to allocate memory");

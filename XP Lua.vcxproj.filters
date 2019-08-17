@@ -190,6 +190,15 @@
     <Filter Include="LuaStream\Source Files">
       <UniqueIdentifier>{eb1c989b-ce28-46ea-a9a0-855f721ec6f2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaODBC">
+      <UniqueIdentifier>{d3ff7644-8572-4eef-8d04-1505a3bfd8a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaODBC\Header Files">
+      <UniqueIdentifier>{c54736d7-07de-485c-8499-92ae4f68605b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaODBC\Source Files">
+      <UniqueIdentifier>{673b3119-e90f-4979-93e7-05a71f860e3b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\plugin.cpp">
@@ -504,6 +513,12 @@
     <ClCompile Include="stream.cpp">
       <Filter>LuaStream\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="odbc.cpp">
+      <Filter>LuaODBC\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ODBCMain.cpp">
+      <Filter>LuaODBC</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -811,6 +826,12 @@
     </ClInclude>
     <ClInclude Include="stream.h">
       <Filter>LuaStream\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="odbc.h">
+      <Filter>LuaODBC\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ODBCMain.h">
+      <Filter>LuaODBC</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
