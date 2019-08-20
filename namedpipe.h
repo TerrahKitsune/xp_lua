@@ -19,6 +19,7 @@ int OpenNamedPipe(lua_State *L);
 int CreateNamedPipe(lua_State *L);
 int ReadByte(lua_State *L);
 int WriteByte(lua_State *L);
+int CheckNamedPipe(lua_State *L);
 
 int namedpipe_gc(lua_State *L);
 int namedpipe_tostring(lua_State *L);

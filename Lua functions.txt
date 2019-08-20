@@ -363,6 +363,10 @@ Pipe:
 	-returns true/false on success or not
 	bool Pipe:WriteByte(byte);
 
+	-Check the amount of data available to read
+	-if avail is nil then GetLastError() can be used to evaluate the error
+	avail Pipe:Available();
+
 	-Closes a pipe, it should not be used after closing
 	nil Pipe:Close();
 

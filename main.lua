@@ -55,128 +55,25 @@ for k,v in pairs(c) do
 	print(k, string.byte(v));
 end
 print("\n\n");
-ArrayPrint(ODBC.GetAllDrivers());
-print("\n\n");
 
-TablePrint(ODBC);
-local odbc = assert(ODBC.DriverConnect("DRIVER={PostgreSQL ODBC Driver(ANSI)};Server=192.168.1.207;Port=5432;Database=test;Uid=ancon;Pwd=ancon;"));
-TablePrint(odbc);
+local pipe = Pipe.Create("Test");
 
-print("\n\n");
+local ok = pipe:Available();
 
+if not ok then print(GetLastError()) else print("Ok "..tostring(ok)); end
 
-assert(odbc:Prepare('select COUNT(*) as cnt from public.pizza;'));
-assert(odbc:Execute());
-assert(odbc:Fetch(), "No data");
-local count = odbc:GetRow().cnt;
-print("Count: "..count);
+local client = Pipe.Open("Test");
 
-math.randomseed(os.time())
-math.random(); math.random(); math.random()
+ok = pipe:Available();
+if not ok then print(GetLastError()) else print("Ok "..tostring(ok)); end
 
-local id, burk = UUID();
-local testid = id;
+ok = client:Available();
+if not ok then print(GetLastError()) else print("Ok "..tostring(ok)); end
 
-assert(odbc:Begin());
-assert(odbc:Prepare([[INSERT INTO public.pizza("Id", "Radius", "Thickness", "Data", "Name", "GuidId")	VALUES (?, ?, ?, ?, ?, ?);]]));
-for n=1,1 do
-	
-	count = count + 1;
-	assert(odbc:Bind(count));
-	assert(odbc:Bind(math.random()));
-	assert(odbc:Bind(math.floor(math.random()*100)));
-	assert(odbc:Bind(burk, true));
-	assert(odbc:Bind("Pizza "..id.." "..(count+1)));
-	assert(odbc:Bind(id));
-	assert(odbc:Execute());
-	id = UUID();
-end
+client:Close();
 
-assert(odbc:Rollback());
+ok = pipe:Available();
+if not ok then print(GetLastError()) else print("Ok "..tostring(ok)); end
 
-assert(odbc:Prepare('select * from public.pizza WHERE "Id"=? OR "GuidId"=?;'));
-assert(odbc:Bind(count-1));
-assert(odbc:Bind(testid));
-assert(odbc:Execute());
-while odbc:Fetch() do 
-
-	TablePrint(odbc:GetRowColumnTypes());
-	TablePrint(odbc:GetRow());
-
-end 
-
---assert(odbc:Prepare('select * from public.pizza;'));
---assert(odbc:Execute());
---while odbc:Fetch() do 
-	--print(odbc:GetRow().GuidId);
---end 
-
-local xls = assert(ODBC.DriverConnect([[Driver={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};
-DBQ=C:\\Users\\Terrah\\Desktop\\Haven healing formula calculator.xlsx;]]));
-xls = odbc;
-print("\nTables:\n");
-assert(xls:Tables());
-local testtable = nil;
-local row;
-while xls:Fetch() do 
-	row = xls:GetRow();
-	TablePrint(row);
-	if not testtable then 
-		testtable = row.TABLE_NAME;
-	end 
-	print("\n");
-end 
-print("\nColumn: "..tostring(testtable).."\n");
-
-assert(xls:Columns(testtable));
-
-while xls:Fetch() do 
-	TablePrint(xls:GetRow());
-	print("\n");
-end 
-print("\nKeys:\n");
-
-assert(xls:PrimaryKeys(testtable));
-
-while xls:Fetch() do 
-	TablePrint(xls:GetRow());
-	print("\n");
-end
-print("\nFK:\n");
-
-assert(xls:ForeignKeys(testtable));
-
-while xls:Fetch() do 
-	TablePrint(xls:GetRow());
-	print("\n");
-end
-
-print("\nProcedures:\n");
-
-assert(xls:Procedures());
-local testprc;
-while xls:Fetch() do 
-	row = xls:GetRow();
-	TablePrint(row);
-	print("\n");
-	testprc = row.procedure_name;
-end
-
-print("\nProcedure Columns: "..testprc.."\n");
-
-assert(xls:ProcedureColumns(testprc));
-while xls:Fetch() do 
-	row = xls:GetRow();
-	TablePrint(row);
-	print("\n");
-end
-print("\nSpecialColumns:\n");
-
-assert(xls:SpecialColumns(testtable));
-
-while xls:Fetch() do 
-	TablePrint(xls:GetRow());
-	print("\n");
-end
-xls:Disconnect();
-odbc:Disconnect();
+ok = client:Available();
+if not ok then print(GetLastError()) else print("Ok "..tostring(ok)); end

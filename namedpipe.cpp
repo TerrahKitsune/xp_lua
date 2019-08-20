@@ -97,6 +97,25 @@ int WritePipe(lua_State *L) {
 	return 2;
 }
 
+int CheckNamedPipe(lua_State *L) {
+
+	LuaNamedPipe * pipe = lua_tonamedpipe(L, 1);
+	DWORD avail;
+
+	lua_pop(L, lua_gettop(L));
+
+	if (PeekNamedPipe(pipe->Pipe, NULL, 0, NULL, &avail, NULL)) {
+		
+		lua_pushinteger(L, avail);
+
+		return 1;
+	}
+
+	lua_pushnil(L);
+
+	return 1;
+}
+
 int OpenNamedPipe(lua_State *L) {
 
 	size_t len;
@@ -112,11 +131,11 @@ int OpenNamedPipe(lua_State *L) {
 	}
 
 	if (lua_gettop(L) >= 2 && lua_toboolean(L, 2)) {
-		access |= GENERIC_READ;
+		access |= GENERIC_WRITE;
 	}
 
 	if (lua_gettop(L) >= 3 && lua_toboolean(L, 3)) {
-		access |= GENERIC_WRITE;
+		access |= GENERIC_READ;
 	}
 
 	if (access == 0) {

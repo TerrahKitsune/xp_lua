@@ -9,6 +9,7 @@ static const struct luaL_Reg namedpipefunctions[] = {
 	{ "Read", ReadPipe },
 	{ "Write", WritePipe },
 	{ "Close",  namedpipe_gc },
+	{ "Available", CheckNamedPipe },
 	{ NULL, NULL }
 };
 
