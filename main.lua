@@ -56,24 +56,17 @@ for k,v in pairs(c) do
 end
 print("\n\n");
 
-local pipe = Pipe.Create("Test");
+TablePrint(Services);
 
-local ok = pipe:Available();
+local test = Services.All();
+assert(test, GetLastError());
+TablePrint(#test);
 
-if not ok then print(GetLastError()) else print("Ok "..tostring(ok)); end
+local service = assert(Services.Open("postgresql-x64-10"),GetLastError());
+print(service);
 
-local client = Pipe.Open("Test");
+TablePrint(service:Status());
 
-ok = pipe:Available();
-if not ok then print(GetLastError()) else print("Ok "..tostring(ok)); end
+local config = assert(service:Config(), GetLastError());
 
-ok = client:Available();
-if not ok then print(GetLastError()) else print("Ok "..tostring(ok)); end
-
-client:Close();
-
-ok = pipe:Available();
-if not ok then print(GetLastError()) else print("Ok "..tostring(ok)); end
-
-ok = client:Available();
-if not ok then print(GetLastError()) else print("Ok "..tostring(ok)); end
+TablePrint(config);

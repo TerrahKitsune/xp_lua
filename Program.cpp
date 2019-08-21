@@ -26,6 +26,7 @@
 #include "LuaImageMain.h"
 #include "StreamMain.h"
 #include "ODBCMain.h"
+#include "WinServicesMain.h"
 
 #define HI_PART(x)  ((x>>4) & 0x0F)
 #define LO_PART(x)  ((x) & 0x0F)
@@ -482,7 +483,9 @@ int main(int argc, char *argv[]){
 	lua_setglobal(L, "Stream");
 	luaopen_odbc(L);
 	lua_setglobal(L, "ODBC");
-
+	luaopen_winservice(L);
+	lua_setglobal(L, "Services");
+	
 	lua_pushcfunction(L, L_GetRuntime);
 	lua_setglobal(L, "Runtime");
 

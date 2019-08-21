@@ -370,6 +370,64 @@ Pipe:
 	-Closes a pipe, it should not be used after closing
 	nil Pipe:Close();
 
+Services:
+
+	-Returns an array containing all services
+	-each entry is a table containing these fields:
+	-DisplayName
+	-ServiceName
+	-CheckPoint
+	-ControlsAccepted
+	-CurrentState
+	-ServiceSpecificExitCode
+	-ServiceType
+	-WaitHint
+	-Win32ExitCode
+	-See: https://docs.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_status
+	-returns nil on failure, use GetLastError to evaluate the error
+	array Services.All()
+
+	-Opens a service by its name
+	-Readonly default false if true will only request read privs
+	-returns nil on failure, use GetLastError to evaluate the error
+	Service Services.Open(serivcename, opt readonly)
+
+	-Retrive the status of an opened service
+	-returns a table containing:
+	-CheckPoint
+	-ControlsAccepted
+	-CurrentState
+	-ServiceSpecificExitCode
+	-ServiceType
+	-WaitHint
+	-Win32ExitCode
+	-See: https://docs.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_status
+	-returns nil on failure, use GetLastError to evaluate the error
+	status Service:Status()
+
+	-Retrive the config of an opened service
+	-Returns a table containing:
+	-ErrorControl
+	-ServiceType
+	-StartType
+	-TagId
+	-BinaryPathName
+	-Dependencies
+	-DisplayName
+	-LoadOrderGroup
+	-ServiceStartName
+	-See: https://docs.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-query_service_configa
+	-returns nil on failure, use GetLastError to evaluate the error
+	config Service:Config()
+
+	-Attempts starting a service
+	-use GetLastError to evaluate errors on failure 
+	bool Service:Start();
+
+	-Attempts stopping  a service
+	-use GetLastError to evaluate errors on failure 
+	bool Service:Stop();
+
 Process:
 
 	-returns a table with process ids as keys and values as names

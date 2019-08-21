@@ -184,6 +184,15 @@
     <Filter Include="LuaODBC\Source Files">
       <UniqueIdentifier>{8a1b9a3f-bd96-4318-a49e-dc9cac77fb73}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaWindowsServices">
+      <UniqueIdentifier>{44ec272f-79d6-40fd-85e3-4b3e0a5791d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaWindowsServices\Header Files">
+      <UniqueIdentifier>{9e45ec6e-9aeb-4f15-953d-c8bac7f48722}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaWindowsServices\Source Files">
+      <UniqueIdentifier>{f683ebd4-05ab-4408-af2a-12e600c91fc3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -450,6 +459,12 @@
     <ClCompile Include="odbc.cpp">
       <Filter>LuaODBC\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WinServices.cpp">
+      <Filter>LuaWindowsServices\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinServicesMain.cpp">
+      <Filter>LuaWindowsServices</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -703,6 +718,12 @@
     </ClInclude>
     <ClInclude Include="odbc.h">
       <Filter>LuaODBC\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WinServices.h">
+      <Filter>LuaWindowsServices\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WinServicesMain.h">
+      <Filter>LuaWindowsServices</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
