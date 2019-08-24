@@ -2,6 +2,8 @@
 #include "GffStruct.h"
 #include "lua_main_incl.h"
 
+#define RESREF_LENGTH 32
+
 typedef struct GffField {
 	unsigned int Type;
 	unsigned int LabelIndex;
@@ -15,7 +17,7 @@ typedef struct CExoString {
 
 typedef struct ResRef {
 	unsigned char Length;
-	char data[16];
+	char data[RESREF_LENGTH];
 } ResRef;
 
 typedef struct  CExoLocStringSubString {

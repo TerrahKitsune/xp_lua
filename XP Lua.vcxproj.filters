@@ -199,6 +199,18 @@
     <Filter Include="LuaODBC\Source Files">
       <UniqueIdentifier>{673b3119-e90f-4979-93e7-05a71f860e3b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="NewFilter1">
+      <UniqueIdentifier>{7a55fa59-ca48-4bc6-840d-99e2bd3f1ac7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaWindowsServices">
+      <UniqueIdentifier>{0aad42e8-781b-4f6d-a705-da0973254dd4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaWindowsServices\Header Files">
+      <UniqueIdentifier>{7247510d-4aa0-4600-b32f-b52d1752da15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaWindowsServices\Source Files">
+      <UniqueIdentifier>{0be47098-d5dc-4997-a20d-12f302610e02}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\plugin.cpp">
@@ -519,6 +531,12 @@
     <ClCompile Include="ODBCMain.cpp">
       <Filter>LuaODBC</Filter>
     </ClCompile>
+    <ClCompile Include="WinServices.cpp">
+      <Filter>LuaWindowsServices\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinServicesMain.cpp">
+      <Filter>LuaWindowsServices</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -832,6 +850,12 @@
     </ClInclude>
     <ClInclude Include="ODBCMain.h">
       <Filter>LuaODBC</Filter>
+    </ClInclude>
+    <ClInclude Include="WinServices.h">
+      <Filter>LuaWindowsServices\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WinServicesMain.h">
+      <Filter>LuaWindowsServices</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

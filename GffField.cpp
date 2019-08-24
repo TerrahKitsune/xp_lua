@@ -93,7 +93,7 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type){
 		resref = (ResRef*)&gff->raw[gff->Header.FieldDataOffset + gff->Header.FieldDataCount];
 		result = gff->Header.FieldDataCount;
 		string = lua_tolstring(L, -1, &len);
-		resref->Length = len > 16 ? 16 : len;
+		resref->Length = len > RESREF_LENGTH ? RESREF_LENGTH : len;
 		memcpy(resref->data, string, len);
 		gff->Header.FieldDataCount += (sizeof(unsigned char) + len);
 		break;
@@ -255,8 +255,8 @@ size_t CalculateFieldDataSize(lua_State *L, Gff * gff, int type, const char * la
 		}
 
 		lua_tolstring(L, -1, &size);
-		if (size > 16)
-			size = 16;
+		if (size > RESREF_LENGTH)
+			size = RESREF_LENGTH;
 
 		size++;
 		gff->Header.FieldDataCount += size;
@@ -461,7 +461,7 @@ void PushFieldData(lua_State *L, Gff * gff, GffField *gfffield){
 		break;
 	case 11:
 		rdata = (ResRef*)GetPtrFromData(L, gff, gfffield->DataOrDataOffset, 1);
-		lua_pushlstring(L, rdata->data, rdata->Length > 16 ? 16 : rdata->Length);
+		lua_pushlstring(L, rdata->data, rdata->Length > RESREF_LENGTH ? RESREF_LENGTH : rdata->Length);
 		break;
 	case 12:
 		lsdata = (CExoLocString*)GetPtrFromData(L, gff, gfffield->DataOrDataOffset, sizeof(CExoLocString));

@@ -24,6 +24,7 @@
 #include "LuaImageMain.h"
 #include "StreamMain.h"
 #include "ODBCMain.h"
+#include "WinServicesMain.h"
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 static int print(lua_State *L){
@@ -110,6 +111,8 @@ LuaEngine::LuaEngine()
 	lua_setglobal(L, "Stream");
 	luaopen_odbc(L);
 	lua_setglobal(L, "ODBC");
+	luaopen_winservice(L);
+	lua_setglobal(L, "Services");
 
 	luaopen_misc(L);
 

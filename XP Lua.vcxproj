@@ -116,6 +116,8 @@
     <ClCompile Include="TimerMain.cpp" />
     <ClCompile Include="tlk.cpp" />
     <ClCompile Include="TlkMain.cpp" />
+    <ClCompile Include="WinServices.cpp" />
+    <ClCompile Include="WinServicesMain.cpp" />
     <ClCompile Include="ZIPMain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -219,6 +221,8 @@
     <ClInclude Include="TimerMain.h" />
     <ClInclude Include="tlk.h" />
     <ClInclude Include="TlkMain.h" />
+    <ClInclude Include="WinServices.h" />
+    <ClInclude Include="WinServicesMain.h" />
     <ClInclude Include="xp_lua_incl.h" />
     <ClInclude Include="ZIPMain.h" />
     <ClInclude Include="zip\zip.h" />
