@@ -153,6 +153,17 @@ Stream:
 	-function(size) return size; end
 	Stream Stream.Create(opt initialsize/allocfunc);
 
+	-Opens a file and reads all its contents and returns it as a stream
+	Stream Stream.Open(filename);
+
+	-Creates (or truncates existing) file and writes the entire stream to it
+	nil Stream:Save(filename);
+
+	-Opens an existing file and seeks to pos in the file and writes len bytes from the stream onto the file
+	-pos = position in the file to write to, file is padded with null bytes if the pos is larger then the current size
+	-len = number of bytes from the stream (determined on the position in the stream)
+	nil Stream:WriteToFile(filename, pos, len);
+
 	-Write a byte at the current position in the stream and advance the position
 	-byte should be between 0-255
 	-returns false if unable to write and an error message

@@ -62,11 +62,16 @@ local test = Services.All();
 assert(test, GetLastError());
 TablePrint(#test);
 
-local service = assert(Services.Open("postgresql-x64-10"),GetLastError());
-print(service);
+local stream = Stream.Open("E:/burg.bic");
+stream:Save("E:/test.bic");
+local f =io.open("E:/test.txt", "wb");
+f:close();
+stream:WriteToFile("E:/test.txt", 20, 8);
+stream:Seek();
+stream:WriteToFile("E:/test.txt", 0, 8);
 
-TablePrint(service:Status());
+stream:Seek();
+stream:WriteToFile("E:/test.txt", 8, 8);
 
-local config = assert(service:Config(), GetLastError());
-
-TablePrint(config);
+stream:Seek();
+stream:WriteToFile("E:/test.txt", 1000, 8);

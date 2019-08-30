@@ -630,6 +630,134 @@ int WriteStreamByte(lua_State* L) {
 	return 1;
 }
 
+int WriteToFile(lua_State* L) {
+	
+	LuaStream* stream = lua_toluastream(L, 1);
+	const char * file = luaL_checkstring(L, 2);
+	size_t pos = luaL_checkinteger(L, 3);
+	size_t len = luaL_checkinteger(L, 4);
+
+	const BYTE * data = ReadStream(stream, len);
+
+	if (data == NULL) {
+		luaL_error(L, "Stream out of bounds");
+		return 0;
+	}
+
+	FILE * f = fopen(file, "r+b");
+
+	if (!f) {
+		luaL_error(L, "Unable to open file");
+		return 0;
+	}
+
+	if (fseek(f, 0, SEEK_END) != 0) {
+		fclose(f);
+		luaL_error(L, "Unable to seek in file");
+		return 0;
+	}
+
+	long size = ftell(f);
+
+	if (pos > size) {
+
+		while (pos > size) {
+
+			if (fputc('\0', f) == EOF) {
+				fclose(f);
+				luaL_error(L, "Unable to write padding");
+				return 0;
+			}
+
+			size++;
+		}
+	}
+	else {
+		if (fseek(f, pos, SEEK_SET) != 0) {
+			fclose(f);
+			luaL_error(L, "Unable to seek in file");
+			return 0;
+		}
+	}
+
+	fwrite(data, sizeof(BYTE), len, f);
+	fflush(f);
+	fclose(f);
+
+	return 0;
+}
+
+int DumpToFile(lua_State* L) {
+
+	LuaStream* stream = lua_toluastream(L, 1);
+	const char * file = luaL_checkstring(L, 2);
+
+	FILE * f = fopen(file, "wb");
+
+	if (!f) {
+		luaL_error(L, "Unable to open file");
+		return 0;
+	}
+
+	fwrite(stream->data, sizeof(BYTE), stream->len, f);
+	fflush(f);
+	fclose(f);
+
+	return 0;
+}
+
+int OpenFileToStream(lua_State* L) {
+
+	const char * file = luaL_checkstring(L, 1);
+
+	FILE * f = fopen(file, "rb");
+
+	if (!f) {
+		luaL_error(L, "Unable to open file");
+		return 1;
+	}
+
+	if (fseek(f, 0, SEEK_END) != 0) {
+		fclose(f);
+		luaL_error(L, "Unable to seek in file");
+		return 1;
+	}
+
+	long size = ftell(f);
+	rewind(f);
+	int alloc = size;
+
+	lua_pop(L, lua_gettop(L));
+
+	LuaStream* stream = lua_pushluastream(L);
+	
+	if (alloc < MIN_STREAM_SIZE) {
+		alloc = MIN_STREAM_SIZE;
+	}
+
+	stream->data = (BYTE*)malloc(alloc);
+	if (!stream->data) {
+		fclose(f);
+		luaL_error(L, "Unable to allocate memory");
+		return 0;
+	}
+
+	stream->alloc = alloc;
+	stream->allocfunc = LUA_NOREF;
+	stream->pos = 0;
+
+	if (size > 0) {
+		stream->len = fread(stream->data, sizeof(BYTE), size, f);
+	}
+	else {		
+		stream->len = 0;
+	}
+
+	fclose(f);
+
+	return 1;
+}
+
 int NewStream(lua_State* L) {
 
 	if (lua_type(L, 1) == LUA_TFUNCTION) {
