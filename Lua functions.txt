@@ -164,6 +164,9 @@ Stream:
 	-len = number of bytes from the stream (determined on the position in the stream)
 	nil Stream:WriteToFile(filename, pos, len);
 
+	-Writes reads len bytes from file from position pos in the file to the current position in the stream
+	nil Stream:ReadFromFile(filename, pos, len);
+
 	-Write a byte at the current position in the stream and advance the position
 	-byte should be between 0-255
 	-returns false if unable to write and an error message

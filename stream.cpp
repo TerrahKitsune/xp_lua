@@ -630,6 +630,50 @@ int WriteStreamByte(lua_State* L) {
 	return 1;
 }
 
+int ReadFromFile(lua_State* L) {
+
+	LuaStream* stream = lua_toluastream(L, 1);
+	const char * file = luaL_checkstring(L, 2);
+	size_t pos = luaL_checkinteger(L, 3);
+	size_t len = luaL_checkinteger(L, 4);
+
+	FILE * f = fopen(file, "rb");
+
+	if (!f) {
+		luaL_error(L, "Unable to open file");
+		return 0;
+	}
+
+	if (fseek(f, pos+ len, SEEK_SET) != 0) {
+		fclose(f);
+		luaL_error(L, "Unable to seek in file");
+		return 0;
+	}
+	else if (fseek(f, pos, SEEK_SET) != 0) {
+		fclose(f);
+		luaL_error(L, "Unable to seek in file");
+		return 0;
+	}
+
+	BYTE * temp = (BYTE*)malloc(len);
+	if (!temp) {
+		fclose(f);
+		luaL_error(L, "Unable to allocate memory");
+		return 0;
+	}
+
+	fread(temp, sizeof(BYTE), len, f);
+
+	fclose(f);
+
+	if (!StreamWrite(L, stream, temp, len)) {
+		luaL_error(L, "Unable to write to stream");
+		return 0;
+	}
+
+	return 0;
+}
+
 int WriteToFile(lua_State* L) {
 	
 	LuaStream* stream = lua_toluastream(L, 1);

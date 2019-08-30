@@ -75,3 +75,8 @@ stream:WriteToFile("E:/test.txt", 8, 8);
 
 stream:Seek();
 stream:WriteToFile("E:/test.txt", 1000, 8);
+
+local other = Stream.Create();
+other:ReadFromFile("E:/test.txt", 8, 8);
+other:Seek();
+print(other:Read());
