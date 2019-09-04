@@ -193,6 +193,15 @@
     <Filter Include="LuaWindowsServices\Source Files">
       <UniqueIdentifier>{f683ebd4-05ab-4408-af2a-12e600c91fc3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaSocket">
+      <UniqueIdentifier>{f4efa851-4aff-4f16-9437-4931eaeca6b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaSocket\Header Files">
+      <UniqueIdentifier>{07414259-f2a5-456b-9627-472b8d5e520b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaSocket\Source Files">
+      <UniqueIdentifier>{5477ed92-0c67-4705-bd27-adb88132c976}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -465,6 +474,12 @@
     <ClCompile Include="WinServicesMain.cpp">
       <Filter>LuaWindowsServices</Filter>
     </ClCompile>
+    <ClCompile Include="luasocket.cpp">
+      <Filter>LuaSocket\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luasocketmain.cpp">
+      <Filter>LuaSocket</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -724,6 +739,12 @@
     </ClInclude>
     <ClInclude Include="WinServicesMain.h">
       <Filter>LuaWindowsServices</Filter>
+    </ClInclude>
+    <ClInclude Include="luasocket.h">
+      <Filter>LuaSocket\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luasocketmain.h">
+      <Filter>LuaSocket</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

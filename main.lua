@@ -56,27 +56,18 @@ for k,v in pairs(c) do
 end
 print("\n\n");
 
-TablePrint(Services);
+TablePrint(Socket);
 
-local test = Services.All();
-assert(test, GetLastError());
-TablePrint(#test);
+local s = Socket.Connect("localhost", 8888);
+local hasdata;
+for n=1,5 do 
+	print(s:Select());
+	hasdata = s:HasData();
+	if hasdata then 
+		print(s:Read());
+	end
+	print(s:Write("Hello!"));
+	Sleep(1000);
+end 
 
-local stream = Stream.Open("E:/burg.bic");
-stream:Save("E:/test.bic");
-local f =io.open("E:/test.txt", "wb");
-f:close();
-stream:WriteToFile("E:/test.txt", 20, 8);
-stream:Seek();
-stream:WriteToFile("E:/test.txt", 0, 8);
-
-stream:Seek();
-stream:WriteToFile("E:/test.txt", 8, 8);
-
-stream:Seek();
-stream:WriteToFile("E:/test.txt", 1000, 8);
-
-local other = Stream.Create();
-other:ReadFromFile("E:/test.txt", 8, 8);
-other:Seek();
-print(other:Read());
+s:Close();

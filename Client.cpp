@@ -31,6 +31,7 @@ Client * ClientConnect(const char * addr, int port) {
 			ptr->ai_protocol);
 		if (cli->s == INVALID_SOCKET) {
 			cli->LastError = WSAGetLastError();
+			freeaddrinfo(result);
 			return cli;
 		}
 

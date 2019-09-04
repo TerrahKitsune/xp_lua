@@ -86,6 +86,8 @@
     <ClCompile Include="image.cpp" />
     <ClCompile Include="LuaImageMain.cpp" />
     <ClCompile Include="LuaMySQLResult.cpp" />
+    <ClCompile Include="luasocket.cpp" />
+    <ClCompile Include="luasocketmain.cpp" />
     <ClCompile Include="mysql_main_incl.cpp" />
     <ClCompile Include="namedpipe.cpp" />
     <ClCompile Include="NamedPipeMain.cpp" />
@@ -178,6 +180,8 @@
     <ClInclude Include="image.h" />
     <ClInclude Include="LuaImageMain.h" />
     <ClInclude Include="LuaMySQLResult.h" />
+    <ClInclude Include="luasocket.h" />
+    <ClInclude Include="luasocketmain.h" />
     <ClInclude Include="mysql_main_incl.h" />
     <ClInclude Include="namedpipe.h" />
     <ClInclude Include="NamedPipeMain.h" />

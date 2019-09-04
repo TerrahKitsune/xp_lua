@@ -384,6 +384,35 @@ Pipe:
 	-Closes a pipe, it should not be used after closing
 	nil Pipe:Close();
 
+Socket:
+
+	-Opens a socket and attempts connecting
+	-family = default 0
+	-sockettype = stream = 1, datagram = 2, raw = 3, rdm = 4, seqpacket = 5 default = 1
+	-protocol: tcp=6, udp=17 default = 6
+	Socket Socket.Connect(address, port, family, sockettype, protocol)
+
+	-Checks the status of the socket
+	-1st: is the socket ok
+	-2nd: is read fd set
+	-3rd: is write fd set
+	-4th: is expected fd set
+	bool, bool, bool, bool Socket:Select()
+
+	-Checks if the socket has data to read
+	-Returns nil if the socket is dead otehrwise true/false
+	bool/nil Socket:HasData()
+
+	-Read data from the socket, returns nil if there is no data to read
+	string Socket:Read()
+
+	-Writes data to the socket, returns the number that was set
+	-returns -1 on failure otherwise returns the number of bytes that was sent
+	int Socket:Write()
+
+	-Closes the socket
+	nil Socket:Close()
+
 Services:
 
 	-Returns an array containing all services
