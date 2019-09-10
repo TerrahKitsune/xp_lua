@@ -93,8 +93,7 @@ int WritePipe(lua_State *L) {
 
 	lua_pop(L, lua_gettop(L));
 	lua_pushnil(L);
-	lua_pushinteger(L, GetLastError());
-	return 2;
+	return 1;
 }
 
 int CheckNamedPipe(lua_State *L) {
@@ -166,9 +165,9 @@ int CreateNamedPipe(lua_State *L) {
 
 	size_t len;
 	const char * pipename = luaL_checklstring(L, 1, &len);
-	int maxinstances = (int)luaL_optinteger(L, 2, 1);
-	int buffersize = (int)luaL_optinteger(L, 3, 1024);
-	int timeout = (int)luaL_optinteger(L, 4, 1000);
+	DWORD maxinstances = (DWORD)luaL_optinteger(L, 2, 1);
+	DWORD buffersize = (DWORD)luaL_optinteger(L, 3, 1024);
+	DWORD timeout = (DWORD)luaL_optinteger(L, 4, 1000);
 	DWORD access = 0;
 
 	if (len >= MAX_PATH - 9) {
@@ -193,11 +192,12 @@ int CreateNamedPipe(lua_State *L) {
 
 	buffersize = max(maxinstances, 1024);
 	timeout = max(timeout, 1);
+	maxinstances = max(maxinstances, 1);
 
 	char realpipename[MAX_PATH] = "\\\\.\\pipe\\";
 	strcat(realpipename, pipename);
 
-	HANDLE hpipe = CreateNamedPipe(realpipename, access, PIPE_NOWAIT, max(maxinstances, 1), buffersize, buffersize, timeout, NULL);
+	HANDLE hpipe = CreateNamedPipe(realpipename, access, PIPE_NOWAIT, maxinstances, buffersize, buffersize, timeout, NULL);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -206,6 +206,14 @@ int CreateNamedPipe(lua_State *L) {
 		lua_pushinteger(L, GetLastError());
 		return 2;
 	}
+	else if (!WaitNamedPipe(realpipename, 1000) && !SetNamedPipeHandleState(hpipe, &access, &maxinstances, &buffersize)) {
+		CloseHandle(hpipe);
+		lua_pushnil(L);
+		lua_pushinteger(L, GetLastError());
+		return 2;
+	}
+
+	WaitForSingleObject(hpipe, 1000);
 
 	LuaNamedPipe * pipe = lua_pushnamedpipe(L);
 

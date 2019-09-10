@@ -56,18 +56,21 @@ for k,v in pairs(c) do
 end
 print("\n\n");
 
-TablePrint(Socket);
+ArrayPrint(ODBC.GetAllDrivers());
 
-local s = Socket.Connect("localhost", 8888);
-local hasdata;
-for n=1,5 do 
-	print(s:Select());
-	hasdata = s:HasData();
-	if hasdata then 
-		print(s:Read());
-	end
-	print(s:Write("Hello!"));
-	Sleep(1000);
+local p = Pipe.Create("Ttest");
+print(GetLastError());
+for n=1, 10 do 
+	while not p:Write("sdfsdfds\n") do 
+		print(GetLastError());
+	end 
 end 
 
-s:Close();
+while p:Available() == 0 do 
+end
+
+local l = p:Read();
+while l do 
+	io.write(l);
+	l = p:Read();
+end
