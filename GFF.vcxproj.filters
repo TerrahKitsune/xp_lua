@@ -202,6 +202,15 @@
     <Filter Include="LuaSocket\Source Files">
       <UniqueIdentifier>{5477ed92-0c67-4705-bd27-adb88132c976}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaLinkedList">
+      <UniqueIdentifier>{9855b5c5-639a-4ec3-a5b3-0b60ba3d2bb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaLinkedList\Header Files">
+      <UniqueIdentifier>{f2276eea-304e-4d11-baf2-cf8bda8e9933}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaLinkedList\Source Files">
+      <UniqueIdentifier>{8ade1e33-4630-47bd-bc9b-130df025156b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -480,6 +489,15 @@
     <ClCompile Include="luasocketmain.cpp">
       <Filter>LuaSocket</Filter>
     </ClCompile>
+    <ClCompile Include="LinkedList.cpp">
+      <Filter>LuaLinkedList\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaLinkedList.cpp">
+      <Filter>LuaLinkedList\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaLinkedListMain.cpp">
+      <Filter>LuaLinkedList</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -745,6 +763,15 @@
     </ClInclude>
     <ClInclude Include="luasocketmain.h">
       <Filter>LuaSocket</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkedList.h">
+      <Filter>LuaLinkedList\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaLinkedList.h">
+      <Filter>LuaLinkedList\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaLinkedListMain.h">
+      <Filter>LuaLinkedList</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -84,7 +84,10 @@
     <ClCompile Include="GffStruct.cpp" />
     <ClCompile Include="Http.cpp" />
     <ClCompile Include="image.cpp" />
+    <ClCompile Include="LinkedList.cpp" />
     <ClCompile Include="LuaImageMain.cpp" />
+    <ClCompile Include="LuaLinkedList.cpp" />
+    <ClCompile Include="LuaLinkedListMain.cpp" />
     <ClCompile Include="LuaMySQLResult.cpp" />
     <ClCompile Include="luasocket.cpp" />
     <ClCompile Include="luasocketmain.cpp" />
@@ -178,7 +181,10 @@
     <ClInclude Include="GffStruct.h" />
     <ClInclude Include="Http.h" />
     <ClInclude Include="image.h" />
+    <ClInclude Include="LinkedList.h" />
     <ClInclude Include="LuaImageMain.h" />
+    <ClInclude Include="LuaLinkedList.h" />
+    <ClInclude Include="LuaLinkedListMain.h" />
     <ClInclude Include="LuaMySQLResult.h" />
     <ClInclude Include="luasocket.h" />
     <ClInclude Include="luasocketmain.h" />

@@ -246,6 +246,38 @@ Env:
 	-Gets the table that contains all other environment tables
 	table Env.Meta();
 
+LinkedList:
+	
+	-create a new instance
+	LinkedList LinkedList.New()
+
+	-add first in the entry
+	nil LinkedList:AddFirst(data)
+
+	-add last in the entry
+	nil LinkedList:AddLast(data)
+
+	-Remove all entries
+	nil LinkedList:Clear()
+
+	-Iterates forwards for i,v in LinkedList:Forward() do ... end
+	iterator LinkedList:Forward()
+
+	-Iterates backwards for i,v in LinkedList:Backward() do ... end
+	iterator LinkedList:Backward()
+
+	-Retrives data from the list based on index, returns nil on failure
+	data LinkedList:Get(index)
+
+	-Removes and returns the data that was removed
+	data LinkedList:Remove(index)
+
+	-Inserts data at the index and pushes down data
+	nil LinkedList:Insert(index, data)
+
+	-Retrive the count
+	number LinkedList:Count()
+
 Zip:
 
 	-Opens/creates a zipfile

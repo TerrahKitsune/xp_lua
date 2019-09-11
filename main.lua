@@ -56,21 +56,60 @@ for k,v in pairs(c) do
 end
 print("\n\n");
 
-ArrayPrint(ODBC.GetAllDrivers());
+local ll = LinkedList.New();
+ll:AddFirst("Hi");
+ll:AddFirst("There!");
+ll:AddFirst(123);
+ll:AddLast(1.578);
+ll:AddFirst(print);
+ll:AddFirst({});
+ll:AddFirst(ll);
+print(ll);
 
-local p = Pipe.Create("Ttest");
-print(GetLastError());
-for n=1, 10 do 
-	while not p:Write("sdfsdfds\n") do 
-		print(GetLastError());
-	end 
+ll:Insert(1, "This is FIRST");
+ll:Insert(ll:Count(), "This is LAST");
+ll:Insert(100, "This is DEAD");
+
+ll:AddFirst("FIRST");
+ll:AddLast("LAST");
+
+ll:Insert(5, "This is 5");
+
+for i,v in ll:Forward() do 
+	print(i,v);
+end 
+print("-----");
+for i,v in ll:Backward() do 
+	print(i,v);
+end 
+print("-----");
+print(ll:Get(5));
+print(ll:Count());
+print(ll:Get(1));
+print(ll:Get(7));
+print("-----");
+for n=1, ll:Count() do 
+	print(n, ll:Get(n));
 end 
 
-while p:Available() == 0 do 
-end
+print(ll:Remove(6));
+print(ll:Remove(1));
+print(ll:Remove(ll:Count()));
+print("-----");
+for i,v in ll:Forward() do 
+	print(i,v);
+end 
+print("-----");
+for i,v in ll:Backward() do 
+	print(i,v);
+end 
+print("----- del");
+for i,v in ll:Forward() do 
+	print(ll:Remove(i));
+end 
 
-local l = p:Read();
-while l do 
-	io.write(l);
-	l = p:Read();
-end
+print(ll:Count());
+print("----- gdsgs");
+for i,v in ll:Forward() do 
+	print(i,v);
+end 
