@@ -99,6 +99,17 @@ for i,v, id in ll:Backward() do
 		print("BAD");
 	end
 end 
+local a=UUID();
+print(StringEqual(nil,nil));
+print(StringEqual(nil,a));
+print(StringEqual(a,a));
+print(StringEqual(1,2));
+print(StringEqual("",""));
+print(StringEqual("",""));
+print(StringEqual("asfsafa",a));
+print(StringEqual(a,a));
+print(StringEqual("Hi","hi"));
+print(StringEqual("hi","hi"));
 
 while true do 
 	ll:AddFirst(UUID());

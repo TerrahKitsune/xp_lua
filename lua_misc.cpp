@@ -143,7 +143,13 @@ int GetStringEqual(lua_State* L) {
 
 	lua_pop(L, lua_gettop(L));
 
-	if (len1 == len2) {
+	if (!str1 || !str2) {
+		lua_pushboolean(L, str1 == str2);
+	}
+	else if (str1 == str2 && len1 == len2) {
+		lua_pushboolean(L, true);
+	}
+	else if (len1 == len2) {
 
 		for (size_t i = 0; i < len1; i++)
 		{

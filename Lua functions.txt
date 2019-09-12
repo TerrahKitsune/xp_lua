@@ -40,6 +40,7 @@ Misc global functions:
 	--7: HKEY_USERS
 	string GetRegistryValue(key,subkey,entry)
 
+	-Compares two strings ignore case
 	bool StringEqual(str1, str2)
 
 	ToggleConsole(bool)
