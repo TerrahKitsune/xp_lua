@@ -134,6 +134,34 @@ int GetAllEnvironment(lua_State * L) {
 	return 1;
 }
 
+int GetStringEqual(lua_State* L) {
+
+	size_t len1;
+	size_t len2;
+	const char* str1 = lua_tolstring(L, 1, &len1);
+	const char* str2 = lua_tolstring(L, 2, &len2);
+
+	lua_pop(L, lua_gettop(L));
+
+	if (len1 == len2) {
+
+		for (size_t i = 0; i < len1; i++)
+		{
+			if (tolower(str1[i]) != tolower(str2[i])) {
+				lua_pushboolean(L, false);
+				return 1;
+			}
+		}
+
+		lua_pushboolean(L, true);
+	}
+	else {
+		lua_pushboolean(L, false);
+	}
+
+	return 1;
+}
+
 int luaopen_misc(lua_State * L) {
 
 	lua_newtable(L);
@@ -255,6 +283,9 @@ int luaopen_misc(lua_State * L) {
 
 
 	lua_setglobal(L, "c");
+
+	lua_pushcfunction(L, GetStringEqual);
+	lua_setglobal(L, "StringEqual");
 
 	lua_pushcfunction(L, GetLastErrorAsMessage);
 	lua_setglobal(L, "GetLastError");

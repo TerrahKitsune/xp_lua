@@ -8,10 +8,15 @@ static const struct luaL_Reg linkedlistfunctions[] = {
 	{ "Clear",  linkedlist_gc },
 	{ "Forward",  LuaForward },
 	{ "Backward",  LuaBackward },
-	{ "Get",  LuaGet },
+	{ "GetFromIndex",  LuaGet },
 	{ "Remove",  LuaRemove },
 	{ "Insert",  LuaInsert },
 	{ "Count",  LuaCount },
+	{ "IndexFromKey",  LuaIndexOf },
+	{ "KeyFromIndex",  LuaGetKey },
+	{ "AddBefore",  LuaAddBefore },
+	{ "AddAfter",  LuaAddAfter },
+	{ "GetFromKey",  LuaGetDataFromKey },
 	{ NULL, NULL }
 }; 
 

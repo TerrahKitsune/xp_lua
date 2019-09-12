@@ -91,13 +91,17 @@ LLNode* Insert(LLNode* head, void* data, Dealloc* proc, int index) {
 
 	LLNode* entry = (LLNode*)calloc(1, sizeof(LLNode));
 
+	if (!entry) {
+		return NULL;
+	}
+
 	entry->data = data;
 
 	if (proc) {
 		entry->deallocfunc = proc;
 	}
 	else {
-		entry->deallocfunc = (Dealloc*)& free;
+		entry->deallocfunc = (Dealloc*)&free;
 	}
 
 	if (!head) {
@@ -150,9 +154,92 @@ LLNode* Insert(LLNode* head, void* data, Dealloc* proc, int index) {
 	return head;
 }
 
+LLNode* AddBefore(LLNode* node, void* data, Dealloc* proc) {
+
+	LLNode* entry = (LLNode*)calloc(1, sizeof(LLNode));
+
+	if (!entry) {
+		return NULL;
+	}
+
+	entry->data = data;
+
+	if (proc) {
+		entry->deallocfunc = proc;
+	}
+	else {
+		entry->deallocfunc = (Dealloc*)&free;
+	}
+
+	if (!node) {
+		return entry;
+	}
+
+	entry->next = node;
+	entry->prev = node->prev;
+
+	if (node->prev) {
+		node->prev->next = entry;
+	}
+
+	node->prev = entry;
+
+	while (node->prev) {
+		node = node->prev;
+	}
+
+	return node;
+}
+
+LLNode* AddAfter(LLNode* node, void* data, Dealloc* proc) {
+
+	LLNode* entry = (LLNode*)calloc(1, sizeof(LLNode));
+
+	if (!entry) {
+		return NULL;
+	}
+
+	entry->data = data;
+
+	if (proc) {
+		entry->deallocfunc = proc;
+	}
+	else {
+		entry->deallocfunc = (Dealloc*)&free;
+	}
+
+	if (!node) {
+		return entry;
+	}
+
+	entry->next = node->next;
+
+	if (entry->next) {
+
+		if (entry->next->prev) {
+			entry->next->prev = entry;
+		}
+
+		entry->prev = node;
+	}
+
+	entry->prev = node;
+	node->next = entry;
+	
+	while (node->prev) {
+		node = node->prev;
+	}
+
+	return node;
+}
+
 LLNode* AddFirst(LLNode* head, void* data, Dealloc* proc) {
 
 	LLNode* entry = (LLNode*)calloc(1, sizeof(LLNode));
+
+	if (!entry) {
+		return NULL;
+	}
 
 	entry->data = data;
 
@@ -176,6 +263,10 @@ LLNode* AddFirst(LLNode* head, void* data, Dealloc* proc) {
 LLNode* AddLast(LLNode* head, void* data, Dealloc* proc) {
 
 	LLNode* entry = (LLNode*)calloc(1, sizeof(LLNode));
+
+	if (!entry) {
+		return NULL;
+	}
 
 	entry->data = data;
 

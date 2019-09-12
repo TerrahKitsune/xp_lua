@@ -57,59 +57,49 @@ end
 print("\n\n");
 
 local ll = LinkedList.New();
-ll:AddFirst("Hi");
-ll:AddFirst("There!");
-ll:AddFirst(123);
-ll:AddLast(1.578);
-ll:AddFirst(print);
-ll:AddFirst({});
-ll:AddFirst(ll);
-print(ll);
 
-ll:Insert(1, "This is FIRST");
-ll:Insert(ll:Count(), "This is LAST");
-ll:Insert(100, "This is DEAD");
+local key = ll:AddFirst("FIRST");
+ll:AddBefore(key, "BEFORE 1");
+ll:AddAfter(key, "AFTER 1");
+ll:AddBefore(key, "BEFORE 2");
+ll:AddAfter(key, "AFTER 2");
 
-ll:AddFirst("FIRST");
-ll:AddLast("LAST");
+local index= ll:IndexFromKey(key);
+print("Key", key);
+print("Index", index);
+print("Data from key", ll:GetFromKey(key));
+print("Data from index", ll:GetFromIndex(index));
 
-ll:Insert(5, "This is 5");
+index = 1;
+key = ll:KeyFromIndex(index);
+print("index key",index, key);
+print("Data from key", ll:GetFromKey(key));
+print("Data from index", ll:GetFromIndex(index));
 
-for i,v in ll:Forward() do 
-	print(i,v);
-end 
-print("-----");
-for i,v in ll:Backward() do 
-	print(i,v);
-end 
-print("-----");
-print(ll:Get(5));
-print(ll:Count());
-print(ll:Get(1));
-print(ll:Get(7));
-print("-----");
-for n=1, ll:Count() do 
-	print(n, ll:Get(n));
-end 
+index = ll:Count();
+key = ll:KeyFromIndex(index);
+print("index key",index, key);
+print("Data from key", ll:GetFromKey(key));
+print("Data from index", ll:GetFromIndex(index));
 
-print(ll:Remove(6));
-print(ll:Remove(1));
-print(ll:Remove(ll:Count()));
-print("-----");
-for i,v in ll:Forward() do 
-	print(i,v);
+for i,v, id in ll:Forward() do 
+	print(i, v, id);
+	if ll:IndexFromKey(id) == i and ll:KeyFromIndex(i) == id and v == ll:GetFromKey(id) and v == ll:GetFromIndex(i) then 
+		print("OK");
+	else 
+		print("BAD");
+	end
 end 
-print("-----");
-for i,v in ll:Backward() do 
-	print(i,v);
-end 
-print("----- del");
-for i,v in ll:Forward() do 
-	print(ll:Remove(i));
+print("---");
+for i,v, id in ll:Backward() do 
+	print(i,v, id);
+	if ll:IndexFromKey(id) == i and ll:KeyFromIndex(i) == id and v == ll:GetFromKey(id) and v == ll:GetFromIndex(i) then 
+		print("OK");
+	else 
+		print("BAD");
+	end
 end 
 
-print(ll:Count());
-print("----- gdsgs");
-for i,v in ll:Forward() do 
-	print(i,v);
+while true do 
+	ll:AddFirst(UUID());
 end 

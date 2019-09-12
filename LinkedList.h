@@ -15,5 +15,7 @@ LLNode* Get(LLNode* head, int index);
 size_t Count(LLNode* head);
 LLNode* Remove(LLNode* node);
 LLNode* Insert(LLNode* head, void* data, Dealloc* proc, int index);
+LLNode* AddBefore(LLNode* node, void* data, Dealloc* proc);
+LLNode* AddAfter(LLNode* node, void* data, Dealloc* proc);
 
 void FreeLinkedList(LLNode* node);

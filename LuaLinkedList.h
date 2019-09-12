@@ -9,12 +9,14 @@ typedef struct LuaLinkedList {
 	LLNode* head;
 	const LLNode* iterator;
 	int pos;
+	int nextid;
 	bool forwards;
 
 } LuaLinkedList;
 
 typedef struct LinkedListData {
 
+	int id;
 	int type;
 	lua_State* L;
 	BYTE data[sizeof(size_t)+sizeof(void*)];
@@ -33,6 +35,11 @@ int Create(lua_State* L);
 int LuaCount(lua_State* L);
 int LuaRemove(lua_State* L);
 int LuaInsert(lua_State* L);
+int LuaIndexOf(lua_State* L);
+int LuaGetKey(lua_State* L);
+int LuaAddAfter(lua_State* L);
+int LuaAddBefore(lua_State* L);
+int LuaGetDataFromKey(lua_State* L);
 
 int linkedlist_gc(lua_State* L);
 int linkedlist_tostring(lua_State* L);

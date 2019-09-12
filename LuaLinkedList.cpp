@@ -50,10 +50,16 @@ void PushNode(LinkedListData* datanode) {
 	}
 }
 
-LinkedListData* CreateNode(lua_State* L, int index) {
+LinkedListData* CreateNode(lua_State* L, int index, int id) {
 
 	LinkedListData* datanode = (LinkedListData*)calloc(1, sizeof(LinkedListData));
+
+	if (!datanode) {
+		return NULL;
+	}
+
 	datanode->L = L;
+	datanode->id = id;
 	datanode->type = lua_type(L, index);
 	int ref;
 
@@ -64,6 +70,11 @@ LinkedListData* CreateNode(lua_State* L, int index) {
 
 		if (data) {
 			void* raw = malloc(max(len, 1));
+			if (!raw) {
+				free(datanode);
+				return NULL;
+			}
+
 			memcpy(datanode->data, &len, sizeof(size_t));
 			memcpy(&datanode->data[sizeof(size_t)], &raw, sizeof(void*));
 			memcpy(raw, data, len);
@@ -84,6 +95,136 @@ LinkedListData* CreateNode(lua_State* L, int index) {
 	return datanode;
 }
 
+int LuaIndexOf(lua_State* L) {
+
+	LuaLinkedList* ll = lua_tolinkedlist(L, 1);
+	int id = (int)luaL_checkinteger(L, 2);
+	LLNode* itr = ll->head;
+	int index = 0;
+	for (; itr; itr = itr->next) {
+		index++;
+		if (((LinkedListData*)itr->data)->id == id) {
+			lua_pop(L, lua_gettop(L));
+			lua_pushinteger(L, index);
+			return 1;
+		}
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushnil(L);
+
+	return 1;
+}
+
+int LuaAddAfter(lua_State* L) {
+
+	LuaLinkedList* ll = lua_tolinkedlist(L, 1);
+	int key = (int)luaL_checkinteger(L, 2);
+
+	LLNode* find = NULL;
+	LLNode* itr = ll->head;
+	for (; itr; itr = itr->next) {
+		if (((LinkedListData*)itr->data)->id == key) {
+			find = itr;
+			break;
+		}
+	}
+
+	if (!find) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	LinkedListData* datanode = CreateNode(L, 3, ++ll->nextid);
+
+	if (!datanode) {
+		luaL_error(L, "Unable to allocate memory");
+		return 0;
+	}
+
+	find = AddAfter(find, datanode, (Dealloc*)& Delete);
+
+	if (!find) {
+		Delete(datanode);
+		luaL_error(L, "Unable to allocate memory");
+		return 0;
+	}
+
+	ll->head = find;
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, datanode->id);
+
+	return 1;
+}
+
+int LuaAddBefore(lua_State* L) {
+
+	LuaLinkedList* ll = lua_tolinkedlist(L, 1);
+	int key = (int)luaL_checkinteger(L, 2);
+
+	LLNode* find = NULL;
+	LLNode* itr = ll->head;
+	for (; itr; itr = itr->next) {
+		if (((LinkedListData*)itr->data)->id == key) {
+			find = itr;
+			break;
+		}
+	}
+
+	if (!find) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		return 1;
+	}
+
+	LinkedListData* datanode = CreateNode(L, 3, ++ll->nextid);
+
+	if (!datanode) {
+		luaL_error(L, "Unable to allocate memory");
+		return 0;
+	}
+
+	find = AddBefore(find, datanode, (Dealloc*)& Delete);
+
+	if (!find) {
+		Delete(datanode);
+		luaL_error(L, "Unable to allocate memory");
+		return 0;
+	}
+
+	ll->head = find;
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, datanode->id);
+
+	return 1;
+}
+
+int LuaGetDataFromKey(lua_State* L) {
+
+	LuaLinkedList* ll = lua_tolinkedlist(L, 1);
+	int id = (int)luaL_checkinteger(L, 2);
+	LLNode* itr = ll->head;
+	int index = 0;
+	for (; itr; itr = itr->next) {
+		index++;
+		if (((LinkedListData*)itr->data)->id == id) {
+			lua_pop(L, lua_gettop(L));
+			PushNode((LinkedListData*)itr->data);
+			return 1;
+		}
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushnil(L);
+
+	return 1;
+}
+
 int LuaGet(lua_State* L) {
 
 	LuaLinkedList* ll = lua_tolinkedlist(L, 1);
@@ -94,6 +235,24 @@ int LuaGet(lua_State* L) {
 
 	if (node) {
 		PushNode((LinkedListData*)node->data);
+	}
+	else {
+		lua_pushnil(L);
+	}
+
+	return 1;
+}
+
+int LuaGetKey(lua_State* L) {
+
+	LuaLinkedList* ll = lua_tolinkedlist(L, 1);
+	int index = (int)luaL_checkinteger(L, 2);
+
+	LLNode* node = Get(ll->head, index - 1);
+	lua_pop(L, lua_gettop(L));
+
+	if (node) {
+		lua_pushinteger(L, ((LinkedListData*)node->data)->id);
 	}
 	else {
 		lua_pushnil(L);
@@ -127,11 +286,27 @@ int LuaInsert(lua_State* L) {
 
 	LuaLinkedList* ll = lua_tolinkedlist(L, 1);
 	int index = (int)luaL_checkinteger(L, 2);
-	LinkedListData* datanode = CreateNode(L, 3);
+	LinkedListData* datanode = CreateNode(L, 3, ++ll->nextid);
 
-	ll->head = Insert(ll->head, datanode, (Dealloc*)& Delete, index - 1);
+	if (!datanode) {
+		luaL_error(L, "Unable to allocate memory");
+		return 0;
+	}
 
-	return 0;
+	LLNode* created = Insert(ll->head, datanode, (Dealloc*)& Delete, index - 1);
+
+	if (!created) {
+		Delete(datanode);
+		luaL_error(L, "Unable to allocate memory");
+		return 0;
+	}
+
+	ll->head = created;
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, datanode->id);
+
+	return 1;
 }
 
 int LuaCount(lua_State* L) {
@@ -165,6 +340,7 @@ int LuaFirstNext(lua_State* L) {
 		lua_pop(L, 1);
 		lua_pushinteger(L, ++ll->pos);
 		PushNode((LinkedListData*)ll->iterator->data);
+		lua_pushinteger(L, ((LinkedListData*)ll->iterator->data)->id);
 	}
 	else {
 		if (lua_isnil(L, 2) || !ll->iterator) {
@@ -183,9 +359,10 @@ int LuaFirstNext(lua_State* L) {
 		lua_pop(L, 1);
 		lua_pushinteger(L, ll->pos--);
 		PushNode((LinkedListData*)ll->iterator->data);
+		lua_pushinteger(L, ((LinkedListData*)ll->iterator->data)->id);
 	}
 
-	return 2;
+	return 3;
 }
 
 int LuaForward(lua_State* L) {
@@ -209,20 +386,52 @@ int LuaBackward(lua_State* L) {
 int LuaAddFirst(lua_State* L) {
 
 	LuaLinkedList* ll = lua_tolinkedlist(L, 1);
-	LinkedListData* datanode = CreateNode(L, 2);
+	LinkedListData* datanode = CreateNode(L, 2, ++ll->nextid);
 
-	ll->head = AddFirst(ll->head, datanode, (Dealloc*)& Delete);
+	if (!datanode) {
+		luaL_error(L, "Unable to allocate memory");
+		return 0;
+	}
 
-	return 0;
+	LLNode* created = AddFirst(ll->head, datanode, (Dealloc*)& Delete);
+
+	if (!created) {
+		Delete(datanode);
+		luaL_error(L, "Unable to allocate memory");
+		return 0;
+	}
+
+	ll->head = created;
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, datanode->id);
+
+	return 1;
 }
 
 int LuaAddLast(lua_State* L) {
 	LuaLinkedList* ll = lua_tolinkedlist(L, 1);
-	LinkedListData* datanode = CreateNode(L, 2);
+	LinkedListData* datanode = CreateNode(L, 2, ++ll->nextid);
 
-	ll->head = AddLast(ll->head, datanode, (Dealloc*)& Delete);
+	if (!datanode) {
+		luaL_error(L, "Unable to allocate memory");
+		return 0;
+	}
 
-	return 0;
+	LLNode* created = AddLast(ll->head, datanode, (Dealloc*)& Delete);
+
+	if (!created) {
+		Delete(datanode);
+		luaL_error(L, "Unable to allocate memory");
+		return 0;
+	}
+
+	ll->head = created;
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, datanode->id);
+
+	return 1;
 }
 
 int Create(lua_State* L) {

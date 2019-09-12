@@ -40,6 +40,8 @@ Misc global functions:
 	--7: HKEY_USERS
 	string GetRegistryValue(key,subkey,entry)
 
+	bool StringEqual(str1, str2)
+
 	ToggleConsole(bool)
 	SetTitle(newtitle)
 
@@ -252,31 +254,53 @@ LinkedList:
 	LinkedList LinkedList.New()
 
 	-add first in the entry
-	nil LinkedList:AddFirst(data)
+	-returns the key of the inserted data
+	int LinkedList:AddFirst(data)
 
 	-add last in the entry
-	nil LinkedList:AddLast(data)
+	-returns the key of the inserted data
+	int LinkedList:AddLast(data)
 
 	-Remove all entries
 	nil LinkedList:Clear()
 
-	-Iterates forwards for i,v in LinkedList:Forward() do ... end
+	-Iterates forwards for index,value,key in LinkedList:Forward() do ... end
 	iterator LinkedList:Forward()
 
-	-Iterates backwards for i,v in LinkedList:Backward() do ... end
+	-Iterates backwards for index,value,key in LinkedList:Backward() do ... end
 	iterator LinkedList:Backward()
 
 	-Retrives data from the list based on index, returns nil on failure
-	data LinkedList:Get(index)
+	data LinkedList:GetFromIndex(index)
+
+	-Retrives data from the list based on key, returns nil on failure
+	data LinkedList:GetFromKey(key)
 
 	-Removes and returns the data that was removed
 	data LinkedList:Remove(index)
 
 	-Inserts data at the index and pushes down data
-	nil LinkedList:Insert(index, data)
+	-returns the key of the inserted data
+	int LinkedList:Insert(index, data)
 
 	-Retrive the count
 	number LinkedList:Count()
+
+	-Get the index the entry with the key is in
+	-Returns nil on failure
+	int LinkedList:IndexFromKey(key)
+
+	-Get the key in the index
+	-Returns nil on failure
+	int LinkedList:KeyFromIndex(index)
+
+	-Adds the data before the existing element by key
+	-returns the inserted key or nil
+	int LinkedList:AddBefore(key, data)
+
+	-Adds the data after the existing element by key
+	-returns the inserted key or nil
+	int LinkedList:AddAfter(key, data)
 
 Zip:
 
