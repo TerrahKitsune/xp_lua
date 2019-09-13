@@ -8,6 +8,7 @@ typedef struct LuaKafka {
 
 	rd_kafka_type_t type;
 	rd_kafka_t* rd;
+	rd_kafka_topic_partition_list_t * subscribelist;
 } LuaKafka;
 
 

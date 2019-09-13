@@ -314,7 +314,6 @@ int DescribeGroups(lua_State* L) {
 		lua_createtable(L, 0, 7);
 
 		lua_pushstring(L, "Broker");
-		lua_pushstring(L, gi->broker.host);
 		lua_pushkafkabroker(L, &gi->broker);
 		lua_settable(L, -3);
 
@@ -366,15 +365,16 @@ int DescribeGroups(lua_State* L) {
 			lua_pushstring(L, "Metadata");
 			lua_pushlstring(L, (const char*)memberinfo->member_metadata, memberinfo->member_metadata_size);
 			lua_settable(L, -3);
-		}
 
+			lua_rawseti(L, -2, n + 1);
+		}
 		lua_settable(L, -3);
 
 		lua_rawseti(L, -2, i + 1);
 	}
 
 	rd_kafka_group_list_destroy(grplist);
-
+	
 	return 1;
 }
 
@@ -429,6 +429,7 @@ int CreateConsumer(lua_State* L) {
 	LuaKafka* luak = lua_pushkafka(L);
 	luak->rd = rd;
 	luak->type = RD_KAFKA_CONSUMER;
+	luak->subscribelist = rd_kafka_topic_partition_list_new(0);
 
 	rd_kafka_resp_err_t err = rd_kafka_poll_set_consumer(luak->rd);
 
@@ -451,23 +452,21 @@ int SubscribeToTopic(lua_State* L) {
 	int partition = luaL_optinteger(L, 3, 0);
 	int timeout = luaL_optinteger(L, 4, 10000);
 
-	rd_kafka_topic_partition_list_t * list = rd_kafka_topic_partition_list_new(1);
-	rd_kafka_topic_partition_list_add(list, topic, partition);
+	rd_kafka_topic_partition_t* pos = rd_kafka_topic_partition_list_add(luak->subscribelist, topic, partition);
 
-	rd_kafka_resp_err_t err = rd_kafka_committed(luak->rd, list, timeout);
+	rd_kafka_resp_err_t err = rd_kafka_committed(luak->rd, luak->subscribelist, timeout);
 
 	if (err) {
 
 		lua_pushboolean(L, false);
 		lua_pushstring(L, rd_kafka_err2str(err));
-		rd_kafka_topic_partition_list_destroy(list);
 		return 2;
 	}
 	else {
 		lua_pushboolean(L, true);
 	}
 
-	err = rd_kafka_subscribe(luak->rd, list);
+	err = rd_kafka_subscribe(luak->rd, luak->subscribelist);
 
 	if (err) {
 
@@ -476,10 +475,8 @@ int SubscribeToTopic(lua_State* L) {
 		return 2;
 	}
 	else {
-		lua_pushkafkaptopicpartition(L, (const rd_kafka_topic_partition_t*)&list->elems[0]);
+		lua_pushkafkaptopicpartition(L, (const rd_kafka_topic_partition_t*)pos);
 	}
-
-	rd_kafka_topic_partition_list_destroy(list);
 
 	return 1;
 }
@@ -535,6 +532,11 @@ int kafka_gc(lua_State* L) {
 	if (luak->rd) {
 		rd_kafka_destroy(luak->rd);
 		luak->rd = NULL;
+	}
+
+	if (luak->subscribelist) {
+		rd_kafka_topic_partition_list_destroy(luak->subscribelist);
+		luak->subscribelist = NULL;
 	}
 
 	if (--CurrentlyOpenKafkas <= 0) {

@@ -8,6 +8,8 @@ function TablePrint(tbl, depth)
 
 	depth = depth or 0;
 
+	print(type(depth));
+
 	local padding="";
 
 	for n=1, depth do 
@@ -62,19 +64,17 @@ print("\n\n");
 
 --TablePrint(Kafka);
 
-local c = assert(Kafka.NewConsumer("test"));
+local c = assert(Kafka.NewConsumer());
 c:Logs("E:/kafka.log");
 c:AddBroker("10.9.23.252");
 print(1,c);
 local meta, err = c:GetGroups();
-print(2,c, meta, err);
-if meta then 
-	print(type(meta));
-	TablePrint(meta);
-else 
-	print(err);
-end
 
+while not meta  do 
+	print(err);
+	meta, err = c:GetGroups();
+end
+TablePrint(meta);
 --c:CreateTopic("test");
 local result = c:Subscribe("test");
 print(c);
@@ -95,8 +95,12 @@ local msg;
 while true do 
 	msg = c:Poll();
 	while msg do 
-		TablePrint(msg);
+		print("["..msg.Topic.."]: "..msg.Payload);
 		msg = c:Poll();
+	end
+
+	if HasKeyDown() and GetKey() == 27 then 
+		return;
 	end
 
 	Sleep(100);
