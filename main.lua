@@ -1,5 +1,5 @@
 local _exit=Exit;Exit=function(ret) GetKey(); return ret; end
-
+JSON = assert(loadfile "JSON.lua")();
 function TablePrint(tbl, depth)
 
 	depth = depth or 0;
@@ -57,3 +57,14 @@ end
 print("\n\n");
 
 TablePrint(Kafka);
+
+local c = assert(Kafka.NewConsumer());
+assert(c:AddBroker("192.168.2.168"));
+local g = assert(c:GetGroups());
+print(c:Logs());
+TablePrint(g);
+g = assert(c:GetMetadata());
+print(c:Logs());
+TablePrint(g);
+
+print(JSON:encode_pretty(g));

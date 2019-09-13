@@ -3,6 +3,11 @@
 
 static const struct luaL_Reg kafkafunctions[] = {
 
+	{ "NewConsumer",  CreateConsumer },
+	{ "AddBroker",  AddBroker },
+	{ "GetGroups",  DescribeGroups },
+	{ "GetMetadata",  GetMetadata },
+	{ "Logs",  GetLastLogs },
 	{ NULL, NULL }
 };
 
