@@ -86,6 +86,8 @@
     <ClCompile Include="image.cpp" />
     <ClCompile Include="LinkedList.cpp" />
     <ClCompile Include="LuaImageMain.cpp" />
+    <ClCompile Include="luakafka.cpp" />
+    <ClCompile Include="luakafkamain.cpp" />
     <ClCompile Include="LuaLinkedList.cpp" />
     <ClCompile Include="LuaLinkedListMain.cpp" />
     <ClCompile Include="LuaMySQLResult.cpp" />
@@ -183,6 +185,8 @@
     <ClInclude Include="image.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="LuaImageMain.h" />
+    <ClInclude Include="luakafka.h" />
+    <ClInclude Include="luakafkamain.h" />
     <ClInclude Include="LuaLinkedList.h" />
     <ClInclude Include="LuaLinkedListMain.h" />
     <ClInclude Include="LuaMySQLResult.h" />
@@ -276,7 +280,17 @@
   <ItemGroup>
     <Image Include="Lua\jiiiiiiiiitsu.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\librdkafka.redist.1.1.0\build\native\librdkafka.redist.targets" Condition="Exists('packages\librdkafka.redist.1.1.0\build\native\librdkafka.redist.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\librdkafka.redist.1.1.0\build\native\librdkafka.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\librdkafka.redist.1.1.0\build\native\librdkafka.redist.targets'))" />
+  </Target>
 </Project>

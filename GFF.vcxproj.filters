@@ -211,6 +211,15 @@
     <Filter Include="LuaLinkedList\Source Files">
       <UniqueIdentifier>{8ade1e33-4630-47bd-bc9b-130df025156b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaKafka">
+      <UniqueIdentifier>{e4f30f39-2b06-4efd-b027-6e6db5fd5b77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaKafka\Header Files">
+      <UniqueIdentifier>{46790a7b-a8c1-4210-8051-67fa93878bd9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaKafka\Source Files">
+      <UniqueIdentifier>{5c92bced-32c7-43b7-82fb-7696a67caa66}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -498,6 +507,12 @@
     <ClCompile Include="LuaLinkedListMain.cpp">
       <Filter>LuaLinkedList</Filter>
     </ClCompile>
+    <ClCompile Include="luakafka.cpp">
+      <Filter>LuaKafka\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luakafkamain.cpp">
+      <Filter>LuaKafka</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -773,6 +788,12 @@
     <ClInclude Include="LuaLinkedListMain.h">
       <Filter>LuaLinkedList</Filter>
     </ClInclude>
+    <ClInclude Include="luakafka.h">
+      <Filter>LuaKafka\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luakafkamain.h">
+      <Filter>LuaKafka</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="scrap.txt" />
@@ -788,5 +809,8 @@
     <Image Include="Lua\jiiiiiiiiitsu.ico">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
