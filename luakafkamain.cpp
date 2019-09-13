@@ -8,8 +8,11 @@ static const struct luaL_Reg kafkafunctions[] = {
 	{ "GetGroups",  DescribeGroups },
 	{ "GetMetadata",  GetMetadata },
 	{ "Logs",  GetLastLogs },
+	{ "Poll",  PollMessage },
+	{ "Subscribe",  SubscribeToTopic },
+	{ "CreateTopic",  CreateTopic },
 	{ NULL, NULL }
-};
+}; 
 
 static const luaL_Reg kafkameta[] = {
 	{ "__gc",  kafka_gc },

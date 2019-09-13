@@ -6,10 +6,8 @@ static const char* LUAKAFKA = "KAFKA";
 
 typedef struct LuaKafka {
 
-	rd_kafka_conf_t* conf;
-	rd_kafka_topic_conf_t* topic_conf;
+	rd_kafka_type_t type;
 	rd_kafka_t* rd;
-
 } LuaKafka;
 
 
@@ -21,6 +19,9 @@ int AddBroker(lua_State* L);
 int DescribeGroups(lua_State* L);
 int GetLastLogs(lua_State* L);
 int GetMetadata(lua_State* L);
+int PollMessage(lua_State* L);
+int SubscribeToTopic(lua_State* L);
+int CreateTopic(lua_State* L);
 
 int kafka_gc(lua_State* L);
 int kafka_tostring(lua_State* L);

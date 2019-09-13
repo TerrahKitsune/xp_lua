@@ -199,9 +199,6 @@
     <Filter Include="LuaODBC\Source Files">
       <UniqueIdentifier>{673b3119-e90f-4979-93e7-05a71f860e3b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="NewFilter1">
-      <UniqueIdentifier>{7a55fa59-ca48-4bc6-840d-99e2bd3f1ac7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="LuaWindowsServices">
       <UniqueIdentifier>{0aad42e8-781b-4f6d-a705-da0973254dd4}</UniqueIdentifier>
     </Filter>
@@ -210,6 +207,33 @@
     </Filter>
     <Filter Include="LuaWindowsServices\Source Files">
       <UniqueIdentifier>{0be47098-d5dc-4997-a20d-12f302610e02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaLinkedList">
+      <UniqueIdentifier>{1d8d66a1-c5c2-47fe-804c-f2cf769d7594}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaLinkedList\Header Files">
+      <UniqueIdentifier>{3a2e82b2-cfd9-4af3-a52c-c30dde1a3ce9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaLinkedList\Source Files">
+      <UniqueIdentifier>{f3a3814e-0583-41e2-a668-8a5fd069da1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaSocket">
+      <UniqueIdentifier>{43a2f330-008c-4952-91a8-04654f26ac5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaSocket\Header Files">
+      <UniqueIdentifier>{7f35ace3-fc0b-40ac-92f7-bdd5a236412f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaSocket\Source Files">
+      <UniqueIdentifier>{ce47cc33-a80a-43b4-9980-85ebbc4b3fa9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaKafka">
+      <UniqueIdentifier>{5f9445c5-2f22-4508-98ab-259f8be0894c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaKafka\Header Files">
+      <UniqueIdentifier>{e98933c9-685e-488d-8ade-65f9d8b729db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaKafka\Source Files">
+      <UniqueIdentifier>{dfecfb33-e7ad-43d5-bc3a-ed74d9301809}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -537,6 +561,27 @@
     <ClCompile Include="WinServicesMain.cpp">
       <Filter>LuaWindowsServices</Filter>
     </ClCompile>
+    <ClCompile Include="LinkedList.cpp">
+      <Filter>LuaLinkedList\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaLinkedList.cpp">
+      <Filter>LuaLinkedList\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaLinkedListMain.cpp">
+      <Filter>LuaLinkedList</Filter>
+    </ClCompile>
+    <ClCompile Include="luasocket.cpp">
+      <Filter>LuaSocket\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luasocketmain.cpp">
+      <Filter>LuaSocket</Filter>
+    </ClCompile>
+    <ClCompile Include="luakafka.cpp">
+      <Filter>LuaKafka\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luakafkamain.cpp">
+      <Filter>LuaKafka</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -857,10 +902,32 @@
     <ClInclude Include="WinServicesMain.h">
       <Filter>LuaWindowsServices</Filter>
     </ClInclude>
+    <ClInclude Include="LinkedList.h">
+      <Filter>LuaLinkedList\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaLinkedList.h">
+      <Filter>LuaLinkedList\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaLinkedListMain.h">
+      <Filter>LuaLinkedList</Filter>
+    </ClInclude>
+    <ClInclude Include="luasocket.h">
+      <Filter>LuaSocket\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luasocketmain.h">
+      <Filter>LuaSocket</Filter>
+    </ClInclude>
+    <ClInclude Include="luakafka.h">
+      <Filter>LuaKafka\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luakafkamain.h">
+      <Filter>LuaKafka</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Lua\Makefile">
       <Filter>Lua</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

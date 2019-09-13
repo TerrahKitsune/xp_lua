@@ -25,6 +25,9 @@
 #include "StreamMain.h"
 #include "ODBCMain.h"
 #include "WinServicesMain.h"
+#include "luasocketmain.h"
+#include "lualinkedlistmain.h"
+#include "luakafkamain.h"
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 static int print(lua_State *L){
@@ -113,6 +116,12 @@ LuaEngine::LuaEngine()
 	lua_setglobal(L, "ODBC");
 	luaopen_winservice(L);
 	lua_setglobal(L, "Services");
+	luaopen_socket(L);
+	lua_setglobal(L, "Socket");
+	luaopen_linkedlist(L);
+	lua_setglobal(L, "LinkedList");
+	luaopen_kafka(L);
+	lua_setglobal(L, "Kafka");
 
 	luaopen_misc(L);
 

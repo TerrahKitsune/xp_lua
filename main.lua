@@ -2,6 +2,10 @@ local _exit=Exit;Exit=function(ret) GetKey(); return ret; end
 JSON = assert(loadfile "JSON.lua")();
 function TablePrint(tbl, depth)
 
+	if(not tbl and depth) then
+		assert(tbl, depth);
+	end
+
 	depth = depth or 0;
 
 	local padding="";
@@ -56,15 +60,44 @@ for k,v in pairs(c) do
 end
 print("\n\n");
 
-TablePrint(Kafka);
+--TablePrint(Kafka);
 
-local c = assert(Kafka.NewConsumer());
-assert(c:AddBroker("192.168.2.168"));
-local g = assert(c:GetGroups());
-print(c:Logs());
-TablePrint(g);
-g = assert(c:GetMetadata());
-print(c:Logs());
-TablePrint(g);
+local c = assert(Kafka.NewConsumer("test"));
+c:Logs("E:/kafka.log");
+c:AddBroker("10.9.23.252");
+print(1,c);
+local meta, err = c:GetGroups();
+print(2,c, meta, err);
+if meta then 
+	print(type(meta));
+	TablePrint(meta);
+else 
+	print(err);
+end
 
-print(JSON:encode_pretty(g));
+--c:CreateTopic("test");
+local result = c:Subscribe("test");
+print(c);
+print(c:Logs());
+
+meta, err = c:GetMetadata(100);
+print(c);
+while not meta do 
+	print(err);
+	meta, err = c:GetMetadata(100);
+end
+
+print(type(meta));
+print(JSON:encode_pretty(meta));
+TablePrint(result);
+TablePrint(c:Subscribe("TutorialTopic"));
+local msg;
+while true do 
+	msg = c:Poll();
+	while msg do 
+		TablePrint(msg);
+		msg = c:Poll();
+	end
+
+	Sleep(100);
+end 
