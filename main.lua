@@ -55,6 +55,13 @@ function PrintPixel(px)
 	print(px.b .. "} ");
 end
 
+function DumpToFile(file, tbl)
+	local f = io.open(file, "w");
+	f:write(JSON:encode_pretty(tbl));
+	f:flush();
+	f:close();
+end
+
 print("bla"..c.LF.."bla");
 
 for k,v in pairs(c) do 
@@ -64,38 +71,41 @@ print("\n\n");
 
 --TablePrint(Kafka);
 
+SetTitle("librdkafka");
+
 local c = assert(Kafka.NewConsumer());
 c:Logs("E:/kafka.log");
 c:AddBroker("10.9.23.252");
-print(1,c);
-local meta, err = c:GetGroups();
 
-while not meta  do 
-	print(err);
-	meta, err = c:GetGroups();
-end
-TablePrint(meta);
---c:CreateTopic("test");
-local result = c:Subscribe("test");
-print(c);
-print(c:Logs());
-
-meta, err = c:GetMetadata(100);
-print(c);
+local meta = c:GetMetadata(1000);
 while not meta do 
-	print(err);
-	meta, err = c:GetMetadata(100);
+	meta = c:GetMetadata(1000);
 end
 
-print(type(meta));
-print(JSON:encode_pretty(meta));
-TablePrint(result);
-TablePrint(c:Subscribe("TutorialTopic"));
-local msg;
+DumpToFile("E:/meta.json", meta);
+DumpToFile("E:/group.json", c:GetGroups());
+local ok, err;
+
+for n=1, #meta.Topics do 
+	
+	if(not meta.Topics[n].Name:match("^__"))then
+
+		io.write("Subscribing to "..tostring(meta.Topics[n].Name).." ");
+
+		ok, err = c:Subscribe(meta.Topics[n].Name);
+
+		if ok then 
+			print("OK");
+		else 
+			print("FAIL: "..err);
+		end
+	end
+end 
+
 while true do 
 	msg = c:Poll();
 	while msg do 
-		print("["..msg.Topic.."]: "..msg.Payload);
+		print("["..msg.Topic.."] ["..msg.Error.."] ["..msg.Partition..":"..msg.Offset.."]: "..msg.Payload);
 		msg = c:Poll();
 	end
 
@@ -103,5 +113,5 @@ while true do
 		return;
 	end
 
-	Sleep(100);
+	Sleep(1);
 end 

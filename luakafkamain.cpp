@@ -10,7 +10,6 @@ static const struct luaL_Reg kafkafunctions[] = {
 	{ "Logs",  GetLastLogs },
 	{ "Poll",  PollMessage },
 	{ "Subscribe",  SubscribeToTopic },
-	{ "CreateTopic",  CreateTopic },
 	{ NULL, NULL }
 }; 
 

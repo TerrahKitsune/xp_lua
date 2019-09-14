@@ -62,6 +62,85 @@ Misc global functions:
 	-Array containing commandline parameters passed though to gff.exe
 	ARGS[]
 
+Kafka:
+
+	-Creates a consumer object
+	-If not groupname is given it defaults to "LUA"
+	Kafka Kafka.NewConsumer(opt groupname)
+
+	-Adds a broker to a kafka object
+	-Adress should be a full adress e.g "localhost:9092"
+	-returns true/false success/failure
+	bool Kafka:AddBroker(adress)
+
+	-Retrives all groups
+	-If no group is given (or its nil) it will retrive all
+	-Timeout 10000 (in ms)
+	-Return nil and an error message on failure
+	-Group object:
+	-Broker: {Host, Id, Port}
+	-Error: Error message (Success=ok)
+	-ErrorCode: Error number (0=ok)
+	-Group: Name of the group
+	-Protocol: Protocol used
+	-ProtocolType: protocoltype
+	-State: State the group is in
+	-Members: [{Host, Id, Assignment, MemberId, Metadata}...]
+	Groups Kafka:GetGroups(opt group, opt timeout)
+
+	-Retrives all metadata
+	-Timeout is default 10000 (in ms)
+	-Returns nil and an error message on failure
+	-Metadata object:
+	-BrokerId: Id of the broker the metadata came from
+	-BrokerName: Name of the broker the metadata came from
+	-Brokers: [{Host, Id, Port}...]
+	-Topics: array of topic objects
+	-Topic object:
+	-Error
+	-ErrorCode
+	-name
+	-Partitions: array of partition objects
+	-Partition object:
+	-Error
+	-ErrorCode
+	-Id
+	-Leader
+	-InSyncReplicas: array of integer ids
+	-Replicas: array of intiger ids
+	Metadata Kafka:GetMetadata(opt timeout)
+
+	-Retrives the logs from the internal buffer and empties the internal buffer
+	-If a filename is given it'll open that file and start dumping the kafka logs to it
+	-If the filename is an empty string the file will be closed
+	string Kafka.Logs(opt filename)
+
+	-Polls for messages
+	-Timeout is 1000 (in ms) default
+	-Returns nil if there is no new messages
+	-Message object:
+	-Error: Error message (Success=normal message)
+	-ErrorCode: Error code (0=normal message)
+	-Key: Key of the message
+	-Offset: Offset of the message
+	-Partition: The partition the message came from
+	-Payload: The actual data
+	-Topic: Name of the topic the message came from
+	message Kafka:Poll(opt timeout)
+
+	-Subscribes to a topic (Depending on the settings this might create the topic if it doesnt exist)
+	-partiton default 0
+	-timeout default 10000 (in ms)
+	-Returns a topic object on success and nil and a error message on failure
+	-Subscribe topic object:
+	-Error
+	-ErrorCode
+	-Metadata
+	-Offset
+	-Partition
+	-Topic
+	topicobject, errormsg Kafka:Subscribe(topicname, opt partition, opt timeout)
+
 ODBC:
 
 	-Return an array of all available drivers

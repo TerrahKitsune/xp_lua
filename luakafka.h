@@ -22,7 +22,6 @@ int GetLastLogs(lua_State* L);
 int GetMetadata(lua_State* L);
 int PollMessage(lua_State* L);
 int SubscribeToTopic(lua_State* L);
-int CreateTopic(lua_State* L);
 
 int kafka_gc(lua_State* L);
 int kafka_tostring(lua_State* L);

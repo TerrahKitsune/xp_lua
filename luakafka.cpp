@@ -311,7 +311,7 @@ int DescribeGroups(lua_State* L) {
 
 		const struct rd_kafka_group_info* gi = &grplist->groups[i];
 
-		lua_createtable(L, 0, 7);
+		lua_createtable(L, 0, 8);
 
 		lua_pushstring(L, "Broker");
 		lua_pushkafkabroker(L, &gi->broker);
@@ -319,6 +319,10 @@ int DescribeGroups(lua_State* L) {
 
 		lua_pushstring(L, "Error");
 		lua_pushstring(L, rd_kafka_err2str(gi->err));
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "ErrorCode");
+		lua_pushinteger(L, gi->err);
 		lua_settable(L, -3);
 
 		lua_pushstring(L, "Group");
@@ -456,14 +460,13 @@ int SubscribeToTopic(lua_State* L) {
 
 	rd_kafka_resp_err_t err = rd_kafka_committed(luak->rd, luak->subscribelist, timeout);
 
+	lua_pop(L, lua_gettop(L));
+
 	if (err) {
 
-		lua_pushboolean(L, false);
+		lua_pushnil(L);
 		lua_pushstring(L, rd_kafka_err2str(err));
 		return 2;
-	}
-	else {
-		lua_pushboolean(L, true);
 	}
 
 	err = rd_kafka_subscribe(luak->rd, luak->subscribelist);
@@ -477,30 +480,6 @@ int SubscribeToTopic(lua_State* L) {
 	else {
 		lua_pushkafkaptopicpartition(L, (const rd_kafka_topic_partition_t*)pos);
 	}
-
-	return 1;
-}
-
-int CreateTopic(lua_State* L) {
-
-	LuaKafka* luak = lua_tokafka(L, 1);
-	const char * topicname = luaL_checkstring(L, 2);
-
-	rd_kafka_NewTopic_t * newtopic = rd_kafka_NewTopic_new(topicname, 1, 1, errorbuffer, kafka_error_buffer_len);
-
-	if (!newtopic) {
-		lua_pushboolean(L, false);
-		lua_pushstring(L, errorbuffer);
-		return 2;
-	}
-
-	rd_kafka_queue_t * queue = rd_kafka_queue_new(luak->rd);
-
-	rd_kafka_CreateTopics(luak->rd, &newtopic, 1, NULL, queue);
-
-	rd_kafka_queue_destroy(queue);
-
-	rd_kafka_NewTopic_destroy(newtopic);
 
 	return 1;
 }
