@@ -15,6 +15,8 @@ typedef struct LuaKafka {
 LuaKafka* lua_pushkafka(lua_State* L);
 LuaKafka* lua_tokafka(lua_State* L, int index);
 
+int CommitMessage(lua_State* L);
+int GetKafkaId(lua_State* L);
 int CreateConsumer(lua_State* L);
 int AddBroker(lua_State* L);
 int DescribeGroups(lua_State* L);

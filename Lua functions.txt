@@ -65,8 +65,14 @@ Misc global functions:
 Kafka:
 
 	-Creates a consumer object
-	-If not groupname is given it defaults to "LUA"
-	Kafka Kafka.NewConsumer(opt groupname)
+	-conf should be a table with keys and values as strings
+	-example: 
+	-local conf = {};
+	-conf["offset.store.method"]="broker";
+	-conf["enable.partition.eof"]="true";
+	-conf["group.id"]="LUA";
+	-default is conf is just with group.id = "LUAC"
+	Kafka Kafka.NewConsumer(opt conf)
 
 	-Adds a broker to a kafka object
 	-Adress should be a full adress e.g "localhost:9092"
@@ -118,15 +124,14 @@ Kafka:
 	-Polls for messages
 	-Timeout is 1000 (in ms) default
 	-Returns nil if there is no new messages
-	-Message object:
-	-Error: Error message (Success=normal message)
-	-ErrorCode: Error code (0=normal message)
-	-Key: Key of the message
-	-Offset: Offset of the message
-	-Partition: The partition the message came from
-	-Payload: The actual data
-	-Topic: Name of the topic the message came from
-	message Kafka:Poll(opt timeout)
+	-kafka message object is described below
+	kafkamessage Kafka:Poll(opt timeout)
+
+	-Commits a message to the broker
+	-this is not nessesary unless the conf has enable.auto.commit = false
+	-messages should only be commited with the same kafka object they came from
+	-returns true or false and an error
+	bool, err Kafka:Commit(Kafkamessage, opt async)
 
 	-Subscribes to a topic (Depending on the settings this might create the topic if it doesnt exist)
 	-partiton default 0
@@ -140,6 +145,24 @@ Kafka:
 	-Partition
 	-Topic
 	topicobject, errormsg Kafka:Subscribe(topicname, opt partition, opt timeout)
+
+	-Get a unique internal id for this object (used for association)
+	int Kafka:GetId()
+
+Kafkamessage:
+
+	-Retrives the data from the message:
+	-Error: Error message (Success=normal message)
+	-ErrorCode: Error code (0=normal message)
+	-Key: Key of the message
+	-Offset: Offset of the message
+	-Partition: The partition the message came from
+	-Payload: The actual data
+	-Topic: Name of the topic the message came from
+	table Kafkamessage:GetData()
+
+	-Get a unique internal id for the kafka object that spawned this message object (used for association)
+	int Kafka:GetOwnerId()
 
 ODBC:
 

@@ -73,7 +73,14 @@ print("\n\n");
 
 SetTitle("librdkafka");
 
-local c = assert(Kafka.NewConsumer());
+local conf = {};
+conf["offset.store.method"]="broker";
+conf["enable.partition.eof"]="true";
+conf["enable.auto.commit"]="false";
+conf["auto.offset.reset"]="earliest";
+conf["group.id"]="LUA";
+
+local c = assert(Kafka.NewConsumer(conf));
 c:Logs("E:/kafka.log");
 c:AddBroker("10.9.23.252");
 
@@ -102,10 +109,23 @@ for n=1, #meta.Topics do
 	end
 end 
 
+print("Owner: "..c:GetId());
+local msg;
+local data;
 while true do 
 	msg = c:Poll();
 	while msg do 
-		print("["..msg.Topic.."] ["..msg.Error.."] ["..msg.Partition..":"..msg.Offset.."]: "..msg.Payload);
+		data = msg:GetData();
+		print("["..data.Topic.."] ["..data.Error.."] ["..data.Partition..":"..data.Offset.."] ["..msg:GetOwnerId().."]: "..data.Payload);
+		if(data.ErrorCode == 0)then 
+			ok, err = c:Commit(msg);
+			io.write("COMMIT: "..tostring(ok));
+			if err then 
+				print(" "..err);
+			else 
+				print(" ");
+			end 
+		end
 		msg = c:Poll();
 	end
 
