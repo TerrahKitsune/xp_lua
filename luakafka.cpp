@@ -6,6 +6,7 @@
 #include <windows.h> 
 #include <time.h> 
 #include "luakafkamessage.h"
+#include "luakafkatopic.h"
 
 #define kafka_error_buffer_len 1024
 #define kafka_last_error_buffer_len 10240
@@ -17,7 +18,7 @@ FILE* KafkaLogFile = NULL;
 static void logger(const rd_kafka_t* rk, int level, const char* fac, const char* buf) {
 
 	time_t rawtime;
-	struct tm * timeinfo;
+	struct tm* timeinfo;
 	time(&rawtime);
 	timeinfo = localtime(&rawtime);
 	char timestamp[100];
@@ -35,7 +36,7 @@ static void logger(const rd_kafka_t* rk, int level, const char* fac, const char*
 
 int GetLastLogs(lua_State* L) {
 
-	const char * logfile = luaL_optstring(L, lua_type(L, 1) == LUA_TSTRING ? 1 : 2, NULL);
+	const char* logfile = luaL_optstring(L, lua_type(L, 1) == LUA_TSTRING ? 1 : 2, NULL);
 
 	if (logfile) {
 
@@ -216,10 +217,23 @@ int PollMessage(lua_State* L) {
 		return 0;
 	}
 
-	int timeout = luaL_optinteger(L, 2, 1000);
-	rd_kafka_message_t *rkmessage;
+	LuaKafkaTopic* topic = lua_tokafkatopic(L, 2);
 
-	rkmessage = rd_kafka_consumer_poll(luak->rd, timeout);
+	if (!topic->topic) {
+		luaL_error(L, "Topic object not open");
+		return 0;
+	}
+	else if (topic->owner != luak->rd) {
+		luaL_error(L, "Invalid kafka owner for topic");
+		return 0;
+	}
+
+	int timeout = luaL_optinteger(L, 3, 1000);
+	rd_kafka_message_t* rkmessage;
+
+	rd_kafka_poll(luak->rd, 0);
+
+	rkmessage = rd_kafka_consume(topic->topic, topic->partition, timeout);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -229,7 +243,6 @@ int PollMessage(lua_State* L) {
 	else {
 		lua_pushnil(L);
 	}
-
 
 	return 1;
 }
@@ -379,7 +392,7 @@ int DescribeGroups(lua_State* L) {
 
 		for (size_t n = 0; n < gi->member_cnt; n++)
 		{
-			rd_kafka_group_member_info*  memberinfo = &gi->members[n];
+			rd_kafka_group_member_info* memberinfo = &gi->members[n];
 
 			lua_createtable(L, 0, 5);
 
@@ -415,13 +428,13 @@ int DescribeGroups(lua_State* L) {
 	return 1;
 }
 
-rd_kafka_conf_t* lua_tokafkaconf(lua_State* L, int idx, const char * defaultgroup) {
+rd_kafka_conf_t* lua_tokafkaconf(lua_State* L, int idx, const char* defaultgroup) {
 
 	rd_kafka_conf_t* conf = rd_kafka_conf_new();
 	bool didGroup = false;
 
-	const char * confname;
-	const char * confvalue;
+	const char* confname;
+	const char* confvalue;
 
 	if (lua_type(L, idx) == LUA_TTABLE) {
 
@@ -431,7 +444,7 @@ rd_kafka_conf_t* lua_tokafkaconf(lua_State* L, int idx, const char * defaultgrou
 			confname = luaL_checkstring(L, -2);
 			confvalue = luaL_checkstring(L, -1);
 
-			if (!didGroup && strcmp(confname, "group.id")==0) {
+			if (!didGroup && strcmp(confname, "group.id") == 0) {
 				didGroup = true;
 			}
 
@@ -478,33 +491,6 @@ int CreateConsumer(lua_State* L) {
 
 	lua_pop(L, lua_gettop(L));
 
-	//if (rd_kafka_conf_set(conf, "group.id", group, errorbuffer, kafka_error_buffer_len) != RD_KAFKA_CONF_OK) {
-
-	//	rd_kafka_conf_destroy(conf);
-	//	lua_pushnil(L);
-	//	lua_pushstring(L, errorbuffer);
-
-	//	return 2;
-	//}
-
-	//if (rd_kafka_conf_set(conf, "offset.store.method", "broker", errorbuffer, kafka_error_buffer_len) != RD_KAFKA_CONF_OK) {
-
-	//	rd_kafka_conf_destroy(conf);
-	//	lua_pushnil(L);
-	//	lua_pushstring(L, errorbuffer);
-
-	//	return 2;
-	//}
-
-	//if (rd_kafka_conf_set(conf, "enable.partition.eof", "true", errorbuffer, kafka_error_buffer_len) != RD_KAFKA_CONF_OK) {
-
-	//	rd_kafka_conf_destroy(conf);
-	//	lua_pushnil(L);
-	//	lua_pushstring(L, errorbuffer);
-
-	//	return 2;
-	//}
-
 	rd_kafka_conf_set_log_cb(conf, logger);
 
 	rd_kafka_t* rd = rd_kafka_new(RD_KAFKA_CONSUMER, conf, errorbuffer, kafka_error_buffer_len);
@@ -521,20 +507,38 @@ int CreateConsumer(lua_State* L) {
 	LuaKafka* luak = lua_pushkafka(L);
 	luak->rd = rd;
 	luak->type = RD_KAFKA_CONSUMER;
-	luak->subscribelist = rd_kafka_topic_partition_list_new(0);
 
-	rd_kafka_resp_err_t err = rd_kafka_poll_set_consumer(luak->rd);
+	return 1;
+}
+
+int QueryHighLow(lua_State* L) {
+
+	LuaKafka* luak = lua_tokafka(L, 1);
+
+	if (!luak->rd) {
+		luaL_error(L, "Kafka object not open");
+		return 0;
+	}
+
+	const char* topic = luaL_checkstring(L, 2);
+	int partition = luaL_checkinteger(L, 3);
+	int timeout = luaL_optinteger(L, 4, 10000);
+	int64_t low;
+	int64_t high;
+
+	rd_kafka_resp_err_t err = rd_kafka_query_watermark_offsets(luak->rd, topic, partition, &low, &high, timeout);
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, !err);
 
 	if (err) {
-
-		lua_pushnil(L);
 		lua_pushstring(L, rd_kafka_err2str(err));
-
 		return 2;
 	}
 
+	lua_pushinteger(L, low);
+	lua_pushinteger(L, high);
 
-	return 1;
+	return 3;
 }
 
 int SubscribeToTopic(lua_State* L) {
@@ -546,34 +550,28 @@ int SubscribeToTopic(lua_State* L) {
 		return 0;
 	}
 
-	const char * topic = luaL_checkstring(L, 2);
-	int partition = luaL_optinteger(L, 3, 0);
-	int timeout = luaL_optinteger(L, 4, 10000);
+	const char* topic = luaL_checkstring(L, 2);
+	int partition = luaL_checkinteger(L, 3);
+	int64_t offset = luaL_checkinteger(L, 4);
+	rd_kafka_topic_conf_t* conf = NULL; // rd_kafka_topic_conf_new();
 
-	rd_kafka_topic_partition_t* pos = rd_kafka_topic_partition_list_add(luak->subscribelist, topic, partition);
-
-	rd_kafka_resp_err_t err = rd_kafka_committed(luak->rd, luak->subscribelist, timeout);
+	rd_kafka_topic_t* rkt = rd_kafka_topic_new(luak->rd, topic, conf);
 
 	lua_pop(L, lua_gettop(L));
 
-	if (err) {
+	if (rd_kafka_consume_start(rkt, partition, offset) == -1) {
 
+		rd_kafka_resp_err_t err = rd_kafka_last_error();
 		lua_pushnil(L);
 		lua_pushstring(L, rd_kafka_err2str(err));
+		rd_kafka_topic_destroy(rkt);
 		return 2;
 	}
 
-	err = rd_kafka_subscribe(luak->rd, luak->subscribelist);
-
-	if (err) {
-
-		lua_pushnil(L);
-		lua_pushstring(L, rd_kafka_err2str(err));
-		return 2;
-	}
-	else {
-		lua_pushkafkaptopicpartition(L, (const rd_kafka_topic_partition_t*)pos);
-	}
+	LuaKafkaTopic* ltopic = lua_pushkafkatopic(L);
+	ltopic->owner = luak->rd;
+	ltopic->partition = partition;
+	ltopic->topic = rkt;
 
 	return 1;
 }
@@ -618,11 +616,6 @@ int kafka_gc(lua_State* L) {
 				KafkaLogFile = NULL;
 			}
 		}
-	}
-
-	if (luak->subscribelist) {
-		rd_kafka_topic_partition_list_destroy(luak->subscribelist);
-		luak->subscribelist = NULL;
 	}
 
 	return 0;

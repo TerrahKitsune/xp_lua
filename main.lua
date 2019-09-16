@@ -76,22 +76,26 @@ SetTitle("librdkafka");
 local conf = {};
 conf["offset.store.method"]="broker";
 conf["enable.partition.eof"]="true";
-conf["enable.auto.commit"]="false";
+conf["enable.auto.commit"]="true";
 conf["auto.offset.reset"]="earliest";
 conf["group.id"]="LUA";
 
 local c = assert(Kafka.NewConsumer(conf));
 c:Logs("E:/kafka.log");
-c:AddBroker("10.9.23.252");
+c:AddBroker("192.168.2.170");
+local ok, err;
 
-local meta = c:GetMetadata(1000);
+local meta, err = c:GetMetadata(1000);
 while not meta do 
-	meta = c:GetMetadata(1000);
+	print(err);
+	meta,err = c:GetMetadata(1000);
 end
-
+print("Connected");
 DumpToFile("E:/meta.json", meta);
 DumpToFile("E:/group.json", c:GetGroups());
-local ok, err;
+local hi,lo;
+
+local topics = {};
 
 for n=1, #meta.Topics do 
 	
@@ -99,12 +103,22 @@ for n=1, #meta.Topics do
 
 		io.write("Subscribing to "..tostring(meta.Topics[n].Name).." ");
 
-		ok, err = c:Subscribe(meta.Topics[n].Name);
+		ok, lo, hi = c:GetOffsets(meta.Topics[n].Name, 0);
 
-		if ok then 
-			print("OK");
+		if ok then
+
+			io.write("["..lo.." "..hi.."] ");
+
+			ok, err = c:Subscribe(meta.Topics[n].Name, 0, lo);
+
+			if ok then 
+				print("OK");
+				table.insert(topics, ok);
+			else 
+				print("FAIL: "..err);
+			end
 		else 
-			print("FAIL: "..err);
+			print("Unable to retrive offsets for "..meta.Topics[n].Name);
 		end
 	end
 end 
@@ -113,20 +127,22 @@ print("Owner: "..c:GetId());
 local msg;
 local data;
 while true do 
-	msg = c:Poll();
-	while msg do 
-		data = msg:GetData();
-		print("["..data.Topic.."] ["..data.Error.."] ["..data.Partition..":"..data.Offset.."] ["..msg:GetOwnerId().."]: "..data.Payload);
-		if(data.ErrorCode == 0)then 
-			ok, err = c:Commit(msg);
-			io.write("COMMIT: "..tostring(ok));
-			if err then 
-				print(" "..err);
-			else 
-				print(" ");
-			end 
+	
+	for n=1, #topics do
+		msg = c:Poll(topics[n]);
+		if msg then 
+			data = msg:GetData();
+			print("["..data.Topic.."] ["..data.Error.."] ["..data.Partition..":"..data.Offset.."] ["..msg:GetOwnerId().."]: "..data.Payload);
+			--[[if(data.ErrorCode == 0)then 
+				ok, err = c:Commit(msg);
+				io.write("COMMIT: "..tostring(ok));
+				if err then 
+					print(" "..err);
+				else 
+					print(" ");
+				end 
+			end]]
 		end
-		msg = c:Poll();
 	end
 
 	if HasKeyDown() and GetKey() == 27 then 

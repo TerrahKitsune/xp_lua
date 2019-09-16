@@ -122,10 +122,11 @@ Kafka:
 	string Kafka.Logs(opt filename)
 
 	-Polls for messages
+	-topicobject is the object retrived from Subscribe
 	-Timeout is 1000 (in ms) default
 	-Returns nil if there is no new messages
 	-kafka message object is described below
-	kafkamessage Kafka:Poll(opt timeout)
+	kafkamessage Kafka:Poll(topicobject, opt timeout)
 
 	-Commits a message to the broker
 	-this is not nessesary unless the conf has enable.auto.commit = false
@@ -133,21 +134,25 @@ Kafka:
 	-returns true or false and an error
 	bool, err Kafka:Commit(Kafkamessage, opt async)
 
+	-Query for the offset for a topic and a partition
+	-returns true and lowest, highest on success and false and an error message on failure
+	bool, low, high Kafka:GetOffsets(topic, partition, opt timeout)
+
 	-Subscribes to a topic (Depending on the settings this might create the topic if it doesnt exist)
-	-partiton default 0
-	-timeout default 10000 (in ms)
-	-Returns a topic object on success and nil and a error message on failure
-	-Subscribe topic object:
-	-Error
-	-ErrorCode
-	-Metadata
-	-Offset
-	-Partition
-	-Topic
-	topicobject, errormsg Kafka:Subscribe(topicname, opt partition, opt timeout)
+	-returns a topic object on success or a nil and a error message on failure
+	-see topic object below
+	kafkatopic, errormsg Kafka:Subscribe(topicname, partition, offset)
 
 	-Get a unique internal id for this object (used for association)
 	int Kafka:GetId()
+
+Kafkatopic:
+	
+	-Get a unique internal id for the kafka object that spawned this message object (used for association)
+	int Kafkatopic:GetOwnerId()
+
+	-Prematurely closes the object and stops the consumer for this topic
+	nil Kafkatopic:Dispose()
 
 Kafkamessage:
 
@@ -162,7 +167,10 @@ Kafkamessage:
 	table Kafkamessage:GetData()
 
 	-Get a unique internal id for the kafka object that spawned this message object (used for association)
-	int Kafka:GetOwnerId()
+	int Kafkamessage:GetOwnerId()
+
+	-Prematurely closes the object and frees any message data
+	nil Kafkamessage:Dispose()
 
 ODBC:
 

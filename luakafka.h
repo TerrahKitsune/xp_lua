@@ -8,13 +8,13 @@ typedef struct LuaKafka {
 
 	rd_kafka_type_t type;
 	rd_kafka_t* rd;
-	rd_kafka_topic_partition_list_t * subscribelist;
 } LuaKafka;
 
 
 LuaKafka* lua_pushkafka(lua_State* L);
 LuaKafka* lua_tokafka(lua_State* L, int index);
 
+int QueryHighLow(lua_State* L);
 int CommitMessage(lua_State* L);
 int GetKafkaId(lua_State* L);
 int CreateConsumer(lua_State* L);
