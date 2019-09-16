@@ -82,7 +82,7 @@ conf["group.id"]="LUA";
 
 local c = assert(Kafka.NewConsumer(conf));
 c:Logs("E:/kafka.log");
-c:AddBroker("192.168.2.170");
+c:AddBroker("10.9.23.252");
 local ok, err;
 
 local meta, err = c:GetMetadata(1000);
@@ -122,12 +122,53 @@ for n=1, #meta.Topics do
 		end
 	end
 end 
+ok = nil;
+for n=1, #topics do 
+	if topics[n]:GetInfo() == "short" then 
+		ok = n;
+		break;
+	end
+end
+
+print("short ->", ok);
+
+if ok then 
+	table.remove(topics, ok):Dispose();
+	--c:DeleteTopic("short");
+end 
+
+--assert(c:CreateTopic("short", 5));
+assert(c:AlterConfig(2, "short", "cleanup.policy", "delete"));
+assert(c:AlterConfig(2, "short", "retention.ms", "1000"));
+assert(c:CreatePartitions("short", 10));
+
+conf = c:GetConfig(2, "short");
+print("CONF:-----");
+for k,v in pairs(conf) do 
+	print(k, v);
+end
+
+conf = {};
+ok, err = c:Subscribe("short", 0, 0, conf);
+assert(ok, err);
+table.insert(topics, ok);
 
 print("Owner: "..c:GetId());
 local msg;
 local data;
 while true do 
 	
+	msg = c:Events();
+
+	while msg do 
+		print("EVENT---");
+		for k,v in pairs(msg) do 
+			print(k, v);
+		end 
+		print("--------");
+		msg = c:Events();
+	end
+
 	for n=1, #topics do
 		msg = c:Poll(topics[n]);
 		if msg then 

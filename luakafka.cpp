@@ -7,10 +7,9 @@
 #include <time.h> 
 #include "luakafkamessage.h"
 #include "luakafkatopic.h"
+#include "kafkahelpers.h"
 
-#define kafka_error_buffer_len 1024
 #define kafka_last_error_buffer_len 10240
-char errorbuffer[kafka_error_buffer_len];
 char lasterror[kafka_last_error_buffer_len] = { 0 };
 int CurrentlyOpenKafkas = 0;
 FILE* KafkaLogFile = NULL;
@@ -56,124 +55,6 @@ int GetLastLogs(lua_State* L) {
 	return 1;
 }
 
-void lua_pushkafkaptopicpartition(lua_State* L, const rd_kafka_topic_partition_t* topic) {
-
-	lua_createtable(L, 0, 6);
-
-	lua_pushstring(L, "Error");
-	lua_pushstring(L, rd_kafka_err2str(topic->err));
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "ErrorCode");
-	lua_pushinteger(L, topic->err);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "Metadata");
-	lua_pushlstring(L, (const char*)topic->metadata, topic->metadata_size);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "Offset");
-	lua_pushinteger(L, topic->offset);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "Partition");
-	lua_pushinteger(L, topic->partition);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "Topic");
-	lua_pushstring(L, topic->topic);
-	lua_settable(L, -3);
-}
-
-void lua_pushkafkamessage(lua_State* L, rd_kafka_message_t* message, rd_kafka_t* owner) {
-
-	LuaKafkaMessage* msg = lua_pushkafkamsg(L);
-	msg->message = message;
-	msg->owner = owner;
-}
-
-void lua_pushkafkabroker(lua_State* L, const rd_kafka_metadata_broker* broker) {
-
-	lua_createtable(L, 0, 3);
-
-	lua_pushstring(L, "Host");
-	lua_pushstring(L, broker->host);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "Id");
-	lua_pushinteger(L, broker->id);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "Port");
-	lua_pushinteger(L, broker->port);
-	lua_settable(L, -3);
-}
-
-void lua_pushkafkapartition(lua_State* L, const rd_kafka_metadata_partition* partition) {
-
-	lua_createtable(L, 0, 6);
-
-	lua_pushstring(L, "Error");
-	lua_pushstring(L, rd_kafka_err2str(partition->err));
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "ErrorCode");
-	lua_pushinteger(L, partition->err);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "Id");
-	lua_pushinteger(L, partition->id);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "Leader");
-	lua_pushinteger(L, partition->leader);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "InSyncReplicas");
-	lua_createtable(L, partition->isr_cnt, 0);
-	for (size_t i = 0; i < partition->isr_cnt; i++)
-	{
-		lua_pushinteger(L, partition->isrs[i]);
-		lua_rawseti(L, -2, i + 1);
-	}
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "Replicas");
-	lua_createtable(L, partition->replica_cnt, 0);
-	for (size_t i = 0; i < partition->replica_cnt; i++)
-	{
-		lua_pushinteger(L, partition->replicas[i]);
-		lua_rawseti(L, -2, i + 1);
-	}
-	lua_settable(L, -3);
-}
-
-void lua_pushkafkatopic(lua_State* L, const rd_kafka_metadata_topic* topic) {
-
-	lua_createtable(L, 0, 5);
-
-	lua_pushstring(L, "Error");
-	lua_pushstring(L, rd_kafka_err2str(topic->err));
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "ErrorCode");
-	lua_pushinteger(L, topic->err);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "Name");
-	lua_pushstring(L, topic->topic);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "Partitions");
-	lua_createtable(L, topic->partition_cnt, 0);
-	for (size_t i = 0; i < topic->partition_cnt; i++)
-	{
-		lua_pushkafkapartition(L, &topic->partitions[i]);
-		lua_rawseti(L, -2, i + 1);
-	}
-	lua_settable(L, -3);
-}
-
 int CommitMessage(lua_State* L) {
 
 	LuaKafka* luak = lua_tokafka(L, 1);
@@ -208,12 +89,54 @@ int CommitMessage(lua_State* L) {
 	return 1;
 }
 
+int PollEvents(lua_State* L) {
+
+	LuaKafka* luak = lua_tokafka(L, 1);
+
+	if (!luak->rd) {
+		luaL_error(L, "Kafka object not open");
+		return 0;
+	}
+
+	rd_kafka_event_t * ev = rd_kafka_queue_poll(luak->evqueue, 0);
+	lua_pop(L, lua_gettop(L));
+	if (ev) {
+
+		lua_createtable(L, 0, 4);
+
+		lua_pushstring(L, "Name");
+		lua_pushstring(L, rd_kafka_event_name(ev));
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "Type");
+		lua_pushinteger(L, rd_kafka_event_type(ev));
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "Error");
+		lua_pushstring(L, rd_kafka_event_error_string(ev));
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "ErrorCode");
+		lua_pushinteger(L, rd_kafka_event_error(ev));
+		lua_settable(L, -3);
+	}
+	else {
+		lua_pushnil(L);
+	}
+
+	return 1;
+}
+
 int PollMessage(lua_State* L) {
 
 	LuaKafka* luak = lua_tokafka(L, 1);
 
 	if (!luak->rd) {
 		luaL_error(L, "Kafka object not open");
+		return 0;
+	}
+	else if (luak->type != RD_KAFKA_CONSUMER) {
+		luaL_error(L, "Only consumers may poll for messages");
 		return 0;
 	}
 
@@ -228,17 +151,17 @@ int PollMessage(lua_State* L) {
 		return 0;
 	}
 
-	int timeout = luaL_optinteger(L, 3, 1000);
+	int timeout = luaL_optinteger(L, 3, 0);
 	rd_kafka_message_t* rkmessage;
-
-	rd_kafka_poll(luak->rd, 0);
 
 	rkmessage = rd_kafka_consume(topic->topic, topic->partition, timeout);
 
 	lua_pop(L, lua_gettop(L));
 
 	if (rkmessage) {
-		lua_pushkafkamessage(L, rkmessage, luak->rd);
+		LuaKafkaMessage* msg = lua_pushkafkamsg(L);
+		msg->message = rkmessage;
+		msg->owner = luak->rd;
 	}
 	else {
 		lua_pushnil(L);
@@ -428,48 +351,6 @@ int DescribeGroups(lua_State* L) {
 	return 1;
 }
 
-rd_kafka_conf_t* lua_tokafkaconf(lua_State* L, int idx, const char* defaultgroup) {
-
-	rd_kafka_conf_t* conf = rd_kafka_conf_new();
-	bool didGroup = false;
-
-	const char* confname;
-	const char* confvalue;
-
-	if (lua_type(L, idx) == LUA_TTABLE) {
-
-		lua_pushnil(L);
-		while (lua_next(L, -2) != 0) {
-
-			confname = luaL_checkstring(L, -2);
-			confvalue = luaL_checkstring(L, -1);
-
-			if (!didGroup && strcmp(confname, "group.id") == 0) {
-				didGroup = true;
-			}
-
-			if (rd_kafka_conf_set(conf, confname, confvalue, errorbuffer, kafka_error_buffer_len) != RD_KAFKA_CONF_OK) {
-
-				rd_kafka_conf_destroy(conf);
-				luaL_error(L, "Unable to set conf %s = %s: %s", confname, confvalue, errorbuffer);
-			}
-
-			//printf("%s = %s\n", confname, confvalue);
-			lua_pop(L, 1);
-		}
-	}
-
-	if (!didGroup) {
-		if (rd_kafka_conf_set(conf, "group.id", defaultgroup, errorbuffer, kafka_error_buffer_len) != RD_KAFKA_CONF_OK) {
-
-			rd_kafka_conf_destroy(conf);
-			luaL_error(L, "Unable to set conf %s = %s: %s", "group.id", defaultgroup, errorbuffer);
-		}
-	}
-
-	return conf;
-}
-
 int GetKafkaId(lua_State* L) {
 
 	LuaKafka* luak = lua_tokafka(L, 1);
@@ -507,6 +388,7 @@ int CreateConsumer(lua_State* L) {
 	LuaKafka* luak = lua_pushkafka(L);
 	luak->rd = rd;
 	luak->type = RD_KAFKA_CONSUMER;
+	luak->evqueue = rd_kafka_queue_get_main(rd);
 
 	return 1;
 }
@@ -541,6 +423,305 @@ int QueryHighLow(lua_State* L) {
 	return 3;
 }
 
+int DeleteTopic(lua_State* L) {
+
+	LuaKafka* luak = lua_tokafka(L, 1);
+	const char * topicname = luaL_checkstring(L, 2);
+	int timeout = luaL_optinteger(L, 3, 10000);
+
+	if (!luak->rd) {
+		luaL_error(L, "Kafka object not open");
+		return 0;
+	}
+
+	rd_kafka_DeleteTopic_t * topic = rd_kafka_DeleteTopic_new(topicname);
+	rd_kafka_AdminOptions_t * adminopts = rd_kafka_AdminOptions_new(luak->rd, RD_KAFKA_ADMIN_OP_ANY);
+
+	rd_kafka_resp_err_t err = rd_kafka_AdminOptions_set_request_timeout(adminopts, luaL_optinteger(L, 3, 10000), errorbuffer, kafka_error_buffer_len);
+	if (err) {
+		rd_kafka_DeleteTopic_destroy(topic);
+		rd_kafka_AdminOptions_destroy(adminopts);
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		lua_pushstring(L, errorbuffer);
+		return 2;
+	}
+
+	rd_kafka_queue_t * queue = rd_kafka_queue_new(luak->rd);
+	rd_kafka_DeleteTopics(luak->rd, &topic, 1, adminopts, queue);
+
+	rd_kafka_event_t * event = rd_kafka_queue_poll(queue, timeout);
+	err = rd_kafka_event_error(event);
+
+	rd_kafka_event_destroy(event);
+	rd_kafka_queue_destroy(queue);
+	rd_kafka_DeleteTopic_destroy(topic);
+	rd_kafka_AdminOptions_destroy(adminopts);
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, !err);
+	if (err)
+	{
+		lua_pushstring(L, rd_kafka_err2str(err));
+		return 2;
+	}
+
+	return 1;
+}
+
+int GetConfig(lua_State* L) {
+
+	LuaKafka* luak = lua_tokafka(L, 1);
+	int configtype = luaL_checkinteger(L, 2);
+	const char * name = luaL_checkstring(L, 3);
+	
+	if (!luak->rd) {
+		luaL_error(L, "Kafka object not open");
+		return 0;
+	}
+
+	rd_kafka_ResourceType_t restype = RD_KAFKA_RESOURCE_UNKNOWN;
+	switch (configtype) {
+
+	case 1:
+		restype = RD_KAFKA_RESOURCE_ANY;
+		break;
+	case 2:
+		restype = RD_KAFKA_RESOURCE_TOPIC;
+		break;
+	case 3:
+		restype = RD_KAFKA_RESOURCE_GROUP;
+		break;
+	case 4:
+		restype = RD_KAFKA_RESOURCE_BROKER;
+		break;
+	}
+
+	rd_kafka_ConfigResource_t* conf = rd_kafka_ConfigResource_new(restype, name);
+	size_t len;
+	const rd_kafka_ConfigEntry_t ** configs = rd_kafka_ConfigResource_configs(conf, &len);
+	const rd_kafka_ConfigEntry_t * keyvalue;
+
+	lua_pop(L, lua_gettop(L));
+	lua_createtable(L, 0, len);
+
+	for (size_t i = 0; i < len; i++)
+	{
+		lua_pushstring(L, rd_kafka_ConfigEntry_name(configs[i]));
+		lua_pushstring(L, rd_kafka_ConfigEntry_value(configs[i]));
+		lua_settable(L, -3);
+	}
+
+	rd_kafka_ConfigResource_destroy(conf);
+
+	return 1;
+}
+
+int AlterConfig(lua_State* L) {
+
+	LuaKafka* luak = lua_tokafka(L, 1);
+	int configtype = luaL_checkinteger(L, 2);
+	const char * name = luaL_checkstring(L, 3);
+	const char * configname = luaL_checkstring(L, 4);
+	const char * configvalue = luaL_checkstring(L, 5);
+	int timeout = luaL_optinteger(L, 6, 10000);
+
+	if (!luak->rd) {
+		luaL_error(L, "Kafka object not open");
+		return 0;
+	}
+
+	rd_kafka_ResourceType_t restype = RD_KAFKA_RESOURCE_UNKNOWN;
+	switch (configtype) {
+
+	case 1:
+		restype = RD_KAFKA_RESOURCE_ANY;
+		break;
+	case 2:
+		restype = RD_KAFKA_RESOURCE_TOPIC;
+		break;
+	case 3:
+		restype = RD_KAFKA_RESOURCE_GROUP;
+		break;
+	case 4:
+		restype = RD_KAFKA_RESOURCE_BROKER;
+		break;
+	}
+
+	rd_kafka_AdminOptions_t * adminopts = rd_kafka_AdminOptions_new(luak->rd, RD_KAFKA_ADMIN_OP_ANY);
+	rd_kafka_resp_err_t err = rd_kafka_AdminOptions_set_request_timeout(adminopts, timeout, errorbuffer, kafka_error_buffer_len);
+	if (err) {
+		rd_kafka_AdminOptions_destroy(adminopts);
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		lua_pushstring(L, errorbuffer);
+		return 2;
+	}
+
+	rd_kafka_ConfigResource_t* conf = rd_kafka_ConfigResource_new(restype, name);
+
+	err = rd_kafka_ConfigResource_set_config(conf, configname, configvalue);
+	if (err) {
+		rd_kafka_AdminOptions_destroy(adminopts);
+		rd_kafka_ConfigResource_destroy(conf);
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		lua_pushstring(L, rd_kafka_err2str(err));
+		return 2;
+	}
+
+	rd_kafka_queue_t * queue = rd_kafka_queue_new(luak->rd);
+
+	rd_kafka_AlterConfigs(luak->rd, &conf, 1, adminopts, queue);
+
+	rd_kafka_event_t * ev = rd_kafka_queue_poll(queue, timeout);
+
+	err = rd_kafka_event_error(ev);
+
+	rd_kafka_event_destroy(ev);
+	rd_kafka_ConfigResource_destroy(conf);
+	rd_kafka_AdminOptions_destroy(adminopts);
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, !err);
+	if (err)
+	{
+		lua_pushstring(L, rd_kafka_err2str(err));
+		return 2;
+	}
+
+	return 1;
+}
+
+int CreatePartition(lua_State* L) {
+
+	LuaKafka* luak = lua_tokafka(L, 1);
+	const char * topicname = luaL_checkstring(L, 2);
+	int numbpartitions = luaL_optinteger(L, 3, 1);
+	int timeout = luaL_optinteger(L, 4, 10000);
+
+	if (!luak->rd) {
+		luaL_error(L, "Kafka object not open");
+		return 0;
+	}
+
+	rd_kafka_AdminOptions_t * adminopts = rd_kafka_AdminOptions_new(luak->rd, RD_KAFKA_ADMIN_OP_ANY);
+	rd_kafka_resp_err_t err = rd_kafka_AdminOptions_set_request_timeout(adminopts, timeout, errorbuffer, kafka_error_buffer_len);
+	if (err) {
+		rd_kafka_AdminOptions_destroy(adminopts);
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		lua_pushstring(L, errorbuffer);
+		return 2;
+	}
+
+	rd_kafka_NewPartitions_t * parts = rd_kafka_NewPartitions_new(topicname, numbpartitions, errorbuffer, kafka_error_buffer_len);
+
+	rd_kafka_queue_t * queue = rd_kafka_queue_new(luak->rd);
+	rd_kafka_CreatePartitions(luak->rd, &parts, 1, adminopts, queue);
+
+	rd_kafka_event_t * event = rd_kafka_queue_poll(queue, timeout);
+	err = rd_kafka_event_error(event);
+
+	rd_kafka_event_destroy(event);
+	rd_kafka_queue_destroy(queue);
+	rd_kafka_AdminOptions_destroy(adminopts);
+	rd_kafka_NewPartitions_destroy(parts);
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, !err);
+	if (err)
+	{
+		lua_pushstring(L, rd_kafka_err2str(err));
+		return 2;
+	}
+
+	return 1;
+}
+
+int CreateTopic(lua_State* L) {
+
+	LuaKafka* luak = lua_tokafka(L, 1);
+	const char * topicname = luaL_checkstring(L, 2);
+	int numbpartitions = luaL_optinteger(L, 3, 1);
+	int replicafactor = luaL_optinteger(L, 4, -1);
+
+	if (!luak->rd) {
+		luaL_error(L, "Kafka object not open");
+		return 0;
+	}
+
+	rd_kafka_NewTopic_t * rkt = rd_kafka_NewTopic_new(topicname, numbpartitions, replicafactor, errorbuffer, kafka_error_buffer_len);
+
+	if (!rkt) {
+		rd_kafka_NewTopic_destroy(rkt);
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		lua_pushstring(L, errorbuffer);
+		return 2;
+	}
+
+	rd_kafka_AdminOptions_t * adminopts = rd_kafka_AdminOptions_new(luak->rd, RD_KAFKA_ADMIN_OP_ANY);
+	rd_kafka_resp_err_t err;
+
+	if (lua_type(L, 5) == LUA_TNUMBER)
+	{
+		err = rd_kafka_AdminOptions_set_broker(adminopts, lua_tointeger(L, 5), errorbuffer, kafka_error_buffer_len);
+		if (err) {
+			rd_kafka_NewTopic_destroy(rkt);
+			rd_kafka_AdminOptions_destroy(adminopts);
+			lua_pop(L, lua_gettop(L));
+			lua_pushboolean(L, false);
+			lua_pushstring(L, errorbuffer);
+			return 2;
+		}
+	}
+
+	err = rd_kafka_AdminOptions_set_request_timeout(adminopts, luaL_optinteger(L, 6, 10000), errorbuffer, kafka_error_buffer_len);
+	if (err) {
+		rd_kafka_NewTopic_destroy(rkt);
+		rd_kafka_AdminOptions_destroy(adminopts);
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		lua_pushstring(L, errorbuffer);
+		return 2;
+	}
+
+	if (lua_type(L, 7) == LUA_TNUMBER)
+	{
+		err = rd_kafka_AdminOptions_set_operation_timeout(adminopts, lua_tointeger(L, 7), errorbuffer, kafka_error_buffer_len);
+		if (err) {
+			rd_kafka_NewTopic_destroy(rkt);
+			rd_kafka_AdminOptions_destroy(adminopts);
+			lua_pop(L, lua_gettop(L));
+			lua_pushboolean(L, false);
+			lua_pushstring(L, errorbuffer);
+			return 2;
+		}
+	}
+
+	rd_kafka_queue_t * queue = rd_kafka_queue_new(luak->rd);
+	rd_kafka_CreateTopics(luak->rd, &rkt, 1, adminopts, queue);
+
+	rd_kafka_event_t * event = rd_kafka_queue_poll(queue, luaL_optinteger(L, 6, 10000));
+	err = rd_kafka_event_error(event);
+
+	rd_kafka_event_destroy(event);
+	rd_kafka_queue_destroy(queue);
+	rd_kafka_AdminOptions_destroy(adminopts);
+	rd_kafka_NewTopic_destroy(rkt);
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, !err);
+	if (err)
+	{
+		lua_pushstring(L, rd_kafka_err2str(err));
+		return 2;
+	}
+
+	return 1;
+}
+
 int SubscribeToTopic(lua_State* L) {
 
 	LuaKafka* luak = lua_tokafka(L, 1);
@@ -553,7 +734,7 @@ int SubscribeToTopic(lua_State* L) {
 	const char* topic = luaL_checkstring(L, 2);
 	int partition = luaL_checkinteger(L, 3);
 	int64_t offset = luaL_checkinteger(L, 4);
-	rd_kafka_topic_conf_t* conf = NULL; // rd_kafka_topic_conf_new();
+	rd_kafka_topic_conf_t* conf = lua_tokafkatopicconf(L, 5);
 
 	rd_kafka_topic_t* rkt = rd_kafka_topic_new(luak->rd, topic, conf);
 
@@ -568,7 +749,7 @@ int SubscribeToTopic(lua_State* L) {
 		return 2;
 	}
 
-	LuaKafkaTopic* ltopic = lua_pushkafkatopic(L);
+	LuaKafkaTopic* ltopic = lua_pushkafkatopic(L, topic);
 	ltopic->owner = luak->rd;
 	ltopic->partition = partition;
 	ltopic->topic = rkt;
@@ -606,6 +787,7 @@ int kafka_gc(lua_State* L) {
 			rd_kafka_consumer_close(luak->rd);
 		}
 
+		rd_kafka_queue_destroy(luak->evqueue);
 		rd_kafka_destroy(luak->rd);
 		luak->rd = NULL;
 

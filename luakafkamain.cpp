@@ -5,6 +5,7 @@
 
 static const struct luaL_Reg kafkafunctions[] = {
 
+	{ "Events",  PollEvents },
 	{ "NewConsumer",  CreateConsumer },
 	{ "AddBroker",  AddBroker },
 	{ "GetGroups",  DescribeGroups },
@@ -13,9 +14,14 @@ static const struct luaL_Reg kafkafunctions[] = {
 	{ "Poll",  PollMessage },
 	{ "Subscribe",  SubscribeToTopic },
 	{ "GetOffsets",  QueryHighLow },
+	{ "CreateTopic",  CreateTopic },
+	{ "DeleteTopic",  DeleteTopic },
 	{ "Close",  kafka_gc },
 	{ "GetId",  GetKafkaId },
 	{ "Commit",  CommitMessage },
+	{ "AlterConfig",  AlterConfig },
+	{ "SetPartitions",  CreatePartition },
+	{ "GetConfig",  GetConfig },
 	{ NULL, NULL }
 }; 
 
@@ -40,6 +46,7 @@ static const luaL_Reg kafkamessagemeta[] = {
 
 static const struct luaL_Reg kafkatopicfunctions[] = {
 	{ "GetOwnerId",  GetKafkaTopicOwnerId },
+	{ "GetInfo",  GetKafkaTopicInfo },
 	{ "Dispose",  kafkatopic_gc },
 	{ NULL, NULL }
 };

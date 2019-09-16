@@ -21,7 +21,23 @@ int GetKafkaTopicOwnerId(lua_State* L) {
 	return 1;
 }
 
-LuaKafkaTopic* lua_pushkafkatopic(lua_State* L) {
+int GetKafkaTopicInfo(lua_State* L) {
+
+	LuaKafkaTopic* kafkamsg = lua_tokafkatopic(L, 1);
+
+	if (!kafkamsg->topic) {
+		luaL_error(L, "Kafka topic is disposed");
+		return 0;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushstring(L, kafkamsg->name);
+	lua_pushinteger(L, kafkamsg->partition);
+
+	return 2;
+}
+
+LuaKafkaTopic* lua_pushkafkatopic(lua_State* L, const char * name) {
 
 	LuaKafkaTopic* lkafka = (LuaKafkaTopic*)lua_newuserdata(L, sizeof(LuaKafkaTopic));
 	if (lkafka == NULL)
@@ -29,6 +45,11 @@ LuaKafkaTopic* lua_pushkafkatopic(lua_State* L) {
 	luaL_getmetatable(L, LUAKAFKATOPIC);
 	lua_setmetatable(L, -2);
 	memset(lkafka, 0, sizeof(LuaKafkaTopic));
+
+	if (name) {
+		lkafka->name = (char*)calloc(strlen(name)+1, sizeof(char));
+		strcpy(lkafka->name, name);
+	}
 
 	return lkafka;
 }
@@ -48,6 +69,11 @@ int kafkatopic_gc(lua_State* L) {
 		rd_kafka_consume_stop(luak->topic, luak->partition);
 		rd_kafka_topic_destroy(luak->topic);
 		luak->topic = NULL;
+	}
+
+	if (luak->name) {
+		free(luak->name);
+		luak->name = NULL;
 	}
 
 	luak->owner = NULL;

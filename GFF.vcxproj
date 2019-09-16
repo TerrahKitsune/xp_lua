@@ -84,6 +84,7 @@
     <ClCompile Include="GffStruct.cpp" />
     <ClCompile Include="Http.cpp" />
     <ClCompile Include="image.cpp" />
+    <ClCompile Include="kafkahelpers.cpp" />
     <ClCompile Include="LinkedList.cpp" />
     <ClCompile Include="LuaImageMain.cpp" />
     <ClCompile Include="luakafka.cpp" />
@@ -185,6 +186,7 @@
     <ClInclude Include="GffStruct.h" />
     <ClInclude Include="Http.h" />
     <ClInclude Include="image.h" />
+    <ClInclude Include="kafkahelpers.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="LuaImageMain.h" />
     <ClInclude Include="luakafka.h" />

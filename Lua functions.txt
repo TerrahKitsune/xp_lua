@@ -74,6 +74,11 @@ Kafka:
 	-default is conf is just with group.id = "LUAC"
 	Kafka Kafka.NewConsumer(opt conf)
 
+	-Poll for any events on the kafka object
+	-This should be done regularly
+	-returns nil if there are no events
+	event Kafka:Events()
+
 	-Adds a broker to a kafka object
 	-Adress should be a full adress e.g "localhost:9092"
 	-returns true/false success/failure
@@ -122,11 +127,11 @@ Kafka:
 	string Kafka.Logs(opt filename)
 
 	-Polls for messages
+	-This fails if attempted on a kafka that isnt a consumer
 	-topicobject is the object retrived from Subscribe
-	-Timeout is 1000 (in ms) default
 	-Returns nil if there is no new messages
 	-kafka message object is described below
-	kafkamessage Kafka:Poll(topicobject, opt timeout)
+	kafkamessage Kafka:Poll(topicobject)
 
 	-Commits a message to the broker
 	-this is not nessesary unless the conf has enable.auto.commit = false
@@ -140,8 +145,31 @@ Kafka:
 
 	-Subscribes to a topic (Depending on the settings this might create the topic if it doesnt exist)
 	-returns a topic object on success or a nil and a error message on failure
+	-if a conf is given it should be given as a table of key values
+	-example: 
+	-local conf = {};
+	-conf["retention.ms"]="604800000";
 	-see topic object below
-	kafkatopic, errormsg Kafka:Subscribe(topicname, partition, offset)
+	kafkatopic, errormsg Kafka:Subscribe(topicname, partition, offset, opt conf)
+
+	-Creates a topic with a number of partitions
+	bool, errormsg Kafka:CreateTopic(topicname, opt partitions, opt replicationfactor, opt brokerid, opt requesttimeout, opt operationtimeout)
+
+	-Delete a topic, this might fail if the broker does not allow topic deletion
+	bool, errormsg Kafka:DeleteTopic(topicname)
+
+	-Set a config
+	-resource type: any=1, topic=2, group=3, broker=4
+	-resourcename: example: a topic name
+	-configvalue: example: retention.ms
+	-configvalue: example: 604800000
+	bool, errormsg Kafka:AlterConfig(resourcetype, resourcename, configname, configvalue, opt timeout)
+
+	-Retrive a key-value table for the config of a resource
+	table Kafka:GetConfig(resourcetype, resourcename)
+
+	-Create new partions in the topic
+	bool, errormsg Kafka:SetPartitions(topicname, newpartitioncount, opt timeout)
 
 	-Get a unique internal id for this object (used for association)
 	int Kafka:GetId()
@@ -150,6 +178,9 @@ Kafkatopic:
 	
 	-Get a unique internal id for the kafka object that spawned this message object (used for association)
 	int Kafkatopic:GetOwnerId()
+
+	-Retrive the name and the partition
+	name, partition Kafkatopic:GetInfo()
 
 	-Prematurely closes the object and stops the consumer for this topic
 	nil Kafkatopic:Dispose()

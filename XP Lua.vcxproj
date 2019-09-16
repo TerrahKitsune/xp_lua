@@ -29,6 +29,7 @@
     <ClCompile Include="Http.cpp" />
     <ClCompile Include="HttpMain.cpp" />
     <ClCompile Include="image.cpp" />
+    <ClCompile Include="kafkahelpers.cpp" />
     <ClCompile Include="LinkedList.cpp" />
     <ClCompile Include="List.cpp" />
     <ClCompile Include="LuaClient.cpp" />
@@ -40,6 +41,7 @@
     <ClCompile Include="luakafka.cpp" />
     <ClCompile Include="luakafkamain.cpp" />
     <ClCompile Include="luakafkamessage.cpp" />
+    <ClCompile Include="luakafkatopic.cpp" />
     <ClCompile Include="LuaLinkedList.cpp" />
     <ClCompile Include="LuaLinkedListMain.cpp" />
     <ClCompile Include="LuaMD5.cpp" />
@@ -147,6 +149,7 @@
     <ClInclude Include="Http.h" />
     <ClInclude Include="HttpMain.h" />
     <ClInclude Include="image.h" />
+    <ClInclude Include="kafkahelpers.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="List.h" />
     <ClInclude Include="LuaClient.h" />
@@ -158,6 +161,7 @@
     <ClInclude Include="luakafka.h" />
     <ClInclude Include="luakafkamain.h" />
     <ClInclude Include="luakafkamessage.h" />
+    <ClInclude Include="luakafkatopic.h" />
     <ClInclude Include="LuaLinkedList.h" />
     <ClInclude Include="LuaLinkedListMain.h" />
     <ClInclude Include="LuaMD5.h" />

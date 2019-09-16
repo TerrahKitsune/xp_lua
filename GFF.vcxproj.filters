@@ -519,6 +519,9 @@
     <ClCompile Include="luakafkatopic.cpp">
       <Filter>LuaKafka\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="kafkahelpers.cpp">
+      <Filter>LuaKafka\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -804,6 +807,9 @@
       <Filter>LuaKafka\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="luakafkatopic.h">
+      <Filter>LuaKafka\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kafkahelpers.h">
       <Filter>LuaKafka\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
