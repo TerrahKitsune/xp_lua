@@ -19,6 +19,7 @@ typedef struct LuaKafka {
 LuaKafka* lua_pushkafka(lua_State* L);
 LuaKafka* lua_tokafka(lua_State* L, int index);
 
+int ProduceMessage(lua_State* L);
 int AlterConfig(lua_State* L);
 int DeleteTopic(lua_State* L);
 int CreateTopic(lua_State* L);
@@ -35,6 +36,11 @@ int SubscribeToTopic(lua_State* L);
 int CreatePartition(lua_State* L);
 int PollEvents(lua_State* L);
 int GetConfig(lua_State* L);
+int PausePartition(lua_State* L);
+int ResumePartition(lua_State* L);
+int CreateProducer(lua_State* L);
+int QueryCommited(lua_State* L);
+int SetCommitedOffset(lua_State* L);
 
 int kafka_gc(lua_State* L);
 int kafka_tostring(lua_State* L);

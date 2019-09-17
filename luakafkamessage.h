@@ -15,6 +15,8 @@ typedef struct LuaKafkaMessage {
 LuaKafkaMessage* lua_pushkafkamsg(lua_State* L);
 LuaKafkaMessage* lua_tokafkamsg(lua_State* L, int index);
 
+int GetKafkaMessageLatency(lua_State* L);
+int GetKafkaMessageTimestamp(lua_State* L);
 int GetKafkaMessageOwnerId(lua_State* L);
 int GetKafkaMessageData(lua_State* L);
 

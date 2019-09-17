@@ -74,6 +74,16 @@ Kafka:
 	-default is conf is just with group.id = "LUAC"
 	Kafka Kafka.NewConsumer(opt conf)
 
+	-Same as NewConsumer, default group = "LUAP"
+	Kafka Kafka.NewProducer(opt conf)
+
+	-Send a message on the kafka topic (Only works for producers)
+	-data: the data to send, must be a string
+	-partition: the partition to send to (default is the partition that was subscribed to) -1 and it'll automatically partition
+	-key: default nil, otherwise it should be a string
+	-timeout default 10000
+	bool, errormsg Kafka:Send(Kafkatopic, data, opt partition, opt key, opt timeout)
+
 	-Poll for any events on the kafka object
 	-This should be done regularly
 	-returns nil if there are no events
@@ -165,11 +175,24 @@ Kafka:
 	-configvalue: example: 604800000
 	bool, errormsg Kafka:AlterConfig(resourcetype, resourcename, configname, configvalue, opt timeout)
 
+	-DOES NOT WORK
 	-Retrive a key-value table for the config of a resource
 	table Kafka:GetConfig(resourcetype, resourcename)
 
 	-Create new partions in the topic
 	bool, errormsg Kafka:SetPartitions(topicname, newpartitioncount, opt timeout)
+
+	-Pauses a topic+partition
+	bool, errormsg Kafka:PauseTopic(Kafkatopic)
+
+	-Resumes a topic+partition
+	bool, errormsg Kafka:ResmuleTopic(Kafkatopic)
+
+	-Retrive the commited offset for a topicing and partition
+	int, err Kafka:GetCommitedOffset(topic, partition, opt timeout)
+
+	-Attempt commiting offsets
+	bool, err Kafka:CommitOffset(topic, parition, offset, async)
 
 	-Get a unique internal id for this object (used for association)
 	int Kafka:GetId()
@@ -185,6 +208,9 @@ Kafkatopic:
 	-Prematurely closes the object and stops the consumer for this topic
 	nil Kafkatopic:Dispose()
 
+	-Check if the topic is paused
+	bool Kafkatopic:IsPaused()
+
 Kafkamessage:
 
 	-Retrives the data from the message:
@@ -196,6 +222,13 @@ Kafkamessage:
 	-Payload: The actual data
 	-Topic: Name of the topic the message came from
 	table Kafkamessage:GetData()
+
+	-Get the timestamp (The timestamp is the number of milliseconds since the epoch (UTC).)
+	-second return is the type of timestamp: 0 = not available, 1= created, 2=log appended
+	int, int Kafkamessage:GetTimestamp()
+
+	-Get the time in miliseconds since the message was produced, -1 is unavailable
+	int Kafkamessage:GetLatency()
 
 	-Get a unique internal id for the kafka object that spawned this message object (used for association)
 	int Kafkamessage:GetOwnerId()

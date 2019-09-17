@@ -37,7 +37,7 @@ int GetKafkaTopicInfo(lua_State* L) {
 	return 2;
 }
 
-LuaKafkaTopic* lua_pushkafkatopic(lua_State* L, const char * name) {
+LuaKafkaTopic* lua_pushkafkatopic(lua_State* L, const char* name) {
 
 	LuaKafkaTopic* lkafka = (LuaKafkaTopic*)lua_newuserdata(L, sizeof(LuaKafkaTopic));
 	if (lkafka == NULL)
@@ -47,7 +47,7 @@ LuaKafkaTopic* lua_pushkafkatopic(lua_State* L, const char * name) {
 	memset(lkafka, 0, sizeof(LuaKafkaTopic));
 
 	if (name) {
-		lkafka->name = (char*)calloc(strlen(name)+1, sizeof(char));
+		lkafka->name = (char*)calloc(strlen(name) + 1, sizeof(char));
 		strcpy(lkafka->name, name);
 	}
 
@@ -61,12 +61,23 @@ LuaKafkaTopic* lua_tokafkatopic(lua_State* L, int index) {
 	return lkafka;
 }
 
+int TopicIsPaused(lua_State* L) {
+	LuaKafkaTopic* luak = lua_tokafkatopic(L, 1);
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, luak->IsPaused);
+	return 1;
+}
+
 int kafkatopic_gc(lua_State* L) {
 
 	LuaKafkaTopic* luak = lua_tokafkatopic(L, 1);
 
 	if (luak->topic) {
-		rd_kafka_consume_stop(luak->topic, luak->partition);
+
+		if (luak->type == RD_KAFKA_CONSUMER) {
+			rd_kafka_consume_stop(luak->topic, luak->partition);
+		}
+
 		rd_kafka_topic_destroy(luak->topic);
 		luak->topic = NULL;
 	}

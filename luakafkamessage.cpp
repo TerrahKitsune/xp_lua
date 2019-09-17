@@ -21,6 +21,37 @@ int GetKafkaMessageOwnerId(lua_State* L) {
 	return 1;
 }
 
+int GetKafkaMessageLatency(lua_State* L) {
+
+	LuaKafkaMessage* kafkamsg = lua_tokafkamsg(L, 1);
+
+	if (!kafkamsg->message) {
+		luaL_error(L, "Kafka message is disposed");
+		return 0;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, rd_kafka_message_latency(kafkamsg->message));
+	return 1;
+}
+
+int GetKafkaMessageTimestamp(lua_State* L) {
+
+	LuaKafkaMessage* kafkamsg = lua_tokafkamsg(L, 1);
+
+	if (!kafkamsg->message) {
+		luaL_error(L, "Kafka message is disposed");
+		return 0;
+	}
+
+	rd_kafka_timestamp_type_t type;
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, rd_kafka_message_timestamp((rd_kafka_message_t*)kafkamsg->message, &type));
+	lua_pushinteger(L, type);
+	return 2;
+}
+
 int GetKafkaMessageData(lua_State* L) {
 
 	LuaKafkaMessage* kafkamsg = lua_tokafkamsg(L, 1);

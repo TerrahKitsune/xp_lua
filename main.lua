@@ -80,9 +80,11 @@ conf["enable.auto.commit"]="true";
 conf["auto.offset.reset"]="earliest";
 conf["group.id"]="LUA";
 
+local addr="192.168.2.170";
+
 local c = assert(Kafka.NewConsumer(conf));
 c:Logs("E:/kafka.log");
-c:AddBroker("10.9.23.252");
+c:AddBroker(addr);
 local ok, err;
 
 local meta, err = c:GetMetadata(1000);
@@ -107,9 +109,11 @@ for n=1, #meta.Topics do
 
 		if ok then
 
-			io.write("["..lo.." "..hi.."] ");
+			local commit = c:GetCommitedOffset(meta.Topics[n].Name, 0, 1000);
 
-			ok, err = c:Subscribe(meta.Topics[n].Name, 0, lo);
+			io.write("["..lo.." "..hi.."] ["..commit.."] ");
+
+			ok, err = c:Subscribe(meta.Topics[n].Name, 0, hi);
 
 			if ok then 
 				print("OK");
@@ -137,12 +141,18 @@ if ok then
 	--c:DeleteTopic("short");
 end 
 
---assert(c:CreateTopic("short", 5));
+--assert(c:CreateTopic("short", 1));
 assert(c:AlterConfig(2, "short", "cleanup.policy", "delete"));
-assert(c:AlterConfig(2, "short", "retention.ms", "1000"));
-assert(c:CreatePartitions("short", 10));
+assert(c:AlterConfig(2, "short", "retention.ms", "3000"));
+assert(c:SetPartitions("short", 5));
 
-conf = c:GetConfig(2, "short");
+conf = c:GetConfig(4, "0");
+print("CONF:-----");
+for k,v in pairs(conf) do 
+	print(k, v);
+end
+
+conf = c:GetConfig(2, "temp");
 print("CONF:-----");
 for k,v in pairs(conf) do 
 	print(k, v);
@@ -153,12 +163,48 @@ ok, err = c:Subscribe("short", 0, 0, conf);
 assert(ok, err);
 table.insert(topics, ok);
 
+ok, err = c:Subscribe("short", 1, 0, conf);
+assert(ok, err);
+table.insert(topics, ok);
+
+print(c:PauseTopic(ok));
+
+local p = assert(Kafka.NewProducer(conf));
+assert(p:AddBroker(addr));
+local ptopic = assert(p:Subscribe("temp", 0, 0, conf));
+print(c:ResumeTopic(ok));
+
+ok, err = p:GetGroups();
+while not ok do 
+	print(err);
+	ok, err = p:GetGroups();
+end
+
+assert(p:Send(ptopic, "Hello!"));
+
 print("Owner: "..c:GetId());
 local msg;
 local data;
+local time,ty;
+local cnt=0;
+local tim = Timer.New();
+tim:Start();
 while true do 
 	
-	msg = c:Events();
+	msg = c:Events() or p:Events();
+	--[[data = UUID();
+	cnt = cnt + 1;
+
+	if tim:Elapsed() > 1000 then 
+		ok, err = p:Send(ptopic, data, 0, tostring(cnt));
+
+		if not ok then
+			print("Send error: "..err);
+		end
+		tim:Stop();
+		tim:Reset();
+		tim:Start();
+	end]]
 
 	while msg do 
 		print("EVENT---");
@@ -166,23 +212,26 @@ while true do
 			print(k, v);
 		end 
 		print("--------");
-		msg = c:Events();
+		msg = c:Events() or p:Events();
 	end
 
 	for n=1, #topics do
 		msg = c:Poll(topics[n]);
 		if msg then 
 			data = msg:GetData();
-			print("["..data.Topic.."] ["..data.Error.."] ["..data.Partition..":"..data.Offset.."] ["..msg:GetOwnerId().."]: "..data.Payload);
-			--[[if(data.ErrorCode == 0)then 
-				ok, err = c:Commit(msg);
+			time, ty = msg:GetTimestamp();
+			print("["..data.Topic.."] ["..data.Error.."] ["..data.Partition..":"..data.Offset.."] ["..msg:GetOwnerId().."] ["..ty..":"..time.."] ["..msg:GetLatency().."] "..tostring(data.Key)..": "..data.Payload);
+			if(data.ErrorCode == 0)then 
+				
+				--[[ok, err = c:Commit(msg);
+				ok, err = c:CommitOffsets(data.Topic, data.Partition, data.Offset);
 				io.write("COMMIT: "..tostring(ok));
 				if err then 
 					print(" "..err);
 				else 
 					print(" ");
-				end 
-			end]]
+				end ]]
+			end
 		end
 	end
 

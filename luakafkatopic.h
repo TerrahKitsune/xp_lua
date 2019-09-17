@@ -10,6 +10,9 @@ typedef struct LuaKafkaTopic {
 	rd_kafka_topic_t* topic;
 	int partition;
 	char * name;
+	bool IsPaused;
+	rd_kafka_type_t type;
+
 } LuaKafkaTopic;
 
 
@@ -18,6 +21,7 @@ LuaKafkaTopic* lua_tokafkatopic(lua_State* L, int index);
 
 int GetKafkaTopicOwnerId(lua_State* L);
 int GetKafkaTopicInfo(lua_State* L);
+int TopicIsPaused(lua_State* L);
 
 int kafkatopic_gc(lua_State* L);
 int kafkatopic_tostring(lua_State* L);
