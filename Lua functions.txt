@@ -143,12 +143,6 @@ Kafka:
 	-kafka message object is described below
 	kafkamessage Kafka:Poll(topicobject)
 
-	-Commits a message to the broker
-	-this is not nessesary unless the conf has enable.auto.commit = false
-	-messages should only be commited with the same kafka object they came from
-	-returns true or false and an error
-	bool, err Kafka:Commit(Kafkamessage, opt async)
-
 	-Query for the offset for a topic and a partition
 	-returns true and lowest, highest on success and false and an error message on failure
 	bool, low, high Kafka:GetOffsets(topic, partition, opt timeout)
@@ -175,9 +169,9 @@ Kafka:
 	-configvalue: example: 604800000
 	bool, errormsg Kafka:AlterConfig(resourcetype, resourcename, configname, configvalue, opt timeout)
 
-	-DOES NOT WORK
-	-Retrive a key-value table for the config of a resource
-	table Kafka:GetConfig(resourcetype, resourcename)
+	-Get config
+	-returns nil and an error msg on error
+	table Kafka:GetConfig(resourcetype, resourcename, opt timeout)
 
 	-Create new partions in the topic
 	bool, errormsg Kafka:SetPartitions(topicname, newpartitioncount, opt timeout)
@@ -187,12 +181,6 @@ Kafka:
 
 	-Resumes a topic+partition
 	bool, errormsg Kafka:ResmuleTopic(Kafkatopic)
-
-	-Retrive the commited offset for a topicing and partition
-	int, err Kafka:GetCommitedOffset(topic, partition, opt timeout)
-
-	-Attempt commiting offsets
-	bool, err Kafka:CommitOffset(topic, parition, offset, async)
 
 	-Get a unique internal id for this object (used for association)
 	int Kafka:GetId()

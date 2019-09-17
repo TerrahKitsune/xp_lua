@@ -9,6 +9,7 @@ static const struct luaL_Reg kafkafunctions[] = {
 	{ "NewConsumer",  CreateConsumer },
 	{ "NewProducer",  CreateProducer },
 	{ "Send",  ProduceMessage },
+	{ "Commit",  CommitMessage },
 	{ "AddBroker",  AddBroker },
 	{ "GetGroups",  DescribeGroups },
 	{ "GetMetadata",  GetMetadata },
@@ -20,14 +21,11 @@ static const struct luaL_Reg kafkafunctions[] = {
 	{ "DeleteTopic",  DeleteTopic },
 	{ "Close",  kafka_gc },
 	{ "GetId",  GetKafkaId },
-	{ "Commit",  CommitMessage },
 	{ "AlterConfig",  AlterConfig },
 	{ "SetPartitions",  CreatePartition },
-	{ "GetConfig",  GetConfig },
 	{ "PauseTopic",  PausePartition },
 	{ "ResumeTopic",  ResumePartition },
-	{ "GetCommitedOffset",  QueryCommited },
-	{ "CommitOffset",  SetCommitedOffset },
+	{ "GetConfig",  GetConfig },
 	{ NULL, NULL }
 }; 
 

@@ -8,8 +8,6 @@ function TablePrint(tbl, depth)
 
 	depth = depth or 0;
 
-	print(type(depth));
-
 	local padding="";
 
 	for n=1, depth do 
@@ -73,18 +71,19 @@ print("\n\n");
 
 SetTitle("librdkafka");
 
+local autocommit = true;
 local conf = {};
 conf["offset.store.method"]="broker";
-conf["enable.partition.eof"]="true";
-conf["enable.auto.commit"]="true";
+--conf["enable.partition.eof"]="true";
+conf["enable.auto.commit"]=tostring(autocommit);
 conf["auto.offset.reset"]="earliest";
 conf["group.id"]="LUA";
-
-local addr="192.168.2.170";
-
+print(conf["enable.auto.commit"]);
 local c = assert(Kafka.NewConsumer(conf));
 c:Logs("E:/kafka.log");
-c:AddBroker(addr);
+
+c:AddBroker("10.9.23.248");
+
 local ok, err;
 
 local meta, err = c:GetMetadata(1000);
@@ -113,7 +112,7 @@ for n=1, #meta.Topics do
 
 				io.write("["..lo.." "..hi.."] ");
 
-				ok, err = c:Subscribe(meta.Topics[n].Name, meta.Topics[n].Partitions[i].Id, hi);
+				ok, err = c:Subscribe(meta.Topics[n].Name, meta.Topics[n].Partitions[i].Id, lo);
 
 				if ok then 
 					print("OK");
@@ -127,85 +126,31 @@ for n=1, #meta.Topics do
 		end
 	end
 end 
-ok = nil;
-for n=1, #topics do 
-	if topics[n]:GetInfo() == "short" then 
-		ok = n;
-		break;
-	end
-end
 
-print("short ->", ok);
+conf = assert(c:GetConfig(2, "temp"));
 
-if ok then 
-	table.remove(topics, ok):Dispose();
-	c:DeleteTopic("short");
+if conf["cleanup.policy"] ~= "delete" then
+	assert(c:AlterConfig(2, "temp", "cleanup.policy", "delete"));
 end 
 
-assert(c:CreateTopic("short", 1));
-assert(c:AlterConfig(2, "short", "cleanup.policy", "delete"));
-assert(c:AlterConfig(2, "short", "retention.ms", "3000"));
-assert(c:SetPartitions("short", 5));
+if conf["retention.bytes"] ~= "1073741824" then
+	assert(c:AlterConfig(2, "temp", "retention.bytes", "1073741824"));
+end 
 
-conf = c:GetConfig(4, "0");
-print("CONF:-----");
-for k,v in pairs(conf) do 
-	print(k, v);
-end
+if conf["retention.ms"] ~= "60000" then
+	assert(c:AlterConfig(2, "temp", "retention.ms", "60000"));
+end 
 
-conf = c:GetConfig(2, "temp");
-print("CONF:-----");
-for k,v in pairs(conf) do 
-	print(k, v);
-end
-
-conf = {};
-ok, err = c:Subscribe("short", 0, 0, conf);
-assert(ok, err);
-table.insert(topics, ok);
-
-ok, err = c:Subscribe("short", 1, 0, conf);
-assert(ok, err);
-table.insert(topics, ok);
-
-print(c:PauseTopic(ok));
-
-local p = assert(Kafka.NewProducer(conf));
-assert(p:AddBroker(addr));
-local ptopic = assert(p:Subscribe("temp", 0, 0, conf));
-print(c:ResumeTopic(ok));
-
-ok, err = p:GetGroups();
-while not ok do 
-	print(err);
-	ok, err = p:GetGroups();
-end
-
-assert(p:Send(ptopic, "Hello!"));
+DumpToFile("E:/topicconf.json", c:GetConfig(2, "temp"));
 
 print("Owner: "..c:GetId());
 local msg;
 local data;
 local time,ty;
-local cnt=0;
-local tim = Timer.New();
-tim:Start();
 while true do 
 	
-	msg = c:Events() or p:Events();
-	--[[data = UUID();
-	cnt = cnt + 1;
-
-	if tim:Elapsed() > 1000 then 
-		ok, err = p:Send(ptopic, data, 0, tostring(cnt));
-
-		if not ok then
-			print("Send error: "..err);
-		end
-		tim:Stop();
-		tim:Reset();
-		tim:Start();
-	end]]
+	ok=false;
+	msg = c:Events();
 
 	while msg do 
 		print("EVENT---");
@@ -213,25 +158,23 @@ while true do
 			print(k, v);
 		end 
 		print("--------");
-		msg = c:Events() or p:Events();
+		msg = c:Events();
 	end
 
 	for n=1, #topics do
 		msg = c:Poll(topics[n]);
 		if msg then 
+			ok = true;
 			data = msg:GetData();
 			time, ty = msg:GetTimestamp();
 			print("["..data.Topic.."] ["..data.Error.."] ["..data.Partition..":"..data.Offset.."] ["..msg:GetOwnerId().."] ["..ty..":"..time.."] ["..msg:GetLatency().."] "..tostring(data.Key)..": "..data.Payload);
-			if(data.ErrorCode == 0)then 
-				
-				--[[ok, err = c:Commit(msg);
-				--ok, err = c:CommitOffsets(data.Topic, data.Partition, data.Offset);
-				io.write("COMMIT: "..tostring(ok));
-				if err then 
-					print(" "..err);
+			if not autocommit and data.ErrorCode == 0 then 
+				ok, err = c:Commit(msg);
+				if ok then 
+					print("Commit: OK");
 				else 
-					print(" ");
-				end]]
+					print("Commit: FAIL "..err);
+				end
 			end
 		end
 	end
@@ -240,5 +183,7 @@ while true do
 		return;
 	end
 
-	Sleep(1);
+	if not ok then
+		Sleep(1);
+	end
 end 
