@@ -957,7 +957,7 @@ int SubscribeToTopic(lua_State* L) {
 
 	const char* topic = luaL_checkstring(L, 2);
 	int partition = luaL_checkinteger(L, 3);
-	int64_t offset = luaL_checkinteger(L, 4);
+	int64_t offset = luaL_optinteger(L, 4, RD_KAFKA_OFFSET_END);
 	rd_kafka_topic_conf_t* conf = lua_tokafkatopicconf(L, 5);
 
 	rd_kafka_topic_t* rkt = rd_kafka_topic_new(luak->rd, topic, conf);
@@ -968,33 +968,33 @@ int SubscribeToTopic(lua_State* L) {
 		
 		rd_kafka_resp_err_t err;
 
-		//rd_kafka_topic_partition_list_t* topics;
+		/*rd_kafka_topic_partition_list_t* topics;
 
-		// err = rd_kafka_subscription(luak->rd, &topics);
-		// 
-		// if (err) {
-		//	 lua_pushnil(L);
-		//	 lua_pushstring(L, rd_kafka_err2str(err));
-		//	 rd_kafka_topic_destroy(rkt);
-		//	 return 2;
-		// }
+		 err = rd_kafka_subscription(luak->rd, &topics);
+		 
+		 if (err) {
+			 lua_pushnil(L);
+			 lua_pushstring(L, rd_kafka_err2str(err));
+			 rd_kafka_topic_destroy(rkt);
+			 return 2;
+		 }
 
-		// if (!topics) {
-		//	 topics = rd_kafka_topic_partition_list_new(1);
-		// }
+		 if (!topics) {
+			 topics = rd_kafka_topic_partition_list_new(1);
+		 }
 
-		// rd_kafka_topic_partition_list_add(topics, topic, partition);
+		 rd_kafka_topic_partition_list_add(topics, topic, partition);
 
-		// err = rd_kafka_subscribe(luak->rd,topics);
+		 err = rd_kafka_subscribe(luak->rd,topics);
 
-		// if (err) {
-		//	 lua_pushnil(L);
-		//	 lua_pushstring(L, rd_kafka_err2str(err));
-		//	 rd_kafka_topic_destroy(rkt);
-		//	 return 2;
-		// }
+		 if (err) {
+			 lua_pushnil(L);
+			 lua_pushstring(L, rd_kafka_err2str(err));
+			 rd_kafka_topic_destroy(rkt);
+			 return 2;
+		 }
 
-		// rd_kafka_topic_partition_list_destroy(topics);
+		 rd_kafka_topic_partition_list_destroy(topics);*/
 
 		if (rd_kafka_consume_start(rkt, partition, offset) == -1) {
 

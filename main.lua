@@ -103,26 +103,27 @@ for n=1, #meta.Topics do
 	
 	if(not meta.Topics[n].Name:match("^__"))then
 
-		io.write("Subscribing to "..tostring(meta.Topics[n].Name).." ");
+		for i=1, #meta.Topics[n].Partitions do
 
-		ok, lo, hi = c:GetOffsets(meta.Topics[n].Name, 0);
+			io.write("Subscribing to "..tostring(meta.Topics[n].Name).."."..meta.Topics[n].Partitions[i].Id.." ");
 
-		if ok then
+			ok, lo, hi = c:GetOffsets(meta.Topics[n].Name, meta.Topics[n].Partitions[i].Id);
 
-			local commit = c:GetCommitedOffset(meta.Topics[n].Name, 0, 1000);
+			if ok then
 
-			io.write("["..lo.." "..hi.."] ["..commit.."] ");
+				io.write("["..lo.." "..hi.."] ");
 
-			ok, err = c:Subscribe(meta.Topics[n].Name, 0, hi);
+				ok, err = c:Subscribe(meta.Topics[n].Name, meta.Topics[n].Partitions[i].Id, hi);
 
-			if ok then 
-				print("OK");
-				table.insert(topics, ok);
+				if ok then 
+					print("OK");
+					table.insert(topics, ok);
+				else 
+					print("FAIL: "..err);
+				end
 			else 
-				print("FAIL: "..err);
+				print("Unable to retrive offsets for "..meta.Topics[n].Name);
 			end
-		else 
-			print("Unable to retrive offsets for "..meta.Topics[n].Name);
 		end
 	end
 end 
@@ -138,10 +139,10 @@ print("short ->", ok);
 
 if ok then 
 	table.remove(topics, ok):Dispose();
-	--c:DeleteTopic("short");
+	c:DeleteTopic("short");
 end 
 
---assert(c:CreateTopic("short", 1));
+assert(c:CreateTopic("short", 1));
 assert(c:AlterConfig(2, "short", "cleanup.policy", "delete"));
 assert(c:AlterConfig(2, "short", "retention.ms", "3000"));
 assert(c:SetPartitions("short", 5));
@@ -224,13 +225,13 @@ while true do
 			if(data.ErrorCode == 0)then 
 				
 				--[[ok, err = c:Commit(msg);
-				ok, err = c:CommitOffsets(data.Topic, data.Partition, data.Offset);
+				--ok, err = c:CommitOffsets(data.Topic, data.Partition, data.Offset);
 				io.write("COMMIT: "..tostring(ok));
 				if err then 
 					print(" "..err);
 				else 
 					print(" ");
-				end ]]
+				end]]
 			end
 		end
 	end
