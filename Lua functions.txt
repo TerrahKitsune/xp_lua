@@ -43,6 +43,12 @@ Misc global functions:
 	-Compares two strings ignore case
 	bool string.equal(str1, str2)
 
+	-Returns the first object that the delegate returns that isnt nil
+	object table.first(table, function(key, value) ... end)
+
+	-Returns all non nil values from the delegate as an array
+	array table.select(table, function(key, value) ... end)
+
 	ToggleConsole(bool)
 	SetTitle(newtitle)
 
