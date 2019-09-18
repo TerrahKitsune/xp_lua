@@ -30,13 +30,13 @@ int lua_uuid(lua_State* L) {
 	memcpy(&buffer[sizeof(data1)], &data2, sizeof(data2));
 	memcpy(&buffer[sizeof(data1) + sizeof(data2)], &data3, sizeof(data3));
 	memcpy(&buffer[sizeof(data1) + sizeof(data2) + sizeof(data3)], guid.Data4, sizeof(guid.Data4));
-	
+
 	lua_pushlstring(L, buffer, sizeof(data1) + sizeof(data2) + sizeof(data3) + sizeof(guid.Data4));
 
 	return 2;
 }
 
-int lua_sleep(lua_State * L) {
+int lua_sleep(lua_State* L) {
 
 	int zzz = (int)luaL_optinteger(L, 1, 1);
 
@@ -50,7 +50,7 @@ int lua_sleep(lua_State * L) {
 	return 0;
 }
 
-static int GetLastErrorAsMessage(lua_State * L)
+static int GetLastErrorAsMessage(lua_State* L)
 {
 	DWORD lasterror = (DWORD)luaL_optinteger(L, 1, GetLastError());
 	char err[1024];
@@ -65,13 +65,13 @@ static int GetLastErrorAsMessage(lua_State * L)
 	return 2;
 }
 
-int Time(lua_State * L) {
+int Time(lua_State* L) {
 
 	lua_pushinteger(L, time(NULL));
 	return 1;
 }
 
-int NewEnvironment(lua_State * L) {
+int NewEnvironment(lua_State* L) {
 
 	if (!lua_isstring(L, 1) || lua_gettop(L) != 1) {
 		luaL_error(L, "Invalid parameters");
@@ -93,7 +93,7 @@ int NewEnvironment(lua_State * L) {
 	return 1;
 }
 
-int GetEnvironment(lua_State * L) {
+int GetEnvironment(lua_State* L) {
 
 	if (!lua_isstring(L, 1) || lua_gettop(L) != 1) {
 		luaL_error(L, "Invalid parameters");
@@ -112,7 +112,7 @@ int GetEnvironment(lua_State * L) {
 	return 1;
 }
 
-int GetCreateEnvironment(lua_State * L) {
+int GetCreateEnvironment(lua_State* L) {
 
 	const char* name = luaL_checkstring(L, 1);
 
@@ -127,7 +127,7 @@ int GetCreateEnvironment(lua_State * L) {
 	}
 }
 
-int GetAllEnvironment(lua_State * L) {
+int GetAllEnvironment(lua_State* L) {
 
 	lua_rawgeti(L, LUA_REGISTRYINDEX, env_table);
 
@@ -168,7 +168,83 @@ int GetStringEqual(lua_State* L) {
 	return 1;
 }
 
-int luaopen_misc(lua_State * L) {
+int TableFirst(lua_State* L) {
+
+	luaL_checktype(L, 1, LUA_TTABLE);
+	luaL_checktype(L, 2, LUA_TFUNCTION);
+
+	if (lua_gettop(L) > 2) {
+		lua_pop(L, lua_gettop(L) - 2);
+	}
+
+	lua_pushvalue(L, 1);
+	lua_pushnil(L);
+	while (lua_next(L, -2) != 0) {
+
+		lua_pushvalue(L, 2);
+		lua_pushvalue(L, 4);
+		lua_pushvalue(L, 5);
+
+		if (lua_pcall(L, 2, 1, 0) != 0) {
+			luaL_error(L, lua_tostring(L, -1));
+			return 0;
+		}
+
+		if (!lua_isnil(L, -1)) {
+			lua_copy(L, -1, 1);
+			lua_pop(L, lua_gettop(L) - 1);
+			return 1;
+		}
+
+		lua_pop(L, 2);
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushnil(L);
+	return 1;
+}
+
+int TableSelect(lua_State* L) {
+
+	luaL_checktype(L, 1, LUA_TTABLE);
+	luaL_checktype(L, 2, LUA_TFUNCTION);
+
+	if (lua_gettop(L) > 2) {
+		lua_pop(L, lua_gettop(L) - 2);
+	}
+
+	int n = 0;
+	lua_createtable(L, 0, 0);
+	lua_pushvalue(L, 1);
+	lua_pushnil(L);
+	while (lua_next(L, -2) != 0) {
+
+		lua_pushvalue(L, 2);
+		lua_pushvalue(L, 5);
+		lua_pushvalue(L, 6);
+
+		if (lua_pcall(L, 2, 1, 0) != 0) {
+			luaL_error(L, lua_tostring(L, -1));
+			return 0;
+		}
+
+		if (!lua_isnil(L, -1)) {
+
+			lua_rawseti(L, 3, ++n);
+			lua_pop(L, 1);
+		}
+		else {
+			lua_pop(L, 2);
+		}
+	}
+
+	lua_copy(L, 3, 1);
+	lua_pop(L, lua_gettop(L) - 1);
+
+	return 1;
+}
+
+int luaopen_misc(lua_State* L) {
 
 	lua_newtable(L);
 	env_table = luaL_ref(L, LUA_REGISTRYINDEX);
@@ -290,8 +366,20 @@ int luaopen_misc(lua_State * L) {
 
 	lua_setglobal(L, "c");
 
+	lua_getglobal(L, "string");
+	lua_pushstring(L, "equal");
 	lua_pushcfunction(L, GetStringEqual);
-	lua_setglobal(L, "StringEqual");
+	lua_settable(L, -3);
+	lua_pop(L, 1);
+
+	lua_getglobal(L, "table");
+	lua_pushstring(L, "first");
+	lua_pushcfunction(L, TableFirst);
+	lua_settable(L, -3);
+	lua_pushstring(L, "select");
+	lua_pushcfunction(L, TableSelect);
+	lua_settable(L, -3);
+	lua_pop(L, 1);
 
 	lua_pushcfunction(L, GetLastErrorAsMessage);
 	lua_setglobal(L, "GetLastError");

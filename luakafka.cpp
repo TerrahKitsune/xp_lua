@@ -258,11 +258,11 @@ int GetConfig(lua_State* L) {
 		return 2;
 	}
 
-	rd_kafka_queue_t * queue = rd_kafka_queue_new(luak->rd);
+	rd_kafka_queue_t* queue = rd_kafka_queue_new(luak->rd);
 
 	rd_kafka_DescribeConfigs(luak->rd, &conf, 1, adminopts, queue);
 
-	rd_kafka_event_t * ev = rd_kafka_queue_poll(queue, timeout);
+	rd_kafka_event_t* ev = rd_kafka_queue_poll(queue, timeout);
 
 	if (!ev) {
 		rd_kafka_queue_destroy(queue);
@@ -298,7 +298,7 @@ int GetConfig(lua_State* L) {
 		return 2;
 	}
 
-	const rd_kafka_DescribeConfigs_result_t * configresult = rd_kafka_event_DescribeConfigs_result(ev);
+	const rd_kafka_DescribeConfigs_result_t* configresult = rd_kafka_event_DescribeConfigs_result(ev);
 
 	if (!configresult) {
 		rd_kafka_event_destroy(ev);
@@ -312,10 +312,10 @@ int GetConfig(lua_State* L) {
 	}
 
 	size_t len;
-	const rd_kafka_ConfigResource_t ** configs = rd_kafka_DescribeConfigs_result_resources(configresult, &len);
+	const rd_kafka_ConfigResource_t** configs = rd_kafka_DescribeConfigs_result_resources(configresult, &len);
 
 	size_t reslen;
-	const rd_kafka_ConfigEntry_t ** configentries = rd_kafka_ConfigResource_configs(configs[0], &reslen);
+	const rd_kafka_ConfigEntry_t** configentries = rd_kafka_ConfigResource_configs(configs[0], &reslen);
 
 	if (len > 0 && configs) {
 		configentries = rd_kafka_ConfigResource_configs(configs[0], &reslen);
@@ -655,20 +655,87 @@ int DeleteTopic(lua_State* L) {
 	rd_kafka_DeleteTopics(luak->rd, &topic, 1, adminopts, queue);
 
 	rd_kafka_event_t* event = rd_kafka_queue_poll(queue, timeout);
+
+	if (!event || rd_kafka_event_type(event) != RD_KAFKA_EVENT_DELETETOPICS_RESULT) {
+
+		if (event) {
+			rd_kafka_event_destroy(event);
+		}
+		rd_kafka_queue_destroy(queue);
+		rd_kafka_DeleteTopic_destroy(topic);
+		rd_kafka_AdminOptions_destroy(adminopts);
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, "Unable to retrive event");
+		return 2;
+	}
+
 	err = rd_kafka_event_error(event);
+
+	lua_pop(L, lua_gettop(L));
+	if (err) {
+
+		rd_kafka_event_destroy(event);
+		rd_kafka_queue_destroy(queue);
+		rd_kafka_DeleteTopic_destroy(topic);
+		rd_kafka_AdminOptions_destroy(adminopts);
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, rd_kafka_err2str(err));
+		return 2;
+	}
+
+	const rd_kafka_DeleteTopics_result_t* result = rd_kafka_event_DeleteTopics_result(event);
+
+	if (!result) {
+
+		rd_kafka_event_destroy(event);
+		rd_kafka_queue_destroy(queue);
+		rd_kafka_DeleteTopic_destroy(topic);
+		rd_kafka_AdminOptions_destroy(adminopts);
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, "Unable to retrive event");
+		return 2;
+	}
+
+	size_t len;
+	const rd_kafka_topic_result_t** configs = rd_kafka_DeleteTopics_result_topics(result, &len);
+
+	if (len <= 0) {
+		rd_kafka_event_destroy(event);
+		rd_kafka_queue_destroy(queue);
+		rd_kafka_DeleteTopic_destroy(topic);
+		rd_kafka_AdminOptions_destroy(adminopts);
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, "Unable to retrive event");
+		return 2;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_createtable(L, 0, 3);
+
+	lua_pushstring(L, "Error");
+	lua_pushstring(L, rd_kafka_topic_result_error_string(configs[0]));
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "ErrorCode");
+	lua_pushinteger(L, rd_kafka_topic_result_error(configs[0]));
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "Name");
+	lua_pushstring(L, rd_kafka_topic_result_name(configs[0]));
+	lua_settable(L, -3);
 
 	rd_kafka_event_destroy(event);
 	rd_kafka_queue_destroy(queue);
 	rd_kafka_DeleteTopic_destroy(topic);
 	rd_kafka_AdminOptions_destroy(adminopts);
-
-	lua_pop(L, lua_gettop(L));
-	lua_pushboolean(L, !err);
-	if (err)
-	{
-		lua_pushstring(L, rd_kafka_err2str(err));
-		return 2;
-	}
 
 	return 1;
 }
@@ -732,19 +799,64 @@ int AlterConfig(lua_State* L) {
 
 	rd_kafka_event_t* ev = rd_kafka_queue_poll(queue, timeout);
 
+	if (!ev || rd_kafka_event_type(ev) != RD_KAFKA_EVENT_ALTERCONFIGS_RESULT) {
+
+		if (ev) {
+			rd_kafka_event_destroy(ev);
+		}
+
+		rd_kafka_ConfigResource_destroy(conf);
+		rd_kafka_AdminOptions_destroy(adminopts);
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, "Unable to retrive event");
+		return 2;
+	}
+
 	err = rd_kafka_event_error(ev);
+
+	if (err) {
+		rd_kafka_event_destroy(ev);
+		rd_kafka_ConfigResource_destroy(conf);
+		rd_kafka_AdminOptions_destroy(adminopts);
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, rd_kafka_err2str(err));
+		return 2;
+	}
+
+	size_t len;
+	const rd_kafka_ConfigResource_t** configs = rd_kafka_AlterConfigs_result_resources(rd_kafka_event_AlterConfigs_result(ev), &len);
+
+	if (len <= 0) {
+		rd_kafka_event_destroy(ev);
+		rd_kafka_ConfigResource_destroy(conf);
+		rd_kafka_AdminOptions_destroy(adminopts);
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, "Unable to retrive result");
+		return 2;
+	}
+
+	size_t reslen;
+	const rd_kafka_ConfigEntry_t** entries = rd_kafka_ConfigResource_configs(configs[0], &reslen);
+
+	lua_pop(L, lua_gettop(L));
+	lua_createtable(L, 0, len);
+
+	for (size_t i = 0; i < reslen; i++)
+	{
+		lua_pushstring(L, rd_kafka_ConfigEntry_name(entries[i]));
+		lua_pushstring(L, rd_kafka_ConfigEntry_value(entries[i]));
+		lua_settable(L, -3);
+	}
 
 	rd_kafka_event_destroy(ev);
 	rd_kafka_ConfigResource_destroy(conf);
 	rd_kafka_AdminOptions_destroy(adminopts);
-
-	lua_pop(L, lua_gettop(L));
-	lua_pushboolean(L, !err);
-	if (err)
-	{
-		lua_pushstring(L, rd_kafka_err2str(err));
-		return 2;
-	}
 
 	return 1;
 }
@@ -777,20 +889,84 @@ int CreatePartition(lua_State* L) {
 	rd_kafka_CreatePartitions(luak->rd, &parts, 1, adminopts, queue);
 
 	rd_kafka_event_t* event = rd_kafka_queue_poll(queue, timeout);
+
+	if (!event || rd_kafka_event_type(event) != RD_KAFKA_EVENT_CREATEPARTITIONS_RESULT) {
+
+		if (event) {
+			rd_kafka_event_destroy(event);
+		}
+		rd_kafka_queue_destroy(queue);
+		rd_kafka_AdminOptions_destroy(adminopts);
+		rd_kafka_NewPartitions_destroy(parts);
+
+		lua_pop(L, lua_gettop(L));
+
+		lua_pushnil(L);
+		lua_pushstring(L, "Unable to retrive result");
+		return 2;
+	}
+
 	err = rd_kafka_event_error(event);
+
+	if (err) {
+
+		rd_kafka_event_destroy(event);
+		rd_kafka_queue_destroy(queue);
+		rd_kafka_AdminOptions_destroy(adminopts);
+		rd_kafka_NewPartitions_destroy(parts);
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, rd_kafka_err2str(err));
+		return 2;
+	}
+
+	const rd_kafka_CreatePartitions_result_t* result = rd_kafka_event_CreatePartitions_result(event);
+
+	if (!result) {
+
+		rd_kafka_event_destroy(event);
+		rd_kafka_queue_destroy(queue);
+		rd_kafka_AdminOptions_destroy(adminopts);
+		rd_kafka_NewPartitions_destroy(parts);
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, "Unable to retrive result");
+		return 2;
+	}
+
+	size_t len;
+	const rd_kafka_topic_result_t** configs = rd_kafka_CreatePartitions_result_topics(result, &len);
+
+	if (len <= 0) {
+		rd_kafka_event_destroy(event);
+		rd_kafka_queue_destroy(queue);
+		rd_kafka_AdminOptions_destroy(adminopts);
+		rd_kafka_NewPartitions_destroy(parts);
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, "Unable to retrive result");
+		return 2;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_createtable(L, 0, 3);
+
+	lua_pushstring(L, "Error");
+	lua_pushstring(L, rd_kafka_topic_result_error_string(configs[0]));
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "ErrorCode");
+	lua_pushinteger(L, rd_kafka_topic_result_error(configs[0]));
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "Name");
+	lua_pushstring(L, rd_kafka_topic_result_name(configs[0]));
+	lua_settable(L, -3);
 
 	rd_kafka_event_destroy(event);
 	rd_kafka_queue_destroy(queue);
 	rd_kafka_AdminOptions_destroy(adminopts);
 	rd_kafka_NewPartitions_destroy(parts);
-
-	lua_pop(L, lua_gettop(L));
-	lua_pushboolean(L, !err);
-	if (err)
-	{
-		lua_pushstring(L, rd_kafka_err2str(err));
-		return 2;
-	}
 
 	return 1;
 }
@@ -870,7 +1046,7 @@ int CreateTopic(lua_State* L) {
 		lua_pushstring(L, "Unable to retrive event");
 		return 2;
 	}
-	
+
 	err = rd_kafka_event_error(event);
 
 	lua_pop(L, lua_gettop(L));
@@ -890,14 +1066,14 @@ int CreateTopic(lua_State* L) {
 	const rd_kafka_CreateTopics_result_t* res = rd_kafka_event_CreateTopics_result(event);
 
 	size_t len;
-	const rd_kafka_topic_result_t ** results = rd_kafka_CreateTopics_result_topics(res, &len);
+	const rd_kafka_topic_result_t** results = rd_kafka_CreateTopics_result_topics(res, &len);
 
 	lua_createtable(L, 0, 3);
 
 	lua_pushstring(L, "ErrorCode");
 	lua_pushinteger(L, rd_kafka_topic_result_error(results[0]));
 	lua_settable(L, -3);
-	
+
 	lua_pushstring(L, "Error");
 	lua_pushstring(L, rd_kafka_topic_result_error_string(results[0]));
 	lua_settable(L, -3);
@@ -1009,34 +1185,6 @@ int SubscribeToTopic(lua_State* L) {
 	if (luak->type == RD_KAFKA_CONSUMER) {
 
 		rd_kafka_resp_err_t err;
-
-		/*rd_kafka_topic_partition_list_t* topics;
-
-		 err = rd_kafka_subscription(luak->rd, &topics);
-
-		 if (err) {
-			 lua_pushnil(L);
-			 lua_pushstring(L, rd_kafka_err2str(err));
-			 rd_kafka_topic_destroy(rkt);
-			 return 2;
-		 }
-
-		 if (!topics) {
-			 topics = rd_kafka_topic_partition_list_new(1);
-		 }
-
-		 rd_kafka_topic_partition_list_add(topics, topic, partition);
-
-		 err = rd_kafka_subscribe(luak->rd,topics);
-
-		 if (err) {
-			 lua_pushnil(L);
-			 lua_pushstring(L, rd_kafka_err2str(err));
-			 rd_kafka_topic_destroy(rkt);
-			 return 2;
-		 }
-
-		 rd_kafka_topic_partition_list_destroy(topics);*/
 
 		if (rd_kafka_consume_start(rkt, partition, offset) == -1) {
 

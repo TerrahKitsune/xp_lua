@@ -41,7 +41,7 @@ Misc global functions:
 	string GetRegistryValue(key,subkey,entry)
 
 	-Compares two strings ignore case
-	bool StringEqual(str1, str2)
+	bool string.equal(str1, str2)
 
 	ToggleConsole(bool)
 	SetTitle(newtitle)
@@ -157,24 +157,24 @@ Kafka:
 	kafkatopic, errormsg Kafka:Subscribe(topicname, partition, offset, opt conf)
 
 	-Creates a topic with a number of partitions
-	bool, errormsg Kafka:CreateTopic(topicname, opt partitions, opt replicationfactor, opt brokerid, opt requesttimeout, opt operationtimeout)
+	table, errormsg Kafka:CreateTopic(topicname, opt partitions, opt replicationfactor, opt brokerid, opt requesttimeout, opt operationtimeout)
 
 	-Delete a topic, this might fail if the broker does not allow topic deletion
-	bool, errormsg Kafka:DeleteTopic(topicname)
+	table, errormsg Kafka:DeleteTopic(topicname)
 
 	-Set a config
 	-resource type: any=1, topic=2, group=3, broker=4
 	-resourcename: example: a topic name
 	-configvalue: example: retention.ms
 	-configvalue: example: 604800000
-	bool, errormsg Kafka:AlterConfig(resourcetype, resourcename, configname, configvalue, opt timeout)
+	table, errormsg Kafka:AlterConfig(resourcetype, resourcename, configname, configvalue, opt timeout)
 
 	-Get config
 	-returns nil and an error msg on error
 	table Kafka:GetConfig(resourcetype, resourcename, opt timeout)
 
 	-Create new partions in the topic
-	bool, errormsg Kafka:SetPartitions(topicname, newpartitioncount, opt timeout)
+	table, errormsg Kafka:SetPartitions(topicname, newpartitioncount, opt timeout)
 
 	-Pauses a topic+partition
 	bool, errormsg Kafka:PauseTopic(Kafkatopic)
