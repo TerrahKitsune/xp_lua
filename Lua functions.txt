@@ -142,25 +142,19 @@ Kafka:
 	-If the filename is an empty string the file will be closed
 	string Kafka.Logs(opt filename)
 
-	-Polls for messages
+	-Consume a message from a kafkatopic (started with StartTopicConsumer)
 	-This fails if attempted on a kafka that isnt a consumer
-	-topicobject is the object retrived from Subscribe
 	-Returns nil if there is no new messages
 	-kafka message object is described below
-	kafkamessage Kafka:Poll(topicobject)
+	kafkamessage Kafka:Consume(topicobject)
 
 	-Query for the offset for a topic and a partition
 	-returns true and lowest, highest on success and false and an error message on failure
 	bool, low, high Kafka:GetOffsets(topic, partition, opt timeout)
 
-	-Subscribes to a topic (Depending on the settings this might create the topic if it doesnt exist)
-	-returns a topic object on success or a nil and a error message on failure
-	-if a conf is given it should be given as a table of key values
-	-example: 
-	-local conf = {};
-	-conf["retention.ms"]="604800000";
-	-see topic object below
-	kafkatopic, errormsg Kafka:Subscribe(topicname, partition, offset, opt conf)
+	-Start consuming on a topic+partition
+	-This returns a kafkatopic object (see below) or nil and an error message
+	kafkatopic, errormsg Kafka:StartTopicConsumer(topicname, partition, offset, opt conf)
 
 	-Creates a topic with a number of partitions
 	table, errormsg Kafka:CreateTopic(topicname, opt partitions, opt replicationfactor, opt brokerid, opt requesttimeout, opt operationtimeout)

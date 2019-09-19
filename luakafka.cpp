@@ -166,7 +166,21 @@ int ProduceMessage(lua_State* L) {
 	return 1;
 }
 
-int PollMessage(lua_State* L) {
+//int Subscribe(lua_State* L) {
+//
+//	LuaKafka* luak = lua_tokafka(L, 1);
+//
+//	if (!luak->rd) {
+//		luaL_error(L, "Kafka object not open");
+//		return 0;
+//	}
+//	else if (luak->type != RD_KAFKA_CONSUMER) {
+//		luaL_error(L, "Only consumers may subscribe");
+//		return 0;
+//	}
+//}
+
+int ConsumeMessage(lua_State* L) {
 
 	LuaKafka* luak = lua_tokafka(L, 1);
 
@@ -175,7 +189,7 @@ int PollMessage(lua_State* L) {
 		return 0;
 	}
 	else if (luak->type != RD_KAFKA_CONSUMER) {
-		luaL_error(L, "Only consumers may poll for messages");
+		luaL_error(L, "Only consumers may consume for messages");
 		return 0;
 	}
 
@@ -673,7 +687,6 @@ int DeleteTopic(lua_State* L) {
 
 	err = rd_kafka_event_error(event);
 
-	lua_pop(L, lua_gettop(L));
 	if (err) {
 
 		rd_kafka_event_destroy(event);
@@ -736,6 +749,47 @@ int DeleteTopic(lua_State* L) {
 	rd_kafka_queue_destroy(queue);
 	rd_kafka_DeleteTopic_destroy(topic);
 	rd_kafka_AdminOptions_destroy(adminopts);
+
+	return 1;
+}
+
+int GetCommitted(lua_State* L) {
+
+	LuaKafka* luak = lua_tokafka(L, 1);
+	const char* topicname = luaL_checkstring(L, 2);
+	int partition = luaL_checkinteger(L, 3);
+	int timeout = luaL_optinteger(L, 4, 10000);
+
+	if (!luak->rd) {
+		luaL_error(L, "Kafka object not open");
+		return 0;
+	}
+
+	rd_kafka_topic_partition_list_t* partitions = rd_kafka_topic_partition_list_new(1);
+	rd_kafka_topic_partition_t* part = rd_kafka_topic_partition_list_add(partitions, topicname, partition);
+
+	if (!part) {
+		rd_kafka_topic_partition_list_destroy(partitions);
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, "Unable to query partition");
+		return 2;
+	}
+
+	rd_kafka_resp_err_t err = rd_kafka_committed(luak->rd, partitions, timeout);
+
+	if (err) {
+
+		rd_kafka_topic_partition_list_destroy(partitions);
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, rd_kafka_err2str(err));
+		return 2;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, part->offset);
+	rd_kafka_topic_partition_list_destroy(partitions);
 
 	return 1;
 }
@@ -1164,7 +1218,7 @@ int ResumePartition(lua_State* L) {
 	return 1;
 }
 
-int SubscribeToTopic(lua_State* L) {
+int StartTopicConsumer(lua_State* L) {
 
 	LuaKafka* luak = lua_tokafka(L, 1);
 

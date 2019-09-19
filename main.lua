@@ -75,10 +75,11 @@ local delete=false;
 local autocommit = true;
 local conf = {};
 conf["offset.store.method"]="broker";
---conf["enable.partition.eof"]="true";
+conf["enable.partition.eof"]="true";
 conf["enable.auto.commit"]=tostring(autocommit);
 conf["auto.offset.reset"]="earliest";
 conf["group.id"]="LUA";
+conf["client.id"]="LUA";
 print(conf["enable.auto.commit"]);
 local c = assert(Kafka.NewConsumer(conf));
 c:Logs("E:/kafka.log");
@@ -99,8 +100,9 @@ DumpToFile("E:/group.json", c:GetGroups());
 local function SubscribeAll(c)
 
 	local meta = assert(c:GetMetadata(10000));
-	local ok, hi,lo;
+	local ok, hi,lo,co;
 	local topics = {};
+	local err;
 
 	for n=1, #meta.Topics do 
 	
@@ -112,11 +114,17 @@ local function SubscribeAll(c)
 
 				ok, lo, hi = c:GetOffsets(meta.Topics[n].Name, meta.Topics[n].Partitions[i].Id);
 
+				co, err = c:GetCommitted(meta.Topics[n].Name, meta.Topics[n].Partitions[i].Id);
+
+				if not co then 
+					co = err;
+				end 
+
 				if ok then
 
-					io.write("["..lo.." "..hi.."] ");
+					io.write("["..lo.." "..hi.." "..co.."] ");
 
-					ok, err = c:Subscribe(meta.Topics[n].Name, meta.Topics[n].Partitions[i].Id, lo);
+					ok, err = c:StartTopicConsumer(meta.Topics[n].Name, meta.Topics[n].Partitions[i].Id, lo);
 
 					if ok then 
 						print("OK");
@@ -176,9 +184,9 @@ if conf["retention.bytes"] ~= "1073741824" then
 	for k,v in pairs(ok) do print(k,v); end
 end 
 
-if conf["retention.ms"] ~= "60000" then
-	print("retention.ms", "60000");
-	ok = assert(c:AlterConfig(2, "temp", "retention.ms", "60000"));
+if conf["retention.ms"] ~= "5000" then
+	print("retention.ms", "5000");
+	ok = assert(c:AlterConfig(2, "temp", "retention.ms", "5000"));
 	for k,v in pairs(ok) do print(k,v); end
 end 
 
@@ -204,7 +212,7 @@ while true do
 	end
 
 	for n=1, #topics do
-		msg = c:Poll(topics[n]);
+		msg = c:Consume(topics[n]);
 		if msg then 
 			ok = true;
 			data = msg:GetData();

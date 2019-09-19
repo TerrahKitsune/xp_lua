@@ -19,6 +19,7 @@ typedef struct LuaKafka {
 LuaKafka* lua_pushkafka(lua_State* L);
 LuaKafka* lua_tokafka(lua_State* L, int index);
 
+int GetCommitted(lua_State* L);
 int ProduceMessage(lua_State* L);
 int AlterConfig(lua_State* L);
 int DeleteTopic(lua_State* L);
@@ -30,8 +31,8 @@ int AddBroker(lua_State* L);
 int DescribeGroups(lua_State* L);
 int GetLastLogs(lua_State* L);
 int GetMetadata(lua_State* L);
-int PollMessage(lua_State* L);
-int SubscribeToTopic(lua_State* L);
+int ConsumeMessage(lua_State* L);
+int StartTopicConsumer(lua_State* L);
 int CreatePartition(lua_State* L);
 int PollEvents(lua_State* L);
 int PausePartition(lua_State* L);

@@ -14,8 +14,8 @@ static const struct luaL_Reg kafkafunctions[] = {
 	{ "GetGroups",  DescribeGroups },
 	{ "GetMetadata",  GetMetadata },
 	{ "Logs",  GetLastLogs },
-	{ "Poll",  PollMessage },
-	{ "Subscribe",  SubscribeToTopic },
+	{ "Consume",  ConsumeMessage },
+	{ "StartTopicConsumer",  StartTopicConsumer },
 	{ "GetOffsets",  QueryHighLow },
 	{ "CreateTopic",  CreateTopic },
 	{ "DeleteTopic",  DeleteTopic },
@@ -26,6 +26,7 @@ static const struct luaL_Reg kafkafunctions[] = {
 	{ "PauseTopic",  PausePartition },
 	{ "ResumeTopic",  ResumePartition },
 	{ "GetConfig",  GetConfig },
+	{ "GetCommitted",  GetCommitted },
 	{ NULL, NULL }
 }; 
 

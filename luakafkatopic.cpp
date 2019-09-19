@@ -8,31 +8,31 @@
 
 int GetKafkaTopicOwnerId(lua_State* L) {
 
-	LuaKafkaTopic* kafkamsg = lua_tokafkatopic(L, 1);
+	LuaKafkaTopic* kafkatopic = lua_tokafkatopic(L, 1);
 
-	if (!kafkamsg->topic) {
+	if (!kafkatopic->topic) {
 		luaL_error(L, "Kafka topic is disposed");
 		return 0;
 	}
 
 	lua_pop(L, lua_gettop(L));
-	lua_pushinteger(L, (lua_Integer)kafkamsg->owner);
+	lua_pushinteger(L, (lua_Integer)kafkatopic->owner);
 
 	return 1;
 }
 
 int GetKafkaTopicInfo(lua_State* L) {
 
-	LuaKafkaTopic* kafkamsg = lua_tokafkatopic(L, 1);
+	LuaKafkaTopic* kafkatopic = lua_tokafkatopic(L, 1);
 
-	if (!kafkamsg->topic) {
+	if (!kafkatopic->topic) {
 		luaL_error(L, "Kafka topic is disposed");
 		return 0;
 	}
 
 	lua_pop(L, lua_gettop(L));
-	lua_pushstring(L, kafkamsg->name);
-	lua_pushinteger(L, kafkamsg->partition);
+	lua_pushstring(L, kafkatopic->name);
+	lua_pushinteger(L, kafkatopic->partition);
 
 	return 2;
 }
@@ -45,7 +45,7 @@ LuaKafkaTopic* lua_pushkafkatopic(lua_State* L, const char* name) {
 	luaL_getmetatable(L, LUAKAFKATOPIC);
 	lua_setmetatable(L, -2);
 	memset(lkafka, 0, sizeof(LuaKafkaTopic));
-
+	
 	if (name) {
 		lkafka->name = (char*)calloc(strlen(name) + 1, sizeof(char));
 		strcpy(lkafka->name, name);
