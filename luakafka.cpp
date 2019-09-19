@@ -83,6 +83,38 @@ int CommitMessage(lua_State* L) {
 	return 1;
 }
 
+int PollMessages(lua_State* L) {
+
+	LuaKafka* luak = lua_tokafka(L, 1);
+
+	if (!luak->rd) {
+		luaL_error(L, "Kafka object not open");
+		return 0;
+	}
+	else if (luak->type != RD_KAFKA_CONSUMER) {
+		luaL_error(L, "Only consumers may consume for messages");
+		return 0;
+	}
+
+	int timeout = luaL_optinteger(L, 3, 0);
+	rd_kafka_message_t* rkmessage;
+
+	rkmessage = rd_kafka_consumer_poll(luak->rd, timeout);
+	
+	lua_pop(L, lua_gettop(L));
+
+	if (rkmessage) {
+		LuaKafkaMessage* msg = lua_pushkafkamsg(L);
+		msg->message = rkmessage;
+		msg->owner = luak->rd;
+	}
+	else {
+		lua_pushnil(L);
+	}
+
+	return 1;
+}
+
 int PollEvents(lua_State* L) {
 
 	LuaKafka* luak = lua_tokafka(L, 1);
@@ -114,9 +146,8 @@ int PollEvents(lua_State* L) {
 		lua_pushinteger(L, rd_kafka_event_error(ev));
 		lua_settable(L, -3);
 	}
-	else {
-		lua_pushnil(L);
-	}
+
+	lua_pushnil(L);
 
 	return 1;
 }
@@ -166,19 +197,109 @@ int ProduceMessage(lua_State* L) {
 	return 1;
 }
 
-//int Subscribe(lua_State* L) {
-//
-//	LuaKafka* luak = lua_tokafka(L, 1);
-//
-//	if (!luak->rd) {
-//		luaL_error(L, "Kafka object not open");
-//		return 0;
-//	}
-//	else if (luak->type != RD_KAFKA_CONSUMER) {
-//		luaL_error(L, "Only consumers may subscribe");
-//		return 0;
-//	}
-//}
+int Subscribe(lua_State* L) {
+
+	LuaKafka* luak = lua_tokafka(L, 1);
+	const char* topic = luaL_checkstring(L, 2);
+	int partition = luaL_optinteger(L, 3, -1);
+
+	if (!luak->rd) {
+		luaL_error(L, "Kafka object not open");
+		return 0;
+	}
+	else if (luak->type != RD_KAFKA_CONSUMER) {
+		luaL_error(L, "Only consumers may subscribe");
+		return 0;
+	}
+
+	rd_kafka_topic_partition_list_t* topics;
+	rd_kafka_resp_err_t err = rd_kafka_subscription(luak->rd, &topics);
+
+	if (err) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		lua_pushstring(L, rd_kafka_err2str(err));
+		return 2;
+	}
+	else if (!topics) {
+		topics = rd_kafka_topic_partition_list_new(1);
+	}
+
+	rd_kafka_topic_partition_t* part = rd_kafka_topic_partition_list_add(topics, topic, partition);
+
+	if (!part) {
+		rd_kafka_topic_partition_list_destroy(topics);
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		lua_pushstring(L, "Unable to add partition to list");
+		return 2;
+	}
+
+	err = rd_kafka_subscribe(luak->rd, topics);
+
+	rd_kafka_topic_partition_list_destroy(topics);
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, !err);
+	if (err) {
+		lua_pushstring(L, rd_kafka_err2str(err));
+		return 2;
+	}
+
+	return 1;
+}
+
+int Assign(lua_State* L) {
+
+	LuaKafka* luak = lua_tokafka(L, 1);
+	const char* topic = luaL_checkstring(L, 2);
+	int partition = luaL_checkinteger(L, 3);
+
+	if (!luak->rd) {
+		luaL_error(L, "Kafka object not open");
+		return 0;
+	}
+	else if (luak->type != RD_KAFKA_CONSUMER) {
+		luaL_error(L, "Only consumers may assign");
+		return 0;
+	}
+
+	rd_kafka_topic_partition_list_t* topics;
+	rd_kafka_resp_err_t err = rd_kafka_assignment(luak->rd, &topics);
+
+	if (err) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		lua_pushstring(L, rd_kafka_err2str(err));
+		return 2;
+	}
+	else if (!topics) {
+		topics = rd_kafka_topic_partition_list_new(1);
+	}
+
+	rd_kafka_topic_partition_t* part = rd_kafka_topic_partition_list_add(topics, topic, partition);
+
+	if (!part) {
+		rd_kafka_topic_partition_list_destroy(topics);
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		lua_pushstring(L, "Unable to add partition to list");
+		return 2;
+	}
+
+	err = rd_kafka_assign(luak->rd, topics);
+
+	rd_kafka_topic_partition_list_destroy(topics);
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, !err);
+	if (err) {
+		lua_pushstring(L, rd_kafka_err2str(err));
+		return 2;
+	}
+
+	return 1;
+}
 
 int ConsumeMessage(lua_State* L) {
 

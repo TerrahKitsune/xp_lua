@@ -142,11 +142,25 @@ Kafka:
 	-If the filename is an empty string the file will be closed
 	string Kafka.Logs(opt filename)
 
+	-Subscribes to a kafka topic if no partition is given it subscribes to all of them
+	-use Poll to retrive messages
+	bool, errormsg Kafka:Subscribe(topic, opt partition)
+
+	-Assigns to a topic+partition
+	bool, errormsg Kafka:Assign(topic, partition)
+
+	-Polls for messages from assigned or subscribed topics
+	-returns nil if there is no new message
+	kafkamessage Kafka:Poll()
+
 	-Consume a message from a kafkatopic (started with StartTopicConsumer)
 	-This fails if attempted on a kafka that isnt a consumer
 	-Returns nil if there is no new messages
 	-kafka message object is described below
 	kafkamessage Kafka:Consume(topicobject)
+
+	-Get the current commited offset (-1001 = none recorded)
+	int Kafka:GetCommitted(topic, partition)
 
 	-Query for the offset for a topic and a partition
 	-returns true and lowest, highest on success and false and an error message on failure

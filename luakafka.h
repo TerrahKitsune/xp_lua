@@ -40,6 +40,9 @@ int ResumePartition(lua_State* L);
 int CreateProducer(lua_State* L);
 int GetConfig(lua_State* L);
 int CommitMessage(lua_State* L);
+int Subscribe(lua_State* L);
+int PollMessages(lua_State* L);
+int Assign(lua_State* L);
 
 int kafka_gc(lua_State* L);
 int kafka_tostring(lua_State* L);

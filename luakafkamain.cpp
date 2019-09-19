@@ -5,6 +5,7 @@
 
 static const struct luaL_Reg kafkafunctions[] = {
 
+	{ "Poll",  PollMessages },
 	{ "Events",  PollEvents },
 	{ "NewConsumer",  CreateConsumer },
 	{ "NewProducer",  CreateProducer },
@@ -27,6 +28,8 @@ static const struct luaL_Reg kafkafunctions[] = {
 	{ "ResumeTopic",  ResumePartition },
 	{ "GetConfig",  GetConfig },
 	{ "GetCommitted",  GetCommitted },
+	{ "Subscribe",  Subscribe },
+	{ "Assign",  Assign },
 	{ NULL, NULL }
 }; 
 
