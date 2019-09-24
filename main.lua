@@ -72,7 +72,7 @@ print("\n\n");
 SetTitle("librdkafka");
 
 local delete=false;
-local subscribe = true;
+local subscribe = false;
 local autocommit = false;
 local conf = {};
 conf["offset.store.method"]="broker";
@@ -84,8 +84,8 @@ conf["client.id"]="LUA";
 print(conf["enable.auto.commit"]);
 local c = assert(Kafka.NewConsumer(conf));
 c:Logs("E:/kafka.log");
-
-c:AddBroker("192.168.2.170");
+local addr = "192.168.2.170";
+c:AddBroker(addr);
 
 local ok, err;
 
@@ -97,6 +97,7 @@ end
 print("Connected");
 DumpToFile("E:/meta.json", meta);
 DumpToFile("E:/group.json", c:GetGroups());
+local hashttp = false;
 
 local function SubscribeAll(c)
 
@@ -125,7 +126,12 @@ local function SubscribeAll(c)
 
 					io.write("["..lo.." "..hi.." "..co.."] ");
 
-					ok, err = c:StartTopicConsumer(meta.Topics[n].Name, meta.Topics[n].Partitions[i].Id, lo);
+					if meta.Topics[n].Name == "HttpRequests" then 
+						hashttp = true;
+						lo = hi;
+					end 
+
+					ok, err = c:OpenTopic(meta.Topics[n].Name, meta.Topics[n].Partitions[i].Id, hi);
 
 					if ok then 
 						print("OK");
@@ -195,6 +201,29 @@ if subscribe then
 else
 
 	local topics = SubscribeAll(c);
+
+	local HttpTest = nil;
+if hashttp then
+
+	local producer = Kafka.NewProducer();
+	producer:AddBroker(addr);
+	local ptopic = producer:OpenTopic("HttpResponses");
+
+HttpTest = function(msg)
+	print("http");
+	local data = JSON:decode(msg.Payload);
+	TablePrint(data);
+
+	local resp = {StatusCode=200, RedirectUri="", Headers={}};
+	
+	resp.Headers["Content-Type"] = "application/json";
+	resp.Body = msg.Payload;
+
+	producer:Send(ptopic, JSON:encode_pretty(resp), nil, msg.Key);
+end
+
+	end
+
 	local find = table.select(topics, function(k,v) if v:GetInfo()=="temp" then return k; end end);
 
 	if delete and #find>0 then 
@@ -269,6 +298,11 @@ else
 				ok = true;
 				data = msg:GetData();
 				time, ty = msg:GetTimestamp();
+
+				if HttpTest and data.Topic == "HttpRequests" then 					
+					print(pcall(HttpTest,data));
+				end
+
 				print("["..data.Topic.."] ["..data.Error.."] ["..data.Partition..":"..data.Offset.."] ["..msg:GetOwnerId().."] ["..ty..":"..time.."] ["..msg:GetLatency().."] "..tostring(data.Key)..": "..data.Payload);
 				if not autocommit and data.ErrorCode == 0 then 
 					ok, err = c:Commit(msg);

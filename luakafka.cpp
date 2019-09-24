@@ -1349,7 +1349,7 @@ int StartTopicConsumer(lua_State* L) {
 	}
 
 	const char* topic = luaL_checkstring(L, 2);
-	int partition = luaL_checkinteger(L, 3);
+	int partition = luaL_optinteger(L, 3, 0);
 	int64_t offset = luaL_optinteger(L, 4, RD_KAFKA_OFFSET_END);
 	rd_kafka_topic_conf_t* conf = lua_tokafkatopicconf(L, 5);
 

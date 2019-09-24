@@ -16,7 +16,7 @@ static const struct luaL_Reg kafkafunctions[] = {
 	{ "GetMetadata",  GetMetadata },
 	{ "Logs",  GetLastLogs },
 	{ "Consume",  ConsumeMessage },
-	{ "StartTopicConsumer",  StartTopicConsumer },
+	{ "OpenTopic",  StartTopicConsumer },
 	{ "GetOffsets",  QueryHighLow },
 	{ "CreateTopic",  CreateTopic },
 	{ "DeleteTopic",  DeleteTopic },

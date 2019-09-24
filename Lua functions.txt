@@ -168,7 +168,7 @@ Kafka:
 
 	-Start consuming on a topic+partition
 	-This returns a kafkatopic object (see below) or nil and an error message
-	kafkatopic, errormsg Kafka:StartTopicConsumer(topicname, partition, offset, opt conf)
+	kafkatopic, errormsg Kafka:OpenTopic(topicname, opt partition, offset, opt conf)
 
 	-Creates a topic with a number of partitions
 	table, errormsg Kafka:CreateTopic(topicname, opt partitions, opt replicationfactor, opt brokerid, opt requesttimeout, opt operationtimeout)
