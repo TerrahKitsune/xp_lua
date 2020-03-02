@@ -244,6 +244,45 @@ int TableSelect(lua_State* L) {
 	return 1;
 }
 
+DWORD crc32(byte* data, int size, DWORD crc)
+{
+	DWORD r = crc;
+	byte* end = data + size;
+	DWORD t;
+
+	while (data < end)
+	{
+		r ^= *data++;
+
+		for (int i = 0; i < 8; i++)
+		{
+			t = ~((r & 1) - 1); 
+			r = (r >> 1) ^ (0xEDB88320 & t);
+		}
+	}
+
+	return ~r;
+}
+
+int CRC32(lua_State* L) {
+
+	size_t size;
+	const char* data = lua_tolstring(L, 1, &size);
+	DWORD crc = 0xFFFFFFFF;
+
+	if (lua_isnumber(L, 2)) {
+		crc = ~(DWORD)lua_tonumber(L, 2);
+	}
+
+	crc = crc32((BYTE*)data, size, crc);
+
+	lua_pop(L, lua_gettop(L));
+
+	lua_pushinteger(L, crc);
+
+	return 1;
+}
+
 int luaopen_misc(lua_State* L) {
 
 	lua_newtable(L);
@@ -392,6 +431,9 @@ int luaopen_misc(lua_State* L) {
 
 	lua_pushcfunction(L, Time);
 	lua_setglobal(L, "Time");
+
+	lua_pushcfunction(L, CRC32);
+	lua_setglobal(L, "CRC32");
 
 	lua_newtable(L);
 
