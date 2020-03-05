@@ -28,6 +28,7 @@
 #include "luasocketmain.h"
 #include "lualinkedlistmain.h"
 #include "luakafkamain.h"
+#include "Sha256Main.h"
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 static int print(lua_State *L){
@@ -122,6 +123,8 @@ LuaEngine::LuaEngine()
 	lua_setglobal(L, "LinkedList");
 	luaopen_kafka(L);
 	lua_setglobal(L, "Kafka");
+	luaopen_sha256(L);
+	lua_setglobal(L, "SHA256");
 
 	luaopen_misc(L);
 

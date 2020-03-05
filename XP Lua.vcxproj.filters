@@ -235,6 +235,15 @@
     <Filter Include="LuaKafka\Source Files">
       <UniqueIdentifier>{dfecfb33-e7ad-43d5-bc3a-ed74d9301809}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaSha256">
+      <UniqueIdentifier>{3270e4f0-d618-40b7-a475-1199ba859049}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaSha256\Header Files">
+      <UniqueIdentifier>{49414460-974c-471b-bd46-07023c9af69a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaSha256\Source Files">
+      <UniqueIdentifier>{1fce70a0-b18f-4b7a-9904-6a38ad897361}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\plugin.cpp">
@@ -591,6 +600,15 @@
     <ClCompile Include="luakafkatopic.cpp">
       <Filter>LuaKafka\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LuaSha256.cpp">
+      <Filter>LuaSha256\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sha256.c">
+      <Filter>LuaSha256\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sha256Main.cpp">
+      <Filter>LuaSha256</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -940,6 +958,15 @@
     </ClInclude>
     <ClInclude Include="luakafkatopic.h">
       <Filter>LuaKafka\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaSha256.h">
+      <Filter>LuaSha256\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sha256.h">
+      <Filter>LuaSha256\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sha256Main.h">
+      <Filter>LuaSha256</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

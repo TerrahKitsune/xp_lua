@@ -30,6 +30,7 @@
 #include "luasocketmain.h"
 #include "lualinkedlistmain.h"
 #include "luakafkamain.h"
+#include "Sha256Main.h"
 
 #define HI_PART(x)  ((x>>4) & 0x0F)
 #define LO_PART(x)  ((x) & 0x0F)
@@ -494,6 +495,8 @@ int main(int argc, char *argv[]){
 	lua_setglobal(L, "LinkedList");
 	luaopen_kafka(L);
 	lua_setglobal(L, "Kafka");
+	luaopen_sha256(L);
+	lua_setglobal(L, "SHA256");
 
 	lua_pushcfunction(L, L_GetRuntime);
 	lua_setglobal(L, "Runtime");

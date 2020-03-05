@@ -52,6 +52,7 @@
     <ClCompile Include="LuaProcess.cpp" />
     <ClCompile Include="LuaServer.cpp" />
     <ClCompile Include="LuaServerMain.cpp" />
+    <ClCompile Include="LuaSha256.cpp" />
     <ClCompile Include="luasocket.cpp" />
     <ClCompile Include="luasocketmain.cpp" />
     <ClCompile Include="LuaSQLite.cpp" />
@@ -119,6 +120,8 @@
     <ClCompile Include="Queue.cpp" />
     <ClCompile Include="ResourceTypes.cpp" />
     <ClCompile Include="Server.cpp" />
+    <ClCompile Include="sha256.c" />
+    <ClCompile Include="Sha256Main.cpp" />
     <ClCompile Include="SQLite\sqlite3.c" />
     <ClCompile Include="stream.cpp" />
     <ClCompile Include="StreamMain.cpp" />
@@ -172,6 +175,7 @@
     <ClInclude Include="LuaProcess.h" />
     <ClInclude Include="LuaServer.h" />
     <ClInclude Include="LuaServerMain.h" />
+    <ClInclude Include="LuaSha256.h" />
     <ClInclude Include="luasocket.h" />
     <ClInclude Include="luasocketmain.h" />
     <ClInclude Include="LuaSQLite.h" />
@@ -234,6 +238,8 @@
     <ClInclude Include="Queue.h" />
     <ClInclude Include="ResourcesTypes.h" />
     <ClInclude Include="Server.h" />
+    <ClInclude Include="sha256.h" />
+    <ClInclude Include="Sha256Main.h" />
     <ClInclude Include="SQLite\sqlite3.h" />
     <ClInclude Include="stream.h" />
     <ClInclude Include="StreamMain.h" />

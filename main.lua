@@ -67,6 +67,12 @@ for k,v in pairs(c) do
 end
 print("\n\n");
 
+local sha = SHA256.New();
+sha:Update("Hi");
+print(sha:Finish());
+
+if true then return; end 
+
 --TablePrint(Kafka);
 
 SetTitle("librdkafka");

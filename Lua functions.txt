@@ -793,6 +793,18 @@ HTTP:
 	-recv: bytes recieved
 	IsRunning, ms, sent, recv Http:GetStatus()
 
+SHA256:
+	
+	-Returns a newly initilized instance of SHA256
+	SHA256 SHA256.New()
+
+	-Digests data into the SHA256 instance	
+	nil SHA256:Update(data)
+
+	-Finilizes the digest and returns the hash as a hex string and a 32 byte string representation
+	-if the digest is finalized already it just returns the previous result without doing anything
+	hexstring, 32bytes SHA256:Finish()
+
 MD5:
 	
 	-Returns a newly initilized instance of MD5

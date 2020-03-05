@@ -94,6 +94,7 @@
     <ClCompile Include="LuaLinkedList.cpp" />
     <ClCompile Include="LuaLinkedListMain.cpp" />
     <ClCompile Include="LuaMySQLResult.cpp" />
+    <ClCompile Include="LuaSha256.cpp" />
     <ClCompile Include="luasocket.cpp" />
     <ClCompile Include="luasocketmain.cpp" />
     <ClCompile Include="mysql_main_incl.cpp" />
@@ -101,6 +102,8 @@
     <ClCompile Include="NamedPipeMain.cpp" />
     <ClCompile Include="odbc.cpp" />
     <ClCompile Include="ODBCMain.cpp" />
+    <ClCompile Include="sha256.c" />
+    <ClCompile Include="Sha256Main.cpp" />
     <ClCompile Include="stream.cpp" />
     <ClCompile Include="StreamMain.cpp" />
     <ClCompile Include="WinServices.cpp" />
@@ -196,6 +199,7 @@
     <ClInclude Include="LuaLinkedList.h" />
     <ClInclude Include="LuaLinkedListMain.h" />
     <ClInclude Include="LuaMySQLResult.h" />
+    <ClInclude Include="LuaSha256.h" />
     <ClInclude Include="luasocket.h" />
     <ClInclude Include="luasocketmain.h" />
     <ClInclude Include="mysql_main_incl.h" />
@@ -204,6 +208,8 @@
     <ClInclude Include="odbc.h" />
     <ClInclude Include="ODBCMain.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="sha256.h" />
+    <ClInclude Include="Sha256Main.h" />
     <ClInclude Include="stream.h" />
     <ClInclude Include="StreamMain.h" />
     <ClInclude Include="WinServices.h" />
