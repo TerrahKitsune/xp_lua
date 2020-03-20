@@ -238,6 +238,16 @@ Kafkamessage:
 	-Prematurely closes the object and frees any message data
 	nil Kafkamessage:Dispose()
 
+Sound 
+	
+	-Plays a .wav file
+	-optional bool async = if true the function will play the sound async
+	-returns true or false if it managed to play the file
+	bool Sound.Play(wavefile, async opt false)
+
+	-Beeps at the frequency for duration
+	bool Sound.Beep(freq, duration)
+
 ODBC:
 
 	-Return an array of all available drivers

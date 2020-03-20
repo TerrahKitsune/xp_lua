@@ -62,6 +62,9 @@ end
 
 print("bla"..c.LF.."bla");
 
+math.randomseed(os.time());
+math.random(); math.random(); math.random();
+
 for k,v in pairs(c) do 
 	print(k, string.byte(v));
 end

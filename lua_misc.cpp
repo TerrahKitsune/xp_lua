@@ -2,6 +2,13 @@
 #include <objbase.h>
 #include <time.h>
 
+#include <stdio.h>
+#include <windows.h>
+#include <windowsx.h>
+#include <mmsystem.h>
+
+#pragma comment (lib , "winmm.lib")
+
 static int env_table = -1;
 static int env_original = -1;
 
@@ -283,6 +290,42 @@ int CRC32(lua_State* L) {
 	return 1;
 }
 
+int luabeep(lua_State* L) {
+
+	DWORD freq = luaL_checkinteger(L, 1);
+	DWORD dur = luaL_checkinteger(L, 2);
+
+	lua_pop(L, lua_gettop(L));
+
+	lua_pushboolean(L, Beep(freq, dur));
+
+	return 1;
+}
+
+int luasound(lua_State* L) {
+
+	const char* sound = NULL;
+
+	if (!lua_isnoneornil(L, 1)) {
+		sound = lua_tostring(L, 1);
+	}
+
+	DWORD Flags = SND_FILENAME | SND_NODEFAULT;
+
+	if (lua_toboolean(L, 2)) {
+		Flags |= SND_ASYNC;
+	}
+	else {
+		Flags |= SND_SYNC;
+	}
+
+	lua_pop(L, lua_gettop(L));
+
+	lua_pushboolean(L, PlaySound(sound, NULL, Flags));
+
+	return 1;
+}
+
 int luaopen_misc(lua_State* L) {
 
 	lua_newtable(L);
@@ -404,6 +447,18 @@ int luaopen_misc(lua_State* L) {
 
 
 	lua_setglobal(L, "c");
+
+	lua_newtable(L);
+
+	lua_pushstring(L, "Play");
+	lua_pushcfunction(L, luasound);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "Beep");
+	lua_pushcfunction(L, luabeep);
+	lua_settable(L, -3);
+
+	lua_setglobal(L, "Sound");
 
 	lua_getglobal(L, "string");
 	lua_pushstring(L, "equal");
