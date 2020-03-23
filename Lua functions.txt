@@ -248,6 +248,10 @@ Sound
 	-Beeps at the frequency for duration
 	bool Sound.Beep(freq, duration)
 
+	-Send a MCS (https://docs.microsoft.com/en-us/windows/win32/multimedia/multimedia-command-strings?redirectedfrom=MSDN)
+	-Returns the errorcode (0 on success) and a string (if any)
+	int, string Sound.SendMCS(command)
+
 ODBC:
 
 	-Return an array of all available drivers

@@ -263,7 +263,7 @@ DWORD crc32(byte* data, int size, DWORD crc)
 
 		for (int i = 0; i < 8; i++)
 		{
-			t = ~((r & 1) - 1); 
+			t = ~((r & 1) - 1);
 			r = (r >> 1) ^ (0xEDB88320 & t);
 		}
 	}
@@ -322,6 +322,26 @@ int luasound(lua_State* L) {
 	lua_pop(L, lua_gettop(L));
 
 	lua_pushboolean(L, PlaySound(sound, NULL, Flags));
+
+	return 1;
+}
+
+int luasoundcommand(lua_State* L) {
+
+	const char* cmd = luaL_checkstring(L, 1);
+	char retstring[1024] = { 0 };
+
+	MCIERROR result = mciSendString(cmd, retstring, 1024, NULL);
+
+	lua_pop(L, lua_gettop(L));
+
+	lua_pushinteger(L, result);
+	lua_pushstring(L, retstring);
+	
+	return 2;
+}
+
+int luaplayrawsound(lua_State* L) {
 
 	return 1;
 }
@@ -456,6 +476,10 @@ int luaopen_misc(lua_State* L) {
 
 	lua_pushstring(L, "Beep");
 	lua_pushcfunction(L, luabeep);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "SendMCS");
+	lua_pushcfunction(L, luasoundcommand);
 	lua_settable(L, -3);
 
 	lua_setglobal(L, "Sound");
