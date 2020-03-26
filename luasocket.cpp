@@ -111,9 +111,9 @@ int LuaSocketOpen(lua_State* L) {
 	struct addrinfo* result = NULL, * ptr = NULL, hints;
 
 	ZeroMemory(&hints, sizeof(hints));
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_protocol = IPPROTO_TCP;
+	hints.ai_family = family;
+	hints.ai_socktype = socktype;
+	hints.ai_protocol = protocol;
 
 	char portstr[15];
 	sprintf(portstr, "%d", port);
@@ -190,7 +190,7 @@ LuaSocket* lua_pushluasocket(lua_State* L) {
 	LuaSocket* sock = (LuaSocket*)lua_newuserdata(L, sizeof(LuaSocket));
 
 	if (sock == NULL)
-		luaL_error(L, "Unable to push namedpipe");
+		luaL_error(L, "Unable to push socket");
 
 	luaL_getmetatable(L, LUASOCKET);
 	lua_setmetatable(L, -2);

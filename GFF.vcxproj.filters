@@ -229,6 +229,15 @@
     <Filter Include="LuaSha256\Source Files">
       <UniqueIdentifier>{7dc9be02-68f4-40a2-896f-901111ca3ef5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaFTP">
+      <UniqueIdentifier>{96f38d4f-3546-4413-a907-72d81a354b4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaFTP\Header Files">
+      <UniqueIdentifier>{4f43a9a9-95ef-4209-9c31-1c3e9fbc74b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaFTP\Source Files">
+      <UniqueIdentifier>{e7966b0d-7484-4533-860f-2edf5ea6483b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -540,6 +549,12 @@
     <ClCompile Include="Sha256Main.cpp">
       <Filter>LuaSha256</Filter>
     </ClCompile>
+    <ClCompile Include="LuaFTPMain.cpp">
+      <Filter>LuaFTP</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaFTP.cpp">
+      <Filter>LuaFTP\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -838,6 +853,12 @@
     </ClInclude>
     <ClInclude Include="Sha256Main.h">
       <Filter>LuaSha256</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaFTPMain.h">
+      <Filter>LuaFTP</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaFTP.h">
+      <Filter>LuaFTP\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
