@@ -54,6 +54,9 @@ Misc global functions:
 
 	ms Runtime()
 
+	-Calculate a crc32
+	int CRC32(stringdata, opt existingcrc)
+
 	-Contains special characters 0 - 31 (http://www.asciitable.com/)
 	-Example c.LF = '\n'
 	table c
@@ -238,7 +241,83 @@ Kafkamessage:
 	-Prematurely closes the object and frees any message data
 	nil Kafkamessage:Dispose()
 
-Sound 
+FileAsync:
+
+	-Opens a file and starts a thread to work with the file
+	-buffersize is the max amount of data to be exhanged between the threads, default 1 mb
+	-returns nil, error on failure
+	FileAsync FileAsync.Open(file, mode, opt buffersize)
+
+	-Checks if the file thread is busy
+	-If wait is true then it'll wait until it is
+	-If cancel is true then it'll cause the thread to cancel whateaver its doing
+	bool FileAsync:Busy(opt wait, opt cancel)
+
+	-Get the current position in the file
+	int FileAsync:Tell()
+
+	-Seek in the file
+	-pos the position to set
+	-type 0=start of file, 1 = current position 2 = end of file
+	-returns the result from fseek
+	int FileAsync:Seek(pos, opt type 0)
+
+	-Resets all flags and sets the position to 0 from start of file
+	nil FileAsync:Rewind()
+
+	-Check if end of file is set
+	bool FileAsync:EndOfFile()
+
+	-Start reading a file
+	-bytestoread number of bytes to read from the file from the current position, default read to end (0)
+	-readbuffersize number of bytes to read before writing to the exhange buffer
+	nil FileAsync:Read(opt bytestoread, opt readbuffersize)
+
+	-Get how many bytes the exhangebuffer contains and what its max size is
+	currentlength, maxlength FileAsync:BufferStatus()
+
+	-Empty the exhangebuffer and return its contents
+	-Returns the contents of the buffer or empty string and the if any command is running
+	string, bool FileAsync:EmptyBuffer()
+
+FTP:
+
+	-Attempts connecting to a server and returning a new ftp client object on success
+	-returns nil, error on failure
+	ftp, arraycontainingwelcomemessages FTP.Open(address, opt port)
+
+	-Sends user and password commands in seqeunce and returns true on success or false and error on failure
+	bool, error FTP:Login(user, password)
+
+	-Sends a FTP command to the server (command should not contain any \r\n)
+	bool, error FTP:Command(command)
+
+	-Enters passive-mode and returns the address and port to connect the datachannel to
+	-returns nil, error on failure
+	ip, port FTP:Passive()
+
+	-Sets the timeout to use for communications (inactivity timer)
+	-Default 1 second
+	nil FTP.SetTimeout(timeinseconds)
+
+	-Opens a datachannel for datatransfer to upload or download data
+	-address: should be the address the ftp server provided from Passive
+	-port: should be the port the ftp server provided from passive
+	-Pump function example: function(recv) return true, datatosend; end
+	-parameter recv=data received, if any
+	-returns boolean, datatosend where the boolean is to keep the connection open, return false to cancel
+	-and datatosend is the data to send to the server, return true, nil to send nothing
+	bool, error FTP:LuaOpenDataChannel(address, port, pumpfunction)
+
+	-Returns the messages that the server has responded with on the ftp channel
+	-this checks for any incoming messages and empties the queue containing messages
+	-returns an array of strings
+	msgs FTP:GetMessages()
+
+	-Closes the ftp client/object, it should not be used after this
+	nil FTP:Close()
+
+Sound: 
 	
 	-Plays a .wav file
 	-optional bool async = if true the function will play the sound async

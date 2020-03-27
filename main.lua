@@ -63,7 +63,14 @@ end
 math.randomseed(os.time());
 math.random(); math.random(); math.random();
 
+local function PrintMsgs(msgs)
+
+	for n=1, #msgs do print(msgs[n]); end
+end
+
 TablePrint(FTP);
+
+FTP.SetTimeout(5);
 
 local ftp, welcomemsg = assert(FTP.Open("comput"));
 
@@ -86,13 +93,21 @@ ip, port = assert(ftp:Passive());
 msgs, err = assert(ftp:Command("STOR Ancon.vhd"));
 TablePrint(msgs);
 
-local f = io.open("C:/Ancon.vhd", "rb");
+local f = FileAsync.Open("C:/Ancon.vhd", "rb");
+f:Read();
 
 print(ftp:OpenDataChannel(ip, port, function(recv) 
 
-	local data = f:read(150000000);
+	local current, max = f:BufferStatus();
+	local data, ok = f:EmptyBuffer();
+	
+	PrintMsgs(ftp:GetMessages());
 
-	return data ~= nil, data; 
+	SetTitle(tostring(max).."/"..tostring(current));
+
+	return ok, data; 
 end));
+
+PrintMsgs(ftp:GetMessages());
 
 f:close();

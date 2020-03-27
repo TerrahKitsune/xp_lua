@@ -238,6 +238,15 @@
     <Filter Include="LuaFTP\Source Files">
       <UniqueIdentifier>{e7966b0d-7484-4533-860f-2edf5ea6483b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaFileAsync">
+      <UniqueIdentifier>{35e57add-8b99-4f4a-8395-a11b7af1b5e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaFileAsync\Header Files">
+      <UniqueIdentifier>{daa6c78b-5431-42ea-b19c-c9b9922147c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaFileAsync\Source Files">
+      <UniqueIdentifier>{5b929b62-300d-47aa-accb-d4914121c28c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -555,6 +564,12 @@
     <ClCompile Include="LuaFTP.cpp">
       <Filter>LuaFTP\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FileAsync.cpp">
+      <Filter>LuaFileAsync\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileAsyncMain.cpp">
+      <Filter>LuaFileAsync</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -859,6 +874,12 @@
     </ClInclude>
     <ClInclude Include="LuaFTP.h">
       <Filter>LuaFTP\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileAsync.h">
+      <Filter>LuaFileAsync\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileAsyncMain.h">
+      <Filter>LuaFileAsync</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

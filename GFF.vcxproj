@@ -77,6 +77,8 @@
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Erf.cpp" />
     <ClCompile Include="ERFMain.cpp" />
+    <ClCompile Include="FileAsync.cpp" />
+    <ClCompile Include="FileAsyncMain.cpp" />
     <ClCompile Include="GffField.cpp" />
     <ClCompile Include="GffHeader.cpp" />
     <ClCompile Include="GffLabel.cpp" />
@@ -184,6 +186,8 @@
     <ClInclude Include="Client.h" />
     <ClInclude Include="Erf.h" />
     <ClInclude Include="ERFMain.h" />
+    <ClInclude Include="FileAsync.h" />
+    <ClInclude Include="FileAsyncMain.h" />
     <ClInclude Include="GffField.h" />
     <ClInclude Include="GffHeader.h" />
     <ClInclude Include="GffLabel.h" />

@@ -8,9 +8,10 @@ static const struct luaL_Reg ftpfunctions[] = {
 	{ "Passive",  LuaPassive },
 	{ "SetTimeout",  LuaSetTimeout },
 	{ "OpenDataChannel",  LuaOpenDataChannel },
+	{ "GetMessages",  GetMessageLog },
 	{ "Close",  luaftp_gc },
 	{ NULL, NULL }
-};
+}; 
 
 static const luaL_Reg ftpmeta[] = {
 	
