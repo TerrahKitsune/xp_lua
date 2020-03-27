@@ -11,6 +11,7 @@ static const struct luaL_Reg fileasyncfunctions[] = {
 	{ "Read",  LuaRead },
 	{ "BufferStatus",  LuaGetReadWriteBufferStatus },
 	{ "EmptyBuffer",  LuaEmptyBuffer },
+	{ "Close",  luafileasync_gc },
 	{ NULL, NULL }
 };
 

@@ -110,4 +110,4 @@ end));
 
 PrintMsgs(ftp:GetMessages());
 
-f:close();
+f:Close();
