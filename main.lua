@@ -68,6 +68,11 @@ local function PrintMsgs(msgs)
 	for n=1, #msgs do print(msgs[n]); end
 end
 
+setenv("Hello", "Test", true);
+print(getenv("Hello"));
+
+if true then return; end 
+
 TablePrint(FTP);
 
 FTP.SetTimeout(5);

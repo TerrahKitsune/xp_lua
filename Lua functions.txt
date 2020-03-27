@@ -43,6 +43,9 @@ Misc global functions:
 	-Compares two strings ignore case
 	bool string.equal(str1, str2)
 
+	int setenv(var, value, override)
+	string (or nil on fail) getenv(var)
+
 	-Returns the first object that the delegate returns that isnt nil
 	object table.first(table, function(key, value) ... end)
 

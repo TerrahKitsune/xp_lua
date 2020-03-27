@@ -341,7 +341,67 @@ int luasoundcommand(lua_State* L) {
 	return 2;
 }
 
-int luaplayrawsound(lua_State* L) {
+int setenv(const char* name, const char* value, int overwrite)
+{
+	int errcode = 0;
+	if (!overwrite) {
+		size_t envsize = 0;
+		errcode = getenv_s(&envsize, NULL, 0, name);
+		if (errcode || envsize) return errcode;
+	}
+	return _putenv_s(name, value);
+}
+
+int luasetenv(lua_State* L) {
+
+	const char* var = luaL_checkstring(L, 1);
+	const char* value = luaL_checkstring(L, 2);
+	bool allowOverwrite = lua_toboolean(L, 3);
+
+	lua_pop(L, lua_gettop(L));
+
+	lua_pushinteger(L, setenv(var, value, allowOverwrite));
+
+	return 1;
+}
+
+int luagetenv(lua_State* L) {
+
+	const char* var = luaL_checkstring(L, 1);
+
+	size_t len;
+	int error = getenv_s(&len, NULL, 0, var);
+
+	lua_pop(L, lua_gettop(L));
+
+	if (error) {
+		lua_pushnil(L);
+		return 1;
+	}
+	else if (len <= 0) {
+		lua_pushstring(L, "");
+		return 1;
+	}
+
+	char* data = (char*)calloc(sizeof(char), len+1);
+
+	if (!data) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+	error = getenv_s(&len, data, len, var);
+
+	if (error) {
+
+		free(data);
+		lua_pushnil(L);
+		return 1;
+	}
+
+	lua_pushlstring(L, data, len);
+
+	free(data);
 
 	return 1;
 }
@@ -465,7 +525,6 @@ int luaopen_misc(lua_State* L) {
 		lua_settable(L, -3);
 	}
 
-
 	lua_setglobal(L, "c");
 
 	lua_newtable(L);
@@ -513,6 +572,12 @@ int luaopen_misc(lua_State* L) {
 
 	lua_pushcfunction(L, CRC32);
 	lua_setglobal(L, "CRC32");
+	
+	lua_pushcfunction(L, luasetenv);
+	lua_setglobal(L, "setenv");
+
+	lua_pushcfunction(L, luagetenv);
+	lua_setglobal(L, "getenv");
 
 	lua_newtable(L);
 
