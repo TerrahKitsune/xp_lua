@@ -8,7 +8,7 @@
 
 #define FTPBUFFERSIZE 4096
 char FTPBUFFER[FTPBUFFERSIZE];
-time_t FTPTIMEOUT = 1;
+time_t FTPTIMEOUT = 5;
 
 int ftp_recv(SOCKET s, char* buffer, size_t len, time_t timeout) {
 
@@ -153,9 +153,10 @@ int GetMessageLog(lua_State* L) {
 	LuaFTP* ftp = lua_toluaftp(L, 1);
 	int timeout = luaL_optinteger(L, 2, 0);
 
+	size_t current = LuaGetLogSize(L, ftp->log);
 	size_t size = LuaAddMessagesToTable(L, ftp->s, ftp->log, 0);
 
-	if (timeout > 0) {
+	if (timeout > 0 && current == size) {
 		size = LuaAddMessagesToTable(L, ftp->s, ftp->log, timeout);
 	}
 
@@ -176,7 +177,7 @@ int GetMessageLog(lua_State* L) {
 	lua_newtable(L);
 	ftp->log = luaL_ref(L, LUA_REGISTRYINDEX);
 
-	lua_copy(L, 3, 1);
+	lua_copy(L, -1, 1);
 	lua_pop(L, lua_gettop(L) - 1);
 
 	return 1;
@@ -221,7 +222,7 @@ int LuaLogin(lua_State* L) {
 		return 2;
 	}
 
-	sprintf(FTPBUFFER, "USER %s\r\n", user);
+	sprintf(FTPBUFFER, "USER %s%s", user, ftp->endline);
 	if (!ftp_send(ftp->s, FTPBUFFER, strlen(FTPBUFFER), FTPTIMEOUT)) {
 
 		lua_pop(L, lua_gettop(L));
@@ -243,7 +244,7 @@ int LuaLogin(lua_State* L) {
 		return 2;
 	}
 
-	sprintf(FTPBUFFER, "PASS %s\r\n", pass);
+	sprintf(FTPBUFFER, "PASS %s%s", pass, ftp->endline);
 	if (!ftp_send(ftp->s, FTPBUFFER, strlen(FTPBUFFER), FTPTIMEOUT)) {
 
 		lua_pop(L, lua_gettop(L));
@@ -374,7 +375,7 @@ int LuaPassive(lua_State* L) {
 
 	LuaFTP* ftp = lua_toluaftp(L, 1);
 
-	strcpy(FTPBUFFER, "PASV\r\n");
+	sprintf(FTPBUFFER, "PASV%s", ftp->endline);
 	if (!ftp_send(ftp->s, FTPBUFFER, strlen(FTPBUFFER), FTPTIMEOUT)) {
 
 		lua_pop(L, lua_gettop(L));
@@ -431,7 +432,7 @@ int LuaCommand(lua_State* L) {
 	LuaFTP* ftp = lua_toluaftp(L, 1);
 	const char* cmd = luaL_checkstring(L, 2);
 
-	sprintf(FTPBUFFER, "%s\r\n", cmd);
+	sprintf(FTPBUFFER, "%s%s", cmd, ftp->endline);
 	if (!ftp_send(ftp->s, FTPBUFFER, strlen(FTPBUFFER), FTPTIMEOUT)) {
 
 		lua_pop(L, lua_gettop(L));
@@ -554,6 +555,25 @@ int LuaConnect(lua_State* L) {
 	return 2;
 }
 
+int LuaSetEndline(lua_State* L) {
+
+	LuaFTP* ftp = lua_toluaftp(L, 1);
+	size_t len;
+	const char * endline = luaL_checklstring(L, 2, &len);
+
+	if (len > 4) {
+		luaL_error(L, "Endline cannot be longer than 4 bytes");
+		return 0;
+	}
+
+	memset(ftp->endline, 0, 5);
+	memcpy(ftp->endline, endline, len);
+
+	lua_pop(L, lua_gettop(L));
+
+	return 0;
+}
+
 LuaFTP* lua_pushluaftp(lua_State* L) {
 
 	LuaFTP* ftp = (LuaFTP*)lua_newuserdata(L, sizeof(LuaFTP));
@@ -565,6 +585,8 @@ LuaFTP* lua_pushluaftp(lua_State* L) {
 	lua_setmetatable(L, -2);
 
 	memset(ftp, 0, sizeof(LuaFTP));
+
+	strcpy(ftp->endline, "\n");
 
 	return ftp;
 }

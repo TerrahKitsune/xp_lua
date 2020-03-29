@@ -9,7 +9,7 @@ typedef struct LuaFTP {
 	char* passive_ip;
 	int passive_port;
 	int log;
-
+	char endline[5];
 } LuaFTP;
 
 LuaFTP* lua_pushluaftp(lua_State* L);
@@ -23,6 +23,7 @@ int LuaPassive(lua_State* L);
 int LuaOpenDataChannel(lua_State* L);
 int LuaSetTimeout(lua_State* L);
 int LuaGetConnectionStatus(lua_State* L);
+int LuaSetEndline(lua_State* L);
 
 int luaftp_gc(lua_State* L);
 int luaftp_tostring(lua_State* L);

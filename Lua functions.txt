@@ -283,11 +283,17 @@ FileAsync:
 	-Returns the contents of the buffer or empty string and the if any command is running
 	string, bool FileAsync:EmptyBuffer()
 
+	-Close the file, the object should not be used afterwards
+	nil FileAsync:Close()
 FTP:
 
 	-Attempts connecting to a server and returning a new ftp client object on success
 	-returns nil, error on failure
 	ftp, arraycontainingwelcomemessages FTP.Open(address, opt port)
+
+	-Set the endline format to use cannot be longer than 4 bytes
+	-default: "\r\n"
+	nil FTP:SetEndline(endline)
 
 	-Sends user and password commands in seqeunce and returns true on success or false and error on failure
 	bool, error FTP:Login(user, password)

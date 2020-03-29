@@ -11,6 +11,7 @@ static const struct luaL_Reg ftpfunctions[] = {
 	{ "GetConnectionStatus",  LuaGetConnectionStatus },
 	{ "OpenDataChannel",  LuaOpenDataChannel },
 	{ "GetMessages",  GetMessageLog },
+	{ "SetEndline",  LuaSetEndline },
 	{ "Close",  luaftp_gc },
 	{ NULL, NULL }
 };
