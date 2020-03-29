@@ -60,59 +60,175 @@ function DumpToFile(file, tbl)
 	f:close();
 end
 
+local statusTimer = Timer.New();
+statusTimer:Start();
+function WriteStatusString(str, prevlen, sincelast)
+
+	if statusTimer:Elapsed() <= sincelast then 
+		return prevlen;
+	else 
+		statusTimer:Stop();
+		statusTimer:Reset();
+		statusTimer:Start();
+	end
+
+	prevlen = prevlen or 0;
+
+	if prevlen > 0 then 
+
+		for n=1, prevlen do 
+			io.write("\b");
+		end 
+
+		for n=1, prevlen do 
+			io.write(" ");
+		end 
+
+		for n=1, prevlen do 
+			io.write("\b");
+		end 
+	end
+
+	io.write(str);
+
+	return str:len();
+end
+
 math.randomseed(os.time());
 math.random(); math.random(); math.random();
 
-local function PrintMsgs(msgs)
+local function PrintMsgs(ftp, timeout)
+	
+	local msgs=ftp:GetMessages(timeout);
 
 	for n=1, #msgs do print(msgs[n]); end
+
+	assert(ftp:GetConnectionStatus());
 end
-
-setenv("Hello", "Test", true);
-print(getenv("Hello"));
-
-if true then return; end 
-
-TablePrint(FTP);
 
 FTP.SetTimeout(5);
 
-local ftp, welcomemsg = assert(FTP.Open("comput"));
+local ftp = FTP.Open("10.9.23.250");
+assert(ftp:Login("ftp", "meowCat69!"));
 
-for n=1, #welcomemsg do 
-	print(welcomemsg[n]);
+local ip, port = ftp:Passive();
+ip="10.9.23.250";
+
+assert(ftp:Command("LIST"));
+PrintMsgs(ftp, 0);
+
+local channel = assert(FTP.OpenDataChannel(ip, port));
+print(channel);
+local ok, data = channel:Recv();
+while ok do 
+
+	if data:len() > 0 then 
+		io.write(data);
+	end
+
+	ok, data = channel:Recv();
 end
 
-local result, err = assert(ftp:Login("admin", "hej123"));
+channel:Close();
 
-local ip, port = assert(ftp:Passive());
-print(ip, port);
+ip, port = ftp:Passive();
+ip="10.9.23.250";
 
-msgs, err = assert(ftp:Command("LIST"));
-TablePrint(msgs);
+PrintMsgs(ftp);
+assert(ftp:Command("STOR bot.sqlite"));
+PrintMsgs(ftp, 5);
 
-print(ftp:OpenDataChannel(ip, port, function(recv) io.write(recv); return true; end));
+local f = io.open("E:/bot.sqlite", "rb");
 
-ip, port = assert(ftp:Passive());
+local cnt = 0;
+local prev = 0;
 
-msgs, err = assert(ftp:Command("STOR Ancon.vhd"));
-TablePrint(msgs);
+channel = assert(FTP.OpenDataChannel(ip, port));
+while channel:GetConnectionStatus() and f do 
 
-local f = FileAsync.Open("C:/Ancon.vhd", "rb");
-f:Read();
+	data = f:read(100000);
 
-print(ftp:OpenDataChannel(ip, port, function(recv) 
+	if data == nil then 
+		f:close();
+		f = nil;
+	else
 
-	local current, max = f:BufferStatus();
-	local data, ok = f:EmptyBuffer();
-	
-	PrintMsgs(ftp:GetMessages());
+		cnt = cnt + data:len();
+		prev = WriteStatusString("Write: "..tostring(cnt), prev, 250);
 
-	SetTitle(tostring(max).."/"..tostring(current));
+		channel:Send(data);
+	end
+end
 
-	return ok, data; 
-end));
+WriteStatusString("Write: "..tostring(cnt), prev, 0);
+prev = 0;
+print(" ");
 
-PrintMsgs(ftp:GetMessages());
+channel:Close();
 
-f:Close();
+PrintMsgs(ftp, 5);
+
+ip, port = ftp:Passive();
+ip="10.9.23.250";
+
+PrintMsgs(ftp);
+
+assert(ftp:Command("RETR bot.sqlite"));
+f = io.open("R:/bot.sqlite", "wb");
+
+channel = assert(FTP.OpenDataChannel(ip, port));
+ok, data = channel:Recv();
+cnt = 0;
+
+while ok do 
+
+	if data:len() > 0 then 
+
+		cnt = cnt + data:len();
+		prev = WriteStatusString("Read: "..tostring(cnt), prev, 250);
+
+		f:write(data);
+		f:flush();
+	end
+
+	ok, data = channel:Recv();
+end
+
+f:close();
+
+WriteStatusString("Read: "..tostring(cnt), prev, 0);
+print(" ");
+
+channel:Close();
+
+ip, port = ftp:Passive();
+ip="10.9.23.250";
+
+PrintMsgs(ftp);
+assert(ftp:Command("STOR bot2.sqlite"));
+PrintMsgs(ftp, 5);
+
+f = io.open("R:/bot.sqlite", "rb");
+
+cnt = 0;
+prev = 0;
+
+channel = assert(FTP.OpenDataChannel(ip, port));
+while channel:GetConnectionStatus() and f do 
+
+	data = f:read(100000);
+
+	if data == nil then 
+		f:close();
+		f = nil;
+	else
+
+		cnt = cnt + data:len();
+		prev = WriteStatusString("Write: "..tostring(cnt), prev, 250);
+
+		channel:Send(data);
+	end
+end
+
+WriteStatusString("Write: "..tostring(cnt), prev, 0);
+print(" ");

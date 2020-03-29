@@ -89,6 +89,7 @@
     <ClCompile Include="kafkahelpers.cpp" />
     <ClCompile Include="LinkedList.cpp" />
     <ClCompile Include="LuaFTP.cpp" />
+    <ClCompile Include="LuaFTPChannel.cpp" />
     <ClCompile Include="LuaFTPMain.cpp" />
     <ClCompile Include="LuaImageMain.cpp" />
     <ClCompile Include="luakafka.cpp" />
@@ -198,6 +199,7 @@
     <ClInclude Include="kafkahelpers.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="LuaFTP.h" />
+    <ClInclude Include="LuaFTPChannel.h" />
     <ClInclude Include="LuaFTPMain.h" />
     <ClInclude Include="LuaImageMain.h" />
     <ClInclude Include="luakafka.h" />

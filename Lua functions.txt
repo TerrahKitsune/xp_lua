@@ -303,22 +303,36 @@ FTP:
 	-Default 1 second
 	nil FTP.SetTimeout(timeinseconds)
 
-	-Opens a datachannel for datatransfer to upload or download data
-	-address: should be the address the ftp server provided from Passive
-	-port: should be the port the ftp server provided from passive
-	-Pump function example: function(recv) return true, datatosend; end
-	-parameter recv=data received, if any
-	-returns boolean, datatosend where the boolean is to keep the connection open, return false to cancel
-	-and datatosend is the data to send to the server, return true, nil to send nothing
-	bool, error FTP:LuaOpenDataChannel(address, port, pumpfunction)
-
 	-Returns the messages that the server has responded with on the ftp channel
 	-this checks for any incoming messages and empties the queue containing messages
 	-returns an array of strings
-	msgs FTP:GetMessages()
+	msgs FTP:GetMessages(opt timeout)
 
 	-Closes the ftp client/object, it should not be used after this
 	nil FTP:Close()
+
+	-Get the status of the ftp channel
+	isconnected, wsaerror FTP:GetConnectionStatus()
+
+	-Opens a datachannel for datatransfer to upload or download data
+	-address: should be the address the ftp server provided from Passive
+	-port: should be the port the ftp server provided from passive
+	-Returns a ftpchannel object see ftpchannel object for references
+	ftpchannel FTP.OpenDataChannel(address, port)
+
+	-Sends data on an open ftpchannel
+	-returns true if the data was successfully sent
+	bool ftpchannel:Send(data)
+
+	-Receive data from an open datachannel
+	-returns if the connection is open and data received, returns empty string if there was none
+	isalive, data ftpchannel:Recv(opt buffersize)
+
+	-Check if an open ftp channel is alive and or has data available to be read
+	isalive, hasdata ftpchannel:GetConnectionStatus()
+
+	-Closes a datachannel, it should not be used after its been closed
+	nil ftpchannel:Close()
 
 Sound: 
 	

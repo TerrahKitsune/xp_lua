@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <stdlib.h> 
 #include <windows.h> 
+#include "LuaFTPChannel.h"
 
 #define FTPBUFFERSIZE 4096
 char FTPBUFFER[FTPBUFFERSIZE];
@@ -33,6 +34,10 @@ int ftp_recv(SOCKET s, char* buffer, size_t len, time_t timeout) {
 		if (result < 0) {
 
 			sprintf(buffer, "%s", "Recv error: %d", WSAGetLastError());
+			return -1;
+		}
+		else if (result == 0) {
+
 			return 0;
 		}
 		else if (buffer[offset] == '\n') {
@@ -63,6 +68,9 @@ int ftp_send(SOCKET s, const char* buffer, size_t len, time_t timeout) {
 
 		if (ret > 0) {
 			sent += ret;
+		}
+		else if (ret == 0) {
+
 		}
 		else if (ret == SOCKET_ERROR && WSAGetLastError() == WSAEWOULDBLOCK) {
 
@@ -107,13 +115,22 @@ size_t LuaAddMessagesToTable(lua_State* L, SOCKET s, int messageLog, time_t time
 
 int LuaGetLastMessage(lua_State* L, int messageLog, int idx) {
 
+	if (idx <= 0) {
+		return 0;
+	}
+
 	lua_rawgeti(L, LUA_REGISTRYINDEX, messageLog);
 	lua_rawgeti(L, -1, idx);
 
 	size_t len;
 	const char* data = lua_tolstring(L, -1, &len);
 
-	strcpy(FTPBUFFER, data);
+	if (data) {
+		strcpy(FTPBUFFER, data);
+	}
+	else {
+		FTPBUFFER[0] = '\0';
+	}
 
 	lua_pop(L, 2);
 
@@ -134,8 +151,13 @@ size_t LuaGetLogSize(lua_State* L, int messageLog) {
 int GetMessageLog(lua_State* L) {
 
 	LuaFTP* ftp = lua_toluaftp(L, 1);
+	int timeout = luaL_optinteger(L, 2, 0);
 
 	size_t size = LuaAddMessagesToTable(L, ftp->s, ftp->log, 0);
+
+	if (timeout > 0) {
+		size = LuaAddMessagesToTable(L, ftp->s, ftp->log, timeout);
+	}
 
 	if (size <= 0) {
 		size = LuaGetLogSize(L, ftp->log);
@@ -154,10 +176,34 @@ int GetMessageLog(lua_State* L) {
 	lua_newtable(L);
 	ftp->log = luaL_ref(L, LUA_REGISTRYINDEX);
 
-	lua_copy(L, 2, 1);
+	lua_copy(L, 3, 1);
 	lua_pop(L, lua_gettop(L) - 1);
 
 	return 1;
+}
+
+int LuaGetConnectionStatus(lua_State* L) {
+
+	LuaFTP* ftp = lua_toluaftp(L, 1);
+
+	bool isConnected = true;
+	char peek[2];
+
+	int result = recv(ftp->s, peek, 1, MSG_PEEK);
+
+	if (result == 0) {
+		isConnected = false;
+	}
+	else if (result == SOCKET_ERROR) {
+		isConnected = WSAGetLastError() == WSAEWOULDBLOCK;
+	}
+
+	lua_pop(L, lua_gettop(L));
+
+	lua_pushboolean(L, isConnected);
+	lua_pushinteger(L, WSAGetLastError());
+
+	return 2;
 }
 
 int LuaLogin(lua_State* L) {
@@ -242,15 +288,8 @@ int LuaSetTimeout(lua_State* L) {
 
 int LuaOpenDataChannel(lua_State* L) {
 
-	LuaFTP* ftp = lua_toluaftp(L, 1);
-	const char* addr = luaL_checkstring(L, 2);
-	int port = luaL_checkinteger(L, 3);
-
-	if (!lua_isfunction(L, 4)) {
-
-		luaL_error(L, "Need to provide function");
-		return 0;
-	}
+	const char* addr = luaL_checkstring(L, 1);
+	int port = luaL_checkinteger(L, 2);
 
 	SOCKET s = INVALID_SOCKET;
 	char portstr[15];
@@ -319,125 +358,16 @@ int LuaOpenDataChannel(lua_State* L) {
 	int ret;
 	u_long flag = 1;
 	ioctlsocket(s, FIONBIO, &flag);
-	const char* data;
-	size_t datalen;
-	time_t timer = time(NULL);
-	bool worked = false;
-	char peek[2] = { 0 };
+	
+	LuaFTPChannel * channel = lua_pushluaftpchannel(L);
 
-	while (true) {
+	channel->s = s;
 
-		LuaAddMessagesToTable(L, ftp->s, ftp->log, 0);
+	channel->ip = (char*)malloc(strlen(addr) + 1);
+	strcpy(channel->ip, addr);
+	channel->port = port;
 
-		worked = false;
-
-		ret = recv(s, FTPBUFFER, FTPBUFFERSIZE, 0);
-
-		if (ret < 0) {
-
-			if (WSAGetLastError() != WSAEWOULDBLOCK) {
-
-				closesocket(s);
-
-				lua_pop(L, lua_gettop(L));
-				lua_pushboolean(L, false);
-				lua_pushfstring(L, "Error: %d", WSAGetLastError());
-
-				return 2;
-			}
-		}
-		else if (ret > 0) {
-			worked = true;
-		}
-
-		lua_pushvalue(L, 4);
-		lua_pushlstring(L, FTPBUFFER, ret <= 0 ? 0 : ret);
-
-		ret = lua_pcall(L, 1, 2, 0);
-
-		if (ret != 0) {
-
-			closesocket(s);
-
-			lua_pushboolean(L, false);
-			lua_copy(L, -1, 1);
-			lua_copy(L, -2, 2);
-			lua_pop(L, lua_gettop(L) - 2);
-
-			return 2;
-		}
-		else if (!lua_isboolean(L, -2) || !lua_toboolean(L, -2)) {
-
-			closesocket(s);
-
-			lua_pop(L, lua_gettop(L));
-			lua_pushboolean(L, true);
-
-			return 1;
-		}
-		else if (!lua_isnoneornil(L, -1)) {
-
-			data = lua_tolstring(L, -1, &datalen);
-
-			if (data && datalen > 0) {
-				if (!ftp_send(s, data, datalen, FTPTIMEOUT)) {
-
-					closesocket(s);
-					lua_pop(L, lua_gettop(L));
-					lua_pushboolean(L, false);
-					lua_pushstring(L, "Send timeout");
-
-					return 2;
-				}
-				else {
-					worked = true;
-				}
-			}
-		}
-
-		lua_pop(L, 2);
-
-		if (!worked) {
-
-			ret = recv(s, peek, 1, MSG_PEEK);
-
-			if (ret == 0) {
-
-				closesocket(s);
-				lua_pop(L, lua_gettop(L));
-				lua_pushboolean(L, false);
-				lua_pushstring(L, "Remove server disconnected");
-
-				return 2;
-			}
-			else if (ret == SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK) {
-
-				closesocket(s);
-				lua_pop(L, lua_gettop(L));
-				lua_pushboolean(L, false);
-				lua_pushfstring(L, "Error: %d", WSAGetLastError());
-
-				return 2;
-			}
-			else if (time(NULL) - timer > FTPTIMEOUT) {
-
-				closesocket(s);
-				lua_pop(L, lua_gettop(L));
-				lua_pushboolean(L, false);
-				lua_pushstring(L, "Send timeout");
-
-				return 2;
-			}
-			else {
-				Sleep(1);
-			}
-		}
-		else {
-			timer = time(NULL);
-		}
-	}
-
-	return 0;
+	return 1;
 }
 
 int LuaPassive(lua_State* L) {
@@ -454,9 +384,15 @@ int LuaPassive(lua_State* L) {
 		return 2;
 	}
 
-	size_t msg = LuaAddMessagesToTable(L, ftp->s, ftp->log, FTPTIMEOUT);
+	size_t msg = LuaAddMessagesToTable(L, ftp->s, ftp->log, 0);
 	msg = LuaGetLogSize(L, ftp->log);
 	int result = LuaGetLastMessage(L, ftp->log, msg);
+
+	if (result != 227) {
+		msg = LuaAddMessagesToTable(L, ftp->s, ftp->log, FTPTIMEOUT);
+		msg = LuaGetLogSize(L, ftp->log);
+		result = LuaGetLastMessage(L, ftp->log, msg);
+	}
 
 	if (result != 227) {
 

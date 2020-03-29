@@ -570,6 +570,9 @@
     <ClCompile Include="FileAsyncMain.cpp">
       <Filter>LuaFileAsync</Filter>
     </ClCompile>
+    <ClCompile Include="LuaFTPChannel.cpp">
+      <Filter>LuaFTP\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -880,6 +883,9 @@
     </ClInclude>
     <ClInclude Include="FileAsyncMain.h">
       <Filter>LuaFileAsync</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaFTPChannel.h">
+      <Filter>LuaFTP\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

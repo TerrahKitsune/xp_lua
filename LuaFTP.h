@@ -12,7 +12,6 @@ typedef struct LuaFTP {
 
 } LuaFTP;
 
-
 LuaFTP* lua_pushluaftp(lua_State* L);
 LuaFTP* lua_toluaftp(lua_State* L, int index);
 
@@ -23,6 +22,7 @@ int LuaCommand(lua_State* L);
 int LuaPassive(lua_State* L);
 int LuaOpenDataChannel(lua_State* L);
 int LuaSetTimeout(lua_State* L);
+int LuaGetConnectionStatus(lua_State* L);
 
 int luaftp_gc(lua_State* L);
 int luaftp_tostring(lua_State* L);
