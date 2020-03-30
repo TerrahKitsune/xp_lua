@@ -300,10 +300,15 @@ function ftp:Upload(remotefile, localfile, progressfunc)
 		return false, "Disconnected";
 	end 
 
+	CopyTo(self.FTP:GetMessages(self.Timeout), self.Msgs);
+
 	local code, msg = GetLast(self.Msgs);
 
-	if numbmsgs == #self.Msgs or code == 150 then 
-		numbmsgs = CopyTo(self.FTP:GetMessages(self.Timeout), self.Msgs);
+	if numbmsgs == #self.Msgs or code ~= 226 then 
+	
+		numbmsgs = #self.Msgs;
+		
+		CopyTo(self.FTP:GetMessages(self.Timeout), self.Msgs);
 		
 		if numbmsgs == #self.Msgs then 
 			return false, "Timeout";
@@ -415,13 +420,15 @@ function ftp:Download(remotefile, localfile, progressfunc)
 		return false, "File transfer failed";
 	end 
 
-
-	CopyTo(self.FTP:GetMessages(), self.Msgs);
+	CopyTo(self.FTP:GetMessages(self.Timeout), self.Msgs);
 
 	local code, msg = GetLast(self.Msgs);
 
-	if numbmsgs == #self.Msgs or code == 150 then 
-		numbmsgs = CopyTo(self.FTP:GetMessages(self.Timeout), self.Msgs);
+	if numbmsgs == #self.Msgs or code ~= 226 then 
+	
+		numbmsgs = #self.Msgs;
+		
+		CopyTo(self.FTP:GetMessages(self.Timeout), self.Msgs);
 		
 		if numbmsgs == #self.Msgs then 
 			FileSystem.Delete(temp);
@@ -517,7 +524,12 @@ function ftp:DirectoryContents()
 			file.Group = group;
 			file.Size = tonumber(size);
 			file.Day = tonumber(day);
-			file.Name = name;
+			
+			if name:match("\r$") then	
+				file.Name = name:match("(.+)\r$");
+			else 
+				file.Name = name;
+			end
 			
 			local r,w,x,rr,ww,xx,rrr,www,xxx = attribs:match("(.)(.)(.)(.)(.)(.)(.)(.)(.)");
 			
