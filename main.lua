@@ -115,8 +115,6 @@ local function downloadfiletree(ftp)
 	local files = assert(ftp:DirectoryContents());
 	for n=1, #files do 
 
-		print(files[n].Name);
-
 		if files[n].IsFolder then 
 			local ok, err = ftp:DirectoryUp(files[n].Name);
 			assert(ok, tostring(files[n].Name)..": "..tostring(err));
