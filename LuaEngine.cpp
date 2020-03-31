@@ -29,6 +29,8 @@
 #include "lualinkedlistmain.h"
 #include "luakafkamain.h"
 #include "Sha256Main.h"
+#include "LuaFTPMain.h"
+#include "FileAsyncMain.h"
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 static int print(lua_State *L){
@@ -125,6 +127,10 @@ LuaEngine::LuaEngine()
 	lua_setglobal(L, "Kafka");
 	luaopen_sha256(L);
 	lua_setglobal(L, "SHA256");
+	luaopen_ftp(L);
+	lua_setglobal(L, "FTP");
+	luaopen_fileasync(L);
+	lua_setglobal(L, "FileAsync");
 
 	luaopen_misc(L);
 

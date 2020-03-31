@@ -20,6 +20,8 @@
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Erf.cpp" />
     <ClCompile Include="ERFMain.cpp" />
+    <ClCompile Include="FileAsync.cpp" />
+    <ClCompile Include="FileAsyncMain.cpp" />
     <ClCompile Include="GffField.cpp" />
     <ClCompile Include="GffHeader.cpp" />
     <ClCompile Include="GffLabel.cpp" />
@@ -36,6 +38,9 @@
     <ClCompile Include="LuaClientMain.cpp" />
     <ClCompile Include="LuaFileSystem.cpp" />
     <ClCompile Include="LuaFileSystemMain.cpp" />
+    <ClCompile Include="LuaFTP.cpp" />
+    <ClCompile Include="LuaFTPChannel.cpp" />
+    <ClCompile Include="LuaFTPMain.cpp" />
     <ClCompile Include="LuaGff.cpp" />
     <ClCompile Include="LuaImageMain.cpp" />
     <ClCompile Include="luakafka.cpp" />
@@ -143,6 +148,8 @@
     <ClInclude Include="Client.h" />
     <ClInclude Include="Erf.h" />
     <ClInclude Include="ERFMain.h" />
+    <ClInclude Include="FileAsync.h" />
+    <ClInclude Include="FileAsyncMain.h" />
     <ClInclude Include="GffField.h" />
     <ClInclude Include="GffHeader.h" />
     <ClInclude Include="GffLabel.h" />
@@ -159,6 +166,9 @@
     <ClInclude Include="LuaClientMain.h" />
     <ClInclude Include="LuaFileSystem.h" />
     <ClInclude Include="LuaFileSystemMain.h" />
+    <ClInclude Include="LuaFTP.h" />
+    <ClInclude Include="LuaFTPChannel.h" />
+    <ClInclude Include="LuaFTPMain.h" />
     <ClInclude Include="LuaGff.h" />
     <ClInclude Include="LuaImageMain.h" />
     <ClInclude Include="luakafka.h" />

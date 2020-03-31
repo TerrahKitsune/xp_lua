@@ -244,6 +244,24 @@
     <Filter Include="LuaSha256\Source Files">
       <UniqueIdentifier>{1fce70a0-b18f-4b7a-9904-6a38ad897361}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaFTP">
+      <UniqueIdentifier>{5c7b4d6d-94aa-4547-84ba-b66874e528e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaFTP\Header Files">
+      <UniqueIdentifier>{42ea09ba-3a99-4fe9-969f-bc99f882b1fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaFTP\Source Files">
+      <UniqueIdentifier>{c0558c8e-e5d6-4d2b-afa0-a82b188e5ffb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaFileAsync">
+      <UniqueIdentifier>{52516615-2238-40c6-b340-c8f050dec6b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaFileAsync\Header Files">
+      <UniqueIdentifier>{cec9fb57-81f9-4b14-9d44-4c4d1fafae31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaFileAsync\Source Files">
+      <UniqueIdentifier>{1501465f-00ec-445e-989c-24ac74161830}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\plugin.cpp">
@@ -609,6 +627,21 @@
     <ClCompile Include="Sha256Main.cpp">
       <Filter>LuaSha256</Filter>
     </ClCompile>
+    <ClCompile Include="LuaFTPMain.cpp">
+      <Filter>LuaFTP</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaFTP.cpp">
+      <Filter>LuaFTP\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaFTPChannel.cpp">
+      <Filter>LuaFTP\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileAsyncMain.cpp">
+      <Filter>LuaFileAsync</Filter>
+    </ClCompile>
+    <ClCompile Include="FileAsync.cpp">
+      <Filter>LuaFileAsync\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -967,6 +1000,21 @@
     </ClInclude>
     <ClInclude Include="Sha256Main.h">
       <Filter>LuaSha256</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaFTPMain.h">
+      <Filter>LuaFTP</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaFTP.h">
+      <Filter>LuaFTP\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaFTPChannel.h">
+      <Filter>LuaFTP\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileAsyncMain.h">
+      <Filter>LuaFileAsync</Filter>
+    </ClInclude>
+    <ClInclude Include="FileAsync.h">
+      <Filter>LuaFileAsync\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
