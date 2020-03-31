@@ -1,13 +1,17 @@
 #include "lua_misc.h"
 #include <objbase.h>
 #include <time.h>
-
+#include <io.h>
 #include <stdio.h>
 #include <windows.h>
 #include <windowsx.h>
 #include <mmsystem.h>
+#include <conio.h>
 
 #pragma comment (lib , "winmm.lib")
+
+#define HI_PART(x)  ((x>>4) & 0x0F)
+#define LO_PART(x)  ((x) & 0x0F)
 
 static int env_table = -1;
 static int env_original = -1;
@@ -406,6 +410,249 @@ int luagetenv(lua_State* L) {
 	return 1;
 }
 
+static int L_cls(lua_State *L) {
+
+	HANDLE                     hStdOut;
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	DWORD                      count;
+	DWORD                      cellCount;
+	COORD                      homeCoords = { 0, 0 };
+
+	hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (hStdOut == INVALID_HANDLE_VALUE) return 0;
+
+	if (!GetConsoleScreenBufferInfo(hStdOut, &csbi)) return 0;
+	cellCount = csbi.dwSize.X *csbi.dwSize.Y;
+
+	if (!FillConsoleOutputCharacter(
+		hStdOut,
+		(TCHAR) ' ',
+		cellCount,
+		homeCoords,
+		&count
+	)) return 0;
+
+	if (!FillConsoleOutputAttribute(
+		hStdOut,
+		csbi.wAttributes,
+		cellCount,
+		homeCoords,
+		&count
+	)) return 0;
+
+	SetConsoleCursorPosition(hStdOut, homeCoords);
+
+	return 0;
+}
+
+static int L_SetConsoleCoords(lua_State *L) {
+
+	int x = luaL_checkinteger(L, 1);
+	int y = luaL_checkinteger(L, 1);
+	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (hStdOut == INVALID_HANDLE_VALUE) return 0;
+
+	COORD homeCoords = { x, y };
+
+	SetConsoleCursorPosition(hStdOut, homeCoords);
+
+	return 0;
+}
+
+static int L_GetConsoleCoords(lua_State *L) {
+
+	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_SCREEN_BUFFER_INFO info;
+	lua_pop(L, lua_gettop(L));
+
+	if (hStdOut == INVALID_HANDLE_VALUE) return 0;
+
+	if (!GetConsoleScreenBufferInfo(hStdOut, &info)) {
+
+		lua_pushnil(L);
+		return 1;
+	}
+
+	lua_pushinteger(L, info.dwCursorPosition.X);
+	lua_pushinteger(L, info.dwCursorPosition.Y);
+	lua_pushinteger(L, info.dwSize.X);
+	lua_pushinteger(L, info.dwSize.Y);
+	lua_pushinteger(L, info.dwMaximumWindowSize.X);
+	lua_pushinteger(L, info.dwMaximumWindowSize.Y);
+
+	return 6;
+}
+
+static int L_ConsoleCreate(lua_State *L) {
+
+	lua_pop(L, lua_gettop(L));
+	BOOL ok = AllocConsole();
+
+	lua_pushboolean(L, ok > 0);
+	
+	return 1;
+}
+
+static int L_ConsoleDestroy(lua_State *L) {
+
+	lua_pop(L, lua_gettop(L));
+	BOOL ok = FreeConsole();
+
+	lua_pushboolean(L, ok > 0);
+	
+	return 1;
+}
+
+static int L_SetTitle(lua_State *L) {
+	SetConsoleTitle(luaL_checkstring(L, 1));
+	lua_pop(L, 1);
+	return 0;
+}
+
+static int L_ToggleConsole(lua_State *L) {
+
+	bool toggle = lua_toboolean(L, 1) > 0;
+	HWND console = GetConsoleWindow();
+	if (toggle) {
+		ShowWindow(console, SW_RESTORE);
+	}
+	else {
+		ShowWindow(console, SW_HIDE);
+	}
+	lua_pop(L, 1);
+	return 0;
+}
+
+static int L_SetTextColor(lua_State *L) {
+
+	int BackC = (int)luaL_checknumber(L, 1);
+	int ForgC = (int)luaL_checknumber(L, 2);
+
+	lua_pop(L, 2);
+
+	WORD wColor = ((BackC & 0x0F) << 4) + (ForgC & 0x0F);
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), wColor);
+
+	return 0;
+}
+
+static int L_GetTextColor(lua_State *L) {
+
+	WORD data;
+	CONSOLE_SCREEN_BUFFER_INFO   csbi;
+	if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
+		data = csbi.wAttributes;
+
+		lua_pushinteger(L, HI_PART(data));
+		lua_pushinteger(L, LO_PART(data));
+	}
+	else {
+		lua_pushnil(L);
+		lua_pushnil(L);
+	}
+
+	return 2;
+}
+
+static int L_ConsoleWrite(lua_State *L) {
+
+	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	
+	if (hStdOut == INVALID_HANDLE_VALUE) {
+		return 0;
+	}
+
+	size_t len;
+	const char * data;
+
+	if (lua_isstring(L, 1)) {
+		data = lua_tolstring(L, 1, &len);
+	}
+	else {
+		data = luaL_tolstring(L, 1, &len);
+	}
+
+	DWORD written;
+	WriteConsole(hStdOut, data, len, &written, NULL);
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, written);
+
+	return 1;
+}
+
+static int L_ConsolePrint(lua_State *L) {
+
+	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	if (hStdOut == INVALID_HANDLE_VALUE) {
+		return 0;
+	}
+
+	DWORD written;
+	DWORD total = 0;
+	size_t len;
+	const char * data;
+
+	for (int n = 1; n <= lua_gettop(L); n++) {
+
+		data = luaL_tolstring(L, n, &len);	
+		lua_pop(L, 1);
+
+		if (!data) {
+			data = "";
+			len = 0;
+		}
+
+		WriteConsole(hStdOut, data, len, &written, NULL);
+		total += written;
+
+		if (n < lua_gettop(L)) {
+			data = "\t";
+			len = 1;
+			WriteConsole(hStdOut, data, len, &written, NULL);
+			total += written;
+		}
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, total);
+
+	return 1;
+}
+
+static int L_ConsoleReadKey(lua_State *L) {
+
+	HANDLE hStdOut = GetStdHandle(STD_INPUT_HANDLE);
+
+	if (hStdOut == INVALID_HANDLE_VALUE) {
+		return 0;
+	}
+
+	char character;
+	DWORD read;
+
+	lua_pop(L, lua_gettop(L));
+
+	bool keydown = false;
+
+	if (_isatty(_fileno(stdin))) {
+		keydown = _kbhit() > 0;
+	}
+	else {
+		keydown = !feof(stdin);
+	}
+
+	if (keydown) {
+		lua_pushinteger(L, _getch());
+	}
+	else {
+		lua_pushnil(L);
+	}
+
+	return 1;
+}
+
 int luaopen_misc(lua_State* L) {
 
 	lua_newtable(L);
@@ -526,6 +773,58 @@ int luaopen_misc(lua_State* L) {
 	}
 
 	lua_setglobal(L, "c");
+
+	lua_newtable(L);
+	
+	lua_pushstring(L, "Print");
+	lua_pushcfunction(L, L_ConsolePrint);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "ReadKey");
+	lua_pushcfunction(L, L_ConsoleReadKey);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "Write");
+	lua_pushcfunction(L, L_ConsoleWrite);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "SetColor");
+	lua_pushcfunction(L, L_SetTextColor);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "GetColor");
+	lua_pushcfunction(L, L_GetTextColor);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "SetVisible");
+	lua_pushcfunction(L, L_ToggleConsole);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "SetTitle");
+	lua_pushcfunction(L, L_SetTitle);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "Destroy");
+	lua_pushcfunction(L, L_ConsoleDestroy);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "Create");
+	lua_pushcfunction(L, L_ConsoleCreate);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "Clear");
+	lua_pushcfunction(L, L_cls);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "GetInfo");
+	lua_pushcfunction(L, L_GetConsoleCoords);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "SetCursorPosition");
+	lua_pushcfunction(L, L_SetConsoleCoords);
+	lua_settable(L, -3);
+
+	lua_setglobal(L, "Console");
 
 	lua_newtable(L);
 

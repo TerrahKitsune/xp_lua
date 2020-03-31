@@ -74,6 +74,44 @@ Misc global functions:
 	-Array containing commandline parameters passed though to gff.exe
 	ARGS[]
 
+Console:
+
+	-Creates a new console if one does not exist
+	bool Console.Create()
+
+	-Deallocates the console
+	bool Console.Destroy()
+
+	-Get the position and sizes of the console window
+	cursorx, cursory, sizex, sizey, maxsizex, maxsizey Console.GetInfo()
+
+	-Moves the cursor to a new location
+	nil Console.SetCursorPosition(x, y);
+
+	-Empties the console
+	nil Console.Clear(x, y);
+
+	-Prints to the console (same as default print except towards the console)
+	charactersprinted Console.Print(...)
+
+	-Reads if a key is pressed, returns nil if no key is pressed otherwise it returns the int of the key pressed
+	key Console.ReadKey()
+
+	-Writes data to the console 
+	characterswritten Console.Write(data)
+
+	-Sets the background and foreground colors of the console
+	nil Console.SetColor(Background, Foreground)
+
+	-Get the colors of the console
+	Background, Foreground Console.GetColor()
+
+	-Toggles if the console should be visible or not
+	nil Console.SetVisible(toggle)
+
+	-Set the title of the console
+	nil Console.SetTitle(newtitle)
+
 Kafka:
 
 	-Creates a consumer object
