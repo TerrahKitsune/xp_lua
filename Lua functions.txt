@@ -57,6 +57,12 @@ Misc global functions:
 
 	ms Runtime()
 
+	-Resolve dns, if full is true then it'll return an array containing ipv6 and ipv6 if not full then it returns a single ipv4 address
+	string or array Dns(name, full default false)
+
+	-Retrive the computer name dns fully qualified
+	string GetComputerName()
+
 	-Calculate a crc32
 	int CRC32(stringdata, opt existingcrc)
 
@@ -89,7 +95,7 @@ Console:
 	nil Console.SetCursorPosition(x, y);
 
 	-Empties the console
-	nil Console.Clear(x, y);
+	nil Console.Clear();
 
 	-Prints to the console (same as default print except towards the console)
 	charactersprinted Console.Print(...)

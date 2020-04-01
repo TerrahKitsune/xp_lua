@@ -128,6 +128,17 @@ local function downloadfiletree(ftp)
 	return folder;
 end
 
+local name = GetComputerName();
+local p = Dns(name, true);
+
+for n=1, #p do 
+	for k,v in pairs(p[n]) do
+		print(k,v);
+	end
+end 
+
+print(name..": "..Dns(name));
+
 local ftp = dofile("ftp.lua")("10.9.23.250", 10709, "ftp", "meowCat69!");
 ftp.PassiveOverride = "10.9.23.250";
 

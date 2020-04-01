@@ -1,3 +1,4 @@
+#include "networking.h"
 #include "lua_misc.h"
 #include <objbase.h>
 #include <time.h>
@@ -341,7 +342,7 @@ int luasoundcommand(lua_State* L) {
 
 	lua_pushinteger(L, result);
 	lua_pushstring(L, retstring);
-	
+
 	return 2;
 }
 
@@ -387,7 +388,7 @@ int luagetenv(lua_State* L) {
 		return 1;
 	}
 
-	char* data = (char*)calloc(sizeof(char), len+1);
+	char* data = (char*)calloc(sizeof(char), len + 1);
 
 	if (!data) {
 		lua_pushnil(L);
@@ -410,7 +411,7 @@ int luagetenv(lua_State* L) {
 	return 1;
 }
 
-static int L_cls(lua_State *L) {
+static int L_cls(lua_State* L) {
 
 	HANDLE                     hStdOut;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -422,11 +423,11 @@ static int L_cls(lua_State *L) {
 	if (hStdOut == INVALID_HANDLE_VALUE) return 0;
 
 	if (!GetConsoleScreenBufferInfo(hStdOut, &csbi)) return 0;
-	cellCount = csbi.dwSize.X *csbi.dwSize.Y;
+	cellCount = csbi.dwSize.X * csbi.dwSize.Y;
 
 	if (!FillConsoleOutputCharacter(
 		hStdOut,
-		(TCHAR) ' ',
+		(TCHAR)' ',
 		cellCount,
 		homeCoords,
 		&count
@@ -445,7 +446,7 @@ static int L_cls(lua_State *L) {
 	return 0;
 }
 
-static int L_SetConsoleCoords(lua_State *L) {
+static int L_SetConsoleCoords(lua_State* L) {
 
 	int x = luaL_checkinteger(L, 1);
 	int y = luaL_checkinteger(L, 1);
@@ -459,7 +460,7 @@ static int L_SetConsoleCoords(lua_State *L) {
 	return 0;
 }
 
-static int L_GetConsoleCoords(lua_State *L) {
+static int L_GetConsoleCoords(lua_State* L) {
 
 	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_SCREEN_BUFFER_INFO info;
@@ -483,33 +484,33 @@ static int L_GetConsoleCoords(lua_State *L) {
 	return 6;
 }
 
-static int L_ConsoleCreate(lua_State *L) {
+static int L_ConsoleCreate(lua_State* L) {
 
 	lua_pop(L, lua_gettop(L));
 	BOOL ok = AllocConsole();
 
 	lua_pushboolean(L, ok > 0);
-	
+
 	return 1;
 }
 
-static int L_ConsoleDestroy(lua_State *L) {
+static int L_ConsoleDestroy(lua_State* L) {
 
 	lua_pop(L, lua_gettop(L));
 	BOOL ok = FreeConsole();
 
 	lua_pushboolean(L, ok > 0);
-	
+
 	return 1;
 }
 
-static int L_SetTitle(lua_State *L) {
+static int L_SetTitle(lua_State* L) {
 	SetConsoleTitle(luaL_checkstring(L, 1));
 	lua_pop(L, 1);
 	return 0;
 }
 
-static int L_ToggleConsole(lua_State *L) {
+static int L_ToggleConsole(lua_State* L) {
 
 	bool toggle = lua_toboolean(L, 1) > 0;
 	HWND console = GetConsoleWindow();
@@ -523,7 +524,7 @@ static int L_ToggleConsole(lua_State *L) {
 	return 0;
 }
 
-static int L_SetTextColor(lua_State *L) {
+static int L_SetTextColor(lua_State* L) {
 
 	int BackC = (int)luaL_checknumber(L, 1);
 	int ForgC = (int)luaL_checknumber(L, 2);
@@ -536,7 +537,7 @@ static int L_SetTextColor(lua_State *L) {
 	return 0;
 }
 
-static int L_GetTextColor(lua_State *L) {
+static int L_GetTextColor(lua_State* L) {
 
 	WORD data;
 	CONSOLE_SCREEN_BUFFER_INFO   csbi;
@@ -554,16 +555,16 @@ static int L_GetTextColor(lua_State *L) {
 	return 2;
 }
 
-static int L_ConsoleWrite(lua_State *L) {
+static int L_ConsoleWrite(lua_State* L) {
 
 	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	
+
 	if (hStdOut == INVALID_HANDLE_VALUE) {
 		return 0;
 	}
 
 	size_t len;
-	const char * data;
+	const char* data;
 
 	if (lua_isstring(L, 1)) {
 		data = lua_tolstring(L, 1, &len);
@@ -581,7 +582,7 @@ static int L_ConsoleWrite(lua_State *L) {
 	return 1;
 }
 
-static int L_ConsolePrint(lua_State *L) {
+static int L_ConsolePrint(lua_State* L) {
 
 	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -592,11 +593,11 @@ static int L_ConsolePrint(lua_State *L) {
 	DWORD written;
 	DWORD total = 0;
 	size_t len;
-	const char * data;
+	const char* data;
 
 	for (int n = 1; n <= lua_gettop(L); n++) {
 
-		data = luaL_tolstring(L, n, &len);	
+		data = luaL_tolstring(L, n, &len);
 		lua_pop(L, 1);
 
 		if (!data) {
@@ -621,7 +622,7 @@ static int L_ConsolePrint(lua_State *L) {
 	return 1;
 }
 
-static int L_ConsoleReadKey(lua_State *L) {
+static int L_ConsoleReadKey(lua_State* L) {
 
 	HANDLE hStdOut = GetStdHandle(STD_INPUT_HANDLE);
 
@@ -653,14 +654,117 @@ static int L_ConsoleReadKey(lua_State *L) {
 	return 1;
 }
 
+static int L_GetHost(lua_State* L) {
+
+	const char* data = lua_tostring(L, 1);
+	struct addrinfo* result = NULL, * ptr = NULL, hints;
+
+	bool full = lua_toboolean(L, 2) > 0;
+
+	ZeroMemory(&hints, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = 0;
+	hints.ai_protocol = 0;
+	hints.ai_flags = AI_ALL;
+
+	int iResult = getaddrinfo(data, NULL, &hints, &result);
+
+	lua_pop(L, lua_gettop(L));
+	int n = 0;
+
+	if (iResult == 0) {
+
+		if (full) {
+			lua_newtable(L);
+		}
+
+		for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
+
+			if (full && (ptr->ai_family == AF_INET || ptr->ai_family == AF_INET6)) {
+
+				lua_newtable(L);
+
+				lua_pushstring(L, "Type");
+
+				if (ptr->ai_family == AF_INET) {
+					lua_pushstring(L, "IPV4");
+				}
+				else {
+					lua_pushstring(L, "IPV6");
+				}
+
+				lua_settable(L, -3);
+
+				if (ptr->ai_family == AF_INET) {
+
+					struct sockaddr_in* b = (struct sockaddr_in*)ptr->ai_addr;
+					char straddr[INET_ADDRSTRLEN];
+
+					lua_pushstring(L, "IP");
+					lua_pushstring(L, inet_ntop(AF_INET, &b->sin_addr, straddr, sizeof(straddr)));
+					lua_settable(L, -3);
+				}
+				else {
+
+					struct sockaddr_in6* a = (struct sockaddr_in6*)ptr->ai_addr;
+					char straddr[INET6_ADDRSTRLEN];
+
+					lua_pushstring(L, "IP");
+					lua_pushstring(L, inet_ntop(AF_INET6, &a->sin6_addr, straddr, sizeof(straddr)));
+					lua_settable(L, -3);
+				}
+
+				lua_rawseti(L, -2, ++n);
+			}
+			else if (!full && ptr->ai_family == AF_INET) {
+
+				struct sockaddr_in* b = (struct sockaddr_in*)ptr->ai_addr;
+				char straddr[INET_ADDRSTRLEN];
+
+				lua_pushstring(L, inet_ntop(AF_INET, &b->sin_addr, straddr, sizeof(straddr)));
+
+				freeaddrinfo(result);
+
+				return 1;
+			}
+		}
+
+		freeaddrinfo(result);
+	}
+	else {
+		lua_pushnil(L);
+	}
+
+	return 1;
+}
+
+static int L_GetComputerName(lua_State* L) {
+
+	char data[MAX_COMPUTERNAME_LENGTH + 1];
+	DWORD len;
+
+	lua_pop(L, lua_gettop(L));
+
+	if (GetComputerNameEx(ComputerNameDnsFullyQualified, data, &len)) {
+
+		lua_pushlstring(L, data, len);
+	}
+	else {
+
+		lua_pushnil(L);
+	}
+
+	return 1;
+}
+
 int luaopen_misc(lua_State* L) {
 
 	lua_newtable(L);
-	env_table = luaL_ref(L, LUA_REGISTRYINDEX);
+		env_table = luaL_ref(L, LUA_REGISTRYINDEX);
 
-	char esc[2] = { 0,0 };
+		char esc[2] = { 0,0 };
 
-	lua_createtable(L, 0, 3);
+		lua_createtable(L, 0, 3);
 
 	lua_pushstring(L, "NUL");
 	lua_pushlstring(L, esc, 1);
@@ -775,7 +879,7 @@ int luaopen_misc(lua_State* L) {
 	lua_setglobal(L, "c");
 
 	lua_newtable(L);
-	
+
 	lua_pushstring(L, "Print");
 	lua_pushcfunction(L, L_ConsolePrint);
 	lua_settable(L, -3);
@@ -856,6 +960,12 @@ int luaopen_misc(lua_State* L) {
 	lua_pushcfunction(L, TableSelect);
 	lua_settable(L, -3);
 	lua_pop(L, 1);
+	
+	lua_pushcfunction(L, L_GetHost);
+	lua_setglobal(L, "Dns");
+
+	lua_pushcfunction(L, L_GetComputerName);
+	lua_setglobal(L, "GetComputerName");
 
 	lua_pushcfunction(L, GetLastErrorAsMessage);
 	lua_setglobal(L, "GetLastError");
@@ -871,7 +981,7 @@ int luaopen_misc(lua_State* L) {
 
 	lua_pushcfunction(L, CRC32);
 	lua_setglobal(L, "CRC32");
-	
+
 	lua_pushcfunction(L, luasetenv);
 	lua_setglobal(L, "setenv");
 
