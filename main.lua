@@ -97,6 +97,11 @@ end
 math.randomseed(os.time());
 math.random(); math.random(); math.random();
 
+local procs = Process.Start(nil,"cmd",nil,false, false);
+Console.Attach(procs:GetID());
+print = Console.Print;
+print(procs:GetID(), procs:GetName());
+
 local prefix = "";
 local function feedback(total, downloaded) 
 	

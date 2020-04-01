@@ -88,6 +88,10 @@ Console:
 	-Deallocates the console
 	bool Console.Destroy()
 
+	-Attaches to an existing console
+	-If no process id is given it attaches to the parents console
+	bool Console.Attach(opt processId)
+
 	-Get the position and sizes of the console window
 	cursorx, cursory, sizex, sizey, maxsizex, maxsizey Console.GetInfo()
 

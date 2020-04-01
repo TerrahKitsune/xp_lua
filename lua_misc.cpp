@@ -614,6 +614,12 @@ static int L_ConsolePrint(lua_State* L) {
 			WriteConsole(hStdOut, data, len, &written, NULL);
 			total += written;
 		}
+		else {
+			data = "\n";
+			len = 1;
+			WriteConsole(hStdOut, data, len, &written, NULL);
+			total += written;
+		}
 	}
 
 	lua_pop(L, lua_gettop(L));
@@ -734,6 +740,18 @@ static int L_GetHost(lua_State* L) {
 	else {
 		lua_pushnil(L);
 	}
+
+	return 1;
+}
+
+static int L_AttachConsole(lua_State* L) {
+
+	DWORD processId = luaL_optinteger(L, 1, ATTACH_PARENT_PROCESS);
+
+	lua_pop(L, lua_gettop(L));
+	BOOL ok = AttachConsole(processId);
+
+	lua_pushboolean(L, ok > 0);
 
 	return 1;
 }
@@ -877,8 +895,12 @@ int luaopen_misc(lua_State* L) {
 	}
 
 	lua_setglobal(L, "c");
-
+	
 	lua_newtable(L);
+
+	lua_pushstring(L, "Attach");
+	lua_pushcfunction(L, L_AttachConsole);
+	lua_settable(L, -3);
 
 	lua_pushstring(L, "Print");
 	lua_pushcfunction(L, L_ConsolePrint);
