@@ -262,6 +262,24 @@
     <Filter Include="LuaFileAsync\Source Files">
       <UniqueIdentifier>{1501465f-00ec-445e-989c-24ac74161830}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaAes">
+      <UniqueIdentifier>{dc2cf17f-ddf3-45bc-b208-90d3f85c8fc6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaAes\Header Files">
+      <UniqueIdentifier>{c178555a-8117-4d69-b63c-4c600e56805c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaAes\Source Files">
+      <UniqueIdentifier>{3f12c35b-5b06-4002-9b41-dfe7ace6e5d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaMutex">
+      <UniqueIdentifier>{d7258c31-5a85-425c-ab1a-c3bfa1c93a58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaMutex\Header Files">
+      <UniqueIdentifier>{035dde4d-dd14-4043-9d3a-80f620391d68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaMutex\Source Files">
+      <UniqueIdentifier>{2619e57d-21a3-49b5-8986-6586ef405051}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\plugin.cpp">
@@ -642,6 +660,21 @@
     <ClCompile Include="FileAsync.cpp">
       <Filter>LuaFileAsync\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="aes.c">
+      <Filter>LuaAes\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaaes.cpp">
+      <Filter>LuaAes\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaAesMain.cpp">
+      <Filter>LuaAes</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaMutex.cpp">
+      <Filter>LuaMutex\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaMutexMain.cpp">
+      <Filter>LuaMutex</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -1015,6 +1048,24 @@
     </ClInclude>
     <ClInclude Include="FileAsync.h">
       <Filter>LuaFileAsync\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="aes.h">
+      <Filter>LuaAes\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="aes.hpp">
+      <Filter>LuaAes\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaaes.h">
+      <Filter>LuaAes\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaAesMain.h">
+      <Filter>LuaAes</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaMutex.h">
+      <Filter>LuaMutex\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaMutexMain.h">
+      <Filter>LuaMutex</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

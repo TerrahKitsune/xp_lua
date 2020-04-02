@@ -15,6 +15,7 @@
     <ClCompile Include="..\plugin.cpp" />
     <ClCompile Include="2da.cpp" />
     <ClCompile Include="2DAMain.cpp" />
+    <ClCompile Include="aes.c" />
     <ClCompile Include="AssemblyHelper.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Client.cpp" />
@@ -34,6 +35,8 @@
     <ClCompile Include="kafkahelpers.cpp" />
     <ClCompile Include="LinkedList.cpp" />
     <ClCompile Include="List.cpp" />
+    <ClCompile Include="luaaes.cpp" />
+    <ClCompile Include="LuaAesMain.cpp" />
     <ClCompile Include="LuaClient.cpp" />
     <ClCompile Include="LuaClientMain.cpp" />
     <ClCompile Include="LuaFileSystem.cpp" />
@@ -50,6 +53,8 @@
     <ClCompile Include="LuaLinkedList.cpp" />
     <ClCompile Include="LuaLinkedListMain.cpp" />
     <ClCompile Include="LuaMD5.cpp" />
+    <ClCompile Include="LuaMutex.cpp" />
+    <ClCompile Include="LuaMutexMain.cpp" />
     <ClCompile Include="LuaMySQL.cpp" />
     <ClCompile Include="LuaMySQLResult.cpp" />
     <ClCompile Include="LuaNWN.cpp" />
@@ -143,6 +148,8 @@
     <ClInclude Include="..\dbplugin.h" />
     <ClInclude Include="2da.h" />
     <ClInclude Include="2DAMain.h" />
+    <ClInclude Include="aes.h" />
+    <ClInclude Include="aes.hpp" />
     <ClInclude Include="AssemblyHelper.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Client.h" />
@@ -162,6 +169,8 @@
     <ClInclude Include="kafkahelpers.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="List.h" />
+    <ClInclude Include="luaaes.h" />
+    <ClInclude Include="LuaAesMain.h" />
     <ClInclude Include="LuaClient.h" />
     <ClInclude Include="LuaClientMain.h" />
     <ClInclude Include="LuaFileSystem.h" />
@@ -178,6 +187,8 @@
     <ClInclude Include="LuaLinkedList.h" />
     <ClInclude Include="LuaLinkedListMain.h" />
     <ClInclude Include="LuaMD5.h" />
+    <ClInclude Include="LuaMutex.h" />
+    <ClInclude Include="LuaMutexMain.h" />
     <ClInclude Include="LuaMySQL.h" />
     <ClInclude Include="LuaMySQLResult.h" />
     <ClInclude Include="LuaNWN.h" />
