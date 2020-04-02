@@ -884,6 +884,22 @@ Services:
 	-use GetLastError to evaluate errors on failure 
 	bool Service:Stop();
 
+Aes:
+
+	-Create a 256 aes context
+	-Key should be 32 bytes
+	-Iv should be 16 bytes, if no iv is given the context is considered ecb
+	Aes Aes.Create(key, opt iv)
+
+	-Encrypt data, if the context is in ecb mode then the data must be in blocks of 16 bytes
+	data Aes:Encrypt(data)
+
+	-Decrypt data, if the context is in ecb mode then the data must be in blocks of 16 bytes
+	data Aes:Decrypt(data)
+
+	-Reset the IV or change it. If the context is a ecb context it is upgraded to cbc
+	nil Aes:SetIV(iv)
+
 Process:
 
 	-returns a table with process ids as keys and values as names

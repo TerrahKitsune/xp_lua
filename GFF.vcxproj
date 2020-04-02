@@ -73,6 +73,7 @@
   <ItemGroup>
     <ClCompile Include="2da.cpp" />
     <ClCompile Include="2DAMain.cpp" />
+    <ClCompile Include="aes.c" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Erf.cpp" />
@@ -88,6 +89,8 @@
     <ClCompile Include="image.cpp" />
     <ClCompile Include="kafkahelpers.cpp" />
     <ClCompile Include="LinkedList.cpp" />
+    <ClCompile Include="luaaes.cpp" />
+    <ClCompile Include="LuaAesMain.cpp" />
     <ClCompile Include="LuaFTP.cpp" />
     <ClCompile Include="LuaFTPChannel.cpp" />
     <ClCompile Include="LuaFTPMain.cpp" />
@@ -185,6 +188,8 @@
   <ItemGroup>
     <ClInclude Include="2da.h" />
     <ClInclude Include="2DAMain.h" />
+    <ClInclude Include="aes.h" />
+    <ClInclude Include="aes.hpp" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="Erf.h" />
@@ -200,6 +205,8 @@
     <ClInclude Include="image.h" />
     <ClInclude Include="kafkahelpers.h" />
     <ClInclude Include="LinkedList.h" />
+    <ClInclude Include="luaaes.h" />
+    <ClInclude Include="LuaAesMain.h" />
     <ClInclude Include="LuaFTP.h" />
     <ClInclude Include="LuaFTPChannel.h" />
     <ClInclude Include="LuaFTPMain.h" />

@@ -34,6 +34,7 @@
 #include "LuaFTPMain.h"
 #include "FileAsyncMain.h"
 #include "LuaMutexMain.h"
+#include "LuaAesMain.h"
 
 #define HI_PART(x)  ((x>>4) & 0x0F)
 #define LO_PART(x)  ((x) & 0x0F)
@@ -506,6 +507,8 @@ int main(int argc, char *argv[]){
 	lua_setglobal(L, "FileAsync");
 	luaopen_mutex(L);
 	lua_setglobal(L, "Mutex");
+	luaopen_luaaes(L);
+	lua_setglobal(L, "Aes");
 
 	lua_pushcfunction(L, L_GetRuntime);
 	lua_setglobal(L, "Runtime");

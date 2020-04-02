@@ -256,6 +256,15 @@
     <Filter Include="LuaMutex\Source Files">
       <UniqueIdentifier>{ef32238b-5c8a-4fb3-837a-6f73bcd4b940}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaAes">
+      <UniqueIdentifier>{c55ac30a-9963-4256-9547-c249498971d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaAes\Header Files">
+      <UniqueIdentifier>{5bd26ba6-808b-4db3-b806-c02944df4177}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaAes\Source Files">
+      <UniqueIdentifier>{1ce12822-54a0-4b0c-bf56-cd9af209de40}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -588,6 +597,15 @@
     <ClCompile Include="LuaMutex.cpp">
       <Filter>LuaMutex\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="aes.c">
+      <Filter>LuaAes\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luaaes.cpp">
+      <Filter>LuaAes\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaAesMain.cpp">
+      <Filter>LuaAes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -907,6 +925,18 @@
     </ClInclude>
     <ClInclude Include="LuaMutex.h">
       <Filter>LuaMutex\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luaaes.h">
+      <Filter>LuaAes\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaAesMain.h">
+      <Filter>LuaAes</Filter>
+    </ClInclude>
+    <ClInclude Include="aes.hpp">
+      <Filter>LuaAes\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="aes.h">
+      <Filter>LuaAes\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

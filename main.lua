@@ -94,10 +94,49 @@ function WriteStatusString(str, prevlen, sincelast)
 	return str:len();
 end
 
+function string.fromhex(str)
+    return (str:gsub('..', function (cc)
+        return string.char(tonumber(cc, 16))
+    end))
+end
+
+function string.tohex(str)
+    return (str:gsub('.', function (c)
+        return string.format('%02X', string.byte(c))
+    end))
+end
+
 math.randomseed(os.time());
 math.random(); math.random(); math.random();
 
 local mutex = Mutex.Open("test");
+
+local aeskey = string.fromhex("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4");
+local iv = string.fromhex("000102030405060708090a0b0c0d0e0f");
+
+local aes = Aes.Create(aeskey, iv);
+
+local testdata = "6bc1bee22e409f96e93d7e117393172a";
+testdata = testdata:upper();
+
+local encrypted = string.tohex(aes:Encrypt(string.fromhex(testdata)));
+aes:SetIV(iv);
+local decrypted = string.tohex(aes:Decrypt(string.fromhex(encrypted)));
+
+print(encrypted);
+print(testdata);
+print(decrypted);
+
+print("---");
+
+aes = Aes.Create(aeskey);
+
+local result = string.tohex(aes:Encrypt(string.fromhex(testdata)));
+local decrypted = string.tohex(aes:Decrypt(string.fromhex(result)));
+
+print(result);
+print(testdata);
+print(decrypted);
 
 print(mutex:Lock());
 print(mutex:Info());
