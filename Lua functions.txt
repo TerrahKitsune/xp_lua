@@ -122,6 +122,22 @@ Console:
 	-Set the title of the console
 	nil Console.SetTitle(newtitle)
 
+Mutex:
+
+	-Opens a global named mutex or creates one if none exists
+	Mutex Mutex.Open(name)
+
+	-Lock a mutex
+	-If no timeout is given it'll wait infinitely
+	-returns true if the mutex was locked
+	bool Mutex:Lock(opt timeout)
+
+	-Unlocks the mutex
+	nil Mutex:Unlock()
+
+	-Get information about the mutex
+	islocked, name, internalid Mutex:Info()
+
 Kafka:
 
 	-Creates a consumer object

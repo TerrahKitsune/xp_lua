@@ -97,6 +97,13 @@ end
 math.randomseed(os.time());
 math.random(); math.random(); math.random();
 
+local mutex = Mutex.Open("test");
+
+print(mutex:Lock());
+print(mutex:Info());
+GetKey();
+print(mutex:Unlock());
+
 local procs = Process.Start(nil,"cmd",nil,false, false);
 Console.Attach(procs:GetID());
 print = Console.Print;

@@ -356,7 +356,6 @@ int LuaOpenDataChannel(lua_State* L) {
 		return 2;
 	}
 
-	int ret;
 	u_long flag = 1;
 	ioctlsocket(s, FIONBIO, &flag);
 	

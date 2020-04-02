@@ -8,7 +8,6 @@ void ReadAsyncFile(LuaFileAsyncThreadInfo* threadInfo, size_t bytestoread, size_
 
 	BYTE* buffer = (BYTE*)malloc(buffersize);
 	size_t read;
-	size_t pos;
 	size_t total = 0;
 
 	if (!buffer) {

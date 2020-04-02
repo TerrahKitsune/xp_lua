@@ -223,7 +223,7 @@ int ODBCPrepare(lua_State* L) {
 int ODBCBind(lua_State* L) {
 
 	LuaOdbc* odbc = AssertIsOpen(L, 1);
-	bool asBinary = lua_toboolean(L, 3);
+	bool asBinary = lua_toboolean(L, 3) > 0;
 
 	if (!odbc->stmt) {
 		luaL_error(L, "No statement is prepared, run Prepare first");

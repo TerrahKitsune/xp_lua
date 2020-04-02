@@ -98,6 +98,8 @@
     <ClCompile Include="luakafkatopic.cpp" />
     <ClCompile Include="LuaLinkedList.cpp" />
     <ClCompile Include="LuaLinkedListMain.cpp" />
+    <ClCompile Include="LuaMutex.cpp" />
+    <ClCompile Include="LuaMutexMain.cpp" />
     <ClCompile Include="LuaMySQLResult.cpp" />
     <ClCompile Include="LuaSha256.cpp" />
     <ClCompile Include="luasocket.cpp" />
@@ -208,6 +210,8 @@
     <ClInclude Include="luakafkatopic.h" />
     <ClInclude Include="LuaLinkedList.h" />
     <ClInclude Include="LuaLinkedListMain.h" />
+    <ClInclude Include="LuaMutex.h" />
+    <ClInclude Include="LuaMutexMain.h" />
     <ClInclude Include="LuaMySQLResult.h" />
     <ClInclude Include="LuaSha256.h" />
     <ClInclude Include="luasocket.h" />

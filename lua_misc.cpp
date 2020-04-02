@@ -361,7 +361,7 @@ int luasetenv(lua_State* L) {
 
 	const char* var = luaL_checkstring(L, 1);
 	const char* value = luaL_checkstring(L, 2);
-	bool allowOverwrite = lua_toboolean(L, 3);
+	bool allowOverwrite = lua_toboolean(L, 3) > 0;
 
 	lua_pop(L, lua_gettop(L));
 
@@ -635,9 +635,6 @@ static int L_ConsoleReadKey(lua_State* L) {
 	if (hStdOut == INVALID_HANDLE_VALUE) {
 		return 0;
 	}
-
-	char character;
-	DWORD read;
 
 	lua_pop(L, lua_gettop(L));
 
