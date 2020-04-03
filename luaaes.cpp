@@ -5,148 +5,181 @@
 #include <stdlib.h> 
 #include <windows.h> 
 
-int LuaCreateContext(lua_State *L) {
+int LuaCreateContext(lua_State* L) {
 
 	size_t keylen;
 	size_t ivlen;
-	const uint8_t * key = (const uint8_t *)luaL_checklstring(L, 1, &keylen);
-	const uint8_t * iv = (const uint8_t *)luaL_optlstring(L, 2, NULL, &ivlen);
+	const char* keystr = luaL_checklstring(L, 1, &keylen);
+	const char* ivstr = luaL_optlstring(L, 2, NULL, &ivlen);
 
-	LuaAes * luaaes = lua_pushluaaes(L);
+	uint8_t key[AES_KEYLEN];
+	uint8_t iv[AES_BLOCKLEN];
 
-	if (keylen != AES_KEYLEN) {
+	LuaAes* luaaes = lua_pushluaaes(L);
+
+	if (keylen > AES_KEYLEN) {
 
 		luaL_error(L, "Key length must be 32 bytes");
 		return 0;
 	}
+	else {
+		ZeroMemory(key, AES_KEYLEN);
+		memcpy(key, keystr, keylen);
+	}
 
-	if (iv) {
-		
-		if (ivlen != AES_BLOCKLEN) {
+	if (ivstr && ivlen > 0) {
+
+		if (ivlen > AES_BLOCKLEN) {
 			luaL_error(L, "IV length must be 16 bytes");
 			return 0;
 		}
+		else {
+			ZeroMemory(iv, AES_BLOCKLEN);
+			memcpy(iv, ivstr, ivlen);
+		}
 
 		memcpy(luaaes->iv, iv, AES_BLOCKLEN);
-		luaaes->isEcb = false;
+		luaaes->type = (lua_isboolean(L, 3) && lua_toboolean(L, 3)) ? AES_256_CTR : AES_256_CBC;
 		AES_init_ctx_iv(&luaaes->context, key, iv);
 	}
 	else {
-		luaaes->isEcb = true;
+		luaaes->type = AES_256_ECB;
 		AES_init_ctx(&luaaes->context, key);
 	}
 
 	return 1;
 }
 
-int LuaSetIV(lua_State *L) {
+int LuaSetIV(lua_State* L) {
 
-	LuaAes * luaaes = lua_toluaaes(L, 1);
+	LuaAes* luaaes = lua_toluaaes(L, 1);
 	size_t len;
-	const char * data = luaL_checklstring(L, 2, &len);
+	const char* data = lua_tolstring(L, 2, &len);
 
-	if (len != AES_BLOCKLEN) {
+	if (luaaes->type == AES_256_ECB) {
+		return 0;
+	}
+	else if (!data || len <= 0) {
+		data = (const char*)luaaes->iv;
+		len = AES_BLOCKLEN;
+	}
+
+	if (len > AES_BLOCKLEN) {
 		luaL_error(L, "IV length must be 16 bytes");
 		return 0;
 	}
 
-	luaaes->isEcb = false;
 	AES_ctx_set_iv(&luaaes->context, (const uint8_t*)data);
 
 	return 0;
 }
 
-int LuaAesEncrypt(lua_State *L) {
+int LuaAesEncrypt(lua_State* L) {
 
-	LuaAes * luaaes = lua_toluaaes(L, 1);
+	LuaAes* luaaes = lua_toluaaes(L, 1);
 	size_t len;
-	const char * data = luaL_checklstring(L, 2, &len);
+	const char* data = luaL_checklstring(L, 2, &len);
 
-	if (luaaes->isEcb) {
+	size_t datalen = 16 * ((size_t)((double)len / AES_BLOCKLEN) + 1);
 
-		if (len > AES_BLOCKLEN) {
-			luaL_error(L, "Data is larger than 16 bytes");
-			return 0;
-		}
+	uint8_t* cbcbuf = (uint8_t*)calloc(datalen, sizeof(uint8_t));
 
-		uint8_t ecbbuf[AES_BLOCKLEN];
-
-		ZeroMemory(ecbbuf, AES_BLOCKLEN);
-		memcpy(ecbbuf, data, len);
-		AES_ECB_encrypt(&luaaes->context, ecbbuf);
-		
-		lua_pop(L, lua_gettop(L));
-		lua_pushlstring(L, (const char*)ecbbuf, AES_BLOCKLEN);
+	if (!cbcbuf) {
+		luaL_error(L, "Unable to allocate buffer");
+		return 0;
 	}
-	else {
 
-		uint8_t* cbcbuf = (uint8_t*)calloc(len, sizeof(uint8_t));
+	memcpy(cbcbuf, data, len);
+	memset(&cbcbuf[len], (BYTE)(datalen - len), datalen - len);
 
-		if (!cbcbuf) {
-			luaL_error(L, "Unable to allocate buffer");
-			return 0;
+	for (size_t i = 0; i < (datalen / AES_BLOCKLEN); i++)
+	{
+		switch (luaaes->type) {
+
+		case AES_256_ECB:
+			AES_ECB_encrypt(&luaaes->context, &cbcbuf[i * AES_BLOCKLEN]);
+			break;
+
+		case AES_256_CBC:
+			AES_CBC_encrypt_buffer(&luaaes->context, &cbcbuf[i * AES_BLOCKLEN], AES_BLOCKLEN);
+			break;
+
+		case AES_256_CTR:
+			AES_CTR_xcrypt_buffer(&luaaes->context, &cbcbuf[i * AES_BLOCKLEN], AES_BLOCKLEN);
+			break;
 		}
-
-		memcpy(cbcbuf, data, len);
-
-		AES_CBC_encrypt_buffer(&luaaes->context, cbcbuf, len);
-
-		lua_pop(L, lua_gettop(L));
-		lua_pushlstring(L, (const char*)cbcbuf, len);
-
-		free(cbcbuf);
 	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushlstring(L, (const char*)cbcbuf, datalen);
+
+	free(cbcbuf);
 
 	return 1;
 }
 
-int LuaAesDecrypt(lua_State *L) {
+int LuaAesDecrypt(lua_State* L) {
 
-	LuaAes * luaaes = lua_toluaaes(L, 1);
+	LuaAes* luaaes = lua_toluaaes(L, 1);
 	size_t len;
-	const char * data = luaL_checklstring(L, 2, &len);
+	const char* data = luaL_checklstring(L, 2, &len);
 
-	if (luaaes->isEcb) {
+	size_t datalen = len;
 
-		if (len > AES_BLOCKLEN) {
-			luaL_error(L, "Data is larger than 16 bytes");
-			return 0;
+	if (datalen % 16 != 0) {
+		luaL_error(L, "Aes decrypt invalid blocksize");
+		return 0;
+	}
+
+	uint8_t* cbcbuf = (uint8_t*)calloc(datalen, sizeof(uint8_t));
+
+	if (!cbcbuf) {
+		luaL_error(L, "Unable to allocate buffer");
+		return 0;
+	}
+
+	memcpy(cbcbuf, data, len);
+
+	for (size_t i = 0; i < (datalen / AES_BLOCKLEN); i++)
+	{
+		switch (luaaes->type) {
+
+			case AES_256_ECB:
+				AES_ECB_decrypt(&luaaes->context, &cbcbuf[i * AES_BLOCKLEN]);
+				break;
+
+			case AES_256_CBC:
+				AES_CBC_decrypt_buffer(&luaaes->context, &cbcbuf[i * AES_BLOCKLEN], AES_BLOCKLEN);
+				break;
+
+			case AES_256_CTR:
+				AES_CTR_xcrypt_buffer(&luaaes->context, &cbcbuf[i * AES_BLOCKLEN], AES_BLOCKLEN);
+				break;
 		}
+	}
 
-		uint8_t ecbbuf[AES_BLOCKLEN];
+	BYTE paddingbyte = cbcbuf[len - 1];
 
-		ZeroMemory(ecbbuf, AES_BLOCKLEN);
-		memcpy(ecbbuf, data, len);
-		AES_ECB_decrypt(&luaaes->context, ecbbuf);
-
-		lua_pop(L, lua_gettop(L));
-		lua_pushlstring(L, (const char*)ecbbuf, AES_BLOCKLEN);
+	if (paddingbyte <= 0 || paddingbyte > AES_BLOCKLEN) {
+		free(cbcbuf);
+		luaL_error(L, "Invalid aes padding");
+		return 0;
 	}
 	else {
-
-		uint8_t* cbcbuf = (uint8_t*)calloc(len, sizeof(uint8_t));
-
-		if (!cbcbuf) {
-			luaL_error(L, "Unable to allocate buffer");
-			return 0;
-		}
-
-		memcpy(cbcbuf, data, len);
-
-		AES_CBC_decrypt_buffer(&luaaes->context, cbcbuf, len);
-
-		lua_pop(L, lua_gettop(L));
-		lua_pushlstring(L, (const char*)cbcbuf, len);
-
-		free(cbcbuf);
+		datalen -= paddingbyte;
 	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushlstring(L, (const char*)cbcbuf, datalen);
+
+	free(cbcbuf);
 
 	return 1;
 }
 
-LuaAes * lua_pushluaaes(lua_State *L) {
+LuaAes* lua_pushluaaes(lua_State* L) {
 
-	LuaAes * luaaes = (LuaAes*)lua_newuserdata(L, sizeof(LuaAes));
+	LuaAes* luaaes = (LuaAes*)lua_newuserdata(L, sizeof(LuaAes));
 
 	if (luaaes == NULL)
 		luaL_error(L, "Unable to push aes");
@@ -158,23 +191,44 @@ LuaAes * lua_pushluaaes(lua_State *L) {
 	return luaaes;
 }
 
-LuaAes * lua_toluaaes(lua_State *L, int index) {
-	LuaAes * luaaes = (LuaAes*)luaL_checkudata(L, index, LUAES);
+LuaAes* lua_toluaaes(lua_State* L, int index) {
+	LuaAes* luaaes = (LuaAes*)luaL_checkudata(L, index, LUAES);
 	if (luaaes == NULL)
 		luaL_error(L, "parameter is not a %s", LUAES);
 	return luaaes;
 }
 
-int luaaes_gc(lua_State *L) {
+int luaaes_gc(lua_State* L) {
 
-	LuaAes * luaaes = lua_toluaaes(L, 1);
+	LuaAes* luaaes = lua_toluaaes(L, 1);
 
 	return 0;
 }
 
-int luaaes_tostring(lua_State *L) {
+int luaaes_tostring(lua_State* L) {
+	
 	char tim[100];
-	sprintf(tim, "LuaAes: 0x%08X", lua_toluaaes(L, 1));
-	lua_pushfstring(L, tim);
+	LuaAes* luaaes = lua_toluaaes(L, 1);
+
+	switch (luaaes->type) {
+
+	case AES_256_ECB:
+		sprintf(tim, "LuaAes: 0x%08X (aes-256-ecb)", luaaes);
+		break;
+
+	case AES_256_CBC:
+		sprintf(tim, "LuaAes: 0x%08X (aes-256-cbc)", luaaes);
+		break;
+
+	case AES_256_CTR:
+		sprintf(tim, "LuaAes: 0x%08X (aes-256-ctr)", luaaes);
+		break;
+
+	default:
+		sprintf(tim, "LuaAes: 0x%08X (invalid)", luaaes);
+		break;
+	}
+
+	lua_pushstring(L, tim);
 	return 1;
 }

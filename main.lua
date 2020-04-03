@@ -111,31 +111,31 @@ math.random(); math.random(); math.random();
 
 local mutex = Mutex.Open("test");
 
-local aeskey = string.fromhex("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4");
-local iv = string.fromhex("000102030405060708090a0b0c0d0e0f");
+local aes = Aes.Create(string.fromhex('F3229A0B371ED2D9441B830D21A390C3F3229A0B371ED2D9441B830D21A390C3'));
+print(aes);
 
-local aes = Aes.Create(aeskey, iv);
+local encrypted = aes:Encrypt(string.fromhex("54657374"));
+local decrypted = aes:Decrypt(encrypted);
 
-local testdata = "6bc1bee22e409f96e93d7e117393172a";
-testdata = testdata:upper();
-
-local encrypted = string.tohex(aes:Encrypt(string.fromhex(testdata)));
-aes:SetIV(iv);
-local decrypted = string.tohex(aes:Decrypt(string.fromhex(encrypted)));
-
-print(encrypted);
-print(testdata);
+print(string.tohex(encrypted));
 print(decrypted);
 
-print("---");
+local aes = Aes.Create(string.fromhex('F3229A0B371ED2D9441B830D21A390C3F3229A0B371ED2D9441B830D21A390C3'), string.fromhex("deadbeefdeadbeefdeadbeefdeadbeef"));
+print(aes);
+local encrypted = aes:Encrypt(string.fromhex("54657374"));
+aes:SetIV();
+local decrypted = aes:Decrypt(encrypted);
 
-aes = Aes.Create(aeskey);
+print(string.tohex(encrypted));
+print(decrypted);
 
-local result = string.tohex(aes:Encrypt(string.fromhex(testdata)));
-local decrypted = string.tohex(aes:Decrypt(string.fromhex(result)));
+local aes = Aes.Create(string.fromhex('F3229A0B371ED2D9441B830D21A390C3F3229A0B371ED2D9441B830D21A390C3'), string.fromhex("deadbeefdeadbeefdeadbeefdeadbeef"), true);
+print(aes);
+local encrypted = aes:Encrypt(string.fromhex("54657374"));
+aes:SetIV();
+local decrypted = aes:Decrypt(encrypted);
 
-print(result);
-print(testdata);
+print(string.tohex(encrypted));
 print(decrypted);
 
 print(mutex:Lock());

@@ -4,9 +4,13 @@
 #include "aes.hpp"
 static const char * LUAES = "LUAES";
 
+#define AES_256_ECB 1
+#define AES_256_CBC 2
+#define AES_256_CTR 3
+
 typedef struct LuaAes {
 
-	bool isEcb;
+	DWORD type;
 	uint8_t iv[AES_BLOCKLEN];
 	AES_ctx context;
 

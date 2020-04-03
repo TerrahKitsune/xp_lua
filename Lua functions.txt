@@ -886,19 +886,21 @@ Services:
 
 Aes:
 
-	-Create a 256 aes context
-	-Key should be 32 bytes
-	-Iv should be 16 bytes, if no iv is given the context is considered ecb
-	Aes Aes.Create(key, opt iv)
+	-Create a aes-256-cbc or aes-256-ecb context
+	-Key to use, should be 32 bytes
+	-Iv if provided the context will be considered cbc instead of ecb should be 16 bytes if provided
+	-usectr if true then the context will be aes-256-ctr
+	-If key and or iv is smaller than their expected sizes they are padded with '\0'
+	Aes Aes.Create(key, opt iv, opt usectr)
 
-	-Encrypt data, if the context is in ecb mode then the data must be in blocks of 16 bytes
+	-Encrypt data
 	data Aes:Encrypt(data)
 
-	-Decrypt data, if the context is in ecb mode then the data must be in blocks of 16 bytes
+	-Decrypt data
 	data Aes:Decrypt(data)
 
-	-Reset the IV or change it. If the context is a ecb context it is upgraded to cbc
-	nil Aes:SetIV(iv)
+	-Reset (default) or change the iv of a cbc context
+	nil Aes:SetIV(opt iv)
 
 Process:
 
