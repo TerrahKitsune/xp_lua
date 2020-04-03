@@ -12,10 +12,12 @@ int LuaSocketHasData(lua_State* L) {
 
 	lua_pop(L, lua_gettop(L));
 
-	if (recv(socket->s, &d, 1, MSG_PEEK) == 1) {
+	int result = recv(socket->s, &d, 1, MSG_PEEK);
+
+	if (result == 1) {
 		lua_pushboolean(L, true);
 	}
-	else if (WSAGetLastError() == WSAEWOULDBLOCK) {
+	else if (result == SOCKET_ERROR && WSAGetLastError() == WSAEWOULDBLOCK) {
 		lua_pushboolean(L, false);
 	}
 	else {
