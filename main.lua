@@ -109,96 +109,24 @@ end
 math.randomseed(os.time());
 math.random(); math.random(); math.random();
 
-local mutex = Mutex.Open("test");
+local listener = assert(Socket.Listen(112, 2));
+local client, data;
 
-local aes = Aes.Create(string.fromhex('F3229A0B371ED2D9441B830D21A390C3F3229A0B371ED2D9441B830D21A390C3'));
-print(aes);
+while true do 
 
-local encrypted = aes:Encrypt(string.fromhex("54657374"));
-local decrypted = aes:Decrypt(encrypted);
+	client = listener:Accept();
 
-print(string.tohex(encrypted));
-print(decrypted);
+	if client then
 
-local aes = Aes.Create(string.fromhex('F3229A0B371ED2D9441B830D21A390C3F3229A0B371ED2D9441B830D21A390C3'), string.fromhex("deadbeefdeadbeefdeadbeefdeadbeef"));
-print(aes);
-local encrypted = aes:Encrypt(string.fromhex("54657374"));
-aes:SetIV();
-local decrypted = aes:Decrypt(encrypted);
+		print(client:Info());
 
-print(string.tohex(encrypted));
-print(decrypted);
-
-local aes = Aes.Create(string.fromhex('F3229A0B371ED2D9441B830D21A390C3F3229A0B371ED2D9441B830D21A390C3'), string.fromhex("deadbeefdeadbeefdeadbeefdeadbeef"), true);
-print(aes);
-local encrypted = aes:Encrypt(string.fromhex("54657374"));
-aes:SetIV();
-local decrypted = aes:Decrypt(encrypted);
-
-print(string.tohex(encrypted));
-print(decrypted);
-
-print(mutex:Lock());
-print(mutex:Info());
-GetKey();
-print(mutex:Unlock());
-
-local procs = Process.Start(nil,"cmd",nil,false, false);
-Console.Attach(procs:GetID());
-print = Console.Print;
-print(procs:GetID(), procs:GetName());
-
-local prefix = "";
-local function feedback(total, downloaded) 
-	
-	if downloaded >= total then
-		prvlen = WriteStatusString(prefix..": "..total.."/"..downloaded, prvlen, 0); 
-	else 
-		prvlen = WriteStatusString(prefix..": "..total.."/"..downloaded, prvlen, 250); 
-	end
-	return true;
-end
-
-local function downloadfiletree(ftp)
-
-	local folder = {};
-
-	local files = assert(ftp:DirectoryContents());
-	for n=1, #files do 
-
-		if files[n].IsFolder then 
-			local ok, err = ftp:DirectoryUp(files[n].Name);
-			assert(ok, tostring(files[n].Name)..": "..tostring(err));
-			folder[files[n].Name] = downloadfiletree(ftp);
-			assert(ftp:DirectoryDown());
-		else
-			folder[files[n].Name] = files[n].Size;
+		while client:HasData() do 
+			data = client:Read();
+			io.write(data);
 		end
-	end
 
-	return folder;
-end
-
-local name = GetComputerName();
-local p = Dns(name, true);
-
-for n=1, #p do 
-	for k,v in pairs(p[n]) do
-		print(k,v);
+		client:Close();
+	else
+		Sleep();
 	end
 end 
-
-print(name..": "..Dns(name));
-
-local ftp = dofile("ftp.lua")("10.9.23.250", 10709, "ftp", "meowCat69!");
-ftp.PassiveOverride = "10.9.23.250";
-
-assert(ftp:Connect());
-
-local files = downloadfiletree(ftp);
-
-TablePrint(files);
-
-ArrayPrint(ftp:GetMessages());
-
-ftp:Close();

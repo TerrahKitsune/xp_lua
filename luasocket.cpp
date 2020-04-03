@@ -28,6 +28,12 @@ int LuaSocketHasData(lua_State* L) {
 int LuaSocketReadData(lua_State* L) {
 
 	LuaSocket* socket = lua_toluasocket(L, 1);
+
+	if (socket->IsServer) {
+		luaL_error(L, "Cannot read on listening socket");
+		return 0;
+	}
+
 	size_t buffersize = (size_t)luaL_optinteger(L, 2, 1500);
 
 	if (!socket->buf || socket->bufsize != buffersize) {
@@ -60,6 +66,12 @@ int LuaSocketReadData(lua_State* L) {
 int LuaSocketWrite(lua_State* L) {
 
 	LuaSocket* socket = lua_toluasocket(L, 1);
+
+	if (socket->IsServer) {
+		luaL_error(L, "Cannot send on listening socket");
+		return 0;
+	}
+
 	size_t len;
 	const char* data = luaL_checklstring(L, 2, &len);
 
@@ -104,7 +116,7 @@ int LuaSocketOpen(lua_State* L) {
 
 	const char* addr = luaL_checkstring(L, 1);
 	int port = luaL_checkinteger(L, 2);
-	int family = luaL_optinteger(L, 3, AF_UNSPEC);
+	int family = luaL_optinteger(L, 3, AF_INET);
 	int socktype = luaL_optinteger(L, 4, SOCK_STREAM);
 	int protocol = luaL_optinteger(L, 5, IPPROTO_TCP);
 
@@ -178,11 +190,176 @@ int LuaSocketOpen(lua_State* L) {
 	lua_pop(L, lua_gettop(L));
 	LuaSocket* sock = lua_pushluasocket(L);
 
-	sock->IsConnected = false;
 	sock->IsServer = false;
 	sock->s = s;
 
 	return 1;
+}
+
+int LuaSocketOpenListener(lua_State* L) {
+
+	int port = luaL_checkinteger(L, 1);
+	int family = luaL_optinteger(L, 2, AF_INET);
+	int socktype = luaL_optinteger(L, 3, SOCK_STREAM);
+	int protocol = luaL_optinteger(L, 4, IPPROTO_TCP);
+
+	struct addrinfo* result = NULL, *ptr = NULL, hints;
+
+	ZeroMemory(&hints, sizeof(hints));
+	hints.ai_family = family;
+	hints.ai_socktype = socktype;
+	hints.ai_protocol = protocol;
+
+	char portstr[15];
+	sprintf(portstr, "%d", port);
+
+	int iResult = getaddrinfo(NULL, portstr, &hints, &result);
+	if (iResult != 0) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushfstring(L, "Unable to resolve port %s", portstr);
+
+		return 2;
+	}
+
+	SOCKET s = INVALID_SOCKET;
+	u_long flag = 1;
+
+	for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
+
+		// Create a SOCKET for connecting to server
+		s = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+
+		if (s == INVALID_SOCKET) {
+
+			lua_pop(L, lua_gettop(L));
+			lua_pushnil(L);
+			lua_pushfstring(L, "Unable to create socket %s (Error: %d)", portstr, WSAGetLastError());
+
+			if (result) {
+				freeaddrinfo(result);
+			}
+
+			return 2;
+		}
+
+		iResult = bind(s, ptr->ai_addr, (int)ptr->ai_addrlen);
+		if (iResult == SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK) {
+
+			closesocket(s);
+			s = INVALID_SOCKET;
+			continue;
+		}
+
+		iResult = listen(s, SOMAXCONN);
+		if (iResult == SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK) {
+
+			closesocket(s);
+			s = INVALID_SOCKET;
+			continue;
+		}
+
+		ioctlsocket(s, FIONBIO, &flag);
+
+		break;
+	}
+
+	if (result) {
+		freeaddrinfo(result);
+	}
+
+	if (s == INVALID_SOCKET) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushfstring(L, "Unable to open socket %s (Error: %d)", portstr, WSAGetLastError());
+
+		return 2;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	LuaSocket* sock = lua_pushluasocket(L);
+
+	sock->IsServer = true;
+	sock->s = s;
+
+	return 1;
+}
+
+int LuaSocketAccept(lua_State* L) {
+
+	LuaSocket* socket = lua_toluasocket(L, 1);
+
+	if (!socket->IsServer) {
+		luaL_error(L, "Cannot accept on client socket");
+		return 0;
+	}
+
+	SOCKET s = accept(socket->s, NULL, NULL);
+
+	lua_pop(L, lua_gettop(L));
+
+	if (s == INVALID_SOCKET) {
+		
+		lua_pushnil(L);
+	}
+	else {
+
+		LuaSocket* client = lua_pushluasocket(L);
+
+		client->IsServer = false;
+		client->s = s;
+	}
+
+	return 1;
+}
+
+int LuaSocketGetInfo(lua_State* L) {
+
+	LuaSocket* socket = lua_toluasocket(L, 1);
+
+	sockaddr_in6  client_info = { 0 };
+	int len = sizeof(sockaddr_in6);
+
+	if (socket->bufsize < 1024) {
+		
+		if (socket->buf) {
+			free(socket->buf);
+		}
+		socket->bufsize = 0;
+
+		socket->buf = (char*)malloc(1024);
+
+		if (socket->buf) {
+			socket->bufsize = 1024;
+		}
+		else {
+			luaL_error(L, "Unable to allocate buffer");
+			return 0;
+		}
+	}
+
+	int result = getpeername(socket->s, (sockaddr*)&client_info, &len);
+
+	lua_pop(L, lua_gettop(L));
+
+	if (client_info.sin6_family == AF_INET6) {
+		lua_pushstring(L, inet_ntop(client_info.sin6_family, &client_info.sin6_addr, socket->buf, socket->bufsize));
+		lua_pushinteger(L, client_info.sin6_port);
+	}
+	else if (client_info.sin6_family == AF_INET) {
+		sockaddr_in* ipv4 = (sockaddr_in*)(&client_info);
+		lua_pushstring(L, inet_ntop(ipv4->sin_family, &ipv4->sin_addr, socket->buf, socket->bufsize));
+		lua_pushinteger(L, ipv4->sin_port);
+	}
+	else {
+		lua_pushnil(L);
+	}
+
+	lua_pushinteger(L, socket->s);
+
+	return 3;
 }
 
 LuaSocket* lua_pushluasocket(lua_State* L) {

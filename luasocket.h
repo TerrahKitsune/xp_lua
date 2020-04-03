@@ -6,7 +6,6 @@ static const char* LUASOCKET = "SOCKET";
 typedef struct LuaSocket {
 
 	bool IsServer;
-	bool IsConnected;
 	SOCKET s;
 	char* buf;
 	size_t bufsize;
@@ -22,6 +21,9 @@ int LuaSocketReadData(lua_State* L);
 int LuaSocketHasData(lua_State* L);
 int LuaSocketSelect(lua_State* L);
 int LuaSocketOpen(lua_State* L);
+int LuaSocketOpenListener(lua_State* L);
+int LuaSocketAccept(lua_State* L);
+int LuaSocketGetInfo(lua_State* L);
 
 int luasocket_gc(lua_State* L);
 int luasocket_tostring(lua_State* L);

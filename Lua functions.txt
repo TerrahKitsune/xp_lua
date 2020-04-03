@@ -800,10 +800,16 @@ Pipe:
 Socket:
 
 	-Opens a socket and attempts connecting
-	-family = default 0
+	-family = ipv6=23, ipv4=2, default 2 (ipv4)
 	-sockettype = stream = 1, datagram = 2, raw = 3, rdm = 4, seqpacket = 5 default = 1
 	-protocol: tcp=6, udp=17 default = 6
 	Socket Socket.Connect(address, port, family, sockettype, protocol)
+
+	-Opens a socket to listen for connections
+	-family = ipv6=23, ipv4=2, default 2 (ipv4)
+	-sockettype = stream = 1, datagram = 2, raw = 3, rdm = 4, seqpacket = 5 default = 1
+	-protocol: tcp=6, udp=17 default = 6
+	Socket Socket.Listen(port, family, sockettype, protocol)
 
 	-Checks the status of the socket
 	-1st: is the socket ok
@@ -817,11 +823,22 @@ Socket:
 	bool/nil Socket:HasData()
 
 	-Read data from the socket, returns nil if there is no data to read
+	-Cannot be ran with a listener socket
 	string Socket:Read()
 
 	-Writes data to the socket, returns the number that was set
+	-Cannot be ran with a listener socket
 	-returns -1 on failure otherwise returns the number of bytes that was sent
 	int Socket:Write()
+
+	-Attempts accepting an incoming connection on a listener socket
+	-Cannot be ran with a client socket
+	-On success returns a client socket
+	-If there is no connection to accept it returns nil
+	Socket Socket:Accept()
+
+	-Retrives info about the socket
+	address, port, socketid Socket:Info()
 
 	-Closes the socket
 	nil Socket:Close()

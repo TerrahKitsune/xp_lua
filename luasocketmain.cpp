@@ -8,6 +8,9 @@ static const struct luaL_Reg socketfunctions[] = {
 	{ "HasData",  LuaSocketHasData },
 	{ "Read",  LuaSocketReadData },
 	{ "Write",  LuaSocketWrite },
+	{ "Listen",  LuaSocketOpenListener },
+	{ "Accept",  LuaSocketAccept },
+	{ "Info",  LuaSocketGetInfo },
 	{ NULL, NULL }
 };
 
