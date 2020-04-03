@@ -322,35 +322,19 @@ int LuaSocketGetInfo(lua_State* L) {
 	sockaddr_in6  client_info = { 0 };
 	int len = sizeof(sockaddr_in6);
 
-	if (socket->bufsize < 1024) {
-		
-		if (socket->buf) {
-			free(socket->buf);
-		}
-		socket->bufsize = 0;
-
-		socket->buf = (char*)malloc(1024);
-
-		if (socket->buf) {
-			socket->bufsize = 1024;
-		}
-		else {
-			luaL_error(L, "Unable to allocate buffer");
-			return 0;
-		}
-	}
+	char buf[INET6_ADDRSTRLEN + 1];
 
 	int result = getpeername(socket->s, (sockaddr*)&client_info, &len);
 
 	lua_pop(L, lua_gettop(L));
 
 	if (client_info.sin6_family == AF_INET6) {
-		lua_pushstring(L, inet_ntop(client_info.sin6_family, &client_info.sin6_addr, socket->buf, socket->bufsize));
+		lua_pushstring(L, inet_ntop(client_info.sin6_family, &client_info.sin6_addr, buf, INET6_ADDRSTRLEN));
 		lua_pushinteger(L, client_info.sin6_port);
 	}
 	else if (client_info.sin6_family == AF_INET) {
 		sockaddr_in* ipv4 = (sockaddr_in*)(&client_info);
-		lua_pushstring(L, inet_ntop(ipv4->sin_family, &ipv4->sin_addr, socket->buf, socket->bufsize));
+		lua_pushstring(L, inet_ntop(ipv4->sin_family, &ipv4->sin_addr, buf, INET6_ADDRSTRLEN));
 		lua_pushinteger(L, ipv4->sin_port);
 	}
 	else {

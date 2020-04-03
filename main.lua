@@ -109,7 +109,7 @@ end
 math.randomseed(os.time());
 math.random(); math.random(); math.random();
 
-local listener = assert(Socket.Listen(112, 2));
+local listener = assert(Socket.Listen(112));
 local client, data;
 
 while true do 
