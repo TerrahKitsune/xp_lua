@@ -142,6 +142,7 @@ Kafka:
 
 	-Creates a consumer object
 	-conf should be a table with keys and values as strings
+	-https://kafka.apache.org/documentation/#consumerconfigs
 	-example: 
 	-local conf = {};
 	-conf["offset.store.method"]="broker";
@@ -151,6 +152,7 @@ Kafka:
 	Kafka Kafka.NewConsumer(opt conf)
 
 	-Same as NewConsumer, default group = "LUAP"
+	-https://kafka.apache.org/documentation/#producerconfigs
 	Kafka Kafka.NewProducer(opt conf)
 
 	-Send a message on the kafka topic (Only works for producers)
