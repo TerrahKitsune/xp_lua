@@ -164,6 +164,11 @@ Kafka:
 
 	-Poll for any events on the kafka object
 	-This should be done regularly
+	-Object properties:
+	-Name
+	-Type
+	-Error
+	-ErrorCode
 	-returns nil if there are no events
 	event Kafka:Events()
 
