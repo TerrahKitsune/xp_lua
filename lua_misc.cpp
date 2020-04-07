@@ -67,11 +67,11 @@ static int GetLastErrorAsMessage(lua_State* L)
 	DWORD lasterror = (DWORD)luaL_optinteger(L, 1, GetLastError());
 	char err[1024];
 
-	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, lasterror,
+	DWORD ok =FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, lasterror,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), err, 1024, NULL);
 
 	lua_pop(L, lua_gettop(L));
-	lua_pushstring(L, err);
+	lua_pushlstring(L, err, ok);
 	lua_pushinteger(L, lasterror);
 
 	return 2;
