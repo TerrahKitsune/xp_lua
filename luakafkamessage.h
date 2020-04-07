@@ -19,6 +19,7 @@ int GetKafkaMessageLatency(lua_State* L);
 int GetKafkaMessageTimestamp(lua_State* L);
 int GetKafkaMessageOwnerId(lua_State* L);
 int GetKafkaMessageData(lua_State* L);
+int GetKafkaMessageEqual(lua_State* L);
 
 int kafkamsg_gc(lua_State* L);
 int kafkamsg_tostring(lua_State* L);

@@ -52,6 +52,24 @@ int GetKafkaMessageTimestamp(lua_State* L) {
 	return 2;
 }
 
+int GetKafkaMessageEqual(lua_State* L) {
+
+	LuaKafkaMessage* kafkamsg = lua_tokafkamsg(L, 1);
+
+	if (lua_isnoneornil(L, 2) && !kafkamsg->message) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, true);
+		return 1;
+	}
+
+	LuaKafkaMessage* kafkamsgother = lua_tokafkamsg(L, 2);
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushboolean(L, kafkamsg == kafkamsgother && kafkamsg->message == kafkamsgother->message && kafkamsg->owner == kafkamsgother->owner);
+	return 1;
+}
+
 int GetKafkaMessageData(lua_State* L) {
 
 	LuaKafkaMessage* kafkamsg = lua_tokafkamsg(L, 1);

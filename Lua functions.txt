@@ -69,6 +69,17 @@ Misc global functions:
 	-Calculate a crc32
 	int CRC32(stringdata, opt existingcrc)
 
+	-Retrive global memory status
+	-type:
+	-0 (default) percentage in use
+	-1 total KB of physical memory
+	-2 free  KB of physical memory
+	-3 total KB of paging file
+	-4 free  KB of paging file
+	-5 total KB of virtual memory
+	-6 free  KB of virtual memory
+	int GlobalMemoryStatus(opt type)
+
 	-Contains special characters 0 - 31 (http://www.asciitable.com/)
 	-Example c.LF = '\n'
 	table c

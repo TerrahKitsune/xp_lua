@@ -13,6 +13,7 @@
 
 #define HI_PART(x)  ((x>>4) & 0x0F)
 #define LO_PART(x)  ((x) & 0x0F)
+#define DIV 1024
 
 static int env_table = -1;
 static int env_original = -1;
@@ -787,6 +788,48 @@ static int L_GetComputerName(lua_State* L) {
 	return 1;
 }
 
+int L_GetGlobalMemoryStatus(lua_State *L) {
+
+	int type = luaL_optinteger(L, 1, 0);
+
+	MEMORYSTATUSEX statex;
+	statex.dwLength = sizeof(statex);
+	GlobalMemoryStatusEx(&statex);
+
+	switch (type)
+	{
+	case 1:
+		lua_pushinteger(L, statex.ullTotalPhys / DIV);
+		break;
+
+	case 2:
+		lua_pushinteger(L, statex.ullAvailPhys / DIV);
+		break;
+
+	case 3:
+		lua_pushinteger(L, statex.ullTotalPageFile / DIV);
+		break;
+
+	case 4:
+		lua_pushinteger(L, statex.ullAvailPageFile / DIV);
+		break;
+
+	case 5:
+		lua_pushinteger(L, statex.ullTotalVirtual / DIV);
+		break;
+
+	case 6:
+		lua_pushinteger(L, statex.ullAvailVirtual / DIV);
+		break;
+
+	default:
+		lua_pushinteger(L, statex.dwMemoryLoad);
+		break;
+	}
+	
+	return 1;
+}
+
 int luaopen_misc(lua_State* L) {
 
 	lua_newtable(L);
@@ -994,6 +1037,9 @@ int luaopen_misc(lua_State* L) {
 	lua_pushcfunction(L, TableSelect);
 	lua_settable(L, -3);
 	lua_pop(L, 1);
+	
+	lua_pushcfunction(L, L_GetGlobalMemoryStatus);
+	lua_setglobal(L, "GlobalMemoryStatus");
 
 	lua_pushcfunction(L, L_GetHost);
 	lua_setglobal(L, "Dns");

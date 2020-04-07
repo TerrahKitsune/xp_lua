@@ -113,5 +113,13 @@ local t=Time(true);
 Sleep(123);
 print(Time(true)-t)
 
+print("Percent                    ", GlobalMemoryStatus());
+print("total KB of physical memory", GlobalMemoryStatus(1));
+print("free  KB of physical memory", GlobalMemoryStatus(2));
+print("total KB of paging file    ", GlobalMemoryStatus(3));
+print("free  KB of paging file    ", GlobalMemoryStatus(4));
+print("total KB of virtual memory ", GlobalMemoryStatus(5));
+print("free  KB of virtual memory ", GlobalMemoryStatus(6));
+
 --FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer");
 --dofile("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer\\main.lua");

@@ -44,6 +44,7 @@ static const struct luaL_Reg kafkamessagefunctions[] = {
 	{ "GetOwnerId",  GetKafkaMessageOwnerId },
 	{ "GetTimestamp",  GetKafkaMessageTimestamp },
 	{ "GetLatency",  GetKafkaMessageLatency },
+	{ "GetEqual",  GetKafkaMessageEqual },
 	{ "Dispose",  kafkamsg_gc },
 	{ NULL, NULL }
 };
