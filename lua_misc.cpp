@@ -79,7 +79,22 @@ static int GetLastErrorAsMessage(lua_State* L)
 
 int Time(lua_State* L) {
 
-	lua_pushinteger(L, time(NULL));
+	//https://gist.github.com/e-yes/278302
+	FILETIME ft;
+	LARGE_INTEGER li;
+
+	/* Get the amount of 100 nano seconds intervals elapsed since January 1, 1601 (UTC) and copy it
+	* to a LARGE_INTEGER structure. */
+	GetSystemTimeAsFileTime(&ft);
+	li.LowPart = ft.dwLowDateTime;
+	li.HighPart = ft.dwHighDateTime;
+
+	LONGLONG ret = li.QuadPart;
+	ret -= 116444736000000000LL; /* Convert from file time to UNIX epoch time. */
+	ret /= 10000; /* From 100 nano seconds (10^-7) to 1 millisecond (10^-3) intervals */
+
+	lua_pushinteger(L, ret);
+
 	return 1;
 }
 
@@ -660,7 +675,7 @@ static int L_ConsoleReadKey(lua_State* L) {
 static int L_GetHost(lua_State* L) {
 
 	const char* data = lua_tostring(L, 1);
-	struct addrinfo* result = NULL, * ptr = NULL, hints;
+	struct addrinfo* result = NULL, *ptr = NULL, hints;
 
 	bool full = lua_toboolean(L, 2) > 0;
 
@@ -775,11 +790,11 @@ static int L_GetComputerName(lua_State* L) {
 int luaopen_misc(lua_State* L) {
 
 	lua_newtable(L);
-		env_table = luaL_ref(L, LUA_REGISTRYINDEX);
+	env_table = luaL_ref(L, LUA_REGISTRYINDEX);
 
-		char esc[2] = { 0,0 };
+	char esc[2] = { 0,0 };
 
-		lua_createtable(L, 0, 3);
+	lua_createtable(L, 0, 3);
 
 	lua_pushstring(L, "NUL");
 	lua_pushlstring(L, esc, 1);
@@ -892,7 +907,7 @@ int luaopen_misc(lua_State* L) {
 	}
 
 	lua_setglobal(L, "c");
-	
+
 	lua_newtable(L);
 
 	lua_pushstring(L, "Attach");
@@ -979,7 +994,7 @@ int luaopen_misc(lua_State* L) {
 	lua_pushcfunction(L, TableSelect);
 	lua_settable(L, -3);
 	lua_pop(L, 1);
-	
+
 	lua_pushcfunction(L, L_GetHost);
 	lua_setglobal(L, "Dns");
 

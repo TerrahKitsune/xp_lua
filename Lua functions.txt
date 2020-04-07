@@ -7,6 +7,9 @@ Misc global functions:
 	-Sleep for 1 milisecond second or opt int, max 1000 (1 second)
 	nil Sleep(opt int);
 	
+	-Get the current unix epoch in miliseconds
+	int Time()
+
 	-Retrives the last error code as a message and code, if no lasterrorcode is provided it'll retrive it
 	string, code GetLastError(opt lasterrorcode)
 

@@ -27,7 +27,7 @@ int LuaCreateMutex(lua_State* L) {
 
 	strcat(mutexname, name);
 
-	HANDLE mutex = CreateMutex(NULL, true, mutexname);
+	HANDLE mutex = CreateMutex(NULL, false, mutexname);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -86,7 +86,7 @@ int LuaUnlockMutex(lua_State* L) {
 		return 0;
 	}
 
-	ReleaseMutex(mutex->mutex);
+	DWORD result = ReleaseMutex(mutex->mutex);
 
 	mutex->istaken = false;
 

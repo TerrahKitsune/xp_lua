@@ -109,24 +109,9 @@ end
 math.randomseed(os.time());
 math.random(); math.random(); math.random();
 
-local listener = assert(Socket.Listen(112));
-local client, data;
+local t=Time(true);
+Sleep(123);
+print(Time(true)-t)
 
-while true do 
-
-	client = listener:Accept();
-
-	if client then
-
-		print(client:Info());
-
-		while client:HasData() do 
-			data = client:Read();
-			io.write(data);
-		end
-
-		client:Close();
-	else
-		Sleep();
-	end
-end 
+--FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer");
+--dofile("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer\\main.lua");
