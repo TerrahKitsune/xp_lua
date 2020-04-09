@@ -69,6 +69,7 @@
     <ClCompile Include="LuaSQLiteMain.cpp" />
     <ClCompile Include="luazip.cpp" />
     <ClCompile Include="lua_helper.cpp" />
+    <ClCompile Include="lua_json.cpp" />
     <ClCompile Include="lua_misc.cpp" />
     <ClCompile Include="MainLoop.cpp" />
     <ClCompile Include="md5.c" />
@@ -203,6 +204,7 @@
     <ClInclude Include="LuaSQLiteMain.h" />
     <ClInclude Include="luazip.h" />
     <ClInclude Include="lua_helper.h" />
+    <ClInclude Include="lua_json.h" />
     <ClInclude Include="lua_main_incl.h" />
     <ClInclude Include="lua_misc.h" />
     <ClInclude Include="MainLoop.h" />

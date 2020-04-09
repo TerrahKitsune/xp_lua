@@ -675,6 +675,9 @@
     <ClCompile Include="LuaMutexMain.cpp">
       <Filter>LuaMutex</Filter>
     </ClCompile>
+    <ClCompile Include="lua_json.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -1066,6 +1069,9 @@
     </ClInclude>
     <ClInclude Include="LuaMutexMain.h">
       <Filter>LuaMutex</Filter>
+    </ClInclude>
+    <ClInclude Include="lua_json.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
