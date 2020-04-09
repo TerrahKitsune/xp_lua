@@ -107,6 +107,7 @@
     <ClCompile Include="LuaSha256.cpp" />
     <ClCompile Include="luasocket.cpp" />
     <ClCompile Include="luasocketmain.cpp" />
+    <ClCompile Include="lua_json.cpp" />
     <ClCompile Include="mysql_main_incl.cpp" />
     <ClCompile Include="namedpipe.cpp" />
     <ClCompile Include="NamedPipeMain.cpp" />
@@ -223,6 +224,7 @@
     <ClInclude Include="LuaSha256.h" />
     <ClInclude Include="luasocket.h" />
     <ClInclude Include="luasocketmain.h" />
+    <ClInclude Include="lua_json.h" />
     <ClInclude Include="mysql_main_incl.h" />
     <ClInclude Include="namedpipe.h" />
     <ClInclude Include="NamedPipeMain.h" />

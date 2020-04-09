@@ -113,6 +113,10 @@ local t=Time(true);
 Sleep(123);
 print(Time(true)-t)
 
+local function test()
+	local info=FileSystem.GetFileInfo("D:/pics.hak");if not info then return -1 else return info.Size; end
+end
+
 print("Percent                    ", GlobalMemoryStatus());
 print("total KB of physical memory", GlobalMemoryStatus(1));
 print("free  KB of physical memory", GlobalMemoryStatus(2));
@@ -120,6 +124,56 @@ print("total KB of paging file    ", GlobalMemoryStatus(3));
 print("free  KB of paging file    ", GlobalMemoryStatus(4));
 print("total KB of virtual memory ", GlobalMemoryStatus(5));
 print("free  KB of virtual memory ", GlobalMemoryStatus(6));
+print("Lua memory                 ", collectgarbage("count"));
+print("FileSize                   ", test());
+print("setpause                   ", collectgarbage('setpause', 150));
+print("setstepmul                 ", collectgarbage('setstepmul', 250));
+
+local function SetGCFunction(tbl, func)
+	return setmetatable(tbl, {__gc = func})
+end
+
+local function CreateGCPrint()
+	SetGCFunction({}, function() print("COLLECTING GARBAGE Lua mem: "..math.floor(collectgarbage("count")) .. " KB Time: "..Time()); CreateGCPrint(); end);
+end
+CreateGCPrint();
+collectgarbage();
+
+local arr = {}
+for n=1, 7 do 
+	table.insert(arr,GlobalMemoryStatus(n));
+end
+
+local NULL = Json.GetNull();
+
+local test2 = {Kek=print, blarg=123, float=math.pi, t=true, f=false, n=Json.GetNull()};
+local test = {Inf=math.huge, Test="123\0", "Meow", Burk=123, Bake=test2, Mems=arr, Empty={}, obj=Json.GetEmpty()}
+
+local res = Json.Encode(test);
+print(res);
+local newtest = Json.Decode(res);
+TablePrint(newtest);
+local function CheckIsEqual(test, test2)
+
+	for k,v in pairs(test) do 
+		
+		local op = test2[k];
+
+		if v == NULL then v=nil; end
+		if op == NULL then op=nil; end
+
+		if type(v) ~= type(op) then
+			print(tostring(k).." "..type(v).." not equal type as "..type(op));
+		elseif type(v) == "table" then 
+			CheckIsEqual(v, op);
+		elseif v ~= op then 
+			print(tostring(k).." "..tostring(v).." not equal "..tostring(op));
+		end
+	end
+end
+
+CheckIsEqual(newtest, test);
+CheckIsEqual(test, newtest);
 
 --FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer");
 --dofile("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer\\main.lua");

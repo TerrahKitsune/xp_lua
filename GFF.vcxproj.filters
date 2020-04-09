@@ -606,6 +606,9 @@
     <ClCompile Include="LuaAesMain.cpp">
       <Filter>LuaAes</Filter>
     </ClCompile>
+    <ClCompile Include="lua_json.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -937,6 +940,9 @@
     </ClInclude>
     <ClInclude Include="aes.h">
       <Filter>LuaAes\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lua_json.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

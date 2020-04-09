@@ -60,7 +60,7 @@ Misc global functions:
 
 	ms Runtime()
 
-	-Resolve dns, if full is true then it'll return an array containing ipv6 and ipv6 if not full then it returns a single ipv4 address
+	-Resolve dns, if full is true then it'll return an array containing ipv6 and ipv4 if not full then it returns a single ipv4 address
 	string or array Dns(name, full default false)
 
 	-Retrive the computer name dns fully qualified
@@ -1230,6 +1230,20 @@ Image:
 	-Discards the image from memory
 	-the image item should *not* be used after this
 	void Image:Close();
+
+Json:
+
+	-Returns a json of the table
+	jsonstring Json.Encode(table)
+
+	-Returns a table from the json
+	table Json.Decode(jsonstring)
+
+	-Returns a table that represents the json value "null", used for encoding
+	table Json.GetNull()
+
+	-Returns a table that represents an empty object {}, default empty tables are []
+	table Json.GetEmpty()
 
 FileSystem:
 
