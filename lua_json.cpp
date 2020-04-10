@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
+#include "math.h"
 
 #define JSONINITBUFFERSIZE 1024
 #define JSONANTIRECURSIONINITSIZE 10; 
@@ -100,46 +101,39 @@ void json_appendstring(lua_State *L, JsonContext* context) {
 
 void json_appendnumber(lua_State *L, JsonContext* context) {
 
-	size_t stackSize = lua_gettop(L);
-	size_t len;
-	const char * str = luaL_tolstring(L, -1, &len);
+	double numb = lua_tonumber(L, -1);
+	char number[50];
 
-	if (lua_gettop(L) != stackSize) {
-		lua_settop(L, stackSize);
-	}
+	if (isfinite(numb)) {
+		
+		long long rounded = llround(numb);
 
-	if (!str || len == 0) {
-		json_append("0", 1, L, context);
-		return;
-	}
-
-	bool fail = false;
-	bool fract = false;
-
-	for (size_t i = 0; i < len; i++)
-	{
-		if (isdigit(str[i])) {
-			continue;
-		}
-		else if (str[i] == '-' && i == 0) {
-			continue;
-		}
-		else if (str[i] == '.' && !fract) {
-			fract = true;
-			continue;
+		if (rounded == numb) {
+			sprintf(number, "%lld", rounded);
 		}
 		else {
-			fail = true;
+			sprintf(number, "%f", numb);
+		}
+	}
+	else if (isnan(numb)) {
+		strcpy(number, "null");
+	}
+	else {
+
+		switch (isinf(numb)) {
+		case -1:
+			strcpy(number, "-1e+9999");
+			break;
+		case 1:
+			strcpy(number, "1e+9999");
+			break;
+		default:
+			strcpy(number, "null");
 			break;
 		}
 	}
 
-	if (fail) {
-		json_appendstring(L, context);
-	}
-	else {
-		json_append(str, len, L, context);
-	}
+	json_append(number, strlen(number), L, context);
 }
 
 void json_appendvalue(lua_State *L, JsonContext* context) {
@@ -584,6 +578,7 @@ void lua_readnumber(lua_State *L, JsonContext* context) {
 	char next = lua_read(L, context);
 	bool fract = false;
 	bool exp = false;
+	bool expplusminus = false;
 
 	if (next == '-') {
 		json_append(&next, 1, L, context);
@@ -607,6 +602,10 @@ void lua_readnumber(lua_State *L, JsonContext* context) {
 		}
 		else if (next == 'e' && !exp) {
 			exp = true;
+			json_append(&next, 1, L, context);
+		}
+		else if ((next == '+' || next == '-') && exp && !expplusminus) {
+			expplusminus = true;
 			json_append(&next, 1, L, context);
 		}
 		else if (isdigit(next)) {

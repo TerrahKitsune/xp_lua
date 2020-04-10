@@ -146,13 +146,25 @@ end
 
 local NULL = Json.GetNull();
 
-local test2 = {Kek=print, blarg=123, float=math.pi, t=true, f=false, n=Json.GetNull()};
-local test = {Inf=math.huge, Test="123\0", "Meow", Burk=123, Bake=test2, Mems=arr, Empty={}, obj=Json.GetEmpty()}
+local test2 = {blarg=123, float=math.pi, t=true, f=false, n=Json.GetNull()};
+local test = {d=0/0, Inf=math.huge, nInf=-math.huge, Test="123\0", "Meow", Burk=123, Bake=test2, Mems=arr, Empty={}, obj=Json.GetEmpty()}
 
+local t=Timer.New();
+t:Start();
 local res = Json.Encode(test);
+t:Stop();
+print("C Time taken",t:Elapsed());
+
 print(res);
+
+t=Timer.New();
+t:Start();
+res = JSON:encode(test);
+t:Stop();
+print("Lua Time taken",t:Elapsed());
+
+
 local newtest = Json.Decode(res);
-TablePrint(newtest);
 local function CheckIsEqual(test, test2)
 
 	for k,v in pairs(test) do 
@@ -174,6 +186,6 @@ end
 
 CheckIsEqual(newtest, test);
 CheckIsEqual(test, newtest);
-
+TablePrint(newtest);
 --FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer");
 --dofile("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer\\main.lua");
