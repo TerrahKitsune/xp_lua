@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include "math.h"
+#include "utf8.h"
 
 #define JSONINITBUFFERSIZE 1024
 #define JSONANTIRECURSIONINITSIZE 10; 
@@ -35,9 +36,21 @@ void json_append(const char * data, size_t len, lua_State *L, JsonContext* conte
 
 	if (context->resultLength + (len + 1) > context->resultSize) {
 
-		size_t newSize = context->resultSize + ((len + JSONINITBUFFERSIZE) * sizeof(char));
+		size_t newSize = (size_t)pow(2.0, (++context->resultReallocStep) > 20 ? 20 : context->resultReallocStep);
+
+		if (newSize < JSONINITBUFFERSIZE) {
+			newSize = JSONINITBUFFERSIZE;
+		}
+		
+		if (newSize < len + 1) {
+			newSize = len + 1;
+		}
+
+		newSize = context->resultSize + (newSize * sizeof(char));
+
 		void * temp = realloc(context->result, newSize);
 		if (!temp) {
+
 			json_end(L, context, "Out of memory");
 		}
 		else {
@@ -49,6 +62,58 @@ void json_append(const char * data, size_t len, lua_State *L, JsonContext* conte
 	memcpy(&context->result[context->resultLength], data, (len * sizeof(char)));
 	context->resultLength += (len * sizeof(char));
 	context->result[context->resultLength] = '\0';
+}
+
+void json_checkappendunicode(const char * str, size_t* current, size_t len, lua_State *L, JsonContext* context) {
+
+	uint32_t codepoint;
+	uint32_t state = 0;
+	char byte[7] = {0};
+
+	size_t test = len - *current > 4 ? 4 : len - *current;
+	memcpy(byte, &str[*current], test);
+
+	if (decode(&state, &codepoint, byte[0]) == UTF8_ACCEPT) {
+
+		if (codepoint <= 0xFF) {
+
+			if (codepoint < ' ') {
+				sprintf(byte, "\\u%04x", codepoint);
+				json_append(byte, 6, L, context);
+			}
+			else {
+				json_append(&byte[0], 1, L, context);
+			}
+		}
+		else if (codepoint <= 0xFFFF) {
+			sprintf(byte, "\\u%04x", codepoint);
+			json_append(byte, 6, L, context);
+
+			//Increment for additional bytes read
+			*current++;
+		}
+		else {
+
+			sprintf(byte, "\\u%04x", (0xD7C0 + (codepoint >> 10)));
+			json_append(byte, 6, L, context);
+
+			sprintf(byte, "\\u%04x", (0xDC00 + (codepoint & 0x3FF)));
+			json_append(byte, 6, L, context);
+
+			//Increment for higher codepoints
+			if (codepoint <= 0xFFFFFF) {
+				*current += 2;
+			}
+			else {
+				*current += 3;
+			}
+		}
+	}
+	else {
+		unsigned short temp = str[*current];
+		sprintf(byte, "\\u%04x", temp);
+		json_append(byte, 6, L, context);
+	}
 }
 
 void json_appendstring(lua_State *L, JsonContext* context) {
@@ -77,18 +142,10 @@ void json_appendstring(lua_State *L, JsonContext* context) {
 		case '\r':
 			json_append("\\r", 2, L, context);
 			break;
-		case '\0':
-			json_append("\\0", 2, L, context);
-			break;
 		default:
 
-			if ((str[i]) < ' ') {
-				sprintf(hex, "\\u%04x", str[i]);
-				json_append(hex, 6, L, context);
-			}
-			else {
-				json_append(&str[i], 1, L, context);
-			}
+			json_checkappendunicode(str, &i, len, L, context);
+			
 			break;
 		}
 	}
@@ -359,9 +416,6 @@ int lua_jsonencode(lua_State *L) {
 	JsonContext jsonContext;
 	memset(&jsonContext, 0, sizeof(JsonContext));
 	jsonContext.maxRecursion = maxRecursion;
-
-	jsonContext.result = (char*)calloc(JSONINITBUFFERSIZE, sizeof(char));
-	jsonContext.resultSize = JSONINITBUFFERSIZE;
 
 	lua_jsonencodetable(L, &jsonContext);
 	lua_pop(L, 1);

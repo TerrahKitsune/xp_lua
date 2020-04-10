@@ -132,9 +132,9 @@ print("setstepmul                 ", collectgarbage('setstepmul', 250));
 local function SetGCFunction(tbl, func)
 	return setmetatable(tbl, {__gc = func})
 end
-
+local last=Time();
 local function CreateGCPrint()
-	SetGCFunction({}, function() print("COLLECTING GARBAGE Lua mem: "..math.floor(collectgarbage("count")) .. " KB Time: "..Time()); CreateGCPrint(); end);
+	SetGCFunction({}, function() local t=Time();print("COLLECTING GARBAGE Lua mem: "..math.floor(collectgarbage("count")) .. " KB Time: "..(t-last)); last=t; CreateGCPrint(); end);
 end
 CreateGCPrint();
 collectgarbage();
@@ -144,27 +144,6 @@ for n=1, 7 do
 	table.insert(arr,GlobalMemoryStatus(n));
 end
 
-local NULL = Json.GetNull();
-
-local test2 = {blarg=123, float=math.pi, t=true, f=false, n=Json.GetNull()};
-local test = {d=0/0, Inf=math.huge, nInf=-math.huge, Test="123\0", "Meow", Burk=123, Bake=test2, Mems=arr, Empty={}, obj=Json.GetEmpty()}
-
-local t=Timer.New();
-t:Start();
-local res = Json.Encode(test);
-t:Stop();
-print("C Time taken",t:Elapsed());
-
-print(res);
-
-t=Timer.New();
-t:Start();
-res = JSON:encode(test);
-t:Stop();
-print("Lua Time taken",t:Elapsed());
-
-
-local newtest = Json.Decode(res);
 local function CheckIsEqual(test, test2)
 
 	for k,v in pairs(test) do 
@@ -184,8 +163,19 @@ local function CheckIsEqual(test, test2)
 	end
 end
 
-CheckIsEqual(newtest, test);
-CheckIsEqual(test, newtest);
-TablePrint(newtest);
+local testdata = {};
+local db=assert(MySQL.Connect("10.9.23.252", "TwitchKafka", "meowCat69!", "twitch"));
+assert(db:Query("SELECT * FROM messages limit 325000;"));
+while db:Fetch() do 
+	table.insert(testdata, db:GetRow());
+end
+print("Rows: "..tostring(#testdata));
+
+local t=Timer.New();
+t:Start();
+local testjson = Json.Encode(testdata);
+t:Stop();
+print(t:Elapsed());
+
 --FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer");
 --dofile("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer\\main.lua");

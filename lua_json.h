@@ -3,6 +3,7 @@
 
 typedef struct JsonContext {
 
+	int resultReallocStep;
 	size_t resultLength;
 	size_t resultSize;
 	char*result;
