@@ -1,29 +1,42 @@
 #pragma once
 #include "lua_main_incl.h"
+static const char * LUAJSON = "LUAJSON";
+
+#define JSONANTIRECURSIONINITSIZE 10
+#define JSONINITBUFFERSIZE 1024
 
 typedef struct JsonContext {
 
 	int resultReallocStep;
-	size_t resultLength;
-	size_t resultSize;
-	char*result;
-
-	size_t maxRecursion;
-	size_t antiRecursionEmpty;
-	size_t antiRecursionLength;
+	unsigned int * antiRecursion;
 	size_t antiRecursionSize;
-	unsigned int* antiRecursion;
+
+	FILE * bufferFile;
+	char * fileName;
+
+	size_t bufferLength;
+	size_t bufferSize;
+	char * buffer;
+
+	FILE * readFile;
 
 	size_t readLine;
-	size_t readPos;
+	size_t readPosition;
 
-	size_t readLength;
 	size_t readCursor;
+	size_t readSize;
 	const char * read;
 
 } JsonContext;
 
-int lua_jsonempty(lua_State *L);
-int lua_jsonnull(lua_State *L);
-int lua_jsonencode(lua_State *L);
-int lua_jsondecode(lua_State *L);
+int lua_jsoncreate(lua_State *L);
+int lua_jsondecodestring(lua_State *L);
+int lua_jsondecodefromfile(lua_State *L);
+int lua_jsonencodetabletostring(lua_State *L);
+int lua_jsonencodetabletofile(lua_State *L);
+
+JsonContext * lua_pushjson(lua_State *L);
+JsonContext * lua_tojson(lua_State *L, int index);
+int json_gc(lua_State *L);
+int json_tostring(lua_State *L);
+

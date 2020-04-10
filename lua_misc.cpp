@@ -1011,26 +1011,6 @@ int luaopen_misc(lua_State* L) {
 
 	lua_setglobal(L, "Console");
 	
-	lua_newtable(L);
-
-	lua_pushstring(L, "GetEmpty");
-	lua_pushcfunction(L, lua_jsonempty);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "GetNull");
-	lua_pushcfunction(L, lua_jsonnull);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "Encode");
-	lua_pushcfunction(L, lua_jsonencode);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "Decode");
-	lua_pushcfunction(L, lua_jsondecode);
-	lua_settable(L, -3);
-
-	lua_setglobal(L, "Json");
-
 	lua_pushstring(L, "Play");
 	lua_pushcfunction(L, luasound);
 	lua_settable(L, -3);

@@ -33,6 +33,7 @@
 #include "FileAsyncMain.h"
 #include "LuaMutexMain.h"
 #include "LuaAesMain.h"
+#include "luajsonmain.h"
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 static int print(lua_State *L){
@@ -137,6 +138,8 @@ LuaEngine::LuaEngine()
 	lua_setglobal(L, "Mutex");
 	luaopen_luaaes(L);
 	lua_setglobal(L, "Aes");
+	luaopen_json(L);
+	lua_setglobal(L, "Json");
 
 	luaopen_misc(L);
 

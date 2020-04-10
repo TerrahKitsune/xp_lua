@@ -280,6 +280,15 @@
     <Filter Include="LuaMutex\Source Files">
       <UniqueIdentifier>{2619e57d-21a3-49b5-8986-6586ef405051}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaJson">
+      <UniqueIdentifier>{b9b2f842-2794-42f0-b74e-41bbeb6a6c58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaJson\Header Files">
+      <UniqueIdentifier>{f4612d7f-1750-49df-91c0-77139a12c2d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaJson\Source Files">
+      <UniqueIdentifier>{3ef82f93-ec01-4966-abc6-a4baad5c2c13}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\plugin.cpp">
@@ -676,7 +685,19 @@
       <Filter>LuaMutex</Filter>
     </ClCompile>
     <ClCompile Include="lua_json.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>LuaJson\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jsonencode.cpp">
+      <Filter>LuaJson\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jsondecode.cpp">
+      <Filter>LuaJson\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jsonutil.cpp">
+      <Filter>LuaJson\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luajsonmain.cpp">
+      <Filter>LuaJson</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1071,7 +1092,22 @@
       <Filter>LuaMutex</Filter>
     </ClInclude>
     <ClInclude Include="lua_json.h">
+      <Filter>LuaJson\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utf8.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jsondecode.h">
+      <Filter>LuaJson\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jsonencode.h">
+      <Filter>LuaJson\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jsonutil.h">
+      <Filter>LuaJson\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luajsonmain.h">
+      <Filter>LuaJson</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

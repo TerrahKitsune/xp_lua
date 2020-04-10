@@ -32,6 +32,9 @@
     <ClCompile Include="Http.cpp" />
     <ClCompile Include="HttpMain.cpp" />
     <ClCompile Include="image.cpp" />
+    <ClCompile Include="jsondecode.cpp" />
+    <ClCompile Include="jsonencode.cpp" />
+    <ClCompile Include="jsonutil.cpp" />
     <ClCompile Include="kafkahelpers.cpp" />
     <ClCompile Include="LinkedList.cpp" />
     <ClCompile Include="List.cpp" />
@@ -46,6 +49,7 @@
     <ClCompile Include="LuaFTPMain.cpp" />
     <ClCompile Include="LuaGff.cpp" />
     <ClCompile Include="LuaImageMain.cpp" />
+    <ClCompile Include="luajsonmain.cpp" />
     <ClCompile Include="luakafka.cpp" />
     <ClCompile Include="luakafkamain.cpp" />
     <ClCompile Include="luakafkamessage.cpp" />
@@ -167,6 +171,9 @@
     <ClInclude Include="Http.h" />
     <ClInclude Include="HttpMain.h" />
     <ClInclude Include="image.h" />
+    <ClInclude Include="jsondecode.h" />
+    <ClInclude Include="jsonencode.h" />
+    <ClInclude Include="jsonutil.h" />
     <ClInclude Include="kafkahelpers.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="List.h" />
@@ -181,6 +188,7 @@
     <ClInclude Include="LuaFTPMain.h" />
     <ClInclude Include="LuaGff.h" />
     <ClInclude Include="LuaImageMain.h" />
+    <ClInclude Include="luajsonmain.h" />
     <ClInclude Include="luakafka.h" />
     <ClInclude Include="luakafkamain.h" />
     <ClInclude Include="luakafkamessage.h" />
@@ -270,6 +278,7 @@
     <ClInclude Include="TimerMain.h" />
     <ClInclude Include="tlk.h" />
     <ClInclude Include="TlkMain.h" />
+    <ClInclude Include="utf8.h" />
     <ClInclude Include="WinServices.h" />
     <ClInclude Include="WinServicesMain.h" />
     <ClInclude Include="xp_lua_incl.h" />

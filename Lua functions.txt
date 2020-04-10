@@ -1232,18 +1232,26 @@ Image:
 	void Image:Close();
 
 Json:
+	
+	-nan (0/0) is considered null
+	-empty objects are []
+	-Create a json instance
+	Json Json.Create()
 
-	-Returns a json of the table
-	jsonstring Json.Encode(table)
+	-Encodes a table to a json string
+	jsonstring Json:Encode(table)
 
-	-Returns a table from the json
-	table Json.Decode(jsonstring)
+	-Decodes a json string to a table
+	table Json:Decode(jsonstring)
 
-	-Returns a table that represents the json value "null", used for encoding
-	table Json.GetNull()
+	-Encodes a table to a file
+	void Json:EncodeToFile(filename, table)
 
-	-Returns a table that represents an empty object {}, default empty tables are []
-	table Json.GetEmpty()
+	-Decodes a json from a file
+	table Json:DecodeFromFile(filename)
+
+	-Prematurely closes a json instance
+	void Json:Dispose()
 
 FileSystem:
 

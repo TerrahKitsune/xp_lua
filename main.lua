@@ -139,6 +139,14 @@ end
 CreateGCPrint();
 collectgarbage();
 
+local garbage = {t=true, f=false, n=0/0, pinf=math.huge,ninf=-math.huge, mem={}, pi=math.pi, func=print}
+
+for n=1, 7 do 
+	table.insert(garbage.mem, GlobalMemoryStatus(n));
+end
+
+garbage.Recurse = garbage;
+
 local arr = {}
 for n=1, 7 do 
 	table.insert(arr,GlobalMemoryStatus(n));
@@ -165,17 +173,35 @@ end
 
 local testdata = {};
 local db=assert(MySQL.Connect("10.9.23.252", "TwitchKafka", "meowCat69!", "twitch"));
-assert(db:Query("SELECT * FROM messages limit 325000;"));
+assert(db:Query("SELECT * FROM messages limit 10;"));
 while db:Fetch() do 
 	table.insert(testdata, db:GetRow());
 end
 print("Rows: "..tostring(#testdata));
+--testdata[1].Test = garbage;
 
 local t=Timer.New();
 t:Start();
-local testjson = Json.Encode(testdata);
+local j=Json.Create();
+local res=j:Encode(testdata);
+j:EncodeToFile("R:/test.json", testdata);
 t:Stop();
+print(res);
 print(t:Elapsed());
+
+local test = j:Decode(res);
+
+CheckIsEqual(test, testdata);
+print("------------");
+test = j:DecodeFromFile("R:/test.json");
+CheckIsEqual(test, testdata);
+
+testdata = {};
+assert(db:Query("SELECT * FROM messages;"));
+while db:Fetch() do 
+	table.insert(testdata, db:GetRow());
+end
+j:EncodeToFile("d:/test.json", testdata);
 
 --FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer");
 --dofile("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer\\main.lua");

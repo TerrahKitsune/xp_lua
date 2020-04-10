@@ -265,6 +265,15 @@
     <Filter Include="LuaAes\Source Files">
       <UniqueIdentifier>{1ce12822-54a0-4b0c-bf56-cd9af209de40}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaJson">
+      <UniqueIdentifier>{611eb294-916b-41c5-99ad-eab83925a47b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaJson\Header Files">
+      <UniqueIdentifier>{f2d1fa47-5273-4aba-b73d-da6a9ac725c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaJson\Source Files">
+      <UniqueIdentifier>{45c7cffb-cd06-4393-9097-f6824a6eabf4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -607,7 +616,19 @@
       <Filter>LuaAes</Filter>
     </ClCompile>
     <ClCompile Include="lua_json.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>LuaJson\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="luajsonmain.cpp">
+      <Filter>LuaJson</Filter>
+    </ClCompile>
+    <ClCompile Include="jsonutil.cpp">
+      <Filter>LuaJson\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jsonencode.cpp">
+      <Filter>LuaJson\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jsondecode.cpp">
+      <Filter>LuaJson\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -941,11 +962,23 @@
     <ClInclude Include="aes.h">
       <Filter>LuaAes\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="lua_json.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="utf8.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lua_json.h">
+      <Filter>LuaJson\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luajsonmain.h">
+      <Filter>LuaJson</Filter>
+    </ClInclude>
+    <ClInclude Include="jsonutil.h">
+      <Filter>LuaJson\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jsonencode.h">
+      <Filter>LuaJson\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="jsondecode.h">
+      <Filter>LuaJson\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
