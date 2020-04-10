@@ -171,6 +171,8 @@ local function CheckIsEqual(test, test2)
 	end
 end
 
+Break();
+
 local testdata = {};
 local db=assert(MySQL.Connect("10.9.23.252", "TwitchKafka", "meowCat69!", "twitch"));
 assert(db:Query("SELECT * FROM messages limit 10;"));
@@ -202,6 +204,10 @@ while db:Fetch() do
 	table.insert(testdata, db:GetRow());
 end
 j:EncodeToFile("d:/test.json", testdata);
-
+testdata=nil;
+Break();
+testdata=j:DecodeFromFile("d:/test.json");
+testdata=nil;
+collectgarbage();
 --FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer");
 --dofile("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer\\main.lua");

@@ -831,6 +831,13 @@ int L_GetGlobalMemoryStatus(lua_State *L) {
 	return 1;
 }
 
+int L_DebugBreak(lua_State *L) {
+
+	DebugBreak();
+
+	return 0;
+}
+
 int luaopen_misc(lua_State* L) {
 
 	lua_newtable(L);
@@ -954,9 +961,6 @@ int luaopen_misc(lua_State* L) {
 
 	lua_newtable(L);
 
-
-	lua_newtable(L);
-
 	lua_pushstring(L, "Attach");
 	lua_pushcfunction(L, L_AttachConsole);
 	lua_settable(L, -3);
@@ -1011,6 +1015,8 @@ int luaopen_misc(lua_State* L) {
 
 	lua_setglobal(L, "Console");
 	
+	lua_newtable(L);
+
 	lua_pushstring(L, "Play");
 	lua_pushcfunction(L, luasound);
 	lua_settable(L, -3);
@@ -1039,7 +1045,10 @@ int luaopen_misc(lua_State* L) {
 	lua_pushcfunction(L, TableSelect);
 	lua_settable(L, -3);
 	lua_pop(L, 1);
-	
+
+	lua_pushcfunction(L, L_DebugBreak);
+	lua_setglobal(L, "Break");
+
 	lua_pushcfunction(L, L_GetGlobalMemoryStatus);
 	lua_setglobal(L, "GlobalMemoryStatus");
 
