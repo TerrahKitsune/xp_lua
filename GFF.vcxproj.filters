@@ -962,9 +962,6 @@
     <ClInclude Include="aes.h">
       <Filter>LuaAes\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utf8.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="lua_json.h">
       <Filter>LuaJson\Header Files</Filter>
     </ClInclude>

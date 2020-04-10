@@ -278,7 +278,6 @@
     <ClInclude Include="TimerMain.h" />
     <ClInclude Include="tlk.h" />
     <ClInclude Include="TlkMain.h" />
-    <ClInclude Include="utf8.h" />
     <ClInclude Include="WinServices.h" />
     <ClInclude Include="WinServicesMain.h" />
     <ClInclude Include="xp_lua_incl.h" />

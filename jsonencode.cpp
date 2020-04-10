@@ -73,63 +73,13 @@ void json_encodevalue(lua_State *L, JsonContext* context, int* depth) {
 
 }
 
-void json_encodewidecharacter(const char * str, size_t* current, size_t len, lua_State *L, JsonContext* context) {
-
-	uint32_t codepoint;
-	uint32_t state = 0;
-	char byte[7] = { 0 };
-
-	size_t test = len - *current > 4 ? 4 : len - *current;
-	memcpy(byte, &str[*current], test);
-
-	if (decode(&state, &codepoint, byte[0]) == UTF8_ACCEPT) {
-
-		if (codepoint <= 0xFF) {
-
-			if (codepoint < ' ') {
-				sprintf(byte, "\\u%04x", codepoint);
-				json_append(byte, 6, L, context);
-			}
-			else {
-				json_append(&byte[0], 1, L, context);
-			}
-		}
-		else if (codepoint <= 0xFFFF) {
-			sprintf(byte, "\\u%04x", codepoint);
-			json_append(byte, 6, L, context);
-
-			//Increment for additional bytes read
-			*current++;
-		}
-		else {
-
-			sprintf(byte, "\\u%04x", (0xD7C0 + (codepoint >> 10)));
-			json_append(byte, 6, L, context);
-
-			sprintf(byte, "\\u%04x", (0xDC00 + (codepoint & 0x3FF)));
-			json_append(byte, 6, L, context);
-
-			//Increment for higher codepoints
-			if (codepoint <= 0xFFFFFF) {
-				*current += 2;
-			}
-			else {
-				*current += 3;
-			}
-		}
-	}
-	else {
-		unsigned short temp = str[*current];
-		sprintf(byte, "\\u%04x", temp);
-		json_append(byte, 6, L, context);
-	}
-}
-
 void json_encodestring(lua_State* L, JsonContext* C) {
 
 	size_t stackSize = lua_gettop(L);
 	size_t len;
 	const char * str = luaL_tolstring(L, -1, &len);
+	char hex[7] = { 0 };
+	int data = 0;
 
 	json_append("\"", 1, L, C);
 	for (size_t i = 0; i < len; i++)
@@ -152,7 +102,14 @@ void json_encodestring(lua_State* L, JsonContext* C) {
 			break;
 		default:
 
-			json_encodewidecharacter(str, &i, len, L, C);
+			if (str[i] < 32 || str[1] > 127) {
+				memcpy(&data, &str[i], 1);
+				sprintf(hex, "\\u%04x", data);
+				json_append(hex, 6, L, C);
+			}
+			else {
+				json_append(&str[i], 1, L, C);
+			}
 
 			break;
 		}

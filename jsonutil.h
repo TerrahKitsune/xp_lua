@@ -5,7 +5,6 @@
 #include <ctype.h>
 #include <stdio.h>
 #include "math.h"
-#include "utf8.h"
 
 void json_seekbuffer(JsonContext* context, int posmod);
 void json_append(const char * data, size_t len, lua_State *L, JsonContext* context);

@@ -4,6 +4,7 @@ static const char * LUAJSON = "LUAJSON";
 
 #define JSONANTIRECURSIONINITSIZE 10
 #define JSONINITBUFFERSIZE 1024
+#define JSONFILEREADBUFFERSIZE 1048576
 
 typedef struct JsonContext {
 
@@ -17,6 +18,9 @@ typedef struct JsonContext {
 	size_t bufferLength;
 	size_t bufferSize;
 	char * buffer;
+
+	char prevFileChar[2];
+	char * readFileBuffer;
 
 	FILE * readFile;
 

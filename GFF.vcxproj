@@ -243,7 +243,6 @@
     <ClInclude Include="Sha256Main.h" />
     <ClInclude Include="stream.h" />
     <ClInclude Include="StreamMain.h" />
-    <ClInclude Include="utf8.h" />
     <ClInclude Include="WinServices.h" />
     <ClInclude Include="WinServicesMain.h" />
     <ClInclude Include="_Http.h" />

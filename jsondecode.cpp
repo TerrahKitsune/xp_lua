@@ -1,87 +1,69 @@
 #include "jsondecode.h"
 #include "jsonutil.h"
 
-void json_advancewhitespace(JsonContext* context) {
+void json_advancewhitespace(lua_State *L, JsonContext* context) {
 
-	if (context->readFile) {
-		
-		char byte;
+	char next = json_readnext(L, context);
+	while (true) {
 
-		while (fread(&byte, sizeof(char), 1, context->readFile) == 1) {
-			switch (byte)
-			{
-			case 10:
-			case 13:
-				context->readLine++;
-				context->readPosition = 0;
-				break;
-			case 32:
-			case 9:
-				context->readPosition++;
-				break;
-			default:
-				json_stepback(context);
-				return;
-			}
-		}
-	}
-	else {
-		for (size_t i = context->readCursor; context->readCursor < context->readSize; context->readCursor++)
+		switch (next)
 		{
-			switch (context->read[i])
-			{
-			case 10:
-			case 13:
-				context->readLine++;
-				context->readPosition = 0;
-				break;
-			case 32:
-			case 9:
-				context->readPosition++;
-				break;
-			default:
-				return;
-			}
+		case 10:
+		case 13:
+			context->readLine++;
+			context->readPosition = 0;
+			break;
+		case 32:
+		case 9:
+			context->readPosition++;
+			break;
+		default:
+			json_stepback(context);
+			return;
 		}
+
+		next = json_readnext(L, context);
 	}
 }
 
 char json_readnext(lua_State *L, JsonContext* context) {
 
-	if (context->readFile) {
-
-		char byte;
-
-		if (fread(&byte, sizeof(char), 1, context->readFile) == 1) {
-			return byte;
-		}
-		else {
-			json_bail(L, context, "Read end of json before it was complete");
-			return 0;
-		}
-	}
-	else {
-
-		if (context->readCursor >= context->readSize) {
-			json_bail(L, context, "Read end of json before it was complete");
-			return 0;
-		}
-
+	if (context->prevFileChar[0]) {
+		context->prevFileChar[0] = 0;
 		context->readPosition++;
-		return context->read[context->readCursor++];
+		return context->prevFileChar[1];
 	}
+
+	if (context->readFile && (!context->readFileBuffer || context->readCursor >= JSONFILEREADBUFFERSIZE)) {
+
+		if (!context->readFileBuffer) {
+			context->readFileBuffer = (char*)malloc(JSONFILEREADBUFFERSIZE);
+			if (!context->readFileBuffer) {
+				json_bail(L, context, "Out of memory");
+				return 0;
+			}
+		}
+
+		context->readSize = fread(context->readFileBuffer, sizeof(char), JSONFILEREADBUFFERSIZE, context->readFile);
+
+		context->readCursor = 0;
+		context->read = context->readFileBuffer;
+	}
+
+	if (context->readCursor >= context->readSize) {
+		json_bail(L, context, "Read end of json before it was complete");
+		return 0;
+	}
+
+	context->prevFileChar[1] = context->read[context->readCursor++];
+	context->readPosition++;
+	return context->prevFileChar[1];
 }
 
 void json_stepback(JsonContext* context) {
-	
-	context->readPosition--;
 
-	if (context->readFile) {
-		fseek(context->readFile, -1, SEEK_CUR);
-	}
-	else {
-		context->readCursor--;
-	}
+	context->readPosition--;
+	context->prevFileChar[0] = 1;
 }
 
 void json_unexpected(char c, lua_State *L, JsonContext* context) {
@@ -112,8 +94,13 @@ void json_decodecharacter(lua_State *L, JsonContext* context) {
 
 	result[0] = (char)first;
 	result[1] = (char)second;
-
-	json_append(result, 2, L, context);
+	
+	if (result[0] && result[1]) {
+		json_append(result, 2, L, context);
+	}
+	else {
+		json_append(&result[1], 1, L, context);
+	}
 }
 
 void json_decodestring(lua_State *L, JsonContext* context) {
@@ -398,13 +385,13 @@ void json_decodevalue(lua_State *L, JsonContext* context) {
 
 void json_decodetable(lua_State *L, JsonContext* C) {
 
-	json_advancewhitespace(C);
+	json_advancewhitespace(L, C);
 	char next = json_readnext(L, C);
 
 	if (next == '{') {
 
 		lua_newtable(L);
-		json_advancewhitespace(C);
+		json_advancewhitespace(L, C);
 		next = json_readnext(L, C);
 
 		if (next == '}') {
@@ -426,21 +413,21 @@ void json_decodetable(lua_State *L, JsonContext* C) {
 				}
 
 				json_decodestring(L, C);
-				json_advancewhitespace(C);
+				json_advancewhitespace(L, C);
 				next = json_readnext(L, C);
 
 				if (next != ':') {
 					json_unexpected(next, L, C);
 				}
 
-				json_advancewhitespace(C);
+				json_advancewhitespace(L, C);
 				json_decodevalue(L, C);
 				lua_settable(L, -3);
-				json_advancewhitespace(C);
+				json_advancewhitespace(L, C);
 				next = json_readnext(L, C);
 
 				if (next == ',') {
-					json_advancewhitespace(C);
+					json_advancewhitespace(L, C);
 					next = json_readnext(L, C);
 					continue;
 				}
@@ -457,7 +444,7 @@ void json_decodetable(lua_State *L, JsonContext* C) {
 	else if (next == '[') {
 
 		int cnt = 0;
-		json_advancewhitespace(C);
+		json_advancewhitespace(L, C);
 		lua_newtable(L);
 
 		next = json_readnext(L, C);
@@ -482,11 +469,11 @@ void json_decodetable(lua_State *L, JsonContext* C) {
 			json_decodevalue(L, C);
 			lua_rawseti(L, -2, ++cnt);
 
-			json_advancewhitespace(C);
+			json_advancewhitespace(L, C);
 			next = json_readnext(L, C);
 
 			if (next == ',') {
-				json_advancewhitespace(C);
+				json_advancewhitespace(L, C);
 				continue;
 			}
 			else if (next == ']') {

@@ -171,43 +171,47 @@ local function CheckIsEqual(test, test2)
 	end
 end
 
+collectgarbage();
 Break();
 
 local testdata = {};
 local db=assert(MySQL.Connect("10.9.23.252", "TwitchKafka", "meowCat69!", "twitch"));
-assert(db:Query("SELECT * FROM messages limit 10;"));
+assert(db:Query("SELECT * FROM messages LIMIT 10000;"));
 while db:Fetch() do 
 	table.insert(testdata, db:GetRow());
 end
-print("Rows: "..tostring(#testdata));
---testdata[1].Test = garbage;
 
-local t=Timer.New();
-t:Start();
 local j=Json.Create();
-local res=j:Encode(testdata);
-j:EncodeToFile("R:/test.json", testdata);
-t:Stop();
-print(res);
-print(t:Elapsed());
+local text, data;
+local t=Timer.New();
+while true do 
 
-local test = j:Decode(res);
+	t:Start();
+	text = j:Encode(testdata);
+	data = j:Decode(text);
 
-CheckIsEqual(test, testdata);
-print("------------");
-test = j:DecodeFromFile("R:/test.json");
-CheckIsEqual(test, testdata);
+	text = j:EncodeToFile("r:/test.json", data);
+	data = j:DecodeFromFile("r:/test.json", text);
 
-testdata = {};
-assert(db:Query("SELECT * FROM messages;"));
-while db:Fetch() do 
-	table.insert(testdata, db:GetRow());
-end
-j:EncodeToFile("d:/test.json", testdata);
-testdata=nil;
-Break();
-testdata=j:DecodeFromFile("d:/test.json");
+	CheckIsEqual(testdata, data);
+	CheckIsEqual(data, testdata);
+
+	t:Stop();
+	t:Reset();
+	t:Start();
+	print("Cycle time: "..tostring(t:Elapsed()));
+	Sleep();
+
+	if HasKeyDown() and GetKey() == string.byte(' ') then 
+		break;
+	end
+end 
+text = nil;
+data = nil;
+t= nil;
+db=nil;
 testdata=nil;
 collectgarbage();
+Break();
 --FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer");
 --dofile("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer\\main.lua");

@@ -50,6 +50,10 @@ void json_bail(lua_State *L, JsonContext* context, const char * err) {
 		free(context->antiRecursion);
 	}
 
+	if (context->readFileBuffer) {
+		free(context->readFileBuffer);
+	}
+
 	memset(context, 0, sizeof(JsonContext));
 
 	if (err) {
