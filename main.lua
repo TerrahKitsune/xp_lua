@@ -171,8 +171,22 @@ local function CheckIsEqual(test, test2)
 	end
 end
 
-collectgarbage();
+local encodetable = Base64.GetEncodeTable();
+encodetable = encodetable:gsub("/", "-");
+Base64.SetEncodeTable(encodetable);
+
+text = "abc 123 hej 123 meow Meow \0\0asd";
+data = Base64.Encode(text);
+print(text);
+print(data);
+print(Base64.Decode(data));
+print(Base64.Decode(data) == text);
+
 Break();
+
+collectgarbage();
+collectgarbage();
+collectgarbage();
 
 local testdata = {};
 local db=assert(MySQL.Connect("10.9.23.252", "TwitchKafka", "meowCat69!", "twitch"));
@@ -181,8 +195,9 @@ while db:Fetch() do
 	table.insert(testdata, db:GetRow());
 end
 
+local text, data; 
+
 local j=Json.Create();
-local text, data;
 local t=Timer.New();
 while true do 
 
@@ -212,6 +227,10 @@ t= nil;
 db=nil;
 testdata=nil;
 collectgarbage();
-Break();
+collectgarbage();
+collectgarbage();
+Sleep(1000);
+collectgarbage();
+
 --FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer");
 --dofile("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer\\main.lua");

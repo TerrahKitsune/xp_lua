@@ -34,6 +34,7 @@
 #include "LuaMutexMain.h"
 #include "LuaAesMain.h"
 #include "luajsonmain.h"
+#include "base64.h"
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 static int print(lua_State *L){
@@ -140,6 +141,8 @@ LuaEngine::LuaEngine()
 	lua_setglobal(L, "Aes");
 	luaopen_json(L);
 	lua_setglobal(L, "Json");
+	luaopen_base64(L);
+	lua_setglobal(L, "Base64");
 
 	luaopen_misc(L);
 

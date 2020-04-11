@@ -74,6 +74,7 @@
     <ClCompile Include="2da.cpp" />
     <ClCompile Include="2DAMain.cpp" />
     <ClCompile Include="aes.c" />
+    <ClCompile Include="base64.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="Erf.cpp" />
@@ -195,6 +196,7 @@
     <ClInclude Include="2DAMain.h" />
     <ClInclude Include="aes.h" />
     <ClInclude Include="aes.hpp" />
+    <ClInclude Include="base64.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="Erf.h" />

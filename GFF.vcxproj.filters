@@ -630,6 +630,9 @@
     <ClCompile Include="jsondecode.cpp">
       <Filter>LuaJson\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="base64.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -976,6 +979,9 @@
     </ClInclude>
     <ClInclude Include="jsondecode.h">
       <Filter>LuaJson\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="base64.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -725,6 +725,7 @@ Zip:
 
 	-Close an open zipfile
 	nil Zip:Close()
+
 Server:
 
 	-Creates a server instance on the port
@@ -756,6 +757,7 @@ Server:
 	-key = socket
 	-value = address
 	table Server:GetClients()
+
 Client:
 
 	-Start a client
@@ -817,6 +819,21 @@ Pipe:
 
 	-Closes a pipe, it should not be used after closing
 	nil Pipe:Close();
+
+Base64:
+
+	-Returns a base64 version of the provided data
+	base64string Base64.Encode(string)
+	
+	-Returns the decoded data from the base64 string
+	string Base64.Decode(base64string)
+
+	-Retrive the base64 encode table used, its a 64 character string
+	string Base64.GetEncodeTable()
+
+	-Set the encode table to the provided encode table
+	-the provided string must be 64 characters long and all characters in it must be unique
+	void Base64.GetEncodeTable(encodetablestring)
 
 Socket:
 
