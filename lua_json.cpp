@@ -3,12 +3,51 @@
 #include "jsonencode.h"
 #include "jsondecode.h"
 
+int lua_jsondecodefunction(lua_State *L) {
+
+	JsonContext * json = lua_tojson(L, 1);
+	luaL_checktype(L, 2, LUA_TFUNCTION);
+	lua_settop(L, 2);
+
+	json_bail(L, json, NULL);
+	json->refReadFunction = luaL_ref(L, LUA_REGISTRYINDEX);
+
+	json_decodetable(L, json);
+	json_bail(L, json, NULL);
+
+	return 1;
+}
+
+int lua_jsonencodefunction(lua_State *L) {
+
+	JsonContext * json = lua_tojson(L, 1);
+	luaL_checktype(L, 2, LUA_TFUNCTION);
+	luaL_checktype(L, 3, LUA_TTABLE);
+	lua_settop(L, 3);
+
+	json_bail(L, json, NULL);
+
+	lua_pushvalue(L, 2);
+	json->refWriteFunction = luaL_ref(L, LUA_REGISTRYINDEX);
+
+	lua_copy(L, 3, 2);
+	lua_pop(L, 1);
+
+	json_encodetable(L, json, NULL);
+	json_append("", 0, L, json, true);
+	json_bail(L, json, NULL);
+
+	return 0;
+}
+
 int lua_jsondecodefromfile(lua_State *L) {
 
 	JsonContext * json = lua_tojson(L, 1);
 	size_t len;
 	const char * file = luaL_checklstring(L, 2, &len);
 	lua_settop(L, 2);
+
+	json_bail(L, json, NULL);
 
 	json->readFile = fopen(file, "r");
 
@@ -105,6 +144,9 @@ JsonContext * lua_pushjson(lua_State *L) {
 	luaL_getmetatable(L, LUAJSON);
 	lua_setmetatable(L, -2);
 	memset(luajson, 0, sizeof(JsonContext));
+
+	luajson->refWriteFunction = LUA_REFNIL;
+	luajson->refReadFunction = LUA_REFNIL;
 
 	return luajson;
 }

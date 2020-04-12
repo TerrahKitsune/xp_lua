@@ -520,6 +520,11 @@ int ReadLuaStream(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
 	long len = (long)luaL_optinteger(L, 2, stream->len - stream->pos);
+
+	if (len > stream->len - stream->pos) {
+		len = stream->len - stream->pos;
+	}
+
 	const BYTE* result = ReadStream(stream, len);
 
 	if (!result) {

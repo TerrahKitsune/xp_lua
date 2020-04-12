@@ -12,6 +12,9 @@ typedef struct JsonContext {
 	unsigned int * antiRecursion;
 	size_t antiRecursionSize;
 
+	int refWriteFunction;
+	int refReadFunction;
+
 	FILE * bufferFile;
 	char * fileName;
 
@@ -21,6 +24,7 @@ typedef struct JsonContext {
 
 	char prevFileChar[2];
 	char * readFileBuffer;
+	size_t readFileBufferSize;
 
 	FILE * readFile;
 
@@ -38,6 +42,8 @@ int lua_jsondecodestring(lua_State *L);
 int lua_jsondecodefromfile(lua_State *L);
 int lua_jsonencodetabletostring(lua_State *L);
 int lua_jsonencodetabletofile(lua_State *L);
+int lua_jsonencodefunction(lua_State *L);
+int lua_jsondecodefunction(lua_State *L);
 
 JsonContext * lua_pushjson(lua_State *L);
 JsonContext * lua_tojson(lua_State *L, int index);

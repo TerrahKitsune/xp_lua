@@ -70,7 +70,6 @@ void json_encodevalue(lua_State *L, JsonContext* context, int* depth) {
 		}
 		break;
 	}
-
 }
 
 void json_encodestring(lua_State* L, JsonContext* C) {
@@ -165,6 +164,8 @@ void json_encodetable(lua_State* L, JsonContext* C, int* depth) {
 		lua_pop(L, 1);
 	}
 
+	int count = 0;
+
 	// Object
 	if (objlen == size && size <= 0) {
 		json_append("[]", 2, L, C);
@@ -195,24 +196,26 @@ void json_encodetable(lua_State* L, JsonContext* C, int* depth) {
 				json_append(":", 1, L, C);
 			}
 			json_encodevalue(L, C, depth);
-			json_append(",", 1, L, C);
 
-			if (depth) {
-				json_append("\n", 1, L, C);
+			if (++count < objlen) {
+				if (depth) {
+					json_append(",\n", 2, L, C);
+				}
+				else {
+					json_append(",", 1, L, C);
+				}
 			}
 
 			lua_pop(L, 1);
 		}
 
 		if (depth) {
-			json_seekbuffer(C, -3);
 			(*depth)--;
 			json_append("\n", 1, L, C);
 			json_pad('\t', *depth, L, C);
 			json_append("}", 1, L, C);
 		}
 		else {
-			json_seekbuffer(C, -1);
 			json_append("}", 1, L, C);
 		}
 	}
@@ -234,23 +237,25 @@ void json_encodetable(lua_State* L, JsonContext* C, int* depth) {
 
 			lua_rawgeti(L, -1, i);
 			json_encodevalue(L, C, depth);
-			json_append(",", 1, L, C);
-			lua_pop(L, 1);
-
-			if (depth) {
-				json_append("\n", 1, L, C);
+			if (++count < objlen) {
+				if (depth) {
+					json_append(",\n", 2, L, C);
+				}
+				else {
+					json_append(",", 1, L, C);
+				}
 			}
+
+			lua_pop(L, 1);
 		}
 
 		if (depth) {
-			json_seekbuffer(C, -3);
 			(*depth)--;
 			json_append("\n", 1, L, C);
 			json_pad('\t', *depth, L, C);
 			json_append("]", 1, L, C);
 		}
 		else {
-			json_seekbuffer(C, -1);
 			json_append("]", 1, L, C);
 		}
 	}

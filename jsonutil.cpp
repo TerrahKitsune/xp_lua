@@ -1,28 +1,5 @@
 #include "jsonutil.h"
 
-void json_seekbuffer(JsonContext* context, int posmod) {
-
-	if (posmod == 0) {
-		return;
-	}
-	else if (context->bufferFile) {
-
-		fflush(context->bufferFile);
-		fseek(context->bufferFile, posmod, SEEK_CUR);
-	}
-	else {
-		if (context->bufferLength + posmod <= 0) {
-			context->bufferLength = 0;
-		}
-		else if (context->bufferLength + posmod > context->bufferSize) {
-			context->bufferLength = context->bufferSize;
-		}
-		else {
-			context->bufferLength += posmod;
-		}
-	}
-}
-
 void json_bail(lua_State *L, JsonContext* context, const char * err) {
 
 	if (context->bufferFile) {
@@ -54,14 +31,25 @@ void json_bail(lua_State *L, JsonContext* context, const char * err) {
 		free(context->readFileBuffer);
 	}
 
+	if (context->refWriteFunction != LUA_REFNIL) {
+		luaL_unref(L, LUA_REGISTRYINDEX, context->refWriteFunction);
+	}
+
+	if (context->refReadFunction != LUA_REFNIL) {
+		luaL_unref(L, LUA_REGISTRYINDEX, context->refReadFunction);
+	}
+
 	memset(context, 0, sizeof(JsonContext));
+
+	context->refWriteFunction = LUA_REFNIL;
+	context->refReadFunction = LUA_REFNIL;
 
 	if (err) {
 		luaL_error(L, err);
 	}
 }
 
-void json_append(const char * data, size_t len, lua_State *L, JsonContext* context) {
+void json_append(const char * data, size_t len, lua_State *L, JsonContext* context, bool isEnd) {
 
 	if (context->bufferFile) {
 
@@ -99,6 +87,25 @@ void json_append(const char * data, size_t len, lua_State *L, JsonContext* conte
 		memcpy(&context->buffer[context->bufferLength], data, (len * sizeof(char)));
 		context->bufferLength += (len * sizeof(char));
 		context->buffer[context->bufferLength] = '\0';
+
+		if (context->refWriteFunction != LUA_REFNIL && context->bufferLength > 0 && (isEnd || context->bufferLength >= JSONFILEREADBUFFERSIZE)) {
+
+			lua_rawgeti(L, LUA_REGISTRYINDEX, context->refWriteFunction);
+			lua_pushlstring(L, context->buffer, context->bufferLength);
+			context->bufferLength = 0;
+
+			if (lua_pcall(L, 1, 0, NULL)) {
+
+				const char * err = lua_tostring(L, -1);
+				lua_pop(L, 1);
+
+				if (!err) {
+					err = "err";
+				}
+
+				json_bail(L, context, err);
+			}
+		}
 	}
 }
 

@@ -34,7 +34,55 @@ char json_readnext(lua_State *L, JsonContext* context) {
 		return context->prevFileChar[1];
 	}
 
-	if (context->readFile && (!context->readFileBuffer || context->readCursor >= JSONFILEREADBUFFERSIZE)) {
+	if (context->refReadFunction != LUA_REFNIL && (!context->readFileBuffer || context->readCursor >= context->readSize)) {
+
+		if (!context->readFileBuffer) {
+			context->readFileBuffer = (char*)malloc(JSONFILEREADBUFFERSIZE);
+			if (!context->readFileBuffer) {
+				json_bail(L, context, "Out of memory");
+				return 0;
+			}
+			context->readFileBufferSize = JSONFILEREADBUFFERSIZE;
+		}
+
+		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refReadFunction);
+
+		if (lua_pcall(L, 0, 1, NULL)) {
+
+			const char * err = lua_tostring(L, -1);
+			lua_pop(L, 1);
+
+			if (!err) {
+				err = "err";
+			}
+
+			json_bail(L, context, err);
+		}
+
+		size_t len;
+		const char * data = lua_tolstring(L, -1, &len);
+
+		if (len > 0 && data) {
+
+			if (len >= context->readFileBufferSize) {
+				void * temp = realloc(context->readFileBuffer, len + 1);
+				if (!temp) {
+					json_bail(L, context, "Out of memory");
+					return 0;
+				}
+				context->readFileBuffer = (char*)temp;
+				context->readFileBufferSize = len + 1;
+			}
+
+			memcpy(context->readFileBuffer, data, len);
+			lua_pop(L, 1);
+
+			context->readCursor = 0;
+			context->read = context->readFileBuffer;
+			context->readSize = len;
+		}
+	}
+	else if (context->readFile && (!context->readFileBuffer || context->readCursor >= JSONFILEREADBUFFERSIZE)) {
 
 		if (!context->readFileBuffer) {
 			context->readFileBuffer = (char*)malloc(JSONFILEREADBUFFERSIZE);

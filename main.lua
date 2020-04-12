@@ -171,6 +171,17 @@ local function CheckIsEqual(test, test2)
 	end
 end
 
+local encodedTest = Stream.Create();
+local function EncoderFunc(text)
+	encodedTest:Buffer(text);
+end
+
+local decodedTest = Stream.Create();
+local function DecoderFunc()
+	local t = decodedTest:Read(100);
+	return t;
+end
+
 local encodetable = Base64.GetEncodeTable();
 encodetable = encodetable:gsub("/", "-");
 Base64.SetEncodeTable(encodetable);
@@ -190,7 +201,7 @@ collectgarbage();
 
 local testdata = {};
 local db=assert(MySQL.Connect("10.9.23.252", "TwitchKafka", "meowCat69!", "twitch"));
-assert(db:Query("SELECT * FROM messages LIMIT 10000;"));
+assert(db:Query("SELECT * FROM messages LIMIT 1000;"));
 while db:Fetch() do 
 	table.insert(testdata, db:GetRow());
 end
@@ -207,6 +218,13 @@ while true do
 
 	text = j:EncodeToFile("r:/test.json", data);
 	data = j:DecodeFromFile("r:/test.json", text);
+
+	encodedTest:Shrink();
+	j:EncodeToFunction(EncoderFunc, data);
+
+	decodedTest:Shrink();
+	decodedTest:Buffer(encodedTest:Read());
+	data = j:DecodeFromFunction(DecoderFunc);
 
 	CheckIsEqual(testdata, data);
 	CheckIsEqual(data, testdata);

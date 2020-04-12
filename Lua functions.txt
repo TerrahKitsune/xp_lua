@@ -1267,6 +1267,17 @@ Json:
 	-Decodes a json from a file
 	table Json:DecodeFromFile(filename)
 
+	-returns the json data to a function
+	-function (part) end
+	-were part is going to be json text parsing
+	void Json:EncodeToFunction(func)
+
+	-Returns a deserilized json table based on the data a function returns
+	-function() return jsonstring; end
+	-were jsonstring needs to be part of a full json
+	-function is called more if the json is not complete
+	table Json:DecodeFromFunction(func)
+
 	-Prematurely closes a json instance
 	void Json:Dispose()
 
