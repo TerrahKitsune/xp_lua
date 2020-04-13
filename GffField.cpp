@@ -2,7 +2,7 @@
 #include "GffLabel.h"
 #include <string.h>
 
-unsigned int WriteField(lua_State *L, Gff * gff){
+unsigned int WriteField(lua_State *L, Gff * gff) {
 
 	GffField * field = (GffField *)&gff->raw[gff->Header.FieldOffset];
 	field = &field[gff->Header.FieldCount];
@@ -27,7 +27,7 @@ unsigned int WriteField(lua_State *L, Gff * gff){
 	return offset;
 }
 
-unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type){
+unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type) {
 
 	unsigned int result = 0;
 	unsigned long data;
@@ -119,7 +119,7 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type){
 
 		cnt = 0;
 		while (lua_next(L, -2) != 0) {
-			if (lua_istable(L, -1)){
+			if (lua_istable(L, -1)) {
 
 				exolocsubstring = (CExoLocStringSubString*)&gff->raw[gff->Header.FieldDataOffset + gff->Header.FieldDataCount];
 
@@ -152,7 +152,7 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type){
 
 		lua_pop(L, 1);
 		break;
-	case 14:	
+	case 14:
 		result = WriteStruct(L, gff);
 		break;
 	case 15:
@@ -185,7 +185,7 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type){
 	return result;
 }
 
-size_t CalculateFieldDataSize(lua_State *L, Gff * gff, int type, const char * label){
+size_t CalculateFieldDataSize(lua_State *L, Gff * gff, int type, const char * label) {
 
 	size_t size = 0;
 	size_t subsize = 0;
@@ -195,21 +195,21 @@ size_t CalculateFieldDataSize(lua_State *L, Gff * gff, int type, const char * la
 	{
 	case 0:
 	case 1:
-		if (!lua_isinteger(L, -1)){
+		if (!lua_isinteger(L, -1)) {
 			Bail(gff, L, NULL);
 			luaL_error(L, "Field type (%d) invalid on field %s", type, label);
 		}
 		break;
 	case 2:
 	case 3:
-		if (!lua_isinteger(L, -1)){
+		if (!lua_isinteger(L, -1)) {
 			Bail(gff, L, NULL);
 			luaL_error(L, "Field type (%d) invalid on field %s", type, label);
 		}
 		break;
 	case 4:
 	case 5:
-		if (!lua_isinteger(L, -1)){
+		if (!lua_isinteger(L, -1)) {
 			Bail(gff, L, NULL);
 			luaL_error(L, "Field type (%d) invalid on field %s", type, label);
 		}
@@ -217,21 +217,21 @@ size_t CalculateFieldDataSize(lua_State *L, Gff * gff, int type, const char * la
 	case 6:
 	case 7:
 		size = sizeof(long);
-		if (!lua_isinteger(L, -1)){
+		if (!lua_isinteger(L, -1)) {
 			Bail(gff, L, NULL);
 			luaL_error(L, "Field type (%d) invalid on field %s", type, label);
 		}
 		gff->Header.FieldDataCount += size;
 		break;
 	case 8:
-		if (!lua_isnumber(L, -1)){
+		if (!lua_isnumber(L, -1)) {
 			Bail(gff, L, NULL);
 			luaL_error(L, "Field type (%d) invalid on field %s", type, label);
 		}
 		break;
 	case 9:
 		size = sizeof(double);
-		if (!lua_isnumber(L, -1)){
+		if (!lua_isnumber(L, -1)) {
 			Bail(gff, L, NULL);
 			luaL_error(L, "Field type (%d) invalid on field %s", type, label);
 		}
@@ -240,7 +240,7 @@ size_t CalculateFieldDataSize(lua_State *L, Gff * gff, int type, const char * la
 	case 10:
 		//void data is the same as exostring
 	case 13:
-		if (!lua_isstring(L, -1)){
+		if (!lua_isstring(L, -1)) {
 			Bail(gff, L, NULL);
 			luaL_error(L, "Field type (%d) invalid on field %s", type, label);
 		}
@@ -249,7 +249,7 @@ size_t CalculateFieldDataSize(lua_State *L, Gff * gff, int type, const char * la
 		gff->Header.FieldDataCount += size;
 		break;
 	case 11:
-		if (!lua_isstring(L, -1)){
+		if (!lua_isstring(L, -1)) {
 			Bail(gff, L, NULL);
 			luaL_error(L, "Field type (%d) invalid on field %s", type, label);
 		}
@@ -263,14 +263,14 @@ size_t CalculateFieldDataSize(lua_State *L, Gff * gff, int type, const char * la
 		break;
 	case 12:
 
-		if (!lua_istable(L, -1)){
+		if (!lua_istable(L, -1)) {
 			Bail(gff, L, NULL);
 			luaL_error(L, "Field type (%d) invalid on field %s", type, label);
 		}
 
 		lua_pushstring(L, "Strings");
 		lua_gettable(L, -2);
-		if (!lua_istable(L, -1)){
+		if (!lua_istable(L, -1)) {
 			Bail(gff, L, NULL);
 			luaL_error(L, "ExoLocString on field %s is missing table Strings", type, label);
 		}
@@ -278,10 +278,10 @@ size_t CalculateFieldDataSize(lua_State *L, Gff * gff, int type, const char * la
 		size = sizeof(CExoLocString);
 		lua_pushnil(L);
 		while (lua_next(L, -2) != 0) {
-			if (lua_istable(L, -1)){
+			if (lua_istable(L, -1)) {
 				lua_pushstring(L, "String");
 				lua_gettable(L, -2);
-				if (!lua_isstring(L, -1)){
+				if (!lua_isstring(L, -1)) {
 					Bail(gff, L, NULL);
 					luaL_error(L, "ExoLocString substring on field %s is not a string", type, label);
 				}
@@ -297,7 +297,7 @@ size_t CalculateFieldDataSize(lua_State *L, Gff * gff, int type, const char * la
 		gff->Header.FieldDataCount += size;
 		break;
 	case 14:
-		if (!lua_istable(L, -1)){
+		if (!lua_istable(L, -1)) {
 			Bail(gff, L, NULL);
 			luaL_error(L, "Field type (%d) invalid on field %s", type, label);
 		}
@@ -306,14 +306,14 @@ size_t CalculateFieldDataSize(lua_State *L, Gff * gff, int type, const char * la
 		break;
 	case 15:
 
-		if (!lua_istable(L, -1)){
+		if (!lua_istable(L, -1)) {
 			Bail(gff, L, NULL);
 			luaL_error(L, "Field type (%d) invalid on field %s", type, label);
 		}
 
 		lua_pushnil(L);
 		while (lua_next(L, -2) != 0) {
-			if (lua_istable(L, -1)){
+			if (lua_istable(L, -1)) {
 				size += CalculateStructSize(L, gff);
 				indices++;
 			}
@@ -337,7 +337,7 @@ size_t CalculateFieldDataSize(lua_State *L, Gff * gff, int type, const char * la
 	return size;
 }
 
-size_t CalculateFieldSize(lua_State *L, Gff * gff){
+size_t CalculateFieldSize(lua_State *L, Gff * gff) {
 
 	int type = -1;
 	size_t size = 0;
@@ -345,7 +345,7 @@ size_t CalculateFieldSize(lua_State *L, Gff * gff){
 	const char * label = NULL;
 	lua_pushstring(L, "Type");
 	lua_gettable(L, -2);
-	if (!lua_isinteger(L, -1)){
+	if (!lua_isinteger(L, -1)) {
 		Bail(gff, L, "Type field missing from field table");
 	}
 	else
@@ -354,14 +354,19 @@ size_t CalculateFieldSize(lua_State *L, Gff * gff){
 
 	lua_pushstring(L, "Label");
 	lua_gettable(L, -2);
-	if (!lua_isstring(L, -1)){
+	if (!lua_isstring(L, -1)) {
 		Bail(gff, L, "Label field missing from field table");
 	}
-	else
-		label = NullTerminatedLabel((GffLabel*)lua_tostring(L, -1));
+	else {
+		label = lua_tolstring(L, -1, &size);
+		GffLabel temp;
+		memset(&temp, 0, sizeof(GffLabel));
+		memcpy(&temp, label, size > 16 ? 16 : size);
+		label = NullTerminatedLabel(&temp);
+	}
 	lua_pop(L, 1);
 
-	if (StringExist(gff, label, strlen(label)) == -1){
+	if (StringExist(gff, label, strlen(label)) == -1) {
 		StringAdd(gff, label, strlen(label), gff->stringcount);
 		gff->Header.LabelCount++;
 		labelsize = sizeof(GffLabel);
@@ -369,7 +374,7 @@ size_t CalculateFieldSize(lua_State *L, Gff * gff){
 
 	lua_pushstring(L, "Data");
 	lua_gettable(L, -2);
-	if (lua_isnoneornil(L, -1)){
+	if (lua_isnoneornil(L, -1)) {
 		Bail(gff, L, "Data field missing from field table");
 	}
 	else
@@ -381,9 +386,9 @@ size_t CalculateFieldSize(lua_State *L, Gff * gff){
 	return sizeof(GffField) + size + labelsize;
 }
 
-void PushField(lua_State *L, Gff * gff, unsigned int fieldindex){
+void PushField(lua_State *L, Gff * gff, unsigned int fieldindex) {
 
-	if (fieldindex >= gff->Header.FieldCount){
+	if (fieldindex >= gff->Header.FieldCount) {
 		Bail(gff, L, "Malformed gff, unable to retrive field outside field count");
 	}
 
@@ -407,7 +412,7 @@ void PushField(lua_State *L, Gff * gff, unsigned int fieldindex){
 	lua_settable(L, -3);
 }
 
-void PushFieldData(lua_State *L, Gff * gff, GffField *gfffield){
+void PushFieldData(lua_State *L, Gff * gff, GffField *gfffield) {
 
 	char bytedata;
 	short shortdata;
@@ -454,7 +459,7 @@ void PushFieldData(lua_State *L, Gff * gff, GffField *gfffield){
 	case 13:
 		cdata = (CExoString*)GetPtrFromData(L, gff, gfffield->DataOrDataOffset, 1);
 		if (cdata->Length + gfffield->DataOrDataOffset > gff->Header.FieldDataCount ||
-			cdata->Length + gfffield->DataOrDataOffset + gff->Header.FieldDataOffset > gff->size){
+			cdata->Length + gfffield->DataOrDataOffset + gff->Header.FieldDataOffset > gff->size) {
 			Bail(gff, L, "Length of CExoString is invalid");
 		}
 		lua_pushlstring(L, cdata->data, cdata->Length);
@@ -480,31 +485,31 @@ void PushFieldData(lua_State *L, Gff * gff, GffField *gfffield){
 	}
 }
 
-void PushStructList(lua_State *L, Gff * gff, unsigned int offset){
+void PushStructList(lua_State *L, Gff * gff, unsigned int offset) {
 
-	if (gff->Header.ListIndicesOffset + offset >= gff->size || offset >= gff->Header.ListIndicesCount){
+	if (gff->Header.ListIndicesOffset + offset >= gff->size || offset >= gff->Header.ListIndicesCount) {
 		Bail(gff, L, "GFF Malformed, list indices outside gff range");
 	}
 
 	StructList * list = (StructList*)&gff->raw[gff->Header.ListIndicesOffset + offset];
 
-	if (list->Length*sizeof(unsigned int) >= gff->Header.ListIndicesCount){
+	if (list->Length * sizeof(unsigned int) >= gff->Header.ListIndicesCount) {
 		Bail(gff, L, "GFF Malformed, indices list length longer then gff indices list");
 	}
 
 	lua_createtable(L, list->Length, 0);
 
-	for (unsigned int n = 0; n<list->Length; n++){
+	for (unsigned int n = 0; n < list->Length; n++) {
 
 		PushStruct(gff, L, list->StructIndecies[n]);
 		lua_rawseti(L, -2, n + 1);
 	}
 }
 
-void PushCExoLocString(lua_State *L, CExoLocString * locstr, Gff * gff, unsigned int originaloffset){
+void PushCExoLocString(lua_State *L, CExoLocString * locstr, Gff * gff, unsigned int originaloffset) {
 
 	if (locstr->TotalSize + sizeof(unsigned int) + originaloffset > gff->Header.FieldDataCount ||
-		locstr->TotalSize + sizeof(unsigned int) + originaloffset + gff->Header.FieldDataOffset > gff->size){
+		locstr->TotalSize + sizeof(unsigned int) + originaloffset + gff->Header.FieldDataOffset > gff->size) {
 		Bail(gff, L, "Malformed gff, unable to CExoLocString->TotalSize reaches outside the datafield span");
 	}
 
@@ -528,10 +533,10 @@ void PushCExoLocString(lua_State *L, CExoLocString * locstr, Gff * gff, unsigned
 	lua_pushstring(L, "Strings");
 	lua_createtable(L, locstr->StringCount, 0);
 
-	for (unsigned int n = 0; n < locstr->StringCount; n++){
+	for (unsigned int n = 0; n < locstr->StringCount; n++) {
 
 		if (sizeof(CExoLocStringSubString) + originaloffset > gff->Header.FieldDataCount ||
-			sizeof(CExoLocStringSubString) + originaloffset + gff->Header.FieldDataOffset > gff->size){
+			sizeof(CExoLocStringSubString) + originaloffset + gff->Header.FieldDataOffset > gff->size) {
 			Bail(gff, L, "Malformed gff, unable to CExoLocStringSubString");
 		}
 
@@ -546,7 +551,7 @@ void PushCExoLocString(lua_State *L, CExoLocString * locstr, Gff * gff, unsigned
 		lua_settable(L, -3);
 
 		if (cursor->StringLength + sizeof(CExoLocStringSubString) + originaloffset > gff->Header.FieldDataCount ||
-			cursor->StringLength + sizeof(CExoLocStringSubString) + originaloffset + gff->Header.FieldDataOffset > gff->size){
+			cursor->StringLength + sizeof(CExoLocStringSubString) + originaloffset + gff->Header.FieldDataOffset > gff->size) {
 			Bail(gff, L, "Malformed gff, unable to CExoLocStringSubString");
 		}
 
@@ -563,13 +568,13 @@ void PushCExoLocString(lua_State *L, CExoLocString * locstr, Gff * gff, unsigned
 	lua_settable(L, -3);
 }
 
-void CopyFromData(lua_State *L, Gff * gff, unsigned offset, void * dst, size_t size){
+void CopyFromData(lua_State *L, Gff * gff, unsigned offset, void * dst, size_t size) {
 	memcpy(dst, GetPtrFromData(L, gff, offset, size), size);
 }
 
-void * GetPtrFromData(lua_State *L, Gff * gff, unsigned offset, size_t size){
+void * GetPtrFromData(lua_State *L, Gff * gff, unsigned offset, size_t size) {
 
-	if (size + offset > gff->Header.FieldDataCount || size + offset + gff->Header.FieldDataOffset > gff->size){
+	if (size + offset > gff->Header.FieldDataCount || size + offset + gff->Header.FieldDataOffset > gff->size) {
 		Bail(gff, L, "Malformed gff, unable to retrive complex field data");
 	}
 
