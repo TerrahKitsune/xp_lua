@@ -135,6 +135,11 @@ void json_pad(char padding, int numbpadding, lua_State*L, JsonContext*C) {
 
 void json_encodetable(lua_State* L, JsonContext* C, int* depth) {
 
+	if (C->refThreadInput != LUA_REFNIL) {
+		json_encodethread(L, C, depth);
+		return;
+	}
+
 	size_t len;
 	const char * rawid = luaL_tolstring(L, -1, &len);
 	lua_pop(L, 1);
@@ -261,4 +266,128 @@ void json_encodetable(lua_State* L, JsonContext* C, int* depth) {
 	}
 
 	json_removefromantirecursion(id, C);
+}
+
+void json_getnextthread(lua_State* L, JsonContext* C) {
+
+	lua_rawgeti(L, LUA_REGISTRYINDEX, C->refThreadInput);
+
+	lua_State*T = lua_tothread(L, -1);
+	int result = lua_resume(T, L, 0);
+
+	if (result == LUA_YIELD) {
+		lua_pop(L, 1);
+		lua_xmove(T, L, 2);	
+		lua_pop(T, lua_gettop(T));
+	}
+	else if (result == 0) {
+		lua_pop(L, 1);
+		lua_pushnil(L);
+		lua_pushnil(L);
+	}
+	else {
+		lua_xmove(T, L, 1);
+		const char * err = lua_tostring(L, -1);
+		if (!err) {
+			err = "Coroutine error";
+		}
+		json_bail(L, C, err);
+	}
+}
+
+void json_encodethread(lua_State* L, JsonContext* C, int* depth) {
+
+	char firstType = '\0';
+
+	size_t keylen;
+	const char * key;
+
+	int count = 0;
+	json_getnextthread(L, C);
+	while (!lua_isnil(L, -1) || !lua_isnil(L, -2)) {
+		
+		if (firstType == '\0') {
+
+			if (lua_type(L, -2) == LUA_TSTRING) {
+				firstType = '{';
+			}
+			else {
+				firstType = '[';
+			}
+
+			json_append(&firstType, 1, L, C);
+
+			if (depth) {
+				(*depth)++;
+				json_append("\n", 1, L, C);
+			}
+
+			firstType = firstType == '{' ? '}' : ']';
+		}
+
+		if (firstType == ']') {
+
+			if (count++ > 0) {
+				if (depth) {
+					json_append(",\n", 2, L, C);
+				}
+				else {
+					json_append(",", 1, L, C);
+				}
+			}
+
+			if (depth) {
+				json_pad('\t', *depth, L, C);
+			}
+
+			json_encodevalue(L, C, depth);	
+		}
+		else {
+
+			if (count++ > 0) {
+				if (depth) {
+					json_append(",\n", 2, L, C);
+				}
+				else {
+					json_append(",", 1, L, C);
+				}
+			}
+
+			if (depth) {
+				json_pad('\t', *depth, L, C);
+			}
+
+			lua_pushvalue(L, -2);
+			json_encodestring(L, C);
+			lua_pop(L, 1);
+			if (depth) {
+				json_append(": ", 2, L, C);
+			}
+			else {
+				json_append(":", 1, L, C);
+			}
+
+			json_encodevalue(L, C, depth);
+		}
+
+		lua_pop(L, 2);
+		json_getnextthread(L, C);
+	}
+
+	lua_pop(L, 2);
+
+	if (firstType=='\0') {
+		json_append("[]", 2, L, C);
+		return;
+	}
+
+	if (depth) {
+		(*depth)--;
+		json_append("\n", 1, L, C);
+		json_pad('\t', *depth, L, C);
+		json_append(&firstType, 1, L, C);
+	}
+	else {
+		json_append(&firstType, 1, L, C);
+	}
 }

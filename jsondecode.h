@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "math.h"
 
+int json_lua_coroutineiterator(lua_State *L, int status, lua_KContext ctx);
 void json_stepback(JsonContext* context);
 char json_readnext(lua_State *L, JsonContext* context);
 void json_unexpected(char c, lua_State *L, JsonContext* context);

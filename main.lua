@@ -171,6 +171,9 @@ local function CheckIsEqual(test, test2)
 	end
 end
 
+local bic=GFF.OpenFile("D:/leioana30.bic");
+GFF.SaveToFile(bic, "D:/test.bic");
+
 local encodedTest = Stream.Create();
 local function EncoderFunc(text)
 	encodedTest:Buffer(text);
@@ -182,23 +185,6 @@ local function DecoderFunc()
 	return t;
 end
 
-local encodetable = Base64.GetEncodeTable();
-encodetable = encodetable:gsub("/", "-");
-Base64.SetEncodeTable(encodetable);
-
-text = "abc 123 hej 123 meow Meow \0\0asd";
-data = Base64.Encode(text);
-print(text);
-print(data);
-print(Base64.Decode(data));
-print(Base64.Decode(data) == text);
-
-Break();
-
-collectgarbage();
-collectgarbage();
-collectgarbage();
-
 local testdata = {};
 local db=assert(MySQL.Connect("10.9.23.252", "TwitchKafka", "meowCat69!", "twitch"));
 assert(db:Query("SELECT * FROM messages LIMIT 1000;"));
@@ -206,13 +192,115 @@ while db:Fetch() do
 	table.insert(testdata, db:GetRow());
 end
 
+local function YieldTable(key,value)
+
+	coroutine.yield(key, value);
+
+	if type(value) == "table" then
+
+		for	k,v in pairs(value) do 
+
+			if type(v) == "table" then 
+				YieldTable(k, v);
+			else
+				coroutine.yield(k, v);
+			end
+		end
+
+		coroutine.yield(nil, nil);
+	end
+end
+
 local text, data; 
+
+data = io.open("D:/huge.json", "r");
+local co = Json.Create():Iterator(function() return data:read(1000); end);
+--local co = Json.Create():Iterator(function() return [[{"MyTable":["Hello","Hello","Hello","Hello","Hello","Hello","Hello","Hello",{"Key":"Value"},"Hello","Hello"],"Cake":"Is good"}]]; end);
+--local co = Json.Create():Iterator(function() return [["hi"]]; end);
+print(coroutine.status(co));
+local last={};
+while coroutine.status(co)~="dead" do 
+
+	local ok,k,v,t = coroutine.resume(co);
+
+	if coroutine.status(co) == "dead" then
+		print(ok,k,v,t, coroutine.status(co));
+		break;
+	end
+
+	--[[print(ok,k,v,t, coroutine.status(co));
+
+	local issame = false;
+	for	n=1, #t do 
+		if last[n] ~= t[n] then 
+			issame = true;
+		end 
+	end 
+
+	if issame then
+		last={}
+		for	n=1, #t do  
+			table.insert(last, t[n]);
+			io.write(t[n].." ");
+		end
+		print("");
+	end]]
+end
+
+Break();
+
+data:close();
+data=nil;
+
+Json.Create():EncodeToFile("D:/huge2.json", coroutine.create(function()
+	
+	coroutine.yield(nil, {});
+	assert(db:Query("SELECT * FROM eventlog;"));
+	while db:Fetch() do 
+
+		coroutine.yield(nil, {});
+
+		for k,v in pairs(db:GetRow()) do 
+			
+			if k =="Data" then 
+				YieldTable(k, Json.Create():Decode(v));
+			else
+				coroutine.yield(k, v);
+			end
+		end
+		
+		coroutine.yield(nil, nil);
+	end
+
+end));
+
+local function IterationThread()
+
+	coroutine.yield(nil, {});
+
+	for	n=1, #testdata do 
+
+		coroutine.yield(1, {});
+
+		for k,v in pairs(testdata[n]) do 
+			coroutine.yield(k, v);
+		end
+
+		coroutine.yield(nil, nil);
+	end
+end
 
 local j=Json.Create();
 local t=Timer.New();
 while true do 
 
+	co = coroutine.create(IterationThread);
+
 	t:Start();
+
+	text = j:EncodeToFile("r:/test.json", co);
+	data = j:DecodeFromFile("r:/test.json", text);
+
 	text = j:Encode(testdata);
 	data = j:Decode(text);
 
@@ -249,6 +337,6 @@ collectgarbage();
 collectgarbage();
 Sleep(1000);
 collectgarbage();
-
+Break();
 --FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer");
 --dofile("C:\\Users\\Terrah\\Desktop\\TwitchToKafkaAdminer\\main.lua");

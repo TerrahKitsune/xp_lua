@@ -9,6 +9,7 @@ static const struct luaL_Reg jsonfunctions[] = {
 	{ "Encode",  lua_jsonencodetabletostring },
 	{ "EncodeToFunction",  lua_jsonencodefunction },
 	{ "DecodeFromFunction",  lua_jsondecodefunction },
+	{ "Iterator",  lua_jsoniterator },
 	{ "Create",  lua_jsoncreate },
 	{ "Dispose",  json_gc },
 	{ NULL, NULL }

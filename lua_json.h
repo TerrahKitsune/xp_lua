@@ -14,6 +14,10 @@ typedef struct JsonContext {
 
 	int refWriteFunction;
 	int refReadFunction;
+	int refThreadInput;
+	int refTable;
+
+	int arrayKey;
 
 	FILE * bufferFile;
 	char * fileName;
@@ -37,6 +41,7 @@ typedef struct JsonContext {
 
 } JsonContext;
 
+int lua_jsoniterator(lua_State *L);
 int lua_jsoncreate(lua_State *L);
 int lua_jsondecodestring(lua_State *L);
 int lua_jsondecodefromfile(lua_State *L);

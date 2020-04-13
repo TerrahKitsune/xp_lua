@@ -39,10 +39,20 @@ void json_bail(lua_State *L, JsonContext* context, const char * err) {
 		luaL_unref(L, LUA_REGISTRYINDEX, context->refReadFunction);
 	}
 
+	if (context->refThreadInput != LUA_REFNIL) {
+		luaL_unref(L, LUA_REGISTRYINDEX, context->refThreadInput);
+	}
+
+	if (context->refTable != LUA_REFNIL) {
+		luaL_unref(L, LUA_REGISTRYINDEX, context->refTable);
+	}
+
 	memset(context, 0, sizeof(JsonContext));
 
 	context->refWriteFunction = LUA_REFNIL;
 	context->refReadFunction = LUA_REFNIL;
+	context->refThreadInput = LUA_REFNIL;
+	context->refTable = LUA_REFNIL;
 
 	if (err) {
 		luaL_error(L, err);
@@ -184,4 +194,28 @@ void json_removefromantirecursion(unsigned int id, JsonContext* context) {
 			}
 		}
 	}
+}
+
+unsigned int json_popfromantirecursion(JsonContext* context) {
+
+	if (context->antiRecursion) {
+		size_t len = 0;
+		for (size_t i = 0; i < context->antiRecursionSize; i++)
+		{
+			if (context->antiRecursion[i] == 0) {
+				len = i;
+				break;
+			}
+		}
+
+		if (len == 0) {
+			return 0;
+		}
+
+		unsigned int result = context->antiRecursion[len-1];
+		context->antiRecursion[len - 1] = 0;
+		return result;
+	}
+
+	return 0;
 }

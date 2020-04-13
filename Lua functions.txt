@@ -1255,13 +1255,13 @@ Json:
 	-Create a json instance
 	Json Json.Create()
 
-	-Encodes a table to a json string
+	-Encodes a table (or coroutine that yeilds key-values) to a json string
 	jsonstring Json:Encode(table)
 
 	-Decodes a json string to a table
 	table Json:Decode(jsonstring)
 
-	-Encodes a table to a file
+	-Encodes a table (or coroutine that yeilds key-values) to a file
 	void Json:EncodeToFile(filename, table)
 
 	-Decodes a json from a file
@@ -1270,7 +1270,7 @@ Json:
 	-returns the json data to a function
 	-function (part) end
 	-were part is going to be json text parsing
-	void Json:EncodeToFunction(func)
+	void Json:EncodeToFunction(func, table)
 
 	-Returns a deserilized json table based on the data a function returns
 	-function() return jsonstring; end
@@ -1280,6 +1280,40 @@ Json:
 
 	-Prematurely closes a json instance
 	void Json:Dispose()
+
+	-Returns a corotune that can be coroutine.resume()'d 
+	-the resume returns ok, key, value, table
+	-the table returned contains the parents in order
+	-if value is a table it contains a field "type" that will be either "array" or "object"
+	-subsequent iterations will be data in that object
+	coroutine Json:Iterator(function() return datastring; end)
+
+	coroutine instead of table example:
+
+	jsonstring Json:Encode(coroutine.create(function() 
+	
+		--Yield the root element
+		coroutine.yield(nil, {});
+
+		--yield an object
+		coroutine.yield("MyTable", {});
+
+		for n=1,10 do 
+			--When the first key in an element is not a string it'll be treated as an array []
+			coroutine.yield(n, "Hello");
+		end
+
+		--Step out of "MyTable"
+		coroutine.yield(nil, nil);
+
+		--Add another value to the root object
+		coroutine.yield("Cake", "Is good");
+
+		--Step out of the root object thereby finishing the object
+		coroutine.yield(nil, nil);
+	end))
+
+	result: {"MyTable":["Hello","Hello","Hello","Hello","Hello","Hello","Hello","Hello","Hello","Hello"],"Cake":"Is good"}
 
 FileSystem:
 

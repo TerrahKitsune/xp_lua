@@ -1,6 +1,231 @@
 #include "jsondecode.h"
 #include "jsonutil.h"
 
+int json_lua_objectiterator(lua_State *L, int status, lua_KContext ctx);
+int json_lua_arrayiterator(lua_State *L, int status, lua_KContext ctx);
+
+int json_lua_arrayiterator(lua_State *L, int status, lua_KContext ctx) {
+
+	JsonContext* context = lua_tojson(L, 1);
+
+	json_advancewhitespace(L, context);
+	char next = json_readnext(L, context);
+
+	if (next == ',') {
+		json_advancewhitespace(L, context);
+		next = json_readnext(L, context);
+	}
+	else if (next == ']') {
+		lua_pop(L, 1);
+		unsigned int raw = json_popfromantirecursion(context);
+		if (raw == 0) {	
+			json_bail(L, context, NULL);
+			lua_settop(L, 0);
+			return -1;
+		}
+		
+		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
+		lua_len(L, -1);
+		int len = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+		lua_pushnil(L);
+		lua_rawseti(L, -2, len);
+		lua_pop(L, 1);
+
+		return ((lua_KFunction)raw)(L, status, ctx);
+	}
+
+	int count = lua_tointeger(L, -1)+1;
+	lua_pop(L, 1);
+	lua_pushinteger(L, count);
+	
+	if (next == '{') {
+
+		lua_pushinteger(L, count);
+		lua_createtable(L, 0, 1);
+		lua_pushstring(L, "type");
+		lua_pushstring(L, "object");
+		lua_settable(L, -3);
+		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
+
+		lua_len(L, -1);
+		int len = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+		lua_pushvalue(L, -3);
+		lua_rawseti(L, -2, len + 1);
+
+		json_addtoantirecursion((unsigned int)&json_lua_arrayiterator, context);
+		lua_yieldk(L, 3, ctx, json_lua_objectiterator);
+	}
+	else if (next == '[') {
+
+		lua_pushinteger(L, 0);
+		lua_pushinteger(L, count);
+		lua_createtable(L, 0, 1);
+		lua_pushstring(L, "type");
+		lua_pushstring(L, "array");
+		lua_settable(L, -3);
+		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
+
+		lua_len(L, -1);
+		int len = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+		lua_pushvalue(L, -3);
+		lua_rawseti(L, -2, len + 1);
+
+		json_addtoantirecursion((unsigned int)&json_lua_arrayiterator, context);
+		lua_yieldk(L, 3, ctx, json_lua_arrayiterator);
+	}
+	else {
+
+		json_stepback(context);
+		lua_pushinteger(L, count);
+		json_decodevalue(L, context);
+		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
+
+		lua_yieldk(L, 3, ctx, json_lua_arrayiterator);
+	}
+
+	return 0;
+}
+
+int json_lua_objectiterator(lua_State *L, int status, lua_KContext ctx) {
+
+	JsonContext* context = lua_tojson(L, 1);
+	json_advancewhitespace(L, context);
+	char next = json_readnext(L, context);
+	
+	if (next == ',') {
+		json_advancewhitespace(L, context);
+		next = json_readnext(L, context);
+	}
+	else if (next == '}') {
+
+		unsigned int raw = json_popfromantirecursion(context);
+		if (raw == 0) {
+			json_bail(L, context, NULL);
+			lua_settop(L, 0);
+			return -1;
+		}
+		
+		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
+		lua_len(L, -1);
+		int len = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+		lua_pushnil(L);
+		lua_rawseti(L, -2, len);
+		lua_pop(L, 1);
+
+		return ((lua_KFunction)raw)(L, status, ctx);
+	}
+
+	json_stepback(context);
+	json_decodestring(L, context);
+
+	json_advancewhitespace(L, context);
+	next = json_readnext(L, context);
+
+	if (next != ':') {
+		json_unexpected(next, L, context);
+		return 0;
+	}
+
+	json_advancewhitespace(L, context);
+	next = json_readnext(L, context);
+
+	if (next == '{') {
+
+		lua_createtable(L, 0, 1);
+		lua_pushstring(L, "type");
+		lua_pushstring(L, "object");
+		lua_settable(L, -3);
+		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
+
+		lua_len(L, -1);
+		int len = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+		lua_pushvalue(L, -3);
+		lua_rawseti(L, -2, len + 1);
+
+		json_addtoantirecursion((unsigned int)&json_lua_objectiterator, context);
+		lua_yieldk(L, 3, ctx, json_lua_objectiterator);
+	}
+	else if (next == '[') {
+
+		lua_pushinteger(L, 0);
+		lua_pushvalue(L, -2);
+		lua_remove(L, -3);
+		lua_createtable(L, 0, 1);
+		lua_pushstring(L, "type");
+		lua_pushstring(L, "array");
+		lua_settable(L, -3);
+		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
+
+		lua_len(L, -1);
+		int len = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+		lua_pushvalue(L, -3);
+		lua_rawseti(L, -2, len + 1);
+
+		json_addtoantirecursion((unsigned int)&json_lua_objectiterator, context);
+		lua_yieldk(L, 3, ctx, json_lua_arrayiterator);
+	}
+	else {
+
+		json_stepback(context);
+		json_decodevalue(L, context);
+		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
+		lua_yieldk(L, 3, ctx, json_lua_objectiterator);
+	}
+
+	json_bail(L, context, NULL);
+
+	return 0;
+}
+
+int json_lua_coroutineiterator(lua_State *L, int status, lua_KContext ctx) {
+
+	JsonContext* context = lua_tojson(L, 1);
+
+	json_advancewhitespace(L, context);
+
+	char next = json_readnext(L, context);
+
+	if (next == '{') {
+
+		lua_pushstring(L, "root");
+		lua_createtable(L, 0, 1);
+		lua_pushstring(L, "type");
+		lua_pushstring(L, "object");
+		lua_settable(L, -3);
+		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
+
+		lua_yieldk(L, 3, ctx, json_lua_objectiterator);
+	}
+	else if (next == '[') {
+
+		lua_pushinteger(L, 0);
+		lua_pushstring(L, "root");
+		lua_createtable(L, 0, 1);
+		lua_pushstring(L, "type");
+		lua_pushstring(L, "array");
+		lua_settable(L, -3);
+
+		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
+		lua_yieldk(L, 3, ctx, json_lua_arrayiterator);
+	}
+	else {
+		json_stepback(context);
+		lua_pushstring(L, "root");
+		json_decodevalue(L, context);
+		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
+	}
+
+	lua_yield(L, 3);
+
+	return 0;
+}
+
 void json_advancewhitespace(lua_State *L, JsonContext* context) {
 
 	char next = json_readnext(L, context);
@@ -142,7 +367,7 @@ void json_decodecharacter(lua_State *L, JsonContext* context) {
 
 	result[0] = (char)first;
 	result[1] = (char)second;
-	
+
 	if (result[0] && result[1]) {
 		json_append(result, 2, L, context);
 	}
