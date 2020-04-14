@@ -1285,7 +1285,7 @@ Json:
 	-the resume returns ok, key, value, table
 	-the table returned contains the parents in order
 	-if value is a table it contains a field "type" that will be either "array" or "object"
-	-subsequent iterations will be data in that object
+	-subsequent iterations will be data in that object until it yeilds nil, nil to step-down
 	coroutine Json:Iterator(function() return datastring; end)
 
 	coroutine instead of table example:

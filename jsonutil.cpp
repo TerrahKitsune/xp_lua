@@ -43,16 +43,11 @@ void json_bail(lua_State *L, JsonContext* context, const char * err) {
 		luaL_unref(L, LUA_REGISTRYINDEX, context->refThreadInput);
 	}
 
-	if (context->refTable != LUA_REFNIL) {
-		luaL_unref(L, LUA_REGISTRYINDEX, context->refTable);
-	}
-
 	memset(context, 0, sizeof(JsonContext));
 
 	context->refWriteFunction = LUA_REFNIL;
 	context->refReadFunction = LUA_REFNIL;
 	context->refThreadInput = LUA_REFNIL;
-	context->refTable = LUA_REFNIL;
 
 	if (err) {
 		luaL_error(L, err);

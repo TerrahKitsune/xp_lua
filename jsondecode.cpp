@@ -20,19 +20,15 @@ int json_lua_arrayiterator(lua_State *L, int status, lua_KContext ctx) {
 		unsigned int raw = json_popfromantirecursion(context);
 		if (raw == 0) {	
 			json_bail(L, context, NULL);
-			lua_settop(L, 0);
+			lua_settop(L, 0); 
 			return -1;
 		}
 		
-		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
-		lua_len(L, -1);
-		int len = lua_tointeger(L, -1);
-		lua_pop(L, 1);
 		lua_pushnil(L);
-		lua_rawseti(L, -2, len);
-		lua_pop(L, 1);
+		lua_pushnil(L);
 
-		return ((lua_KFunction)raw)(L, status, ctx);
+		lua_yieldk(L, 2, 0, (lua_KFunction)raw);
+		return 0;
 	}
 
 	int count = lua_tointeger(L, -1)+1;
@@ -46,16 +42,9 @@ int json_lua_arrayiterator(lua_State *L, int status, lua_KContext ctx) {
 		lua_pushstring(L, "type");
 		lua_pushstring(L, "object");
 		lua_settable(L, -3);
-		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
-
-		lua_len(L, -1);
-		int len = lua_tointeger(L, -1);
-		lua_pop(L, 1);
-		lua_pushvalue(L, -3);
-		lua_rawseti(L, -2, len + 1);
 
 		json_addtoantirecursion((unsigned int)&json_lua_arrayiterator, context);
-		lua_yieldk(L, 3, ctx, json_lua_objectiterator);
+		lua_yieldk(L, 2, ctx, json_lua_objectiterator);
 	}
 	else if (next == '[') {
 
@@ -65,25 +54,17 @@ int json_lua_arrayiterator(lua_State *L, int status, lua_KContext ctx) {
 		lua_pushstring(L, "type");
 		lua_pushstring(L, "array");
 		lua_settable(L, -3);
-		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
-
-		lua_len(L, -1);
-		int len = lua_tointeger(L, -1);
-		lua_pop(L, 1);
-		lua_pushvalue(L, -3);
-		lua_rawseti(L, -2, len + 1);
 
 		json_addtoantirecursion((unsigned int)&json_lua_arrayiterator, context);
-		lua_yieldk(L, 3, ctx, json_lua_arrayiterator);
+		lua_yieldk(L, 2, ctx, json_lua_arrayiterator);
 	}
 	else {
 
 		json_stepback(context);
 		lua_pushinteger(L, count);
 		json_decodevalue(L, context);
-		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
 
-		lua_yieldk(L, 3, ctx, json_lua_arrayiterator);
+		lua_yieldk(L, 2, ctx, json_lua_arrayiterator);
 	}
 
 	return 0;
@@ -107,16 +88,12 @@ int json_lua_objectiterator(lua_State *L, int status, lua_KContext ctx) {
 			lua_settop(L, 0);
 			return -1;
 		}
-		
-		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
-		lua_len(L, -1);
-		int len = lua_tointeger(L, -1);
-		lua_pop(L, 1);
-		lua_pushnil(L);
-		lua_rawseti(L, -2, len);
-		lua_pop(L, 1);
 
-		return ((lua_KFunction)raw)(L, status, ctx);
+		lua_pushnil(L);
+		lua_pushnil(L);
+
+		lua_yieldk(L, 2, 0, (lua_KFunction)raw);
+		return 0;
 	}
 
 	json_stepback(context);
@@ -139,16 +116,9 @@ int json_lua_objectiterator(lua_State *L, int status, lua_KContext ctx) {
 		lua_pushstring(L, "type");
 		lua_pushstring(L, "object");
 		lua_settable(L, -3);
-		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
-
-		lua_len(L, -1);
-		int len = lua_tointeger(L, -1);
-		lua_pop(L, 1);
-		lua_pushvalue(L, -3);
-		lua_rawseti(L, -2, len + 1);
 
 		json_addtoantirecursion((unsigned int)&json_lua_objectiterator, context);
-		lua_yieldk(L, 3, ctx, json_lua_objectiterator);
+		lua_yieldk(L, 2, ctx, json_lua_objectiterator);
 	}
 	else if (next == '[') {
 
@@ -159,23 +129,15 @@ int json_lua_objectiterator(lua_State *L, int status, lua_KContext ctx) {
 		lua_pushstring(L, "type");
 		lua_pushstring(L, "array");
 		lua_settable(L, -3);
-		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
-
-		lua_len(L, -1);
-		int len = lua_tointeger(L, -1);
-		lua_pop(L, 1);
-		lua_pushvalue(L, -3);
-		lua_rawseti(L, -2, len + 1);
 
 		json_addtoantirecursion((unsigned int)&json_lua_objectiterator, context);
-		lua_yieldk(L, 3, ctx, json_lua_arrayiterator);
+		lua_yieldk(L, 2, ctx, json_lua_arrayiterator);
 	}
 	else {
 
 		json_stepback(context);
 		json_decodevalue(L, context);
-		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
-		lua_yieldk(L, 3, ctx, json_lua_objectiterator);
+		lua_yieldk(L, 2, ctx, json_lua_objectiterator);
 	}
 
 	json_bail(L, context, NULL);
@@ -198,9 +160,8 @@ int json_lua_coroutineiterator(lua_State *L, int status, lua_KContext ctx) {
 		lua_pushstring(L, "type");
 		lua_pushstring(L, "object");
 		lua_settable(L, -3);
-		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
 
-		lua_yieldk(L, 3, ctx, json_lua_objectiterator);
+		lua_yieldk(L, 2, ctx, json_lua_objectiterator);
 	}
 	else if (next == '[') {
 
@@ -211,17 +172,15 @@ int json_lua_coroutineiterator(lua_State *L, int status, lua_KContext ctx) {
 		lua_pushstring(L, "array");
 		lua_settable(L, -3);
 
-		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
-		lua_yieldk(L, 3, ctx, json_lua_arrayiterator);
+		lua_yieldk(L, 2, ctx, json_lua_arrayiterator);
 	}
 	else {
 		json_stepback(context);
 		lua_pushstring(L, "root");
 		json_decodevalue(L, context);
-		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refTable);
 	}
 
-	lua_yield(L, 3);
+	lua_yield(L, 2);
 
 	return 0;
 }

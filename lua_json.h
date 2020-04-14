@@ -15,7 +15,6 @@ typedef struct JsonContext {
 	int refWriteFunction;
 	int refReadFunction;
 	int refThreadInput;
-	int refTable;
 
 	int arrayKey;
 

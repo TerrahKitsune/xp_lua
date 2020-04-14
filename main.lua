@@ -214,43 +214,32 @@ end
 local text, data; 
 
 data = io.open("D:/huge.json", "r");
-local co = Json.Create():Iterator(function() return data:read(1000); end);
+--local co = Json.Create():Iterator(function() return data:read(1000); end);
 --local co = Json.Create():Iterator(function() return [[{"MyTable":["Hello","Hello","Hello","Hello","Hello","Hello","Hello","Hello",{"Key":"Value"},"Hello","Hello"],"Cake":"Is good"}]]; end);
---local co = Json.Create():Iterator(function() return [["hi"]]; end);
+local co = Json.Create():Iterator(function() return [["hi"]]; end);
 print(coroutine.status(co));
-local last={};
+local tree={};
 while coroutine.status(co)~="dead" do 
 
-	local ok,k,v,t = coroutine.resume(co);
+	local ok,k,v = coroutine.resume(co);
 
 	if coroutine.status(co) == "dead" then
-		print(ok,k,v,t, coroutine.status(co));
+		print(ok,k,v, coroutine.status(co));
 		break;
 	end
-
-	--[[print(ok,k,v,t, coroutine.status(co));
-
-	local issame = false;
-	for	n=1, #t do 
-		if last[n] ~= t[n] then 
-			issame = true;
-		end 
-	end 
-
-	if issame then
-		last={}
-		for	n=1, #t do  
-			table.insert(last, t[n]);
-			io.write(t[n].." ");
-		end
-		print("");
-	end]]
 end
 
 Break();
 
 data:close();
 data=nil;
+
+data = io.open("D:/huge.json", "r");
+local co = Json.Create():Iterator(function() return data:read(1000); end);
+
+Json.Create():EncodeToFile("D:/huge3.json", co);
+
+Break();
 
 Json.Create():EncodeToFile("D:/huge2.json", coroutine.create(function()
 	

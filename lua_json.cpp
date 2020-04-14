@@ -27,11 +27,6 @@ int lua_yielder(lua_State *L){
 int lua_jsoniterator(lua_State *L) {
 
 	JsonContext * json = lua_tojson(L, 1);
-
-	if (json->refTable != LUA_REFNIL) {
-		luaL_error(L, "This context is used for iteration");
-	}
-
 	luaL_checktype(L, 2, LUA_TFUNCTION);
 	lua_settop(L, 2);
 
@@ -39,9 +34,6 @@ int lua_jsoniterator(lua_State *L) {
 	lua_pushvalue(L, 2);
 	lua_xmove(L, T, 1);
 	json->refReadFunction = luaL_ref(T, LUA_REGISTRYINDEX);
-
-	lua_newtable(T);
-	json->refTable = luaL_ref(T, LUA_REGISTRYINDEX);
 
 	lua_pushcfunction(T, lua_yielder);
 	lua_pushvalue(L, 1);
@@ -54,11 +46,6 @@ int lua_jsoniterator(lua_State *L) {
 int lua_jsondecodefunction(lua_State *L) {
 
 	JsonContext * json = lua_tojson(L, 1);
-
-	if (json->refTable != LUA_REFNIL) {
-		luaL_error(L, "This context is used for iteration");
-	}
-
 	luaL_checktype(L, 2, LUA_TFUNCTION);
 	lua_settop(L, 2);
 
@@ -74,11 +61,6 @@ int lua_jsondecodefunction(lua_State *L) {
 int lua_jsonencodefunction(lua_State *L) {
 
 	JsonContext * json = lua_tojson(L, 1);
-
-	if (json->refTable != LUA_REFNIL) {
-		luaL_error(L, "This context is used for iteration");
-	}
-
 	luaL_checktype(L, 2, LUA_TFUNCTION);
 	lua_jsonprepasthread(L, json, 3);
 
@@ -100,11 +82,6 @@ int lua_jsonencodefunction(lua_State *L) {
 int lua_jsondecodefromfile(lua_State *L) {
 
 	JsonContext * json = lua_tojson(L, 1);
-
-	if (json->refTable != LUA_REFNIL) {
-		luaL_error(L, "This context is used for iteration");
-	}
-
 	size_t len;
 	const char * file = luaL_checklstring(L, 2, &len);
 	lua_settop(L, 2);
@@ -134,11 +111,6 @@ int lua_jsondecodefromfile(lua_State *L) {
 int lua_jsondecodestring(lua_State *L) {
 
 	JsonContext * json = lua_tojson(L, 1);
-
-	if (json->refTable != LUA_REFNIL) {
-		luaL_error(L, "This context is used for iteration");
-	}
-
 	size_t len;
 	const char * data = luaL_checklstring(L, 2, &len);
 	lua_settop(L, 2);
@@ -158,11 +130,6 @@ int lua_jsondecodestring(lua_State *L) {
 int lua_jsonencodetabletostring(lua_State *L) {
 
 	JsonContext * json = lua_tojson(L, 1);
-
-	if (json->refTable != LUA_REFNIL) {
-		luaL_error(L, "This context is used for iteration");
-	}
-
 	lua_jsonprepasthread(L, json, 2);
 
 	json_encodetable(L, json, NULL);
@@ -176,11 +143,6 @@ int lua_jsonencodetabletostring(lua_State *L) {
 int lua_jsonencodetabletofile(lua_State *L) {
 
 	JsonContext * json = lua_tojson(L, 1);
-
-	if (json->refTable != LUA_REFNIL) {
-		luaL_error(L, "This context is used for iteration");
-	}
-
 	size_t filelen;
 	const char * file = lua_tolstring(L, 2, &filelen);
 	lua_jsonprepasthread(L, json, 3);
@@ -223,7 +185,6 @@ JsonContext * lua_pushjson(lua_State *L) {
 	luajson->refWriteFunction = LUA_REFNIL;
 	luajson->refReadFunction = LUA_REFNIL;
 	luajson->refThreadInput = LUA_REFNIL;
-	luajson->refTable = LUA_REFNIL;
 
 	return luajson;
 }
