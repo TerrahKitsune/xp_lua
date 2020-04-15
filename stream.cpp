@@ -89,9 +89,7 @@ int SetLength(lua_State* L) {
 	}
 
 	stream->len = size;
-	if (stream->pos > stream->len) {
-		stream->pos = stream->len;
-	}
+	stream->pos = 0;
 
 	return 0;
 }
