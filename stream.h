@@ -11,6 +11,7 @@ typedef struct LuaStream {
 	size_t alloc;
 
 	int allocfunc;
+	HANDLE hSharedMemory;
 
 } LuaStream;
 
@@ -18,6 +19,9 @@ typedef struct LuaStream {
 LuaStream* lua_pushluastream(lua_State* L);
 LuaStream* lua_toluastream(lua_State* L, int index);
 
+int OpenSharedMemoryStream(lua_State* L);
+int NewSharedMemoryStream(lua_State* L);
+int SetLength(lua_State* L);
 int Compress(lua_State* L);
 int Decompress(lua_State* L);
 int WriteToFile(lua_State* L);

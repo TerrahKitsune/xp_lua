@@ -137,3 +137,28 @@ print(compressed:Read());
 ok, err=compressed:Decompress();
 local decompressed = assert(ok, GetLastError(err));
 print(decompressed:Read());
+
+ok, err = Stream.CreateSharedMemoryStream("testyyy", 1024);
+stream = assert(ok, GetLastError(err));
+local position, length, allocated = stream:GetInfo();
+for n=1, allocated do 
+	stream:WriteByte(n % 255);
+end
+
+ok, err = Stream.OpenSharedMemoryStream("testyyy");
+local sharedstream = assert(ok, GetLastError(err));
+position, length, allocated = sharedstream:GetInfo();
+
+stream:Seek();
+for n=1, allocated do 
+	print(sharedstream:ReadByte());
+end
+sharedstream:SetLength(0);
+for n=1, allocated do 
+	sharedstream:WriteByte(0);
+end
+print("---");
+Break();
+for n=1, allocated do 
+	print(stream:ReadByte());
+end

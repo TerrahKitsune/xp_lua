@@ -533,6 +533,19 @@ Stream:
 	-function(size) return size; end
 	Stream Stream.Create(opt initialsize/allocfunc);
 
+	-Create a shared memory with a name as a stream
+	-a shared memory stream cannot be resized once created
+	-use GetInfo() to retrive the actual size of the block
+	-"Global\\" can be suffixed
+	-Returns nil and an errorcode (GetLastError) on failure
+	Stream Stream.CreateSharedMemoryStream(name, size);
+
+	-Opens an existing shared memory by name
+	-use GetInfo() to retrive the actual size of the block
+	-"Global\\" can be suffixed
+	-Returns nil and an errorcode (GetLastError) on failure
+	Stream Stream.OpenSharedMemoryStream(name);
+
 	-Opens a file and reads all its contents and returns it as a stream
 	Stream Stream.Open(filename);
 
@@ -581,6 +594,9 @@ Stream:
 	-Retrives the current position, length and the current allocated size of the stream
 	position, length, allocated Stream:GetInfo();
 
+	-Set the length of the stream, clamped to 0 and whats currently allocated
+	void Stream:SetLength(newlength);
+
 	length Stream:len();
 	pos Stream:pos();
 
@@ -590,12 +606,24 @@ Stream:
 
 	-Returns a stream containing a compressed version of the original
 	-algorithm: https://docs.microsoft.com/en-gb/windows/win32/cmpapi/using-the-compression-api
-	-default COMPRESS_ALGORITHM_MSZIP
+	-COMPRESS_ALGORITHM_INVALID      0
+	-COMPRESS_ALGORITHM_NULL         1
+	-COMPRESS_ALGORITHM_MSZIP        2 (default)
+	-COMPRESS_ALGORITHM_XPRESS       3
+	-COMPRESS_ALGORITHM_XPRESS_HUFF  4
+	-COMPRESS_ALGORITHM_LZMS         5
+	-COMPRESS_ALGORITHM_MAX          6
 	Stream Stream:Compress(opt algorithm)
 
 	-Returns a stream containing a decompressed version of the original
 	-algorithm: https://docs.microsoft.com/en-gb/windows/win32/cmpapi/using-the-compression-api
-	-default COMPRESS_ALGORITHM_MSZIP
+	-COMPRESS_ALGORITHM_INVALID      0
+	-COMPRESS_ALGORITHM_NULL         1
+	-COMPRESS_ALGORITHM_MSZIP        2 (default)
+	-COMPRESS_ALGORITHM_XPRESS       3
+	-COMPRESS_ALGORITHM_XPRESS_HUFF  4
+	-COMPRESS_ALGORITHM_LZMS         5
+	-COMPRESS_ALGORITHM_MAX          6
 	Stream Stream:Decompress(opt algorithm)
 
 	bool Stream:WriteFloat()

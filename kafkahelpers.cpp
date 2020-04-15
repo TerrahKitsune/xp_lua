@@ -21,7 +21,6 @@ rd_kafka_topic_conf_t* lua_tokafkatopicconf(lua_State* L, int idx) {
 				luaL_error(L, "Unable to set conf %s = %s: %s", confname, confvalue, errorbuffer);
 			}
 
-			//printf("%s = %s\n", confname, confvalue);
 			lua_pop(L, 1);
 		}
 	}

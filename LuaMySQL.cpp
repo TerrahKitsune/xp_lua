@@ -699,6 +699,7 @@ int luamysql_gc(lua_State *L) {
 		}
 		catch (...) {}
 		CleanUp(luamysql->task.get());
+		luamysql->hasTask = false;
 	}
 
 	if (luamysql->result) {

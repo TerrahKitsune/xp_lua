@@ -36,10 +36,13 @@ static const struct luaL_Reg streamfunctions[] = {
 	{ "ReadLong",  ReadLong },
 	{ "WriteUnsignedLong",  WriteUnsignedLong },
 	{ "ReadUnsignedLong", ReadUnsignedLong },
+	{ "SetLength", SetLength },
 	{ "Compress", Compress },
 	{ "Decompress", Decompress },
+	{ "CreateSharedMemoryStream", NewSharedMemoryStream },
+	{ "OpenSharedMemoryStream", OpenSharedMemoryStream },
 	{ NULL, NULL }
-};
+}; 
 
 static const luaL_Reg streammeta[] = {
 	{ "__gc",  luastream_gc },

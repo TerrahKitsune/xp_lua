@@ -12,6 +12,11 @@ const size_t MIN_STREAM_SIZE = 1024;
 
 size_t AllocAddSize(lua_State* L, LuaStream* stream, size_t requestedsize) {
 
+	if (stream && stream->hSharedMemory) {
+		luaL_error(L, "Shared memory full");
+		return 0;
+	}
+
 	if (stream && stream->allocfunc != LUA_NOREF) {
 
 		lua_rawgeti(L, LUA_REGISTRYINDEX, stream->allocfunc);
@@ -69,6 +74,26 @@ bool CheckStreamSize(lua_State* L, LuaStream* stream, size_t requestedsize) {
 	else {
 		return true;
 	}
+}
+
+int SetLength(lua_State* L) {
+
+	LuaStream* stream = lua_toluastream(L, 1);
+	int size = luaL_checkinteger(L, 2);
+
+	if (size > stream->alloc) {
+		size = stream->alloc;
+	}
+	else if (size < 0) {
+		size = 0;
+	}
+
+	stream->len = size;
+	if (stream->pos > stream->len) {
+		stream->pos = stream->len;
+	}
+
+	return 0;
 }
 
 bool StreamWrite(lua_State* L, LuaStream* stream, BYTE* data, size_t len) {
@@ -974,6 +999,105 @@ int NewStream(lua_State* L) {
 	return 1;
 }
 
+int OpenSharedMemoryStream(lua_State* L) {
+
+	const char * name = luaL_checkstring(L, 1);
+	int readOnly = lua_isboolean(L, 2) && lua_toboolean(L, 2);
+
+	LuaStream* stream = lua_pushluastream(L);
+
+	stream->hSharedMemory = OpenFileMapping(readOnly ? FILE_MAP_READ : FILE_MAP_ALL_ACCESS, FALSE, name);
+
+	if (stream->hSharedMemory == NULL) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushinteger(L, GetLastError());
+		return 2;
+	}
+
+	stream->data = (BYTE*)MapViewOfFile(stream->hSharedMemory, readOnly ? FILE_MAP_READ : FILE_MAP_ALL_ACCESS, 0, 0, 0);
+
+	if (stream->data == NULL) {
+		CloseHandle(stream->hSharedMemory);
+		stream->hSharedMemory = NULL;
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushinteger(L, GetLastError());
+		return 2;
+	}
+
+	MEMORY_BASIC_INFORMATION info;
+	stream->alloc = VirtualQuery(stream->data, &info, sizeof(MEMORY_BASIC_INFORMATION));
+
+	if (stream->alloc == 0) {
+
+		UnmapViewOfFile(stream->data);
+		stream->data = NULL;
+		CloseHandle(stream->hSharedMemory);
+		stream->hSharedMemory = NULL;
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushinteger(L, GetLastError());
+		return 2;
+	}
+	else {
+		stream->alloc = info.RegionSize;
+		stream->len = info.RegionSize;
+	}
+
+	return 1;
+}
+
+int NewSharedMemoryStream(lua_State* L) {
+
+	const char * name = luaL_checkstring(L, 1, &len);
+	int size = luaL_checkinteger(L, 2);
+
+	LuaStream* stream = lua_pushluastream(L);
+
+	stream->hSharedMemory = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, size, name);
+
+	if (stream->hSharedMemory == NULL) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushinteger(L, GetLastError());
+		return 2;
+	}
+
+	stream->data = (BYTE*)MapViewOfFile(stream->hSharedMemory, FILE_MAP_ALL_ACCESS, 0, 0, size);
+
+	if (stream->data == NULL) {
+		CloseHandle(stream->hSharedMemory);
+		stream->hSharedMemory = NULL;
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushinteger(L, GetLastError());
+		return 2;
+	}
+
+	MEMORY_BASIC_INFORMATION info;
+	stream->alloc = VirtualQuery(stream->data, &info, sizeof(MEMORY_BASIC_INFORMATION));
+
+	if (stream->alloc == 0) {
+
+		UnmapViewOfFile(stream->data);
+		stream->data = NULL;
+		CloseHandle(stream->hSharedMemory);
+		stream->hSharedMemory = NULL;
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushinteger(L, GetLastError());
+		return 2;
+	}
+	else {
+		stream->alloc = info.RegionSize;
+	}
+
+	return 1;
+}
+
 LuaStream* lua_pushluastream(lua_State* L) {
 
 	LuaStream* stream = (LuaStream*)lua_newuserdata(L, sizeof(LuaStream));
@@ -1004,14 +1128,20 @@ int luastream_gc(lua_State* L) {
 
 	LuaStream* pipe = lua_toluastream(L, 1);
 
-	if (pipe && pipe->alloc) {
+	if (pipe->hSharedMemory) {
+		UnmapViewOfFile(pipe->data);
+		CloseHandle(pipe->hSharedMemory);
+		pipe->hSharedMemory = NULL;
+	}
+	else if (pipe->data) {
 		free(pipe->data);
-		ZeroMemory(pipe, sizeof(LuaStream));
 	}
 
-	if (pipe && pipe->allocfunc != LUA_NOREF) {
+	pipe->data = NULL;
+
+	if (pipe->allocfunc != LUA_NOREF) {
 		luaL_unref(L, LUA_REGISTRYINDEX, pipe->allocfunc);
-		pipe->allocfunc = 0;
+		pipe->allocfunc = LUA_NOREF;
 	}
 
 	return 0;
