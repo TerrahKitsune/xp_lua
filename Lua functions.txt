@@ -595,6 +595,7 @@ Stream:
 	position, length, allocated Stream:GetInfo();
 
 	-Set the length of the stream, clamped to 0 and whats currently allocated
+	-Resets position to 0
 	void Stream:SetLength(newlength);
 
 	length Stream:len();
