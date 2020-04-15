@@ -18,6 +18,8 @@ typedef struct LuaStream {
 LuaStream* lua_pushluastream(lua_State* L);
 LuaStream* lua_toluastream(lua_State* L, int index);
 
+int Compress(lua_State* L);
+int Decompress(lua_State* L);
 int WriteToFile(lua_State* L);
 int DumpToFile(lua_State* L);
 int OpenFileToStream(lua_State* L);

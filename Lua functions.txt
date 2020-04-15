@@ -588,6 +588,16 @@ Stream:
 	-If no position is given the stream is rewinded to 0
 	void Stream:Seek(opt pos)
 
+	-Returns a stream containing a compressed version of the original
+	-algorithm: https://docs.microsoft.com/en-gb/windows/win32/cmpapi/using-the-compression-api
+	-default COMPRESS_ALGORITHM_MSZIP
+	Stream Stream:Compress(opt algorithm)
+
+	-Returns a stream containing a decompressed version of the original
+	-algorithm: https://docs.microsoft.com/en-gb/windows/win32/cmpapi/using-the-compression-api
+	-default COMPRESS_ALGORITHM_MSZIP
+	Stream Stream:Decompress(opt algorithm)
+
 	bool Stream:WriteFloat()
 	number Stream:ReadFloat()
 

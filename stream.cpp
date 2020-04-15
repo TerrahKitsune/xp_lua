@@ -4,6 +4,9 @@
 #include <errno.h>
 #include <stdlib.h> 
 #include <windows.h> 
+#include <stdio.h>
+#include <compressapi.h>
+#pragma comment(lib, "Cabinet.lib")
 
 const size_t MIN_STREAM_SIZE = 1024;
 
@@ -649,7 +652,7 @@ int ReadFromFile(lua_State* L) {
 		return 0;
 	}
 
-	if (fseek(f, pos+ len, SEEK_SET) != 0) {
+	if (fseek(f, pos + len, SEEK_SET) != 0) {
 		fclose(f);
 		luaL_error(L, "Unable to seek in file");
 		return 0;
@@ -680,7 +683,7 @@ int ReadFromFile(lua_State* L) {
 }
 
 int WriteToFile(lua_State* L) {
-	
+
 	LuaStream* stream = lua_toluastream(L, 1);
 	const char * file = luaL_checkstring(L, 2);
 	size_t pos = luaL_checkinteger(L, 3);
@@ -779,7 +782,7 @@ int OpenFileToStream(lua_State* L) {
 	lua_pop(L, lua_gettop(L));
 
 	LuaStream* stream = lua_pushluastream(L);
-	
+
 	if (alloc < MIN_STREAM_SIZE) {
 		alloc = MIN_STREAM_SIZE;
 	}
@@ -798,11 +801,130 @@ int OpenFileToStream(lua_State* L) {
 	if (size > 0) {
 		stream->len = fread(stream->data, sizeof(BYTE), size, f);
 	}
-	else {		
+	else {
 		stream->len = 0;
 	}
 
 	fclose(f);
+
+	return 1;
+}
+
+int Compress(lua_State* L) {
+
+	LuaStream* stream = lua_toluastream(L, 1);
+	COMPRESSOR_HANDLE Compressor = NULL;
+	SIZE_T CompressedBufferSize;
+	DWORD compressionAlgorithm = luaL_optinteger(L, 2, COMPRESS_ALGORITHM_MSZIP);
+	LuaStream* compressed = lua_pushluastream(L);
+
+	BOOL Success = CreateCompressor(compressionAlgorithm, NULL, &Compressor);
+
+	if (!Success) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushinteger(L, GetLastError());
+		return 2;
+	}
+
+	Success = Compress(Compressor, stream->data, stream->len, NULL, 0, &CompressedBufferSize);
+
+	if (!Success && GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+		CloseCompressor(Compressor);
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushinteger(L, GetLastError());
+		return 2;
+	}
+
+	compressed->data = (BYTE*)malloc(CompressedBufferSize);
+
+	if (!compressed->data) {
+		CloseCompressor(Compressor);
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushinteger(L, ERROR_INSUFFICIENT_BUFFER);
+		return 2;
+	}
+
+	compressed->alloc = CompressedBufferSize;
+
+	Success = Compress(Compressor, stream->data, stream->len, compressed->data, compressed->alloc, &CompressedBufferSize);
+
+	if (!Success) {
+
+		CloseCompressor(Compressor);
+		free(compressed->data);
+		memset(compressed, 0, sizeof(LuaStream));
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushinteger(L, GetLastError());
+		return 2;
+	}
+
+	compressed->len = CompressedBufferSize;
+
+	CloseCompressor(Compressor);
+
+	return 1;
+}
+
+int Decompress(lua_State* L) {
+
+	LuaStream* stream = lua_toluastream(L, 1);
+	DECOMPRESSOR_HANDLE Decompressor = NULL;
+	DWORD compressionAlgorithm = luaL_optinteger(L, 2, COMPRESS_ALGORITHM_MSZIP);
+	BOOL Success = CreateDecompressor(compressionAlgorithm, NULL, &Decompressor);
+	LuaStream* uncompressed = lua_pushluastream(L);
+	SIZE_T DecompressedBufferSize;
+
+	if (!Success) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushinteger(L, GetLastError());
+		return 2;
+	}
+
+	Success = Decompress(Decompressor, stream->data, (SIZE_T)stream->len, NULL, 0, &DecompressedBufferSize);
+
+	if (!Success && GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+		CloseDecompressor(Decompressor);
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushinteger(L, GetLastError());
+		return 2;
+	}
+
+	uncompressed->data = (BYTE*)malloc(DecompressedBufferSize);
+
+	if (!uncompressed->data) {
+		CloseDecompressor(Decompressor);
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushinteger(L, ERROR_INSUFFICIENT_BUFFER);
+		return 2;
+	}
+
+	uncompressed->alloc = DecompressedBufferSize;
+
+	Success = Decompress(Decompressor, stream->data, stream->len, uncompressed->data, uncompressed->alloc, &DecompressedBufferSize);
+
+	if (!Success) {
+
+		CloseDecompressor(Decompressor);
+		free(uncompressed->data);
+		memset(uncompressed, 0, sizeof(LuaStream));
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushinteger(L, GetLastError());
+		return 2;
+	}
+
+	uncompressed->len = DecompressedBufferSize;
+
+	CloseDecompressor(Decompressor);
 
 	return 1;
 }
@@ -857,12 +979,13 @@ LuaStream* lua_pushluastream(lua_State* L) {
 	LuaStream* stream = (LuaStream*)lua_newuserdata(L, sizeof(LuaStream));
 
 	if (stream == NULL)
-		luaL_error(L, "Unable to push namedpipe");
+		luaL_error(L, "Unable to push stream");
 
 	luaL_getmetatable(L, STREAM);
 	lua_setmetatable(L, -2);
 
 	memset(stream, 0, sizeof(LuaStream));
+	stream->allocfunc = LUA_NOREF;
 
 	return stream;
 }
