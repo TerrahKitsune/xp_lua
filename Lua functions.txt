@@ -533,7 +533,12 @@ Stream:
 	-function(size) return size; end
 	Stream Stream.Create(opt initialsize/allocfunc);
 
-	-Create a shared memory with a name as a stream
+	-Querries and returns shared memory information
+	-https://docs.microsoft.com/en-gb/windows/win32/api/winnt/ns-winnt-memory_basic_information
+	-returns nil and an errorcode on failure
+	table Stream.GetSharedMemoryStreamInfo(name)
+
+	-Create a shared memory with a name as a stream (Or opens existing with full rights)
 	-a shared memory stream cannot be resized once created
 	-use GetInfo() to retrive the actual size of the block
 	-"Global\\" can be suffixed
@@ -544,7 +549,7 @@ Stream:
 	-use GetInfo() to retrive the actual size of the block
 	-"Global\\" can be suffixed
 	-Returns nil and an errorcode (GetLastError) on failure
-	Stream Stream.OpenSharedMemoryStream(name);
+	Stream Stream.OpenSharedMemoryStream(name, opt bool readonly);
 
 	-Opens a file and reads all its contents and returns it as a stream
 	Stream Stream.Open(filename);

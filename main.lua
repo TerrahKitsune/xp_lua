@@ -106,7 +106,7 @@ function string.tohex(str)
     end))
 end
 
-math.randomseed(os.time());
+math.randomseed(Time());
 math.random(); math.random(); math.random();
 
 print("Percent                    ", GlobalMemoryStatus());
@@ -129,36 +129,10 @@ collectgarbage();
 
 local db=assert(MySQL.Connect("10.9.23.252", "TwitchKafka", "meowCat69!", "twitch"));
 
-local stream = Stream.Create();
-stream:Write("Hello Hello Hello Hello Hello Hello!");
-local ok, err=stream:Compress();
-local compressed = assert(ok, GetLastError(err));
-print(compressed:Read());
-ok, err=compressed:Decompress();
-local decompressed = assert(ok, GetLastError(err));
-print(decompressed:Read());
-
-ok, err = Stream.CreateSharedMemoryStream("testyyy", 1024);
-stream = assert(ok, GetLastError(err));
+local ok, err = Stream.CreateSharedMemoryStream("testyyy", 1024);
+local stream = assert(ok, GetLastError(err));
 local position, length, allocated = stream:GetInfo();
+print(position, length, allocated);
 for n=1, allocated do 
-	stream:WriteByte(n % 255);
-end
-
-ok, err = Stream.OpenSharedMemoryStream("testyyy");
-local sharedstream = assert(ok, GetLastError(err));
-position, length, allocated = sharedstream:GetInfo();
-
-stream:Seek();
-for n=1, allocated do 
-	print(sharedstream:ReadByte());
-end
-sharedstream:SetLength(0);
-for n=1, allocated do 
-	sharedstream:WriteByte(0);
-end
-print("---");
-Break();
-for n=1, allocated do 
-	print(stream:ReadByte());
-end
+	stream:WriteByte(math.floor(math.random()*1000)%255);
+end	

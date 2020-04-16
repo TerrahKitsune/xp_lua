@@ -997,6 +997,81 @@ int NewStream(lua_State* L) {
 	return 1;
 }
 
+int GetSharedMemoryStreamInfo(lua_State* L) {
+
+	const char * name = luaL_checkstring(L, 1);
+
+	HANDLE h = OpenFileMapping(FILE_MAP_READ, FALSE, name);
+
+	if (h == NULL) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushinteger(L, GetLastError());
+		return 2;
+	}
+
+	void * ptr = MapViewOfFile(h,FILE_MAP_READ, 0, 0, 0);
+
+	if (ptr == NULL) {
+		CloseHandle(h);
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushinteger(L, GetLastError());
+		return 2;
+	}
+
+	MEMORY_BASIC_INFORMATION info;
+	SIZE_T len = VirtualQuery(ptr, &info, sizeof(MEMORY_BASIC_INFORMATION));
+
+	if (len < sizeof(MEMORY_BASIC_INFORMATION)) {
+		UnmapViewOfFile(ptr);
+		CloseHandle(h);
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushinteger(L, GetLastError());
+		return 2;
+	}
+	else {
+
+		lua_pop(L, lua_gettop(L));
+
+		lua_createtable(L, 0, 7);
+
+		lua_pushstring(L, "AllocationBase");
+		lua_pushinteger(L, (DWORD)info.AllocationBase);
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "AllocationProtect");
+		lua_pushinteger(L, info.AllocationProtect);
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "BaseAddress");
+		lua_pushinteger(L, (DWORD)info.BaseAddress);
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "Protect");
+		lua_pushinteger(L, info.Protect);
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "RegionSize");
+		lua_pushinteger(L, info.RegionSize);
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "State");
+		lua_pushinteger(L, info.State);
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "Type");
+		lua_pushinteger(L, info.Type);
+		lua_settable(L, -3);
+
+		UnmapViewOfFile(ptr);
+		CloseHandle(h);
+
+		return 1;
+	}
+}
+
 int OpenSharedMemoryStream(lua_State* L) {
 
 	const char * name = luaL_checkstring(L, 1);

@@ -41,6 +41,7 @@ static const struct luaL_Reg streamfunctions[] = {
 	{ "Decompress", Decompress },
 	{ "CreateSharedMemoryStream", NewSharedMemoryStream },
 	{ "OpenSharedMemoryStream", OpenSharedMemoryStream },
+	{ "GetSharedMemoryStreamInfo", GetSharedMemoryStreamInfo },
 	{ NULL, NULL }
 }; 
 
