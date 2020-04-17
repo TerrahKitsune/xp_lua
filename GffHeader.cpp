@@ -122,6 +122,9 @@ void TrackOrBail(lua_State*L, Gff * gff, const void * gffstruct){
 
 	if (gff->gfftracker == NULL){
 		gff->gfftracker = (StructTrackerLinkedList*)gff_malloc(sizeof(StructTrackerLinkedList));
+		if (!gff->gfftracker) {
+			Bail(gff, L, "No memory");
+		}
 		gff->gfftracker->next = NULL;
 		gff->gfftracker->value = gffstruct;
 	}
@@ -138,6 +141,9 @@ void TrackOrBail(lua_State*L, Gff * gff, const void * gffstruct){
 		}
 
 		Parent->next = (StructTrackerLinkedList*)gff_malloc(sizeof(StructTrackerLinkedList));
+		if (!Parent->next) {
+			Bail(gff, L, "No memory");
+		}
 		Parent->next->next = NULL;
 		Parent->next->value = gffstruct;
 	}

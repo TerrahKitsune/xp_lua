@@ -364,6 +364,17 @@ int LuaOpenDataChannel(lua_State* L) {
 	channel->s = s;
 
 	channel->ip = (char*)gff_malloc(strlen(addr) + 1);
+
+	if (!channel->ip) {
+		closesocket(s);
+		channel->s = INVALID_SOCKET;
+		lua_pop(L, lua_gettop(L));
+		lua_pushboolean(L, false);
+		lua_pushfstring(L, "Out of memory");
+
+		return 2;
+	}
+
 	strcpy(channel->ip, addr);
 	channel->port = port;
 

@@ -7,7 +7,7 @@ static const char * LUASHA256 = "LUASHA256";
 
 typedef struct LuaSHA256 {
 	SHA256_CTX SHA;
-	unsigned char * hash;
+	unsigned char hash[SHA256_BLOCK_SIZE];
 } LuaSHA256;
 
 LuaSHA256 * lua_tosha256(lua_State *L, int index);

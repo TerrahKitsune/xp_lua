@@ -486,21 +486,39 @@ int MySQLConnect(lua_State *L) {
 	size_t len;
 	const char * temp = luaL_checklstring(L, 1, &len);
 	char * temp_server = (char*)gff_malloc(len + 1);
+	if (!temp_server) {
+		luaL_error(L, "Unable to allocate memory for mysql");
+	}
 	temp_server[len] = '\0';
 	memcpy(temp_server, temp, len);
 
 	temp = luaL_checklstring(L, 2, &len);
 	char * temp_user = (char*)gff_malloc(len + 1);
+	if (!temp_user) {
+		gff_free(temp_server);
+		luaL_error(L, "Unable to allocate memory for mysql");
+	}
 	temp_user[len] = '\0';
 	memcpy(temp_user, temp, len);
 
 	temp = luaL_checklstring(L, 3, &len);
 	char * temp_password = (char*)gff_malloc(len + 1);
+	if (!temp_password) {
+		gff_free(temp_user);
+		gff_free(temp_server);
+		luaL_error(L, "Unable to allocate memory for mysql");
+	}
 	temp_password[len] = '\0';
 	memcpy(temp_password, temp, len);
 
 	temp = luaL_checklstring(L, 4, &len);
 	char * temp_schema = (char*)gff_malloc(len + 1);
+	if (!temp_schema) {
+		gff_free(temp_user);
+		gff_free(temp_server);
+		gff_free(temp_password);
+		luaL_error(L, "Unable to allocate memory for mysql");
+	}
 	temp_schema[len] = '\0';
 	memcpy(temp_schema, temp, len);
 
@@ -522,14 +540,14 @@ int MySQLConnect(lua_State *L) {
 	}
 
 	if (!mysql_init(luamysql->mysql)) {
+		gff_free(luamysql->mysql);
+		luamysql->mysql = NULL;
 		gff_free(temp_server);
 		gff_free(temp_user);
 		gff_free(temp_password);
 		gff_free(temp_schema);
 		luaL_error(L, "Unable to initialize mysql");
 	}
-
-	
 
 	if (timeout <= 0)
 		timeout = 3600;

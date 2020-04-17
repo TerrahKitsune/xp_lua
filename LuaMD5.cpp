@@ -53,8 +53,7 @@ int FinalMD5(lua_State *L){
 
 	LuaMD5 * luamd5 = lua_tomd5(L, 1);
 	if (!luamd5->hash){
-		luamd5->hash = (unsigned char*)gff_malloc(16);
-		MD5Final(luamd5->hash, &luamd5->MD5);
+		MD5Final((unsigned char *)luamd5->hash, &luamd5->MD5);
 	}
 
 	char md5string[33];
@@ -63,7 +62,7 @@ int FinalMD5(lua_State *L){
 
 	lua_pop(L, 1);
 	lua_pushstring(L,md5string);
-	lua_pushlstring(L, (const char*)luamd5->hash, 16);
+	lua_pushlstring(L, (const char *)luamd5->hash, 16);
 
 	return 2;
 }
@@ -71,13 +70,10 @@ int FinalMD5(lua_State *L){
 int md5_gc(lua_State *L){
 
 	LuaMD5 * luamd5 = lua_tomd5(L, 1);
+
 	if (!luamd5->hash){
-		luamd5->hash = (unsigned char*)gff_malloc(16);
 		MD5Final(luamd5->hash, &luamd5->MD5);
 	}
-
-	gff_free(luamd5->hash);
-	luamd5->hash = NULL;
 
 	return 0;
 }

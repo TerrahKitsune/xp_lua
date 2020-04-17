@@ -141,7 +141,27 @@ int luaclient_connect(lua_State *L) {
 
 	LuaClientThread * thread = (LuaClientThread*)gff_calloc(1, sizeof(LuaClientThread));
 
+	if (!thread) {
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, "Out of memory");
+
+		return 2;
+	}
+
 	thread->addr = (char*)gff_malloc(strlen(addr) + 1);
+
+	if (!thread->addr) {
+		gff_free(thread);
+
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		lua_pushstring(L, "Out of memory");
+
+		return 2;
+	}
+
 	strcpy(thread->addr, addr);
 
 	thread->Events = queue_Create();

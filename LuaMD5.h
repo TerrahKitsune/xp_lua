@@ -7,7 +7,7 @@ static const char * LUAMD5 = "MD5";
 
 typedef struct LuaMD5 {
 	MD5_CTX MD5;
-	unsigned char * hash;
+	unsigned char hash[16];
 } LuaMD5;
 
 LuaMD5 * lua_tomd5(lua_State *L, int index);
