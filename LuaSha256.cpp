@@ -53,7 +53,7 @@ int FinalSHA256(lua_State *L) {
 
 	LuaSHA256 * luasha256 = lua_tosha256(L, 1);
 	if (!luasha256->hash) {
-		luasha256->hash = (unsigned char*)malloc(SHA256_BLOCK_SIZE);
+		luasha256->hash = (unsigned char*)gff_malloc(SHA256_BLOCK_SIZE);
 		sha256_final(&luasha256->SHA, luasha256->hash);
 	}
 
@@ -73,11 +73,11 @@ int sha256_gc(lua_State *L) {
 	LuaSHA256 * luasha256 = lua_tosha256(L, 1);
 
 	if (!luasha256->hash) {
-		luasha256->hash = (unsigned char*)malloc(SHA256_BLOCK_SIZE);
+		luasha256->hash = (unsigned char*)gff_malloc(SHA256_BLOCK_SIZE);
 		sha256_final(&luasha256->SHA, luasha256->hash);
 	}
 
-	free(luasha256->hash);
+	gff_free(luasha256->hash);
 	luasha256->hash = NULL;
 
 	return 0;

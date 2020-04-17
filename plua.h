@@ -17,6 +17,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #pragma once
 #define DLLEXPORT extern "C" __declspec(dllexport)
 
+#include "mem.h"
 #include "windows.h"
 #include "../plugin.h"
 #include "../../misc/log.h"

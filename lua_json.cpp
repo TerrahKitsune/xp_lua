@@ -96,10 +96,10 @@ int lua_jsondecodefromfile(lua_State *L) {
 	}
 
 	if (json->fileName) {
-		free(json->fileName);
+		gff_free(json->fileName);
 	}
 
-	json->fileName = (char*)calloc(len + 1, sizeof(char));
+	json->fileName = (char*)gff_calloc(len + 1, sizeof(char));
 	strcpy(json->fileName, file);
 
 	json_decodevalue(L, json);
@@ -154,10 +154,10 @@ int lua_jsonencodetabletofile(lua_State *L) {
 	}
 
 	if (json->fileName) {
-		free(json->fileName);
+		gff_free(json->fileName);
 	}
 
-	json->fileName = (char*)calloc(filelen+1, sizeof(char));
+	json->fileName = (char*)gff_calloc(filelen+1, sizeof(char));
 	strcpy(json->fileName, file);
 
 	int depth = 0;

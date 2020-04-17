@@ -1,8 +1,9 @@
 #include "Queue.h"
+#include "mem.h"
 
 Queue * queue_Create() {
 
-	Queue * queue = (Queue*)calloc(1, sizeof(Queue));
+	Queue * queue = (Queue*)gff_calloc(1, sizeof(Queue));
 
 	InitializeCriticalSectionAndSpinCount(&queue->CriticalSection, 0x00000400);
 
@@ -20,21 +21,21 @@ void queue_Destroy(Queue * q) {
 		temp = entry;
 		entry = entry->Next;
 
-		free(temp);
+		gff_free(temp);
 	}
 
 	LeaveCriticalSection(&q->CriticalSection);
 
 	DeleteCriticalSection(&q->CriticalSection);
 
-	free(q);
+	gff_free(q);
 }
 
 void queue_Enqueue(Queue * q, void * Data) {
 
 	EnterCriticalSection(&q->CriticalSection);
 
-	QueueEntry * temp = (QueueEntry*)calloc(1, sizeof(QueueEntry));
+	QueueEntry * temp = (QueueEntry*)gff_calloc(1, sizeof(QueueEntry));
 
 	if (!temp) {
 		LeaveCriticalSection(&q->CriticalSection);
@@ -80,7 +81,7 @@ void * queue_Dequeue(Queue * q) {
 
 	void * data = temp->Data;
 
-	free(temp);
+	gff_free(temp);
 
 	return data;
 }

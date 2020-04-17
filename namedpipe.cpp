@@ -36,7 +36,7 @@ int ReadPipe(lua_State *L) {
 	LuaNamedPipe * pipe = lua_tonamedpipe(L, 1);
 	int buffersize = (int)max(luaL_optinteger(L, 2, 1024),1024);
 
-	char * buf = (char*)malloc(buffersize);
+	char * buf = (char*)gff_malloc(buffersize);
 
 	if (!buf) {
 		lua_pop(L, lua_gettop(L));
@@ -52,13 +52,13 @@ int ReadPipe(lua_State *L) {
 		buf[read] = '\0';
 		lua_pop(L, lua_gettop(L));
 		lua_pushlstring(L, buf, read);
-		free(buf);
+		gff_free(buf);
 		return 1;
 	}
 
 	lua_pop(L, lua_gettop(L));
 	lua_pushnil(L);
-	free(buf);
+	gff_free(buf);
 	return 1;
 }
 

@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <stdlib.h> 
 #include <windows.h> 
+#include "mem.h"
 
 size_t Count(LLNode* head) {
 
@@ -53,7 +54,7 @@ LLNode* Remove(LLNode* node) {
 		proc(node->data);
 	}
 
-	free(node);
+	gff_free(node);
 
 	return find;
 }
@@ -89,7 +90,7 @@ LLNode* Get(LLNode* head, int index) {
 
 LLNode* Insert(LLNode* head, void* data, Dealloc* proc, int index) {
 
-	LLNode* entry = (LLNode*)calloc(1, sizeof(LLNode));
+	LLNode* entry = (LLNode*)gff_calloc(1, sizeof(LLNode));
 
 	if (!entry) {
 		return NULL;
@@ -101,7 +102,7 @@ LLNode* Insert(LLNode* head, void* data, Dealloc* proc, int index) {
 		entry->deallocfunc = proc;
 	}
 	else {
-		entry->deallocfunc = (Dealloc*)&free;
+		entry->deallocfunc = (Dealloc*)&gff_free;
 	}
 
 	if (!head) {
@@ -148,7 +149,7 @@ LLNode* Insert(LLNode* head, void* data, Dealloc* proc, int index) {
 			proc(entry->data);
 		}
 
-		free(entry);
+		gff_free(entry);
 	}
 
 	return head;
@@ -156,7 +157,7 @@ LLNode* Insert(LLNode* head, void* data, Dealloc* proc, int index) {
 
 LLNode* AddBefore(LLNode* node, void* data, Dealloc* proc) {
 
-	LLNode* entry = (LLNode*)calloc(1, sizeof(LLNode));
+	LLNode* entry = (LLNode*)gff_calloc(1, sizeof(LLNode));
 
 	if (!entry) {
 		return NULL;
@@ -168,7 +169,7 @@ LLNode* AddBefore(LLNode* node, void* data, Dealloc* proc) {
 		entry->deallocfunc = proc;
 	}
 	else {
-		entry->deallocfunc = (Dealloc*)&free;
+		entry->deallocfunc = (Dealloc*)&gff_free;
 	}
 
 	if (!node) {
@@ -193,7 +194,7 @@ LLNode* AddBefore(LLNode* node, void* data, Dealloc* proc) {
 
 LLNode* AddAfter(LLNode* node, void* data, Dealloc* proc) {
 
-	LLNode* entry = (LLNode*)calloc(1, sizeof(LLNode));
+	LLNode* entry = (LLNode*)gff_calloc(1, sizeof(LLNode));
 
 	if (!entry) {
 		return NULL;
@@ -205,7 +206,7 @@ LLNode* AddAfter(LLNode* node, void* data, Dealloc* proc) {
 		entry->deallocfunc = proc;
 	}
 	else {
-		entry->deallocfunc = (Dealloc*)&free;
+		entry->deallocfunc = (Dealloc*)&gff_free;
 	}
 
 	if (!node) {
@@ -235,7 +236,7 @@ LLNode* AddAfter(LLNode* node, void* data, Dealloc* proc) {
 
 LLNode* AddFirst(LLNode* head, void* data, Dealloc* proc) {
 
-	LLNode* entry = (LLNode*)calloc(1, sizeof(LLNode));
+	LLNode* entry = (LLNode*)gff_calloc(1, sizeof(LLNode));
 
 	if (!entry) {
 		return NULL;
@@ -247,7 +248,7 @@ LLNode* AddFirst(LLNode* head, void* data, Dealloc* proc) {
 		entry->deallocfunc = proc;
 	}
 	else {
-		entry->deallocfunc = (Dealloc*)& free;
+		entry->deallocfunc = (Dealloc*)&gff_free;
 	}
 
 	if (!head) {
@@ -262,7 +263,7 @@ LLNode* AddFirst(LLNode* head, void* data, Dealloc* proc) {
 
 LLNode* AddLast(LLNode* head, void* data, Dealloc* proc) {
 
-	LLNode* entry = (LLNode*)calloc(1, sizeof(LLNode));
+	LLNode* entry = (LLNode*)gff_calloc(1, sizeof(LLNode));
 
 	if (!entry) {
 		return NULL;
@@ -274,7 +275,7 @@ LLNode* AddLast(LLNode* head, void* data, Dealloc* proc) {
 		entry->deallocfunc = proc;
 	}
 	else {
-		entry->deallocfunc = (Dealloc*)& free;
+		entry->deallocfunc = (Dealloc*)&gff_free;
 	}
 
 	if (!head) {
@@ -313,6 +314,6 @@ void FreeLinkedList(LLNode* node) {
 
 		temp = find;
 		find = find->next;
-		free(temp);
+		gff_free(temp);
 	}
 }

@@ -27,7 +27,7 @@ int OpenGffFile(lua_State *L){
 		return 0;
 	}
 
-	Gff* gff = (Gff*)malloc(sizeof(Gff));
+	Gff* gff = (Gff*)gff_malloc(sizeof(Gff));
 
 	if (gff == NULL){
 		luaL_error(L, "unable to allocate %ld bytes for %s", size, file);
@@ -35,7 +35,7 @@ int OpenGffFile(lua_State *L){
 	}
 
 	memset(gff, 0, sizeof(Gff));
-	gff->raw = (unsigned char*)malloc(size);
+	gff->raw = (unsigned char*)gff_malloc(size);
 
 	if (gff == NULL){
 		luaL_error(L, "unable to allocate %ld bytes for %s", size, file);
@@ -45,8 +45,8 @@ int OpenGffFile(lua_State *L){
 	gff->size = size;
 
 	if (fread(gff->raw, 1, size, pFile) != size){
-		free(gff->raw);
-		free(gff);
+		gff_free(gff->raw);
+		gff_free(gff);
 		fclose(pFile);
 		luaL_error(L, "unable to read %s", file);
 		return 0;
@@ -64,8 +64,8 @@ int OpenGffFile(lua_State *L){
 		Bail(gff, L, "Gff Malformed, structs still in tracker");
 	}
 	else{
-		free(gff->raw);
-		free(gff);
+		gff_free(gff->raw);
+		gff_free(gff);
 	}
 
 	return 1;
@@ -82,7 +82,7 @@ int OpenGffString(lua_State *L){
 		return 0;
 	}
 
-	Gff* gff = (Gff*)malloc(sizeof(Gff));
+	Gff* gff = (Gff*)gff_malloc(sizeof(Gff));
 
 	if (gff == NULL){
 		luaL_error(L, "unable to allocate %ld bytes for gff", size);
@@ -90,7 +90,7 @@ int OpenGffString(lua_State *L){
 	}
 
 	memset(gff, 0, sizeof(Gff));
-	gff->raw = (unsigned char*)malloc(size);
+	gff->raw = (unsigned char*)gff_malloc(size);
 
 	if (gff == NULL){
 		luaL_error(L, "unable to allocate %ld bytes", size);
@@ -112,8 +112,8 @@ int OpenGffString(lua_State *L){
 		fclose(f);*/
 		UntrackAll(gff);
 		StringClear(gff);
-		free(gff->raw);
-		free(gff);
+		gff_free(gff->raw);
+		gff_free(gff);
 	}
 
 	return 1;
@@ -127,7 +127,7 @@ int SaveGffToFile(lua_State *L){
 	memset(PATH, 0, _MAX_PATH + 1);
 	strncpy(PATH, file, _MAX_PATH);
 
-	Gff * gff = (Gff*)malloc(sizeof(Gff));
+	Gff * gff = (Gff*)gff_malloc(sizeof(Gff));
 	if (gff == NULL){
 		luaL_error(L, "Unable to allocate memory for gff");
 		return 0;
@@ -145,7 +145,7 @@ int SaveGffToFile(lua_State *L){
 	gff->Header.ListIndicesOffset = gff->Header.FieldIndicesOffset + gff->Header.FieldIndicesCount;
 
 	gff->size = gff->Header.ListIndicesOffset + gff->Header.ListIndicesCount;
-	gff->raw = (unsigned char*)malloc(gff->size);
+	gff->raw = (unsigned char*)gff_malloc(gff->size);
 	if (gff->raw == NULL){
 		Bail(gff, L, "Unable to allocate memory for gff");
 	}
@@ -190,8 +190,8 @@ int SaveGffToFile(lua_State *L){
 	fclose(target);
 	UntrackAll(gff);
 	StringClear(gff);
-	free(gff->raw);
-	free(gff);
+	gff_free(gff->raw);
+	gff_free(gff);
 
 	lua_pop(L, 1);
 	return 0;
@@ -199,7 +199,7 @@ int SaveGffToFile(lua_State *L){
 
 int SaveGffToString(lua_State *L){
 
-	Gff * gff = (Gff*)malloc(sizeof(Gff));
+	Gff * gff = (Gff*)gff_malloc(sizeof(Gff));
 	if (gff == NULL){
 		luaL_error(L, "Unable to allocate memory for gff");
 		return 0;
@@ -216,7 +216,7 @@ int SaveGffToString(lua_State *L){
 	gff->Header.ListIndicesOffset = gff->Header.FieldIndicesOffset + gff->Header.FieldIndicesCount;
 
 	gff->size = gff->Header.ListIndicesOffset + gff->Header.ListIndicesCount;
-	gff->raw = (unsigned char*)malloc(gff->size);
+	gff->raw = (unsigned char*)gff_malloc(gff->size);
 	if (gff->raw == NULL){
 		Bail(gff, L, "Unable to allocate memory for gff");
 	}
@@ -236,8 +236,8 @@ int SaveGffToString(lua_State *L){
 
 	UntrackAll(gff);
 	StringClear(gff);
-	free(gff->raw);
-	free(gff);
+	gff_free(gff->raw);
+	gff_free(gff);
 
  	return 1;
 }

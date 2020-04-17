@@ -1,8 +1,9 @@
 #include "Client.h"
+#include "mem.h"
 
 Client * ClientConnect(const char * addr, int port) {
 
-	Client * cli = (Client*)calloc(1, sizeof(Client));
+	Client * cli = (Client*)gff_calloc(1, sizeof(Client));
 
 	cli->s = INVALID_SOCKET;
 
@@ -20,7 +21,7 @@ Client * ClientConnect(const char * addr, int port) {
 
 	int iResult = getaddrinfo(addr, portstr, &hints, &result);
 	if (iResult != 0) {
-		free(cli);
+		gff_free(cli);
 		return NULL;
 	}
 
@@ -119,5 +120,5 @@ void ClientDisconnect(Client * cli) {
 		cli->s = INVALID_SOCKET;
 	}
 
-	free(cli);
+	gff_free(cli);
 }

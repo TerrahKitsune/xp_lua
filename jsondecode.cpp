@@ -221,7 +221,7 @@ char json_readnext(lua_State *L, JsonContext* context) {
 	if (context->refReadFunction != LUA_REFNIL && (!context->readFileBuffer || context->readCursor >= context->readSize)) {
 
 		if (!context->readFileBuffer) {
-			context->readFileBuffer = (char*)malloc(JSONFILEREADBUFFERSIZE);
+			context->readFileBuffer = (char*)gff_malloc(JSONFILEREADBUFFERSIZE);
 			if (!context->readFileBuffer) {
 				json_bail(L, context, "Out of memory");
 				return 0;
@@ -249,7 +249,7 @@ char json_readnext(lua_State *L, JsonContext* context) {
 		if (len > 0 && data) {
 
 			if (len >= context->readFileBufferSize) {
-				void * temp = realloc(context->readFileBuffer, len + 1);
+				void * temp = gff_realloc(context->readFileBuffer, len + 1);
 				if (!temp) {
 					json_bail(L, context, "Out of memory");
 					return 0;
@@ -269,7 +269,7 @@ char json_readnext(lua_State *L, JsonContext* context) {
 	else if (context->readFile && (!context->readFileBuffer || context->readCursor >= JSONFILEREADBUFFERSIZE)) {
 
 		if (!context->readFileBuffer) {
-			context->readFileBuffer = (char*)malloc(JSONFILEREADBUFFERSIZE);
+			context->readFileBuffer = (char*)gff_malloc(JSONFILEREADBUFFERSIZE);
 			if (!context->readFileBuffer) {
 				json_bail(L, context, "Out of memory");
 				return 0;

@@ -22,7 +22,7 @@ char *base64_encode(const unsigned char *data,
 
 	*output_length = 4 * ((input_length + 2) / 3);
 
-	char *encoded_data = (char *)malloc(*output_length);
+	char *encoded_data = (char *)gff_malloc(*output_length);
 	if (encoded_data == NULL) return NULL;
 
 	for (int i = 0, j = 0; i < input_length;) {
@@ -56,7 +56,7 @@ unsigned char *base64_decode(const char *data,
 	if (data[input_length - 1] == '=') (*output_length)--;
 	if (data[input_length - 2] == '=') (*output_length)--;
 
-	unsigned char *decoded_data = (unsigned char *)malloc(*output_length);
+	unsigned char *decoded_data = (unsigned char *)gff_malloc(*output_length);
 	if (decoded_data == NULL) return NULL;
 
 	for (int i = 0, j = 0; i < input_length;) {
@@ -97,7 +97,7 @@ int lua_base64encode(lua_State *L) {
 
 	if (encoded) {
 		lua_pushlstring(L, encoded, encodedlen);
-		free(encoded);
+		gff_free(encoded);
 	}
 	else {
 		lua_pushnil(L);
@@ -116,7 +116,7 @@ int lua_base64decode(lua_State *L) {
 
 	if (decoded) {
 		lua_pushlstring(L, (const char*)decoded, encodedlen);
-		free(decoded);
+		gff_free(decoded);
 	}
 	else {
 		lua_pushnil(L);

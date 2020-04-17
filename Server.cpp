@@ -1,8 +1,9 @@
 #include "Server.h"
+#include "mem.h"
 
 Server * CreateServer(int port) {
 
-	Server * r = (Server*)calloc(1, sizeof(Server));
+	Server * r = (Server*)gff_calloc(1, sizeof(Server));
 
 	r->ListenSocket = INVALID_SOCKET;
 	r->Clients = list_CreateList();
@@ -86,7 +87,7 @@ SOCKET ServerAccept(Server  * srv) {
 
 	list_Leave(srv->Clients);
 
-	SOCKET * data = (SOCKET*)malloc(sizeof(SOCKET));
+	SOCKET * data = (SOCKET*)gff_malloc(sizeof(SOCKET));
 	memcpy(data, &result, sizeof(SOCKET));
 	list_Add(srv->Clients, data);
 
@@ -128,7 +129,7 @@ size_t ServerReceive(Server * srv, SOCKET socket, char * buffer, size_t buffersi
 		if ((result == 0 || srv->Error != WSAEWOULDBLOCK) && list_Remove(srv->Clients, real)) {
 			shutdown(*real, SD_SEND);
 			closesocket(*real);
-			free(real);
+			gff_free(real);
 
 			if (Disconnected)
 				*Disconnected = 1;
@@ -174,7 +175,7 @@ size_t ServerSend(Server * srv, SOCKET socket, char * buffer, size_t buffersize,
 		if ((result == 0 || srv->Error != WSAEWOULDBLOCK) && list_Remove(srv->Clients, real)) {
 			shutdown(*real, SD_SEND);
 			closesocket(*real);
-			free(real);
+			gff_free(real);
 
 			if (Disconnected)
 				*Disconnected = 1;
@@ -214,7 +215,7 @@ void ServerDisconnect(Server * srv, SOCKET socket) {
 	if (list_Remove(srv->Clients, real)) {
 		shutdown(*real, SD_SEND);
 		closesocket(*real);
-		free(real);
+		gff_free(real);
 	}
 }
 
@@ -228,7 +229,7 @@ void ServerShutdown(Server * srv) {
 	for (unsigned int n = 0; n < srv->Clients->len; n++) {
 
 		if (srv->Clients->data[n] != NULL) {
-			free(srv->Clients->data[n]);
+			gff_free(srv->Clients->data[n]);
 			srv->Clients->data[n] = NULL;
 		}
 	}
@@ -237,5 +238,5 @@ void ServerShutdown(Server * srv) {
 
 	list_Destroy(srv->Clients);
 
-	free(srv);
+	gff_free(srv);
 }

@@ -320,7 +320,7 @@ int ReadFromPipe(lua_State *L) {
 		buffersize = 1;
 	}
 
-	char * data = (char*)malloc(buffersize);
+	char * data = (char*)gff_malloc(buffersize);
 	if (!data) {
 		lua_pop(L, lua_gettop(L));
 		lua_pushnil(L);
@@ -333,7 +333,7 @@ int ReadFromPipe(lua_State *L) {
 	if (success) {
 
 		if (read <= 0) {
-			free(data);
+			gff_free(data);
 			lua_pop(L, lua_gettop(L));
 			lua_pushnil(L);
 			return 1;
@@ -344,7 +344,7 @@ int ReadFromPipe(lua_State *L) {
 	}
 
 	if (!success) {
-		free(data);
+		gff_free(data);
 		lua_pop(L, lua_gettop(L));
 		lua_pushnil(L);
 		return 1;
@@ -352,7 +352,7 @@ int ReadFromPipe(lua_State *L) {
 
 	lua_pop(L, lua_gettop(L));
 	lua_pushlstring(L, data, read);
-	free(data);
+	gff_free(data);
 	return 1;
 }
 
@@ -371,7 +371,7 @@ int ErrorFromPipe(lua_State *L) {
 		buffersize = 1;
 	}
 
-	char * data = (char*)malloc(buffersize);
+	char * data = (char*)gff_malloc(buffersize);
 	if (!data) {
 		lua_pop(L, lua_gettop(L));
 		lua_pushnil(L);
@@ -384,7 +384,7 @@ int ErrorFromPipe(lua_State *L) {
 	if (success) {
 
 		if (read <= 0) {
-			free(data);
+			gff_free(data);
 			lua_pop(L, lua_gettop(L));
 			lua_pushnil(L);
 			return 1;
@@ -395,7 +395,7 @@ int ErrorFromPipe(lua_State *L) {
 	}
 
 	if (!success) {
-		free(data);
+		gff_free(data);
 		lua_pop(L, lua_gettop(L));
 		lua_pushnil(L);
 		return 1;
@@ -403,7 +403,7 @@ int ErrorFromPipe(lua_State *L) {
 
 	lua_pop(L, lua_gettop(L));
 	lua_pushlstring(L, data, read);
-	free(data);
+	gff_free(data);
 	return 1;
 }
 

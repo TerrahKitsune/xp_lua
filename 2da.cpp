@@ -84,7 +84,7 @@ void AddToList(Linked * root, void * data) {
 		return;
 	}
 
-	newlinked = (Linked *)calloc(1, sizeof(Linked));
+	newlinked = (Linked *)gff_calloc(1, sizeof(Linked));
 
 	if (root->next == NULL) {
 		root->next = newlinked;
@@ -105,7 +105,7 @@ void freelinked(Linked * root) {
 	while (l) {
 		temp = l;
 		l = l->next;
-		free(temp);
+		gff_free(temp);
 	}
 }
 
@@ -171,11 +171,11 @@ int twoda_open(lua_State *L) {
 	const char * lineend = &columns.start[columns.len + 1];
 	Lua2daLine field = GetField(columns.start, lineend);
 	char * fielddata;
-	Linked * list = (Linked*)calloc(1, sizeof(Linked));
+	Linked * list = (Linked*)gff_calloc(1, sizeof(Linked));
 
 	while (field.start)
 	{
-		fielddata = (char*)calloc(field.len + 1, sizeof(char));
+		fielddata = (char*)gff_calloc(field.len + 1, sizeof(char));
 		memcpy(fielddata, field.start, field.len);
 
 		AddToList(list, fielddata);
@@ -194,27 +194,27 @@ int twoda_open(lua_State *L) {
 
 	int cnt = 0;
 
-	header.columns = (char**)calloc(header.numbcols, sizeof(char*));
+	header.columns = (char**)gff_calloc(header.numbcols, sizeof(char*));
 	for (Linked * l = list; l; l = l->next) {
 		header.columns[cnt++] = (char*)l->data;
 	}
 
 	freelinked(list);
-	list = (Linked*)calloc(1, sizeof(Linked));
+	list = (Linked*)gff_calloc(1, sizeof(Linked));
 
 	Linked * sub;
 	Lua2daLine line = GetRow(&columns.start[columns.len + 1], end);
 
 	while (line.start) {
 
-		sub = (Linked*)calloc(1, sizeof(Linked));
+		sub = (Linked*)gff_calloc(1, sizeof(Linked));
 		lineend = &line.start[line.len + 1];
 
 		field = GetField(line.start, lineend);
 
 		while (field.start)
 		{
-			fielddata = (char*)calloc(field.len + 1, sizeof(char));
+			fielddata = (char*)gff_calloc(field.len + 1, sizeof(char));
 			memcpy(fielddata, field.start, field.len);
 
 			AddToList(sub, fielddata);
@@ -232,14 +232,14 @@ int twoda_open(lua_State *L) {
 	cnt = 0;
 	int subcnt;
 	if (header.numbrows > 0) {
-		header.rows = (char***)calloc(header.numbrows, sizeof(char**));
+		header.rows = (char***)gff_calloc(header.numbrows, sizeof(char**));
 		for (Linked * l = list; l; l = l->next) {
 
 			sub = (Linked*)l->data;
 
 			subcnt = 0;
 
-			header.rows[cnt] = (char**)calloc(header.numbcols, sizeof(char*));
+			header.rows[cnt] = (char**)gff_calloc(header.numbcols, sizeof(char*));
 
 			if (sub) {
 
@@ -378,9 +378,9 @@ void freelua2dasubdata(Lua2da * data) {
 	if (data->columns) {
 		for (int n = 0; n < data->numbcols; n++) {
 			if (data->columns[n])
-				free(data->columns[n]);
+				gff_free(data->columns[n]);
 		}
-		free(data->columns);
+		gff_free(data->columns);
 		data->columns = NULL;
 	}
 
@@ -391,12 +391,12 @@ void freelua2dasubdata(Lua2da * data) {
 				for (int col = 0; col < data->numbcols; col++)
 				{
 					if (data->rows[row][col])
-						free(data->rows[row][col]);
+						gff_free(data->rows[row][col]);
 				}
-				free(data->rows[row]);
+				gff_free(data->rows[row]);
 			}
 		}
-		free(data->rows);
+		gff_free(data->rows);
 		data->rows = NULL;
 	}
 }

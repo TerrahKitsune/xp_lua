@@ -70,10 +70,10 @@ int LuaFtpChannelRecv(lua_State* L) {
 	else if (!ftp->buffer || ftp->buffersize != buffersize) {
 
 		if (ftp->buffer) {
-			free(ftp->buffer);
+			gff_free(ftp->buffer);
 		}
 
-		ftp->buffer = (char*)malloc(buffersize);
+		ftp->buffer = (char*)gff_malloc(buffersize);
 		ftp->buffersize = buffersize;
 	}
 
@@ -163,13 +163,13 @@ int luaftpchannel_gc(lua_State* L) {
 	}
 
 	if (ftp->ip) {
-		free(ftp->ip);
+		gff_free(ftp->ip);
 		ftp->ip = NULL;
 		ftp->port = 0;
 	}
 
 	if (ftp->buffer) {
-		free(ftp->buffer);
+		gff_free(ftp->buffer);
 		ftp->buffer = NULL;
 		ftp->buffersize = 0;
 	}

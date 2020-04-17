@@ -34,17 +34,17 @@ void Destroy(HttpResult * result) {
 		if (result->result)
 			Destroy(result->result);
 		if (result->error)
-			free(result->error);
-		free(result);
+			gff_free(result->error);
+		gff_free(result);
 	}
 }
 
 HttpResult * CreateResult(const char * error, Buffer * b = NULL) {
 
-	HttpResult * result = (HttpResult *)calloc(1, sizeof(HttpResult));
+	HttpResult * result = (HttpResult *)gff_calloc(1, sizeof(HttpResult));
 
 	if (error) {
-		result->error = (char*)calloc(strlen(error) + 1, sizeof(char));
+		result->error = (char*)gff_calloc(strlen(error) + 1, sizeof(char));
 		strcpy(result->error, error);
 	}
 
@@ -235,7 +235,7 @@ bool IsBlocking(SSL* ssl, int ret) {
 int GetContentLength(const char * header) {
 	char * end;
 	char * contentlen;
-	char * head = (char*)malloc(strlen(header) + 1);
+	char * head = (char*)gff_malloc(strlen(header) + 1);
 	int ret = -1;
 	if (!head)
 		return -1;
@@ -257,7 +257,7 @@ int GetContentLength(const char * header) {
 		}
 	}
 
-	free(head);
+	gff_free(head);
 	return ret;
 }
 
@@ -450,7 +450,7 @@ int Start(lua_State *L) {
 
 	LuaHttp* luahttp = lua_pushhttp(L);
 
-	luahttp->ip = (char*)calloc(strlen(ip) + 1, sizeof(char));
+	luahttp->ip = (char*)gff_calloc(strlen(ip) + 1, sizeof(char));
 	strcpy(luahttp->ip, ip);
 	luahttp->port = port;
 	luahttp->request = b;
@@ -696,7 +696,7 @@ LuaHttp * lua_pushhttp(lua_State *L) {
 	memset(luahttp, 0, sizeof(LuaHttp));
 
 	luahttp->Timeout = 10000.0;
-	luahttp->packet = (char*)calloc(PACKETSIZE, sizeof(char));
+	luahttp->packet = (char*)gff_calloc(PACKETSIZE, sizeof(char));
 
 	return luahttp;
 }
@@ -719,12 +719,12 @@ int luahttp_gc(lua_State *L) {
 	}
 
 	if (luahttp->ip) {
-		free(luahttp->ip);
+		gff_free(luahttp->ip);
 		luahttp->ip = NULL;
 	}
 
 	if (luahttp->packet) {
-		free(luahttp->packet);
+		gff_free(luahttp->packet);
 		luahttp->packet = NULL;
 	}
 

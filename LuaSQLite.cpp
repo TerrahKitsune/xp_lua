@@ -73,7 +73,7 @@ int SQLiteExecuteWithCallback(lua_State *L) {
 	const char * query = luaL_checklstring(L, 2, &len);
 	int err;
 	char *zErrMsg = 0;
-	char * current = (char*)malloc(len + 1);
+	char * current = (char*)gff_malloc(len + 1);
 	if (current == NULL) {
 
 		lua_pop(L, lua_gettop(L));
@@ -96,7 +96,7 @@ int SQLiteExecuteWithCallback(lua_State *L) {
 	if (err == SQLITE_ABORT) {
 		lua_pushboolean(L, false);
 		lua_pushfstring(L, "%s: %s", zErrMsg, lua_tostring(L, -2));
-		free(current);
+		gff_free(current);
 		sqlite3_free(zErrMsg);
 		return 2;
 	}
@@ -112,7 +112,7 @@ int SQLiteExecuteWithCallback(lua_State *L) {
 		lua_pushstring(L, "OK");
 	}
 
-	free(current);
+	gff_free(current);
 	return 2;
 }
 
@@ -322,7 +322,7 @@ int SQLiteConnect(lua_State *L) {
 
 	size_t len;
 	const char * db = luaL_optlstring(L, 1, ":memory:", &len);
-	char * file = (char*)malloc(len + 1);
+	char * file = (char*)gff_malloc(len + 1);
 	if (!file)
 		luaL_error(L, "Unable to allocate memory for sqlite");
 	file[len] = '\0';
@@ -333,7 +333,7 @@ int SQLiteConnect(lua_State *L) {
 	lua_pop(L, lua_gettop(L));
 	LuaSQLite * luasqlite = lua_pushsqlite(L);
 	if (!luasqlite) {
-		free(file);
+		gff_free(file);
 		luaL_error(L, "Unable to allocate memory for sqlite");
 	}
 	luasqlite->busyhandler = -1;
@@ -354,13 +354,13 @@ int SQLiteConnect(lua_State *L) {
 
 	//Ignore missuse
 	if (ok != SQLITE_OK && ok != SQLITE_MISUSE) {
-		free(file);
+		gff_free(file);
 		luaL_error(L, "SQLite error %s", sqlite3_errmsg(luasqlite->db));
 	}
 
 	int err = sqlite3_open(file, &luasqlite->db);
 	if (err) {
-		free(file);
+		gff_free(file);
 		luaL_error(L, "SQLite error %s", sqlite3_errmsg(luasqlite->db));
 	}
 
@@ -395,7 +395,7 @@ int SQLite_GC(lua_State *L) {
 	}
 
 	if (luasqlite->file) {
-		free(luasqlite->file);
+		gff_free(luasqlite->file);
 		luasqlite->file = NULL;
 	}
 

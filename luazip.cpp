@@ -235,7 +235,7 @@ int zip_extract(lua_State *L) {
 	}
 	else {
 
-		char * buffer = (char*)malloc((size_t)sb.size);
+		char * buffer = (char*)gff_malloc((size_t)sb.size);
 		if (!buffer) {
 
 			zip_fclose(zf);
@@ -248,7 +248,7 @@ int zip_extract(lua_State *L) {
 
 		if (zip_fread(zf, buffer, sb.size) != sb.size) {
 
-			free(buffer);
+			gff_free(buffer);
 			zip_fclose(zf);
 
 			lua_pop(L, lua_gettop(L));
@@ -259,7 +259,7 @@ int zip_extract(lua_State *L) {
 
 		lua_pop(L, lua_gettop(L));
 		lua_pushlstring(L, buffer, (size_t)sb.size);
-		free(buffer);
+		gff_free(buffer);
 	}
 
 	zip_fclose(zf);

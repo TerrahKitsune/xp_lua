@@ -6,7 +6,7 @@
 
 void ReadAsyncFile(LuaFileAsyncThreadInfo* threadInfo, size_t bytestoread, size_t buffersize) {
 
-	BYTE* buffer = (BYTE*)malloc(buffersize);
+	BYTE* buffer = (BYTE*)gff_malloc(buffersize);
 	size_t read;
 	size_t total = 0;
 
@@ -31,7 +31,7 @@ void ReadAsyncFile(LuaFileAsyncThreadInfo* threadInfo, size_t bytestoread, size_
 					Sleep(1);
 
 					if (!threadInfo->alive || threadInfo->stop) {
-						free(buffer);
+						gff_free(buffer);
 						return;
 					}
 
@@ -43,7 +43,7 @@ void ReadAsyncFile(LuaFileAsyncThreadInfo* threadInfo, size_t bytestoread, size_
 				if (++total >= bytestoread && bytestoread > 0) {
 
 					LeaveCriticalSection(&threadInfo->CriticalSection);
-					free(buffer);
+					gff_free(buffer);
 					return;
 				}
 			}
@@ -53,12 +53,12 @@ void ReadAsyncFile(LuaFileAsyncThreadInfo* threadInfo, size_t bytestoread, size_
 
 		if (read != buffersize && feof(threadInfo->file)) {
 
-			free(buffer);
+			gff_free(buffer);
 			return;
 		}
 	}
 
-	free(buffer);
+	gff_free(buffer);
 }
 
 unsigned __stdcall FileAsyncProcessThreadFunction(void* pArguments) {
@@ -163,7 +163,7 @@ int OpenFileAsync(lua_State* L) {
 
 	LuaFileAsync* afile = lua_pushluafileasync(L);
 
-	afile->thread = (LuaFileAsyncThreadInfo*)calloc(1, sizeof(LuaFileAsyncThreadInfo));
+	afile->thread = (LuaFileAsyncThreadInfo*)gff_calloc(1, sizeof(LuaFileAsyncThreadInfo));
 
 	if (!afile->thread) {
 
@@ -177,14 +177,14 @@ int OpenFileAsync(lua_State* L) {
 
 	afile->thread->file = file;
 	afile->thread->alive = true;
-	afile->thread->buffer = (BYTE*)malloc(buffersize);
+	afile->thread->buffer = (BYTE*)gff_malloc(buffersize);
 	afile->thread->currentlen = 0;
 	afile->thread->buffersize = buffersize;
 
 	if (!afile->thread->buffer) {
 
 		fclose(file);
-		free(afile->thread);
+		gff_free(afile->thread);
 		afile->thread = NULL;
 		lua_pop(L, lua_gettop(L));
 		lua_pushnil(L);
@@ -414,8 +414,8 @@ int luafileasync_gc(lua_State* L) {
 
 		DeleteCriticalSection(&fileasync->thread->CriticalSection);
 		CloseHandle(fileasync->thread->hThread);
-		free(fileasync->thread->buffer);
-		free(fileasync->thread);
+		gff_free(fileasync->thread->buffer);
+		gff_free(fileasync->thread);
 		fileasync->thread = NULL;
 	}
 

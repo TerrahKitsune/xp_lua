@@ -16,19 +16,19 @@ void json_bail(lua_State *L, JsonContext* context, const char * err) {
 	}
 
 	if (context->buffer) {
-		free(context->buffer);
+		gff_free(context->buffer);
 	}
 
 	if (context->fileName) {
-		free(context->fileName);
+		gff_free(context->fileName);
 	}
 
 	if (context->antiRecursion) {
-		free(context->antiRecursion);
+		gff_free(context->antiRecursion);
 	}
 
 	if (context->readFileBuffer) {
-		free(context->readFileBuffer);
+		gff_free(context->readFileBuffer);
 	}
 
 	if (context->refWriteFunction != LUA_REFNIL) {
@@ -78,7 +78,7 @@ void json_append(const char * data, size_t len, lua_State *L, JsonContext* conte
 
 			newSize = context->bufferSize + (newSize * sizeof(char));
 
-			void * temp = realloc(context->buffer, newSize);
+			void * temp = gff_realloc(context->buffer, newSize);
 			if (!temp) {
 
 				json_bail(L, context, "Out of memory");
@@ -148,7 +148,7 @@ bool json_addtoantirecursion(unsigned int id, JsonContext* context) {
 	}
 
 	if (idx == -1) {
-		void*temp = realloc(context->antiRecursion, (context->antiRecursionSize * sizeof(unsigned int)) + (10 * sizeof(unsigned int)));
+		void*temp = gff_realloc(context->antiRecursion, (context->antiRecursionSize * sizeof(unsigned int)) + (10 * sizeof(unsigned int)));
 		if (!temp) {
 			return false;
 		}

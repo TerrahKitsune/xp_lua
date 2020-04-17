@@ -129,7 +129,7 @@ DWORD WINAPI SrvProc(LPVOID lpParam) {
 					Disconnect(self, ev->s);
 				}
 
-				free(ev);
+				gff_free(ev);
 				ev = (NetEvent *)queue_Dequeue(self->Send);
 			}
 
@@ -139,7 +139,7 @@ DWORD WINAPI SrvProc(LPVOID lpParam) {
 
 				EnterCriticalSection(&self->CriticalSection);
 
-				temp = realloc(self->Clients, sizeof(LuaServerClient) * (self->NumbClients + 1));
+				temp = gff_realloc(self->Clients, sizeof(LuaServerClient) * (self->NumbClients + 1));
 
 				if (temp) {
 
@@ -194,7 +194,7 @@ DWORD WINAPI SrvProc(LPVOID lpParam) {
 
 	DeleteCriticalSection(&self->CriticalSection);
 
-	free(self);
+	gff_free(self);
 
 	CloseHandle(thread);
 
@@ -205,7 +205,7 @@ int luaserver_start(lua_State *L) {
 
 	List * lst = _SrvList(L);
 
-	LuaServerThread * thread = (LuaServerThread*)calloc(1, sizeof(LuaServerThread));
+	LuaServerThread * thread = (LuaServerThread*)gff_calloc(1, sizeof(LuaServerThread));
 
 	InitializeCriticalSectionAndSpinCount(&thread->CriticalSection, 0x00000400);
 
@@ -224,7 +224,7 @@ int luaserver_start(lua_State *L) {
 		DeleteCriticalSection(&thread->CriticalSection);
 		queue_Destroy(thread->Events);
 		queue_Destroy(thread->Send);
-		free(thread);
+		gff_free(thread);
 
 		lua_pop(L, lua_gettop(L));
 		lua_pushnil(L);
@@ -366,7 +366,7 @@ int luaserver_getevent(lua_State *L) {
 
 	list_Leave(lst);
 
-	free(netevent);
+	gff_free(netevent);
 
 	return 1;
 }

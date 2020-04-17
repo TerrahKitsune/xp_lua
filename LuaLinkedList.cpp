@@ -12,7 +12,7 @@ void Delete(void* data) {
 		void* raw;
 		memcpy(&raw, &datanode->data[sizeof(size_t)], sizeof(void*));
 		if (raw) {
-			free(raw);
+			gff_free(raw);
 		}
 	}
 	else if (datanode->type != LUA_TNUMBER) {
@@ -23,7 +23,7 @@ void Delete(void* data) {
 		luaL_unref(datanode->L, LUA_REGISTRYINDEX, ref);
 	}
 
-	free(data);
+	gff_free(data);
 }
 
 void PushNode(LinkedListData* datanode) {
@@ -52,7 +52,7 @@ void PushNode(LinkedListData* datanode) {
 
 LinkedListData* CreateNode(lua_State* L, int index, int id) {
 
-	LinkedListData* datanode = (LinkedListData*)calloc(1, sizeof(LinkedListData));
+	LinkedListData* datanode = (LinkedListData*)gff_calloc(1, sizeof(LinkedListData));
 
 	if (!datanode) {
 		return NULL;
@@ -69,9 +69,9 @@ LinkedListData* CreateNode(lua_State* L, int index, int id) {
 		const char* data = lua_tolstring(L, index, &len);
 
 		if (data) {
-			void* raw = malloc(max(len, 1));
+			void* raw = gff_malloc(max(len, 1));
 			if (!raw) {
-				free(datanode);
+				gff_free(datanode);
 				return NULL;
 			}
 

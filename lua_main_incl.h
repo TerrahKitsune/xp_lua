@@ -1,5 +1,6 @@
 #pragma once
 #include "xp_lua_incl.h"
+#include "mem.h"
 
 static void DumpStack(lua_State *L, bool untilnil = false){
 

@@ -1,6 +1,7 @@
 #include "List.h"
 #include <stdlib.h>
 #include <string>
+#include "mem.h"
 
 void list_Enter(List * list) {
 	EnterCriticalSection(&list->CriticalSection);
@@ -15,14 +16,14 @@ List * list_CreateList(size_t prealloc) {
 	if (prealloc < 10)
 		prealloc = 10;
 
-	List * list = (List*)malloc(sizeof(List));
+	List * list = (List*)gff_malloc(sizeof(List));
 	if (!list)
 		return NULL;
 
-	list->data = (void**)malloc(sizeof(void*) * prealloc);
+	list->data = (void**)gff_malloc(sizeof(void*) * prealloc);
 
 	if (!list->data) {
-		free(list);
+		gff_free(list);
 		return NULL;
 	}
 
@@ -39,7 +40,7 @@ int list_Add(List * list, void * data) {
 	EnterCriticalSection(&list->CriticalSection);
 
 	if (list->len >= list->alloc) {
-		void * temp = realloc(list->data, sizeof(void*) * (list->alloc + 10));
+		void * temp = gff_realloc(list->data, sizeof(void*) * (list->alloc + 10));
 		if (!temp) {
 			LeaveCriticalSection(&list->CriticalSection);
 			return -1;
@@ -106,7 +107,7 @@ void list_Destroy(List * list) {
 	DeleteCriticalSection(&list->CriticalSection);
 
 	if (list->data)
-		free(list->data);
+		gff_free(list->data);
 
-	free(list);
+	gff_free(list);
 }

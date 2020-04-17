@@ -145,10 +145,10 @@ void ClearStatement(LuaOdbc* odbc) {
 		for (unsigned int i = 0; i < odbc->numbparams; i++)
 		{
 			if (odbc->params[i])
-				free(odbc->params[i]);
+				gff_free(odbc->params[i]);
 		}
 
-		free(odbc->params);
+		gff_free(odbc->params);
 
 		odbc->params = NULL;
 		odbc->numbparams = 0;
@@ -205,7 +205,7 @@ int ODBCPrepare(lua_State* L) {
 	odbc->numbparams = (unsigned int)params;
 
 	if (odbc->numbparams > 0) {
-		odbc->params = (void**)calloc(odbc->numbparams, sizeof(void*));
+		odbc->params = (void**)gff_calloc(odbc->numbparams, sizeof(void*));
 
 		if (!odbc->params) {
 			luaL_error(L, "Unable to allocate memory for parameters");
@@ -256,7 +256,7 @@ int ODBCBind(lua_State* L) {
 
 	case LUA_TBOOLEAN:
 
-		odbc->params[odbc->paramnumber] = calloc(1, sizeof(SQLINTEGER));
+		odbc->params[odbc->paramnumber] = gff_calloc(1, sizeof(SQLINTEGER));
 		idata = (SQLINTEGER)lua_toboolean(L, 2);
 
 		if (!odbc->params[odbc->paramnumber]) {
@@ -279,7 +279,7 @@ int ODBCBind(lua_State* L) {
 
 		if (idata == (SQLINTEGER)ceil(ddata)) {
 
-			odbc->params[odbc->paramnumber] = calloc(1, sizeof(SQLINTEGER));
+			odbc->params[odbc->paramnumber] = gff_calloc(1, sizeof(SQLINTEGER));
 
 			if (!odbc->params[odbc->paramnumber]) {
 				luaL_error(L, "Failed to allocate memory");
@@ -294,7 +294,7 @@ int ODBCBind(lua_State* L) {
 		}
 		else {
 
-			odbc->params[odbc->paramnumber] = calloc(1, sizeof(SQLDOUBLE));
+			odbc->params[odbc->paramnumber] = gff_calloc(1, sizeof(SQLDOUBLE));
 
 			if (!odbc->params[odbc->paramnumber]) {
 				luaL_error(L, "Failed to allocate memory");
@@ -313,7 +313,7 @@ int ODBCBind(lua_State* L) {
 
 		cdata = luaL_tolstring(L, 2, &rawlen);
 
-		odbc->params[odbc->paramnumber] = calloc(rawlen + 1, sizeof(char));
+		odbc->params[odbc->paramnumber] = gff_calloc(rawlen + 1, sizeof(char));
 
 		if (!odbc->params[odbc->paramnumber]) {
 			luaL_error(L, "Failed to allocate memory");
@@ -629,7 +629,7 @@ int ODBCExecute(lua_State* L) {
 		for (unsigned int i = 0; i < odbc->numbparams; i++)
 		{
 			if (odbc->params[i]) {
-				free(odbc->params[i]);
+				gff_free(odbc->params[i]);
 				odbc->params[i] = NULL;
 			}
 		}
@@ -760,7 +760,7 @@ int ODBCGetRow(lua_State* L) {
 
 		if (datatype == SQL_DECIMAL || datatype == SQL_NUMERIC || datatype == SQL_REAL || datatype == SQL_FLOAT || datatype == SQL_DOUBLE) {
 
-			data = (SQLPOINTER)calloc(1, sizeof(lua_Number));
+			data = (SQLPOINTER)gff_calloc(1, sizeof(lua_Number));
 
 			if (!data) {
 				luaL_error(L, "Unable to allocate memory");
@@ -785,7 +785,7 @@ int ODBCGetRow(lua_State* L) {
 		}
 		else if (datatype == SQL_SMALLINT || datatype == SQL_INTEGER || datatype == SQL_TINYINT || datatype == SQL_BIGINT) {
 
-			data = (SQLPOINTER)calloc(1, sizeof(lua_Integer));
+			data = (SQLPOINTER)gff_calloc(1, sizeof(lua_Integer));
 
 			if (!data) {
 				luaL_error(L, "Unable to allocate memory");
@@ -829,7 +829,7 @@ int ODBCGetRow(lua_State* L) {
 		}
 		else {
 
-			data = calloc(sizeof(SQLCHAR), columnsize);
+			data = gff_calloc(sizeof(SQLCHAR), columnsize);
 
 			if (!data) {
 				luaL_error(L, "Unable to allocate memory");
@@ -854,7 +854,7 @@ int ODBCGetRow(lua_State* L) {
 		}
 
 		if (data) {
-			free(data);
+			gff_free(data);
 			data = NULL;
 		}
 
@@ -915,7 +915,7 @@ int ODBCDriverConnect(lua_State* L) {
 		luaL_error(L, "Connection string cannot be empty");
 	}
 
-	char* currentconnectionstring = (char*)calloc(len + 1, sizeof(char));
+	char* currentconnectionstring = (char*)gff_calloc(len + 1, sizeof(char));
 	if (!currentconnectionstring) {
 		luaL_error(L, "Failed to allocate memory");
 	}
@@ -926,7 +926,7 @@ int ODBCDriverConnect(lua_State* L) {
 	LuaOdbc* odbc = lua_pushodbc(L);
 
 	if (!odbc) {
-		free(currentconnectionstring);
+		gff_free(currentconnectionstring);
 		luaL_error(L, "Failed to allocate memory");
 	}
 
@@ -984,7 +984,7 @@ int odbc_gc(lua_State* L) {
 	LuaOdbc* odbc = lua_toodbc(L, 1);
 
 	if (odbc->ConnectionString) {
-		free(odbc->ConnectionString);
+		gff_free(odbc->ConnectionString);
 		odbc->ConnectionString = NULL;
 	}
 

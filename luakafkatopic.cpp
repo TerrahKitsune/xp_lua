@@ -47,7 +47,7 @@ LuaKafkaTopic* lua_pushkafkatopic(lua_State* L, const char* name) {
 	memset(lkafka, 0, sizeof(LuaKafkaTopic));
 	
 	if (name) {
-		lkafka->name = (char*)calloc(strlen(name) + 1, sizeof(char));
+		lkafka->name = (char*)gff_calloc(strlen(name) + 1, sizeof(char));
 		strcpy(lkafka->name, name);
 	}
 
@@ -83,7 +83,7 @@ int kafkatopic_gc(lua_State* L) {
 	}
 
 	if (luak->name) {
-		free(luak->name);
+		gff_free(luak->name);
 		luak->name = NULL;
 	}
 

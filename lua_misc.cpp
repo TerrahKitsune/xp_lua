@@ -405,7 +405,7 @@ int luagetenv(lua_State* L) {
 		return 1;
 	}
 
-	char* data = (char*)calloc(sizeof(char), len + 1);
+	char* data = (char*)gff_calloc(sizeof(char), len + 1);
 
 	if (!data) {
 		lua_pushnil(L);
@@ -416,14 +416,14 @@ int luagetenv(lua_State* L) {
 
 	if (error) {
 
-		free(data);
+		gff_free(data);
 		lua_pushnil(L);
 		return 1;
 	}
 
 	lua_pushlstring(L, data, len);
 
-	free(data);
+	gff_free(data);
 
 	return 1;
 }

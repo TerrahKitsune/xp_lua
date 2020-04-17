@@ -33,10 +33,10 @@ BOOL CALLBACK MonitorEnumProcCallback(_In_  HMONITOR hMonitor, _In_  HDC DevC, _
 		DWORD FileSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (sizeof(RGBTRIPLE) + 1 * (image->Width*image->Height * 4));
 
 		if (image->Data) {
-			free(image->Data);
+			gff_free(image->Data);
 		}
 
-		image->Data = (BYTE*)calloc(FileSize, sizeof(1));
+		image->Data = (BYTE*)gff_calloc(FileSize, sizeof(1));
 
 		if (image->Data)
 		{
@@ -308,7 +308,7 @@ int lua_crop(lua_State *L) {
 	LuaImage * image = lua_pushimage(L);
 
 	DWORD FileSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (sizeof(RGBTRIPLE) + 1 * (w*h * 4));
-	BYTE * buffer = (BYTE*)calloc(FileSize, sizeof(1));
+	BYTE * buffer = (BYTE*)gff_calloc(FileSize, sizeof(1));
 
 	if (!buffer) {
 		lua_pop(L, lua_gettop(L));
@@ -394,7 +394,7 @@ int lua_createimage(lua_State *L) {
 	LuaImage * image = lua_pushimage(L);
 
 	DWORD FileSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (sizeof(RGBTRIPLE) + 1 * (w*h * 4));
-	BYTE * buffer = (BYTE*)calloc(FileSize, sizeof(1));
+	BYTE * buffer = (BYTE*)gff_calloc(FileSize, sizeof(1));
 
 	if (!buffer) {
 		lua_pop(L, lua_gettop(L));
@@ -744,7 +744,7 @@ int lua_loadfromfile(lua_State *L) {
 		return 2;
 	}
 
-	BYTE * buffer = (BYTE*)calloc(size, sizeof(BYTE));
+	BYTE * buffer = (BYTE*)gff_calloc(size, sizeof(BYTE));
 
 	if (!buffer) {
 		lua_pop(L, lua_gettop(L));
@@ -760,7 +760,7 @@ int lua_loadfromfile(lua_State *L) {
 		lua_pushboolean(L, false);
 		lua_pushstring(L, "Unable to read file");
 		CloseHandle(FH);
-		free(buffer);
+		gff_free(buffer);
 		return 2;
 	}
 
@@ -773,7 +773,7 @@ int lua_loadfromfile(lua_State *L) {
 		lua_pop(L, lua_gettop(L));
 		lua_pushboolean(L, false);
 		lua_pushstring(L, "Invalid filetype (bmp only)");
-		free(buffer);
+		gff_free(buffer);
 		return 2;
 	}
 	else if (BFileHeader->bfSize < sizeof(BITMAPFILEHEADER) ||
@@ -781,7 +781,7 @@ int lua_loadfromfile(lua_State *L) {
 		lua_pop(L, lua_gettop(L));
 		lua_pushboolean(L, false);
 		lua_pushstring(L, "Invalid sizes, can only load simple bmp files");
-		free(buffer);
+		gff_free(buffer);
 		return 2;
 	}
 	else if (BInfoHeader->biSize != sizeof(BITMAPINFOHEADER) ||
@@ -791,7 +791,7 @@ int lua_loadfromfile(lua_State *L) {
 		lua_pop(L, lua_gettop(L));
 		lua_pushboolean(L, false);
 		lua_pushstring(L, "Invalid bits or multiplane, can only load simple bmp files");
-		free(buffer);
+		gff_free(buffer);
 		return 2;
 	}
 
@@ -861,7 +861,7 @@ int image_gc(lua_State *L) {
 	LuaImage * img = lua_toimage(L, 1);
 
 	if (img->Data) {
-		free(img->Data);
+		gff_free(img->Data);
 		img->Data = NULL;
 	}
 

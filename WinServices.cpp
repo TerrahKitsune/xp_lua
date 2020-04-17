@@ -145,14 +145,14 @@ int getconfig(lua_State * L) {
 		return 1;
 	}
 
-	QUERY_SERVICE_CONFIG* config = (QUERY_SERVICE_CONFIG*)calloc(needed, sizeof(BYTE));
+	QUERY_SERVICE_CONFIG* config = (QUERY_SERVICE_CONFIG*)gff_calloc(needed, sizeof(BYTE));
 
 	if (!config) {
 		luaL_error(L, "Unable to allocate memory");
 	}
 
 	if (!QueryServiceConfig(luaservice->hService, config, needed, &needed)) {
-		free(config);
+		gff_free(config);
 		lua_pushnil(L);
 		return 1;
 	}
@@ -195,7 +195,7 @@ int getconfig(lua_State * L) {
 	lua_pushstring(L, config->lpServiceStartName);
 	lua_settable(L, -3);
 
-	free(config);
+	gff_free(config);
 
 	return 1;
 }

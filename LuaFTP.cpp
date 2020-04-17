@@ -363,7 +363,7 @@ int LuaOpenDataChannel(lua_State* L) {
 
 	channel->s = s;
 
-	channel->ip = (char*)malloc(strlen(addr) + 1);
+	channel->ip = (char*)gff_malloc(strlen(addr) + 1);
 	strcpy(channel->ip, addr);
 	channel->port = port;
 
@@ -416,10 +416,10 @@ int LuaPassive(lua_State* L) {
 	lua_pushinteger(L, port);
 
 	if (ftp->passive_ip) {
-		free(ftp->passive_ip);
+		gff_free(ftp->passive_ip);
 	}
 
-	ftp->passive_ip = (char*)calloc(strlen(ipaddr) + 1, sizeof(char));
+	ftp->passive_ip = (char*)gff_calloc(strlen(ipaddr) + 1, sizeof(char));
 	strcpy(ftp->passive_ip, ipaddr);
 	ftp->passive_port = port;
 
@@ -611,7 +611,7 @@ int luaftp_gc(lua_State* L) {
 
 	if (ftp->passive_ip) {
 
-		free(ftp->passive_ip);
+		gff_free(ftp->passive_ip);
 		ftp->passive_ip = NULL;
 	}
 

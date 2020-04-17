@@ -1,5 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 
+#include "mem.h"
+
 #include "lua_main_incl.h" 
 #include "networking.h"
 #include <conio.h>
@@ -84,11 +86,11 @@ double TickGetCounter()
 	return double(li.QuadPart - TickCounterStart) / PCFreq;
 }
 
-int GetResults(lua_State *L){
+int GetResults(lua_State *L) {
 
 	int cnt = 0;
 
-	for (int n = 1; n < lua_gettop(L); n++){
+	for (int n = 1; n < lua_gettop(L); n++) {
 		if (lua_isnil(L, n))
 			break;
 		else
@@ -98,15 +100,15 @@ int GetResults(lua_State *L){
 	return cnt;
 }
 
-static int print(lua_State *L){
+static int print(lua_State *L) {
 	FILE * file = fopen("LUA.txt", "a");
 	const char * data;
 	size_t len = 0;
 
-	if (file){
-		for (int n = 1; n <= lua_gettop(L); n++){
+	if (file) {
+		for (int n = 1; n <= lua_gettop(L); n++) {
 			data = luaL_tolstring(L, n, &len);
-			if (data && len > 0){
+			if (data && len > 0) {
 				fwrite(data, 1, len, file);
 				fwrite("\t", 1, 1, file);
 				fflush(file);
@@ -122,7 +124,7 @@ static int print(lua_State *L){
 }
 
 
-static int L_kbhit(lua_State *L){
+static int L_kbhit(lua_State *L) {
 
 	if (_isatty(_fileno(stdin))) {
 		lua_pushboolean(L, _kbhit());
@@ -134,7 +136,7 @@ static int L_kbhit(lua_State *L){
 	return 1;
 }
 
-static int L_getch(lua_State *L){
+static int L_getch(lua_State *L) {
 
 	if (_isatty(_fileno(stdin))) {
 		lua_pushinteger(L, _getch());
@@ -152,17 +154,17 @@ static int L_getch(lua_State *L){
 	return 1;
 }
 
-static int L_GetTextColor(lua_State *L){
+static int L_GetTextColor(lua_State *L) {
 
 	WORD data;
 	CONSOLE_SCREEN_BUFFER_INFO   csbi;
-	if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)){
+	if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
 		data = csbi.wAttributes;
 
 		lua_pushinteger(L, HI_PART(data));
 		lua_pushinteger(L, LO_PART(data));
 	}
-	else{
+	else {
 		lua_pushnil(L);
 		lua_pushnil(L);
 	}
@@ -175,7 +177,7 @@ const char * ReadStdIn(char * buf, size_t bufsize) {
 		return gets_s(buf, bufsize);
 	}
 	else {
-		size_t size = fread(buf, 1, bufsize-1, stdin);
+		size_t size = fread(buf, 1, bufsize - 1, stdin);
 		if (size <= 0) {
 			return NULL;
 		}
@@ -184,7 +186,7 @@ const char * ReadStdIn(char * buf, size_t bufsize) {
 	}
 }
 
-static int L_SetTextColor(lua_State *L){
+static int L_SetTextColor(lua_State *L) {
 
 	int BackC = (int)luaL_checknumber(L, 1);
 	int ForgC = (int)luaL_checknumber(L, 2);
@@ -217,7 +219,7 @@ static int L_cls(lua_State *L) {
 		cellCount,
 		homeCoords,
 		&count
-		)) return 0;
+	)) return 0;
 
 	if (!FillConsoleOutputAttribute(
 		hStdOut,
@@ -225,7 +227,7 @@ static int L_cls(lua_State *L) {
 		cellCount,
 		homeCoords,
 		&count
-		)) return 0;
+	)) return 0;
 
 	SetConsoleCursorPosition(hStdOut, homeCoords);
 
@@ -257,7 +259,7 @@ static int L_put(lua_State *L) {
 	return 0;
 }
 
-static int L_Exit(lua_State *L){
+static int L_Exit(lua_State *L) {
 
 	int ExitCode = (int)luaL_optinteger(L, 1, 0);
 	lua_pop(L, lua_gettop(L));
@@ -269,7 +271,7 @@ static int L_Exit(lua_State *L){
 	exit(ExitCode);
 }
 
-static int L_GetMemory(lua_State *L){
+static int L_GetMemory(lua_State *L) {
 
 	lua_pop(L, lua_gettop(L));
 	int mem = lua_gc(L, LUA_GCCOUNT, 0);
@@ -279,7 +281,7 @@ static int L_GetMemory(lua_State *L){
 	return 1;
 }
 
-static int L_ShellExecute(lua_State *L){
+static int L_ShellExecute(lua_State *L) {
 
 	int ok = (int)ShellExecute(NULL, "open", luaL_checkstring(L, 1), luaL_checkstring(L, 2), NULL, SW_SHOW);
 	lua_pop(L, lua_gettop(L));
@@ -289,25 +291,25 @@ static int L_ShellExecute(lua_State *L){
 
 static int hook;
 static double ticktime;
-void L_Ticker(lua_State *L, lua_Debug *ar){
+void L_Ticker(lua_State *L, lua_Debug *ar) {
 	if (hook == -1)
 		return;
-	else if (TickGetCounter() < ticktime){
+	else if (TickGetCounter() < ticktime) {
 		return;
 	}
 	else
 		TickStartCounter();
 
 	lua_rawgeti(L, LUA_REGISTRYINDEX, hook);
-	if (lua_isfunction(L, 1)){
+	if (lua_isfunction(L, 1)) {
 		lua_pcall(L, 0, 0, NULL);
 	}
 	lua_pop(L, lua_gettop(L));
 }
 
-static int L_SetTick(lua_State *L){
+static int L_SetTick(lua_State *L) {
 
-	if (!lua_isfunction(L, 1)){
+	if (!lua_isfunction(L, 1)) {
 		lua_sethook(L, L_Ticker, 0, 0);
 		if (hook != -1)
 			luaL_unref(L, LUA_REGISTRYINDEX, hook);
@@ -334,11 +336,11 @@ static int L_SetTick(lua_State *L){
 	return 0;
 }
 
-static int L_GetReg(lua_State *L){
+static int L_GetReg(lua_State *L) {
 
 	HKEY key = HKEY_LOCAL_MACHINE;
 
-	switch (lua_tointeger(L, 1)){
+	switch (lua_tointeger(L, 1)) {
 	case 1:
 		key = HKEY_CLASSES_ROOT;
 		break;
@@ -365,17 +367,17 @@ static int L_GetReg(lua_State *L){
 	}
 
 	DWORD max = 1048576;
-	char * buffer = (char*)malloc(max);
+	char * buffer = (char*)gff_malloc(max);
 	if (!buffer)
 		luaL_error(L, "Unable to allocate memory for readbuffer in GetReg");
 	memset(buffer, 0, max);
 	LSTATUS status = RegGetValue(key, luaL_checkstring(L, 2), luaL_checkstring(L, 3), RRF_RT_ANY, nullptr, buffer, &max);
-	if (status == ERROR_SUCCESS){
+	if (status == ERROR_SUCCESS) {
 		lua_pop(L, lua_gettop(L));
 		lua_pushstring(L, buffer);
-		free(buffer);
+		gff_free(buffer);
 	}
-	else{
+	else {
 
 		lua_pop(L, lua_gettop(L));
 
@@ -391,44 +393,54 @@ static int L_GetReg(lua_State *L){
 			lua_pushnil(L);
 			lua_pushstring(L, "unable to format error message!");
 		}
-		else{
+		else {
 			lua_pushnil(L);
 			lua_pushstring(L, err);
 			LocalFree(err);
-		}	
-		free(buffer);
+		}
+		gff_free(buffer);
 
 		return 2;
 	}
 	return 1;
 }
 
-static int L_ToggleConsole(lua_State *L){
+static int L_ToggleConsole(lua_State *L) {
 
 	bool toggle = lua_toboolean(L, 1) > 0;
 	HWND console = GetConsoleWindow();
-	if (toggle){		
+	if (toggle) {
 		ShowWindow(console, SW_RESTORE);
 	}
-	else{
+	else {
 		ShowWindow(console, SW_HIDE);
 	}
 	lua_pop(L, 1);
 	return 0;
 }
 
-static int L_SetTitle(lua_State *L){
+static int L_SetTitle(lua_State *L) {
 	SetConsoleTitle(luaL_checkstring(L, 1));
 	lua_pop(L, 1);
 	return 0;
 }
 
-static int L_GetRuntime(lua_State *L){
+static int L_GetRuntime(lua_State *L) {
 	lua_pushnumber(L, GetCounter());
 	return 1;
 }
 
-int main(int argc, char *argv[]){
+static void *l_alloc(void *ud, void *ptr, size_t osize,	size_t nsize) {
+
+	if (nsize == 0) {
+		gff_free(ptr);
+		return NULL;
+	}
+	else
+		return gff_realloc(ptr, nsize);
+}
+
+int main(int argc, char *argv[]) {
 
 	WSADATA wsa;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
@@ -442,7 +454,7 @@ int main(int argc, char *argv[]){
 
 	StartCounter();
 	hook = -1;
-	lua_State *L = luaL_newstate();
+	lua_State *L = lua_newstate(l_alloc, NULL);
 	luaL_openlibs(L);
 
 #ifdef _DEBUG
@@ -451,7 +463,7 @@ int main(int argc, char *argv[]){
 #endif
 
 	lua_createtable(L, 0, argc);
-	for (int n = 0; n < argc; n++){
+	for (int n = 0; n < argc; n++) {
 		lua_pushstring(L, argv[n]);
 		lua_rawseti(L, -2, n + 1);
 	}
@@ -548,7 +560,7 @@ int main(int argc, char *argv[]){
 
 	lua_pushcfunction(L, L_kbhit);
 	lua_setglobal(L, "HasKeyDown");
-	
+
 	lua_pushcfunction(L, L_put);
 	lua_setglobal(L, "Put");
 
@@ -562,15 +574,14 @@ int main(int argc, char *argv[]){
 	luaopen_misc(L);
 
 	const char * file = "main.lua";
-	if (argc > 1){
+	if (argc > 1) {
 		file = argv[1];
 	}
 
 	FILE * exists = NULL;
 
-	if(_stricmp(file, "cmd") != 0)
+	if (_stricmp(file, "cmd") != 0)
 		exists = fopen(file, "r");
-	
 
 	if (exists) {
 		fclose(exists);
@@ -646,7 +657,7 @@ int main(int argc, char *argv[]){
 			if (error) {
 				fprintf(stderr, "%s\n", lua_tostring(L, -1));
 				fflush(stderr);
-				lua_pop(L, 1); 
+				lua_pop(L, 1);
 			}
 
 			lua_pop(L, lua_gettop(L));

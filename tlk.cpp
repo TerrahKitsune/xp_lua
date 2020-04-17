@@ -38,7 +38,7 @@ int tlk_open(lua_State *L) {
 
 	tlk->file = f;
 	memcpy(&tlk->Header, &header, sizeof(TlkHeader));
-	tlk->filename = (char*)calloc(len + 1, sizeof(char));
+	tlk->filename = (char*)gff_calloc(len + 1, sizeof(char));
 	memcpy(tlk->filename, file, sizeof(char)*len);
 
 	return 1;
@@ -217,7 +217,7 @@ int tlk_defragment(lua_State *L) {
 	}
 
 	size_t buffersize = 1024;
-	char * buffer = (char*)calloc(buffersize, sizeof(char));
+	char * buffer = (char*)gff_calloc(buffersize, sizeof(char));
 
 	if (!buffer) {
 		fclose(tmp);
@@ -233,7 +233,7 @@ int tlk_defragment(lua_State *L) {
 	{
 		//Read header
 		if (fread(&data, sizeof(TlkStringData), 1, tlk->file) != 1) {
-			free(buffer);
+			gff_free(buffer);
 			fclose(tmp);
 			lua_pop(L, lua_gettop(L));
 			lua_pushboolean(L, false);
@@ -244,9 +244,9 @@ int tlk_defragment(lua_State *L) {
 
 			//Check buffer size
 			if (data.StringSize > buffersize) {
-				free(buffer);
+				gff_free(buffer);
 				buffersize = data.StringSize + 1;
-				buffer = (char*)calloc(buffersize, sizeof(char));
+				buffer = (char*)gff_calloc(buffersize, sizeof(char));
 				if (!buffer) {
 					fclose(tmp);
 					lua_pop(L, lua_gettop(L));
@@ -260,7 +260,7 @@ int tlk_defragment(lua_State *L) {
 
 			//Seek to data
 			if (fseek(tlk->file, tlk->Header.StringEntriesOffset + data.OffsetToString, SEEK_SET) != 0) {
-				free(buffer);
+				gff_free(buffer);
 				fclose(tmp);
 				lua_pop(L, lua_gettop(L));
 				lua_pushboolean(L, false);
@@ -269,7 +269,7 @@ int tlk_defragment(lua_State *L) {
 
 			//Read data
 			if (fread(buffer, sizeof(char), data.StringSize, tlk->file) != data.StringSize) {
-				free(buffer);
+				gff_free(buffer);
 				fclose(tmp);
 				lua_pop(L, lua_gettop(L));
 				lua_pushboolean(L, false);
@@ -278,7 +278,7 @@ int tlk_defragment(lua_State *L) {
 
 			//Restore position
 			if (fseek(tlk->file, pos, SEEK_SET) != 0) {
-				free(buffer);
+				gff_free(buffer);
 				fclose(tmp);
 				lua_pop(L, lua_gettop(L));
 				lua_pushboolean(L, false);
@@ -290,7 +290,7 @@ int tlk_defragment(lua_State *L) {
 
 			//Seek to data
 			if (fseek(tmp, currentdata, SEEK_SET) != 0) {
-				free(buffer);
+				gff_free(buffer);
 				fclose(tmp);
 				lua_pop(L, lua_gettop(L));
 				lua_pushboolean(L, false);
@@ -299,7 +299,7 @@ int tlk_defragment(lua_State *L) {
 
 			//Write data
 			if (fwrite(buffer, sizeof(char), data.StringSize, tmp) != data.StringSize) {
-				free(buffer);
+				gff_free(buffer);
 				fclose(tmp);
 				lua_pop(L, lua_gettop(L));
 				lua_pushboolean(L, false);
@@ -308,7 +308,7 @@ int tlk_defragment(lua_State *L) {
 
 			//Restore position
 			if (fseek(tmp, pos, SEEK_SET) != 0) {
-				free(buffer);
+				gff_free(buffer);
 				fclose(tmp);
 				lua_pop(L, lua_gettop(L));
 				lua_pushboolean(L, false);
@@ -322,7 +322,7 @@ int tlk_defragment(lua_State *L) {
 
 		//Write dataheader
 		if (fwrite(&data, sizeof(TlkStringData), 1, tmp) != 1) {
-			free(buffer);
+			gff_free(buffer);
 			fclose(tmp);
 			lua_pop(L, lua_gettop(L));
 			lua_pushboolean(L, false);
@@ -334,7 +334,7 @@ int tlk_defragment(lua_State *L) {
 	tlk->file = fopen(tlk->filename, "wb");
 	if (!tlk->file) {
 		tlk->file = fopen(tlk->filename, "rb");
-		free(buffer);
+		gff_free(buffer);
 		fclose(tmp);
 		lua_pop(L, lua_gettop(L));
 		lua_pushboolean(L, false);
@@ -358,7 +358,7 @@ int tlk_defragment(lua_State *L) {
 
 	memcpy(&tlk->Header, &header, sizeof(TlkHeader));
 
-	free(buffer);
+	gff_free(buffer);
 	fclose(tmp);
 
 	lua_pop(L, lua_gettop(L));
@@ -596,7 +596,7 @@ int tlk_get(lua_State *L)
 			return 1;
 		}
 
-		str = (char*)malloc(entry.StringSize);
+		str = (char*)gff_malloc(entry.StringSize);
 		if (!str) {
 			lua_pop(L, lua_gettop(L));
 			lua_pushnil(L);
@@ -605,7 +605,7 @@ int tlk_get(lua_State *L)
 
 		if (fread(str, 1, entry.StringSize, tlk->file) != entry.StringSize)
 		{
-			free(str);
+			gff_free(str);
 			lua_pop(L, lua_gettop(L));
 			lua_pushnil(L);
 			return 1;
@@ -615,7 +615,7 @@ int tlk_get(lua_State *L)
 		lua_pushlstring(L, str, entry.StringSize);
 		lua_settable(L, -3);
 
-		free(str);
+		gff_free(str);
 	}
 	else {
 		lua_pushstring(L, "String");
@@ -661,7 +661,7 @@ int tlk_getall(lua_State *L) {
 				return 1;
 			}
 
-			str = (char*)malloc(entry.StringSize);
+			str = (char*)gff_malloc(entry.StringSize);
 			if (!str) {
 				lua_pop(L, lua_gettop(L));
 				lua_pushnil(L);
@@ -672,14 +672,14 @@ int tlk_getall(lua_State *L) {
 
 			if (test != entry.StringSize)
 			{
-				free(str);
+				gff_free(str);
 				lua_pop(L, lua_gettop(L));
 				lua_pushnil(L);
 				return 1;
 			}
 
 			lua_pushlstring(L, str, entry.StringSize);
-			free(str);
+			gff_free(str);
 			fseek(tlk->file, prev, SEEK_SET);
 		}
 		else {
@@ -714,7 +714,7 @@ int tlk_gc(lua_State *L) {
 	LuaTLK * tlk = lua_totlk(L, 1);
 
 	if (tlk->filename) {
-		free(tlk->filename);
+		gff_free(tlk->filename);
 		tlk->filename = NULL;
 	}
 

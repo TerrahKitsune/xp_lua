@@ -18,7 +18,28 @@ static const luaL_Reg luasqlmeta[] = {
 	{ NULL, NULL }
 };
 
+static struct sqlite3_mem_methods sqlitemalloc;
+
+void * sqlite_malloc(int size) {
+	return gff_malloc(size);
+}
+
+void sqlite_free(void * ptr) {
+	gff_free(ptr);
+}
+
+void * sqlite_realloc(void * ptr, int size) {
+	return gff_realloc(ptr, size);
+}
+
 int luaopen_sqlite(lua_State *L) {
+
+	sqlite3_config(SQLITE_CONFIG_MEMSTATUS, 0);
+	sqlite3_config(SQLITE_CONFIG_GETMALLOC, &sqlitemalloc);
+	sqlitemalloc.xMalloc = sqlite_malloc;
+	sqlitemalloc.xFree = sqlite_free;
+	sqlitemalloc.xRealloc = sqlite_realloc;
+	sqlite3_config(SQLITE_CONFIG_MALLOC, &sqlitemalloc);
 
 	luaL_newlibtable(L, lasqlitefunctions);
 	luaL_setfuncs(L, lasqlitefunctions, 0);

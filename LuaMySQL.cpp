@@ -12,11 +12,11 @@ void CleanUp(LuaAsyncResult * result) {
 		return;
 
 	if (result->Error) {
-		free(result->Error);
+		gff_free(result->Error);
 		result->Error = NULL;
 	}
 
-	free(result);
+	gff_free(result);
 }
 
 
@@ -29,7 +29,7 @@ int DataToHex(lua_State *L) {
 		luaL_error(L, "No data given to encode");
 	}
 
-	char * buffer = (char*)malloc((len * 2) + 3);
+	char * buffer = (char*)gff_malloc((len * 2) + 3);
 	if (!buffer) {
 		luaL_error(L, "Unable to allocate %u bytes for conversion buffer", (len * 2) + 1);
 	}
@@ -44,7 +44,7 @@ int DataToHex(lua_State *L) {
 		lua_pushstring(L, "0x0");
 	else
 		lua_pushlstring(L, buffer, newlen + 2);
-	free(buffer);
+	gff_free(buffer);
 	return 1;
 }
 
@@ -63,7 +63,7 @@ int EscapeString(lua_State *L) {
 		luaL_error(L, "Mysql is not connected");
 	}
 
-	char * buffer = (char*)malloc((len * 2) + 1);
+	char * buffer = (char*)gff_malloc((len * 2) + 1);
 	if (!buffer) {
 		luaL_error(L, "Unable to allocate %u bytes for conversion buffer", (len * 2) + 1);
 	}
@@ -71,7 +71,7 @@ int EscapeString(lua_State *L) {
 	unsigned long newlen = mysql_real_escape_string(luamysql->connection, buffer, data, len);
 	lua_pop(L, 1);
 	lua_pushlstring(L, buffer, newlen);
-	free(buffer);
+	gff_free(buffer);
 	return 1;
 }
 
@@ -227,12 +227,12 @@ int MySQLForkResult(lua_State *L) {
 void SetResult(LuaAsyncResult * result, const char *error, int rows) {
 
 	if (result->Error) {
-		free(result->Error);
+		gff_free(result->Error);
 		result->Error = NULL;
 	}
 
 	if (error) {
-		result->Error = (char*)calloc(strlen(error) + 1, 1);
+		result->Error = (char*)gff_calloc(strlen(error) + 1, 1);
 
 		if (result->Error) {
 			strcpy(result->Error, error);
@@ -248,7 +248,7 @@ void SetResult(LuaAsyncResult * result, const char *error, int rows) {
 
 LuaAsyncResult* Execute(LuaMySQL * luamysql, bool store) {
 
-	LuaAsyncResult * result = (LuaAsyncResult*)calloc(1, sizeof(LuaAsyncResult));
+	LuaAsyncResult * result = (LuaAsyncResult*)gff_calloc(1, sizeof(LuaAsyncResult));
 
 	if (!luamysql->connection)
 	{
@@ -388,10 +388,10 @@ int MySQLExecute(lua_State *L) {
 	}
 
 	if (luamysql->query) {
-		free(luamysql->query);
+		gff_free(luamysql->query);
 	}
 
-	luamysql->query = (char*)calloc(len + 1, sizeof(char));
+	luamysql->query = (char*)gff_calloc(len + 1, sizeof(char));
 
 	if (!luamysql->query) {
 		lua_pushboolean(L, false);
@@ -459,8 +459,8 @@ int MySQLChangeDatabase(lua_State *L) {
 	}
 
 	if(luamysql->schema)
-		free(luamysql->schema);
-	luamysql->schema = (char*)calloc(strlen(db) + 1, sizeof(char));
+		gff_free(luamysql->schema);
+	luamysql->schema = (char*)gff_calloc(strlen(db) + 1, sizeof(char));
 
 	if (!luamysql->schema) {
 		lua_pop(L, lua_gettop(L));
@@ -485,22 +485,22 @@ int MySQLConnect(lua_State *L) {
 
 	size_t len;
 	const char * temp = luaL_checklstring(L, 1, &len);
-	char * temp_server = (char*)malloc(len + 1);
+	char * temp_server = (char*)gff_malloc(len + 1);
 	temp_server[len] = '\0';
 	memcpy(temp_server, temp, len);
 
 	temp = luaL_checklstring(L, 2, &len);
-	char * temp_user = (char*)malloc(len + 1);
+	char * temp_user = (char*)gff_malloc(len + 1);
 	temp_user[len] = '\0';
 	memcpy(temp_user, temp, len);
 
 	temp = luaL_checklstring(L, 3, &len);
-	char * temp_password = (char*)malloc(len + 1);
+	char * temp_password = (char*)gff_malloc(len + 1);
 	temp_password[len] = '\0';
 	memcpy(temp_password, temp, len);
 
 	temp = luaL_checklstring(L, 4, &len);
-	char * temp_schema = (char*)malloc(len + 1);
+	char * temp_schema = (char*)gff_malloc(len + 1);
 	temp_schema[len] = '\0';
 	memcpy(temp_schema, temp, len);
 
@@ -511,21 +511,21 @@ int MySQLConnect(lua_State *L) {
 
 	LuaMySQL * luamysql = lua_pushmysql(L);
 
-	luamysql->mysql = (MYSQL*)calloc(1, sizeof(MYSQL));
+	luamysql->mysql = (MYSQL*)gff_calloc(1, sizeof(MYSQL));
 
 	if (!luamysql->mysql) {
-		free(temp_server);
-		free(temp_user);
-		free(temp_password);
-		free(temp_schema);
+		gff_free(temp_server);
+		gff_free(temp_user);
+		gff_free(temp_password);
+		gff_free(temp_schema);
 		luaL_error(L, "Unable to allocate memory for mysql");
 	}
 
 	if (!mysql_init(luamysql->mysql)) {
-		free(temp_server);
-		free(temp_user);
-		free(temp_password);
-		free(temp_schema);
+		gff_free(temp_server);
+		gff_free(temp_user);
+		gff_free(temp_password);
+		gff_free(temp_schema);
 		luaL_error(L, "Unable to initialize mysql");
 	}
 
@@ -551,7 +551,7 @@ int MySQLConnect(lua_State *L) {
 	if (luamysql->connection == NULL)
 	{
 		mysql_close(luamysql->mysql);
-		free(luamysql->mysql);
+		gff_free(luamysql->mysql);
 		luamysql->mysql = NULL;
 
 		lua_pop(L, 1);
@@ -611,11 +611,11 @@ bool Reconnect(LuaMySQL *luamysql) {
 
 	if (luamysql->mysql) {
 		mysql_close(luamysql->mysql);
-		free(luamysql->mysql);
+		gff_free(luamysql->mysql);
 		luamysql->mysql = NULL;
 	}
 
-	luamysql->mysql = (MYSQL*)calloc(1, sizeof(MYSQL));
+	luamysql->mysql = (MYSQL*)gff_calloc(1, sizeof(MYSQL));
 
 	if (!luamysql->mysql || !mysql_init(luamysql->mysql)) {
 		return FALSE;
@@ -635,17 +635,17 @@ bool Reconnect(LuaMySQL *luamysql) {
 		}
 
 		if (luamysql->lastError) {
-			free(luamysql->lastError);
+			gff_free(luamysql->lastError);
 		}
 
-		luamysql->lastError = (char*)malloc(strlen(err)+1);
+		luamysql->lastError = (char*)gff_malloc(strlen(err)+1);
 
 		if (luamysql->lastError) {
 			strcpy(luamysql->lastError, err);
 		}
 
 		mysql_close(luamysql->mysql);
-		free(luamysql->mysql);
+		gff_free(luamysql->mysql);
 		luamysql->mysql = NULL;
 		return FALSE;
 	}
@@ -709,37 +709,37 @@ int luamysql_gc(lua_State *L) {
 
 	if (luamysql->connection) {
 		mysql_close(luamysql->mysql);
-		free(luamysql->mysql);
+		gff_free(luamysql->mysql);
 		luamysql->connection = NULL;
 	}
 
 	if (luamysql->server) {
-		free(luamysql->server);
+		gff_free(luamysql->server);
 		luamysql->server = NULL;
 	}
 
 	if (luamysql->user) {
-		free(luamysql->user);
+		gff_free(luamysql->user);
 		luamysql->user = NULL;
 	}
 
 	if (luamysql->password) {
-		free(luamysql->password);
+		gff_free(luamysql->password);
 		luamysql->password = NULL;
 	}
 
 	if (luamysql->schema) {
-		free(luamysql->schema);
+		gff_free(luamysql->schema);
 		luamysql->schema = NULL;
 	}
 
 	if (luamysql->query) {
-		free(luamysql->query);
+		gff_free(luamysql->query);
 		luamysql->query = NULL;
 	}
 
 	if (luamysql->lastError) {
-		free(luamysql->lastError);
+		gff_free(luamysql->lastError);
 	}
 
 	return 0;

@@ -61,7 +61,7 @@ bool CheckStreamSize(lua_State* L, LuaStream* stream, size_t requestedsize) {
 			newsize = MIN_STREAM_SIZE;
 		}
 
-		void* temp = realloc(stream->data, stream->alloc + newsize);
+		void* temp = gff_realloc(stream->data, stream->alloc + newsize);
 		if (!temp) {
 			return false;
 		}
@@ -686,7 +686,7 @@ int ReadFromFile(lua_State* L) {
 		return 0;
 	}
 
-	BYTE * temp = (BYTE*)malloc(len);
+	BYTE * temp = (BYTE*)gff_malloc(len);
 	if (!temp) {
 		fclose(f);
 		luaL_error(L, "Unable to allocate memory");
@@ -810,7 +810,7 @@ int OpenFileToStream(lua_State* L) {
 		alloc = MIN_STREAM_SIZE;
 	}
 
-	stream->data = (BYTE*)malloc(alloc);
+	stream->data = (BYTE*)gff_malloc(alloc);
 	if (!stream->data) {
 		fclose(f);
 		luaL_error(L, "Unable to allocate memory");
@@ -860,7 +860,7 @@ int Compress(lua_State* L) {
 		return 2;
 	}
 
-	compressed->data = (BYTE*)malloc(CompressedBufferSize);
+	compressed->data = (BYTE*)gff_malloc(CompressedBufferSize);
 
 	if (!compressed->data) {
 		CloseCompressor(Compressor);
@@ -877,7 +877,7 @@ int Compress(lua_State* L) {
 	if (!Success) {
 
 		CloseCompressor(Compressor);
-		free(compressed->data);
+		gff_free(compressed->data);
 		memset(compressed, 0, sizeof(LuaStream));
 
 		lua_pop(L, lua_gettop(L));
@@ -919,7 +919,7 @@ int Decompress(lua_State* L) {
 		return 2;
 	}
 
-	uncompressed->data = (BYTE*)malloc(DecompressedBufferSize);
+	uncompressed->data = (BYTE*)gff_malloc(DecompressedBufferSize);
 
 	if (!uncompressed->data) {
 		CloseDecompressor(Decompressor);
@@ -936,7 +936,7 @@ int Decompress(lua_State* L) {
 	if (!Success) {
 
 		CloseDecompressor(Decompressor);
-		free(uncompressed->data);
+		gff_free(uncompressed->data);
 		memset(uncompressed, 0, sizeof(LuaStream));
 
 		lua_pop(L, lua_gettop(L));
@@ -962,7 +962,7 @@ int NewStream(lua_State* L) {
 		stream->allocfunc = ref;
 		size_t size = AllocAddSize(L, stream, MIN_STREAM_SIZE);
 
-		stream->data = (BYTE*)malloc(size);
+		stream->data = (BYTE*)gff_malloc(size);
 		if (!stream->data) {
 			luaL_error(L, "Unable to allocate memory");
 			return 0;
@@ -983,7 +983,7 @@ int NewStream(lua_State* L) {
 
 	LuaStream* stream = lua_pushluastream(L);
 
-	stream->data = (BYTE*)malloc(init);
+	stream->data = (BYTE*)gff_malloc(init);
 	if (!stream->data) {
 		luaL_error(L, "Unable to allocate memory");
 		return 0;
@@ -1207,7 +1207,7 @@ int luastream_gc(lua_State* L) {
 		pipe->hSharedMemory = NULL;
 	}
 	else if (pipe->data) {
-		free(pipe->data);
+		gff_free(pipe->data);
 	}
 
 	pipe->data = NULL;

@@ -80,7 +80,7 @@ DWORD WINAPI CliProc(LPVOID lpParam) {
 				}
 			}
 
-			free(ev);
+			gff_free(ev);
 			ev = (NetEvent *)queue_Dequeue(self->Send);
 		}
 
@@ -104,7 +104,7 @@ DWORD WINAPI CliProc(LPVOID lpParam) {
 	queue_Destroy(self->Events);
 	queue_Destroy(self->Send);
 
-	free(self);
+	gff_free(self);
 
 	CloseHandle(thread);
 
@@ -139,9 +139,9 @@ int luaclient_connect(lua_State *L) {
 	const char * addr = luaL_checkstring(L, 1);
 	int port = (int)luaL_checkinteger(L, 2);
 
-	LuaClientThread * thread = (LuaClientThread*)calloc(1, sizeof(LuaClientThread));
+	LuaClientThread * thread = (LuaClientThread*)gff_calloc(1, sizeof(LuaClientThread));
 
-	thread->addr = (char*)malloc(strlen(addr) + 1);
+	thread->addr = (char*)gff_malloc(strlen(addr) + 1);
 	strcpy(thread->addr, addr);
 
 	thread->Events = queue_Create();
@@ -157,8 +157,8 @@ int luaclient_connect(lua_State *L) {
 	thread->Thread = CreateThread(NULL, 0, CliProc, thread, 0, &thread->ThreadId);
 	if (!thread->Thread) {
 
-		free(thread->addr);
-		free(thread);
+		gff_free(thread->addr);
+		gff_free(thread);
 
 		lua_pop(L, lua_gettop(L));
 		lua_pushnil(L);
@@ -235,7 +235,7 @@ int luaclient_getevent(lua_State *L) {
 
 	list_Leave(lst);
 
-	free(netevent);
+	gff_free(netevent);
 
 	return 1;
 }

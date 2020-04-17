@@ -41,10 +41,10 @@ int LuaSocketReadData(lua_State* L) {
 	if (!socket->buf || socket->bufsize != buffersize) {
 
 		if (socket->buf) {
-			free(socket->buf);
+			gff_free(socket->buf);
 		}
 
-		socket->buf = (char*)malloc(buffersize);
+		socket->buf = (char*)gff_malloc(buffersize);
 		socket->bufsize = buffersize;
 	}
 
@@ -384,7 +384,7 @@ int luasocket_gc(lua_State* L) {
 	}
 
 	if (pipe->buf) {
-		free(pipe->buf);
+		gff_free(pipe->buf);
 		pipe->buf = NULL;
 	}
 

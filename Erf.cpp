@@ -23,11 +23,11 @@ void * CreateKeyList(size_t len, int version, ERFHeader * header){
 
 	if (version == 1){
 		header->OffsetToResourceList = header->OffsetToKeyList + (len * sizeof(ErfKey));
-		return calloc(len, sizeof(ErfKey));
+		return gff_calloc(len, sizeof(ErfKey));
 	}
 	else{
 		header->OffsetToResourceList = header->OffsetToKeyList + (len * sizeof(ErfKeyV2));
-		return calloc(len, sizeof(ErfKeyV2));
+		return gff_calloc(len, sizeof(ErfKeyV2));
 	}
 }
 
@@ -121,10 +121,10 @@ int CreateErf(lua_State *L){
 	ERF erf;
 	memset(&erf, 0, sizeof(ERF));
 
-	erf.File = (char*)calloc(len + 1, sizeof(char));
+	erf.File = (char*)gff_calloc(len + 1, sizeof(char));
 	memcpy(erf.File, file, len);
 
-	erf.Header = (ERFHeader*)calloc(1, sizeof(ERFHeader));
+	erf.Header = (ERFHeader*)gff_calloc(1, sizeof(ERFHeader));
 
 	if (version == 1){
 		memcpy(erf.Header->Version, "V1.0", 4);
@@ -156,11 +156,11 @@ int CreateErf(lua_State *L){
 		lua_pop(L, 1);
 	}
 
-	ERFBuildEntry * entries = (ERFBuildEntry*)calloc(erf.Header->EntryCount, sizeof(ERFBuildEntry));
+	ERFBuildEntry * entries = (ERFBuildEntry*)gff_calloc(erf.Header->EntryCount, sizeof(ERFBuildEntry));
 	if (!entries){
 
-		free(erf.Header);
-		free(erf.File);
+		gff_free(erf.Header);
+		gff_free(erf.File);
 		fclose(raw);
 		remove(file);
 		luaL_error(L, "Unable to allocate memory");
@@ -212,8 +212,8 @@ int CreateErf(lua_State *L){
 	}
 
 	void * keylist = NULL;
-	ErfResList * reslit = (ErfResList *)calloc(erf.Header->EntryCount, sizeof(ErfResList));
-	ErfLocString * locstr = (ErfLocString *)calloc(1, sizeof(ErfLocString) + desclen + 1);
+	ErfResList * reslit = (ErfResList *)gff_calloc(erf.Header->EntryCount, sizeof(ErfResList));
+	ErfLocString * locstr = (ErfLocString *)gff_calloc(1, sizeof(ErfLocString) + desclen + 1);
 	if (locstr && reslit){
 
 		memcpy(locstr->String, desc, desclen);
@@ -277,15 +277,15 @@ int CreateErf(lua_State *L){
 		}
 
 		if (locstr)
-			free(locstr);
+			gff_free(locstr);
 
 		if (keylist)
-			free(keylist);
+			gff_free(keylist);
 
-		free(reslit);
-		free(erf.Header);
-		free(erf.File);
-		free(entries);
+		gff_free(reslit);
+		gff_free(erf.Header);
+		gff_free(erf.File);
+		gff_free(entries);
 		fclose(raw);
 		remove(file);
 		luaL_error(L, "Unable to open target file for reading");
@@ -295,9 +295,9 @@ int CreateErf(lua_State *L){
 	for (unsigned int i = 0; i < erf.Header->EntryCount; i++){
 		fclose(entries[i].f);
 	}
-	free(entries);
-	free(locstr);
-	free(reslit);
+	gff_free(entries);
+	gff_free(locstr);
+	gff_free(reslit);
 
 	fclose(raw);
 
@@ -412,7 +412,7 @@ int GetResource(lua_State *L){
 		luaL_error(L, "Unable to seek in file");
 	}
 
-	void * buffer = malloc(node.ResourceSize);
+	void * buffer = gff_malloc(node.ResourceSize);
 	if (!buffer){
 		fclose(file);
 		luaL_error(L, "Unable to allocate memory for resource");
@@ -421,14 +421,14 @@ int GetResource(lua_State *L){
 	read = fread(buffer, 1, node.ResourceSize, file);
 	if (read != node.ResourceSize){
 		fclose(file);
-		free(buffer);
+		gff_free(buffer);
 		luaL_error(L, "Unable to read resource from file");
 	}
 
 	lua_pop(L, 2);
 	lua_pushlstring(L, (const char*)buffer, node.ResourceSize);
 
-	free(buffer);
+	gff_free(buffer);
 	fclose(file);
 
 	return 1;
@@ -459,7 +459,7 @@ int GetKeys(lua_State *L){
 	void * readinto;
 	if (luaerf->version == 1){
 		buffersize = sizeof(ErfKey)*luaerf->Header->EntryCount;
-		keys = (ErfKey*)calloc(luaerf->Header->EntryCount, sizeof(ErfKey));
+		keys = (ErfKey*)gff_calloc(luaerf->Header->EntryCount, sizeof(ErfKey));
 		if (!keys){
 			fclose(file);
 			luaL_error(L, "Unable to allocate buffer for key list");
@@ -468,7 +468,7 @@ int GetKeys(lua_State *L){
 	}
 	else {
 		buffersize = sizeof(ErfKeyV2)*luaerf->Header->EntryCount;
-		keysv2 = (ErfKeyV2*)calloc(luaerf->Header->EntryCount, sizeof(ErfKeyV2));
+		keysv2 = (ErfKeyV2*)gff_calloc(luaerf->Header->EntryCount, sizeof(ErfKeyV2));
 		if (!keysv2){
 			fclose(file);
 			luaL_error(L, "Unable to allocate buffer for key list");
@@ -479,7 +479,7 @@ int GetKeys(lua_State *L){
 	size_t read = fread(readinto, 1, buffersize, file);
 	if (read != buffersize){
 		fclose(file);
-		free(keys);
+		gff_free(keys);
 		luaL_error(L, "Unable to read from file");
 	}
 	else
@@ -541,7 +541,7 @@ int GetKeys(lua_State *L){
 		lua_rawseti(L, -2, n + 1);
 	}
 
-	free(keys);
+	gff_free(keys);
 
 	return 1;
 }
@@ -566,7 +566,7 @@ int GetLocalizedStrings(lua_State *L){
 	}
 
 	unsigned int buffersize = luaerf->Header->LocalizedStringSize;
-	unsigned char * buffer = (unsigned char *)malloc(buffersize);
+	unsigned char * buffer = (unsigned char *)gff_malloc(buffersize);
 	if (!buffer){
 		fclose(file);
 		luaL_error(L, "Unable to allocate buffer for localized strings");
@@ -575,7 +575,7 @@ int GetLocalizedStrings(lua_State *L){
 	size_t read = fread(buffer, 1, buffersize, file);
 	if (read != buffersize){
 		fclose(file);
-		free(buffer);
+		gff_free(buffer);
 		luaL_error(L, "Unable to read localized strings from file");
 	}
 	else
@@ -589,7 +589,7 @@ int GetLocalizedStrings(lua_State *L){
 	for (unsigned int n = 0; n < luaerf->Header->LanguageCount; n++){
 
 		if (next >= buffersize){
-			free(buffer);
+			gff_free(buffer);
 			luaL_error(L, "Localized string size outside buffer range!");
 		}
 
@@ -602,7 +602,7 @@ int GetLocalizedStrings(lua_State *L){
 		lua_settable(L, -3);
 
 		if (locstr->StringSize >= buffersize){
-			free(buffer);
+			gff_free(buffer);
 			luaL_error(L, "Localized string size outside buffer range!");
 		}
 
@@ -615,7 +615,7 @@ int GetLocalizedStrings(lua_State *L){
 		next = next + sizeof(ErfLocString) + locstr->StringSize;
 	}
 
-	free(buffer);
+	gff_free(buffer);
 	return 1;
 }
 
@@ -630,7 +630,7 @@ int OpenErf(lua_State *L){
 		return 1;
 	}
 
-	ERFHeader * header = (ERFHeader*)malloc(sizeof(ERFHeader));
+	ERFHeader * header = (ERFHeader*)gff_malloc(sizeof(ERFHeader));
 	if (!header){
 		lua_pop(L, 1);
 		lua_pushnil(L);
@@ -640,7 +640,7 @@ int OpenErf(lua_State *L){
 	size_t read = fread(header, 1, sizeof(ERFHeader), file);
 	if (read < sizeof(ERFHeader)){
 		fclose(file);
-		free(header);
+		gff_free(header);
 		lua_pop(L, 1);
 		lua_pushnil(L);
 		return 1;
@@ -662,16 +662,16 @@ int OpenErf(lua_State *L){
 		version = 2;
 	}
 	else{
-		free(header);
+		gff_free(header);
 		lua_pop(L, 1);
 		lua_pushnil(L);
 		return 1;
 	}
 
 
-	char * filenamebuffer = (char*)malloc(len + 1);
+	char * filenamebuffer = (char*)gff_malloc(len + 1);
 	if (!filenamebuffer){
-		free(header);
+		gff_free(header);
 		lua_pop(L, 1);
 		lua_pushnil(L);
 		return 1;
@@ -685,8 +685,8 @@ int OpenErf(lua_State *L){
 	luaerf->version = version;
 
 	if (!luaerf){
-		free(header);
-		free(filenamebuffer);
+		gff_free(header);
+		gff_free(filenamebuffer);
 		lua_pop(L, 1);
 		lua_pushnil(L);
 		return 1;
@@ -726,12 +726,12 @@ int erf_gc(lua_State *L){
 	ERF * luaerf = lua_toerf(L, 1);
 
 	if (luaerf->File){
-		free(luaerf->File);
+		gff_free(luaerf->File);
 		luaerf->File = NULL;
 	}
 
 	if (luaerf->Header){
-		free(luaerf->Header);
+		gff_free(luaerf->Header);
 		luaerf->Header = NULL;
 	}
 

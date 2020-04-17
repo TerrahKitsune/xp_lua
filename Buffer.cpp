@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include "mem.h"
 
 #define FORMATBUFFERSIZE 1048576
 #define INITIAL 1024
@@ -16,7 +17,7 @@ static bool Resize(Buffer * b, size_t more){
 	if (b->length + more < b->size)
 		return true;
 
-	void * temp = realloc(b->data, b->size + more + INITIAL);
+	void * temp = gff_realloc(b->data, b->size + more + INITIAL);
 	if (!temp)
 		return false;
 
@@ -27,11 +28,11 @@ static bool Resize(Buffer * b, size_t more){
 
 Buffer * New(){
 
-	Buffer * temp = (Buffer *)calloc(1, sizeof(Buffer));
+	Buffer * temp = (Buffer *)gff_calloc(1, sizeof(Buffer));
 	if (temp){
-		temp->data = (char*)calloc(INITIAL, sizeof(char));
+		temp->data = (char*)gff_calloc(INITIAL, sizeof(char));
 		if (!temp->data){
-			free(temp);
+			gff_free(temp);
 			return NULL;
 		}
 		else
@@ -46,13 +47,13 @@ Buffer * New(const char * filename){
 	if (filename == NULL || filename[0] == '\0')
 		return New();
 
-	Buffer * temp = (Buffer *)calloc(1, sizeof(Buffer));
+	Buffer * temp = (Buffer *)gff_calloc(1, sizeof(Buffer));
 	if (!temp)
 		return NULL;
 
 	temp->file = fopen(filename, "wb+");
 	if (!temp->file){
-		free(temp);
+		gff_free(temp);
 		return NULL;
 	}
 
@@ -64,8 +65,8 @@ void Destroy(Buffer * b){
 		if (b->file)
 			fclose(b->file);
 		if (b->data)
-			free(b->data);
-		free(b);
+			gff_free(b->data);
+		gff_free(b);
 	}
 }
 
@@ -116,7 +117,7 @@ bool BufferFormat(Buffer * b, const char * format, ...){
 char * c_str(Buffer * b){
 	if (b->file){
 		if (b->data){
-			free(b->data);
+			gff_free(b->data);
 			b->data = NULL;
 			b->length = 0;
 			b->size = 0;
@@ -127,7 +128,7 @@ char * c_str(Buffer * b){
 			return NULL;
 		}
 
-		void * temp = malloc(len + 1);
+		void * temp = gff_malloc(len + 1);
 		if (!temp)
 			return NULL;
 		b->data = (char*)temp;

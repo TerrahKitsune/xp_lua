@@ -71,7 +71,7 @@ int lua_resource_getresourceid(lua_State * L, const char * file, size_t len){
 		}
 	}
 
-	char * ext = (char*)calloc(remainderlength + 1, sizeof(char));
+	char * ext = (char*)gff_calloc(remainderlength + 1, sizeof(char));
 	if (!ext)
 		return result;
 	else
@@ -94,7 +94,7 @@ int lua_resource_getresourceid(lua_State * L, const char * file, size_t len){
 		lua_pop(L, 1);
 	}
 
-	free(ext);
+	gff_free(ext);
 
 	lua_pop(L, 1);
 

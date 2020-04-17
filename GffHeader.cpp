@@ -9,8 +9,8 @@ void Bail(Gff * gff, lua_State *L, const char * errormsg){
 	lua_pop(L, lua_gettop(L));
 	UntrackAll(gff);
 	StringClear(gff);
-	free(gff->raw);
-	free(gff);
+	gff_free(gff->raw);
+	gff_free(gff);
 	if (errormsg != NULL)
 		luaL_error(L, errormsg);
 }
@@ -33,13 +33,13 @@ void StringAdd(Gff * gff, const char * string, size_t length, unsigned int offse
 		}
 	}
 
-	(*node) = (StringLinkedList *)malloc(sizeof(StringLinkedList));
+	(*node) = (StringLinkedList *)gff_malloc(sizeof(StringLinkedList));
 	if ((*node) == NULL)
 		return;
 	(*node)->length = length;
-	(*node)->string = (char*)malloc(length + 1);
+	(*node)->string = (char*)gff_malloc(length + 1);
 	if ((*node)->string == NULL){
-		free((*node));
+		gff_free((*node));
 		(*node) = NULL;
 		return;
 	}
@@ -69,8 +69,8 @@ void StringClear(Gff * gff){
 		remove = traversal;
 		traversal = traversal->next;
 		if (remove->string)
-			free(remove->string);
-		free(remove);
+			gff_free(remove->string);
+		gff_free(remove);
 	}
 	gff->strings = NULL;
 	gff->stringcount = 0;
@@ -121,7 +121,7 @@ int TrackCount(Gff * gff){
 void TrackOrBail(lua_State*L, Gff * gff, const void * gffstruct){
 
 	if (gff->gfftracker == NULL){
-		gff->gfftracker = (StructTrackerLinkedList*)malloc(sizeof(StructTrackerLinkedList));
+		gff->gfftracker = (StructTrackerLinkedList*)gff_malloc(sizeof(StructTrackerLinkedList));
 		gff->gfftracker->next = NULL;
 		gff->gfftracker->value = gffstruct;
 	}
@@ -137,7 +137,7 @@ void TrackOrBail(lua_State*L, Gff * gff, const void * gffstruct){
 			Traverse = Traverse->next;
 		}
 
-		Parent->next = (StructTrackerLinkedList*)malloc(sizeof(StructTrackerLinkedList));
+		Parent->next = (StructTrackerLinkedList*)gff_malloc(sizeof(StructTrackerLinkedList));
 		Parent->next->next = NULL;
 		Parent->next->value = gffstruct;
 	}
@@ -164,7 +164,7 @@ void UntrackOrBail(lua_State*L, Gff * gff, const void * gffstruct){
 		if (gff->gfftracker->value != gffstruct || gff->gfftracker->next != NULL)
 			Bail(gff, L, "GFF Malformed, invalid order of struct loading");
 		else {
-			free(gff->gfftracker);
+			gff_free(gff->gfftracker);
 			gff->gfftracker = NULL;
 		}
 	}
@@ -172,7 +172,7 @@ void UntrackOrBail(lua_State*L, Gff * gff, const void * gffstruct){
 		Bail(gff, L, "GFF Malformed, invalid order of struct loading");
 	}
 	else{
-		free(Parent->next);
+		gff_free(Parent->next);
 		Parent->next = NULL;
 	}
 }
@@ -187,12 +187,12 @@ void UntrackAll(Gff * gff){
 		if (Traverse->next == NULL){
 
 			if (Parent == NULL){
-				free(gff->gfftracker);
+				gff_free(gff->gfftracker);
 				gff->gfftracker = NULL;
 				return;
 			}
 			else{
-				free(Parent->next);
+				gff_free(Parent->next);
 				Parent->next = NULL;
 			}
 
