@@ -9,14 +9,6 @@ void lua_jsonprepasthread(lua_State*L, JsonContext *json, int idx) {
 
 		json->refThreadInput = luaL_ref(L, LUA_REGISTRYINDEX);
 		json_getnextthread(L, json);
-		if (lua_type(L, -1) != LUA_TTABLE) {
-			json_bail(L, json, "Root (first element) must be a table");
-			return;
-		}
-	}
-	else if (lua_type(L, idx) != LUA_TTABLE) {
-		json_bail(L, json, "Root (first element) must be a table");
-		return;
 	}
 }
 
@@ -72,7 +64,7 @@ int lua_jsonencodefunction(lua_State *L) {
 	lua_copy(L, 3, 2);
 	lua_pop(L, 1);
 
-	json_encodetable(L, json, NULL);
+	json_encodevalue(L, json, NULL);
 	json_append("", 0, L, json, true);
 	json_bail(L, json, NULL);
 
@@ -132,7 +124,7 @@ int lua_jsonencodetabletostring(lua_State *L) {
 	JsonContext * json = lua_tojson(L, 1);
 	lua_jsonprepasthread(L, json, 2);
 
-	json_encodetable(L, json, NULL);
+	json_encodevalue(L, json, NULL);
 
 	lua_pushlstring(L, json->buffer, json->bufferLength);
 	json_bail(L, json, NULL);
@@ -161,7 +153,7 @@ int lua_jsonencodetabletofile(lua_State *L) {
 	strcpy(json->fileName, file);
 
 	int depth = 0;
-	json_encodetable(L, json, &depth);
+	json_encodevalue(L, json, &depth);
 
 	json_bail(L, json, NULL);
 

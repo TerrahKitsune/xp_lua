@@ -289,6 +289,15 @@
     <Filter Include="LuaJson\Source Files">
       <UniqueIdentifier>{3ef82f93-ec01-4966-abc6-a4baad5c2c13}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Memory">
+      <UniqueIdentifier>{e99ce517-6995-4ae0-b7cf-fa840a0eb295}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Memory\Header Files">
+      <UniqueIdentifier>{25676c6c-cefe-414c-8938-6bd83638805b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Memory\Source Files">
+      <UniqueIdentifier>{600b7231-e941-4b61-84d6-e6ec244b3fd7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\plugin.cpp">
@@ -705,6 +714,9 @@
     <ClCompile Include="mem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MemoryManager.cpp">
+      <Filter>Memory\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -1117,6 +1129,9 @@
     </ClInclude>
     <ClInclude Include="mem.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryManager.h">
+      <Filter>Memory\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -525,6 +525,61 @@ int StreamPos(lua_State* L) {
 	return 1;
 }
 
+int StreamIndexOf(lua_State* L) {
+
+	LuaStream* stream = lua_toluastream(L, 1);
+
+	if (lua_type(L, 2) == LUA_TSTRING) {
+
+		size_t len;
+		const char * data = lua_tolstring(L, 2, &len);
+
+		if (len <= 0 || len >= (stream->len - stream->pos)) {
+			lua_pushnil(L);
+			return 1;
+		}
+
+		for (size_t i = stream->pos; i < stream->len - len; i++)
+		{
+			if (memcmp(&stream->data[i], data, len) == 0) {
+
+				lua_pushinteger(L, i);
+				return 1;
+			}
+		}
+
+		lua_pushnil(L);
+		return 1;
+	}
+	else if (lua_type(L, 2) == LUA_TNUMBER || lua_isnone(L, 2)) {
+		
+		int raw = luaL_optinteger(L, 2, 0);
+
+		if (raw < 0 || raw > 255) {
+			luaL_error(L, "Parameter 2 must be a string or a byte");
+			return 0;
+		}
+
+		BYTE lookfor = (BYTE)raw;
+
+		for (size_t i = stream->pos; i < stream->len; i++)
+		{
+			if (stream->data[i] == lookfor) {
+
+				lua_pushinteger(L, i);
+				return 1;
+			}
+		}
+
+		lua_pushnil(L);
+		return 1;
+	}
+	else {
+		lua_pushnil(L);
+		return 1;
+	}
+}
+
 int ReadStreamByte(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
@@ -547,8 +602,60 @@ int ReadLuaStream(lua_State* L) {
 	LuaStream* stream = lua_toluastream(L, 1);
 	long len = (long)luaL_optinteger(L, 2, stream->len - stream->pos);
 
-	if (len > stream->len - stream->pos) {
+	if (stream->pos >= stream->len) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		return 1;
+	}
+	else if (len > stream->len - stream->pos) {
 		len = stream->len - stream->pos;
+	}
+
+	const BYTE* result = ReadStream(stream, len);
+
+	if (!result) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushlstring(L, "", 0);
+		return 1;
+	}
+
+	lua_pop(L, lua_gettop(L));
+	lua_pushlstring(L, (char*)result, len);
+
+	return 1;
+}
+
+int ReadUntilLuaStream(lua_State* L) {
+
+	LuaStream* stream = lua_toluastream(L, 1);
+	long len = (long)luaL_optinteger(L, 2, 0);
+
+	if (stream->pos >= stream->len) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushnil(L);
+		return 1;
+	}
+	else if (len <= 0 || len > 255) {
+		luaL_error(L, "Parameter 2 must be a byte 0 - 255");
+	}
+
+	BYTE find = (BYTE)len;
+	len = stream->len;
+	
+	for (size_t i = stream->pos; i < stream->len; i++)
+	{
+		if (stream->data[i] == find) {
+			len = i;
+			break;
+		}
+	}
+
+	len -= stream->pos;
+
+	if (len <= 0) {
+		lua_pop(L, lua_gettop(L));
+		lua_pushlstring(L, "", 0);
+		return 1;
 	}
 
 	const BYTE* result = ReadStream(stream, len);

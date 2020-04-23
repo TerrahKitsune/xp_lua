@@ -19,6 +19,8 @@ typedef struct LuaStream {
 LuaStream* lua_pushluastream(lua_State* L);
 LuaStream* lua_toluastream(lua_State* L, int index);
 
+int ReadUntilLuaStream(lua_State* L);
+int StreamIndexOf(lua_State* L);
 int GetSharedMemoryStreamInfo(lua_State* L);
 int OpenSharedMemoryStream(lua_State* L);
 int NewSharedMemoryStream(lua_State* L);

@@ -268,6 +268,10 @@ static int L_Exit(lua_State *L) {
 	ERR_free_strings();
 	EVP_cleanup();
 	WSACleanup();
+	size_t leaked = EndMemoryManager();
+#ifdef _DEBUG
+	assert(leaked == 0);
+#endif
 	exit(ExitCode);
 }
 
@@ -441,6 +445,8 @@ static void *l_alloc(void *ud, void *ptr, size_t osize,	size_t nsize) {
 }
 
 int main(int argc, char *argv[]) {
+
+	InitMemoryManager();
 
 	WSADATA wsa;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)

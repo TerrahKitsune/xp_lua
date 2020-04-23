@@ -80,6 +80,7 @@
     <ClCompile Include="md5.c" />
     <ClCompile Include="MD5Main.cpp" />
     <ClCompile Include="mem.cpp" />
+    <ClCompile Include="MemoryManager.cpp" />
     <ClCompile Include="MySQLMain.cpp" />
     <ClCompile Include="mysql_main_incl.cpp" />
     <ClCompile Include="namedpipe.cpp" />
@@ -222,6 +223,7 @@
     <ClInclude Include="md5.h" />
     <ClInclude Include="MD5Main.h" />
     <ClInclude Include="mem.h" />
+    <ClInclude Include="MemoryManager.h" />
     <ClInclude Include="MySQLMain.h" />
     <ClInclude Include="mysql_main_incl.h" />
     <ClInclude Include="namedpipe.h" />

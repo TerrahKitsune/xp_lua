@@ -127,12 +127,85 @@ end
 CreateGCPrint();
 collectgarbage();
 
+local s = Stream.Create();
+
+s:Buffer("Hello this is text\0");
+print(s:IndexOf(0));
+print(s:IndexOf("is"));
+print(s:ReadUntil(string.byte("i")));
+s:Read(1);
+print(s:ReadUntil(string.byte("i")));
+s:Read(1);
+print(s:ReadUntil(string.byte("i")));
+print(s:Read());
+print(s:Read());
+
+if s then return; end
+
+local j = Json.Create();
 local db=assert(MySQL.Connect("10.9.23.252", "TwitchKafka", "meowCat69!", "twitch"));
 
-local ok, err = Stream.CreateSharedMemoryStream("testyyy", 1024);
-local stream = assert(ok, GetLastError(err));
-local position, length, allocated = stream:GetInfo();
-print(position, length, allocated);
-for n=1, allocated do 
-	stream:WriteByte(math.floor(math.random()*1000)%255);
-end	
+print(j:Encode("hello"));
+Break();
+
+j:EncodeToFile("d:/big.json", coroutine.create(function() 
+
+	assert(db:Query("SELECT * FROM eventlogs LIMIT 800000;"));
+	coroutine.yield(nil, {});
+
+	while db:Fetch() do
+
+		coroutine.yield(1, {});
+
+		for k,v in pairs(db:GetRow()) do 
+			coroutine.yield(k, v);
+		end
+
+		coroutine.yield(nil, nil);
+	end
+
+	coroutine.yield(nil, nil);
+end));
+
+local data={};
+local str,f;
+while true do  
+	
+	print("DecodeFromFile");
+	data = j:DecodeFromFile("d:/big.json");
+	print("Encode");
+	str = j:Encode(data);
+	f=io.open("d:/big2.json", "w");
+	f:write(str);
+	f:flush();
+	f:close();
+	data = nil;
+	str = nil;
+	f=io.open("d:/big2.json", "r");
+
+	print("DecodeFromFunction");
+	data = j:DecodeFromFunction(function() return f:read(1000); end);
+	f:close();
+
+	f=Stream.Create();
+	j:EncodeToFunction(function(part) f:Buffer(part); end, data);
+	data=nil;
+
+	data = j:DecodeFromFunction(function() return f:Read(1000); end);
+	f=nil;
+	data=nil;
+
+	f=io.open("d:/big2.json", "r");
+	str = f:read("*all");
+	f:close();
+
+	print("Decode");
+	data = j:Decode(str);
+	str=nil;
+
+	print("EncodeToFile");
+	j:EncodeToFile("d:/big3.json", data);
+	data=nil;
+
+	Break();
+end

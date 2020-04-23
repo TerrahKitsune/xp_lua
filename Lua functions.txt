@@ -596,6 +596,14 @@ Stream:
 	-Reads from the current position, if length is omitted it reads to the end
 	string Stream:Read(opt length);
 
+	-Returns from the current position until the first occurance of toFind byte
+	-toFind is 0 by default
+	string Stream:ReadUntil(opt tofind)
+
+	-Finds the next occurance from the current position
+	-Returns nil if none found
+	pos Stream:IndexOf(string or byte)
+
 	-Retrives the current position, length and the current allocated size of the stream
 	position, length, allocated Stream:GetInfo();
 

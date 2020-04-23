@@ -81,7 +81,12 @@ void json_append(const char * data, size_t len, lua_State *L, JsonContext* conte
 			void * temp = gff_realloc(context->buffer, newSize);
 			if (!temp) {
 
-				json_bail(L, context, "Out of memory");
+				lua_gc(L, LUA_GCCOLLECT, 0);
+				temp = gff_realloc(context->buffer, newSize);
+
+				if (!temp) {
+					json_bail(L, context, "Out of memory");
+				}
 			}
 			else {
 				context->buffer = (char*)temp;
@@ -207,7 +212,7 @@ unsigned int json_popfromantirecursion(JsonContext* context) {
 			return 0;
 		}
 
-		unsigned int result = context->antiRecursion[len-1];
+		unsigned int result = context->antiRecursion[len - 1];
 		context->antiRecursion[len - 1] = 0;
 		return result;
 	}

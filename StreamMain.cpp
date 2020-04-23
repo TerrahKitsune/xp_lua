@@ -37,6 +37,8 @@ static const struct luaL_Reg streamfunctions[] = {
 	{ "WriteUnsignedLong",  WriteUnsignedLong },
 	{ "ReadUnsignedLong", ReadUnsignedLong },
 	{ "SetLength", SetLength },
+	{ "ReadUntil", ReadUntilLuaStream },
+	{ "IndexOf", StreamIndexOf },
 	{ "Compress", Compress },
 	{ "Decompress", Decompress },
 	{ "CreateSharedMemoryStream", NewSharedMemoryStream },

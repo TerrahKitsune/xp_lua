@@ -223,8 +223,13 @@ char json_readnext(lua_State *L, JsonContext* context) {
 		if (!context->readFileBuffer) {
 			context->readFileBuffer = (char*)gff_malloc(JSONFILEREADBUFFERSIZE);
 			if (!context->readFileBuffer) {
-				json_bail(L, context, "Out of memory");
-				return 0;
+
+				lua_gc(L, LUA_GCCOLLECT, 0);
+				context->readFileBuffer = (char*)gff_malloc(JSONFILEREADBUFFERSIZE);
+
+				if (!context->readFileBuffer) {
+					json_bail(L, context, "Out of memory");
+				}
 			}
 			context->readFileBufferSize = JSONFILEREADBUFFERSIZE;
 		}
@@ -249,11 +254,18 @@ char json_readnext(lua_State *L, JsonContext* context) {
 		if (len > 0 && data) {
 
 			if (len >= context->readFileBufferSize) {
+
 				void * temp = gff_realloc(context->readFileBuffer, len + 1);
+
 				if (!temp) {
-					json_bail(L, context, "Out of memory");
-					return 0;
+					lua_gc(L, LUA_GCCOLLECT, 0);
+					temp = gff_realloc(context->readFileBuffer, len + 1);
+
+					if (!temp) {
+						json_bail(L, context, "Out of memory");
+					}
 				}
+
 				context->readFileBuffer = (char*)temp;
 				context->readFileBufferSize = len + 1;
 			}
@@ -270,9 +282,17 @@ char json_readnext(lua_State *L, JsonContext* context) {
 
 		if (!context->readFileBuffer) {
 			context->readFileBuffer = (char*)gff_malloc(JSONFILEREADBUFFERSIZE);
+
 			if (!context->readFileBuffer) {
-				json_bail(L, context, "Out of memory");
-				return 0;
+
+				lua_gc(L, LUA_GCCOLLECT, 0);
+
+				context->readFileBuffer = (char*)gff_malloc(JSONFILEREADBUFFERSIZE);
+
+				if (!context->readFileBuffer) {
+					json_bail(L, context, "Out of memory");
+					return 0;
+				}
 			}
 		}
 

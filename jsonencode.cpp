@@ -153,9 +153,14 @@ void json_encodetable(lua_State* L, JsonContext* C, int* depth) {
 		json_bail(L, C, "Recursion detected");
 		return;
 	}
-	else if(!json_addtoantirecursion(id, C)){
-		json_bail(L, C, "Out of memory");
-		return;
+	else if (!json_addtoantirecursion(id, C)) {
+
+		lua_gc(L, LUA_GCCOLLECT, 0);
+
+		if (!json_addtoantirecursion(id, C)) {
+			json_bail(L, C, "Out of memory");
+			return;
+		}
 	}
 
 	size_t pos = 0;
@@ -277,7 +282,7 @@ void json_getnextthread(lua_State* L, JsonContext* C) {
 
 	if (result == LUA_YIELD) {
 		lua_pop(L, 1);
-		lua_xmove(T, L, 2);	
+		lua_xmove(T, L, 2);
 		lua_pop(T, lua_gettop(T));
 	}
 	else if (result == 0) {
@@ -305,7 +310,7 @@ void json_encodethread(lua_State* L, JsonContext* C, int* depth) {
 	int count = 0;
 	json_getnextthread(L, C);
 	while (!lua_isnil(L, -1) || !lua_isnil(L, -2)) {
-		
+
 		if (firstType == '\0') {
 
 			if (lua_type(L, -2) == LUA_TSTRING) {
@@ -340,7 +345,7 @@ void json_encodethread(lua_State* L, JsonContext* C, int* depth) {
 				json_pad('\t', *depth, L, C);
 			}
 
-			json_encodevalue(L, C, depth);	
+			json_encodevalue(L, C, depth);
 		}
 		else {
 
@@ -376,7 +381,7 @@ void json_encodethread(lua_State* L, JsonContext* C, int* depth) {
 
 	lua_pop(L, 2);
 
-	if (firstType=='\0') {
+	if (firstType == '\0') {
 		json_append("[]", 2, L, C);
 		return;
 	}

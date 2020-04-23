@@ -52,6 +52,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -70,6 +71,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <LargeAddressAware>true</LargeAddressAware>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -116,6 +118,7 @@
     <ClCompile Include="luasocketmain.cpp" />
     <ClCompile Include="lua_json.cpp" />
     <ClCompile Include="mem.cpp" />
+    <ClCompile Include="MemoryManager.cpp" />
     <ClCompile Include="mysql_main_incl.cpp" />
     <ClCompile Include="namedpipe.cpp" />
     <ClCompile Include="NamedPipeMain.cpp" />
@@ -239,6 +242,7 @@
     <ClInclude Include="luasocketmain.h" />
     <ClInclude Include="lua_json.h" />
     <ClInclude Include="mem.h" />
+    <ClInclude Include="MemoryManager.h" />
     <ClInclude Include="mysql_main_incl.h" />
     <ClInclude Include="namedpipe.h" />
     <ClInclude Include="NamedPipeMain.h" />

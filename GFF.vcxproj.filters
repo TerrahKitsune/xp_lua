@@ -274,6 +274,15 @@
     <Filter Include="LuaJson\Source Files">
       <UniqueIdentifier>{45c7cffb-cd06-4393-9097-f6824a6eabf4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Memory">
+      <UniqueIdentifier>{166ffa6a-027b-4009-a690-066115b36f77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Memory\Header Files">
+      <UniqueIdentifier>{4cf98a56-d31c-4193-9aa3-1760930a026d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Memory\Source Files">
+      <UniqueIdentifier>{dcefc642-cd9a-4e70-a7ee-cbd7cadcc68e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -636,6 +645,9 @@
     <ClCompile Include="mem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MemoryManager.cpp">
+      <Filter>Memory\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -988,6 +1000,9 @@
     </ClInclude>
     <ClInclude Include="mem.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryManager.h">
+      <Filter>Memory\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

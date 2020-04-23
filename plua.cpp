@@ -32,6 +32,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 {
 	if (ul_reason_for_call == DLL_PROCESS_ATTACH)
 	{
+		InitMemoryManager();
+
 		plugin = new PLua();
 
 		TCHAR szPath[MAX_PATH];
@@ -41,6 +43,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 	else if (ul_reason_for_call == DLL_PROCESS_DETACH)
 	{
 		delete plugin;
+
+		EndMemoryManager();
 	}
 	return TRUE;
 }
@@ -53,7 +57,7 @@ Implementation of Lua Plugin
 PLua::PLua()
 {
 	header = _T(
-		"NWNX Lua Plugin V.0.3.70\n" \
+		"NWNX Lua Plugin V.0.3.71\n" \
 		"(c) 2020 by Robin Karlsson (Terrahkitsune)\n" \
 		"Lua (c) PUC-Rio: https://www.lua.org/ \n"\
 		"visit us at http://www.nwnx.org\n");
@@ -62,7 +66,7 @@ PLua::PLua()
 		"This plugin provides a lua engine and environment.");
 
 	subClass = _T("LUA");
-	version = _T("0.3.70");
+	version = _T("0.3.71");
 	buffer = NULL;
 	Engine = new LuaEngine();
 
