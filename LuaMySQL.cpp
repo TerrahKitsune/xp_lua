@@ -595,7 +595,7 @@ int SetTimeout(lua_State *L) {
 
 	if (luamysql) {
 
-		luamysql->timeout = (int)min(luaL_checkinteger(L, 2), 1);
+		luamysql->timeout = (int)max(luaL_checkinteger(L, 2), 1);
 
 		mysql_options(luamysql->mysql, MYSQL_OPT_CONNECT_TIMEOUT, &luamysql->timeout);
 		mysql_options(luamysql->mysql, MYSQL_OPT_READ_TIMEOUT, &luamysql->timeout);
