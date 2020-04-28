@@ -768,6 +768,63 @@ int WriteStreamByte(lua_State* L) {
 	return 1;
 }
 
+int ReadUtf8(lua_State* L) {
+
+	LuaStream* stream = lua_toluastream(L, 1);
+
+	long avail = stream->len - stream->pos;
+
+	if (!stream->data || avail <= 0) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+	BYTE first = stream->data[stream->pos];
+	DWORD code = 0;
+
+	if (first > 0x10000) {
+
+		if (avail < 4) {
+			lua_pushnil(L);
+			return 1;
+		}
+
+		memcpy(&code, &stream->data[stream->pos], 4);
+		lua_pushlstring(L, (const char*)&code, 4);
+		stream->pos += 4;
+	}
+	else if (first > 0x800) {
+
+		if (avail < 3) {
+			lua_pushnil(L);
+			return 1;
+		}
+
+		memcpy(&code, &stream->data[stream->pos], 3);
+		lua_pushlstring(L, (const char*)&code, 3);
+		stream->pos += 3;
+	}
+	else if (first > 0x80) {
+
+		if (avail < 2) {
+			lua_pushnil(L);
+			return 1;
+		}
+
+		memcpy(&code, &stream->data[stream->pos], 2);
+		lua_pushlstring(L, (const char*)&code, 2);
+		stream->pos += 2;
+	}
+	else {
+		memcpy(&code, &stream->data[stream->pos], 1);
+		lua_pushlstring(L, (const char*)&code, 1);
+		stream->pos += 1;
+	}
+
+	lua_pushinteger(L, code);
+	return 2;
+}
+
 int ReadFromFile(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);

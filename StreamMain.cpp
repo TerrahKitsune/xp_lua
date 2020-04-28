@@ -36,6 +36,7 @@ static const struct luaL_Reg streamfunctions[] = {
 	{ "ReadLong",  ReadLong },
 	{ "WriteUnsignedLong",  WriteUnsignedLong },
 	{ "ReadUnsignedLong", ReadUnsignedLong },
+	{ "ReadUtf8",  ReadUtf8 },
 	{ "SetLength", SetLength },
 	{ "ReadUntil", ReadUntilLuaStream },
 	{ "IndexOf", StreamIndexOf },

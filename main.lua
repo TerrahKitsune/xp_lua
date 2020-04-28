@@ -127,81 +127,6 @@ end
 CreateGCPrint();
 collectgarbage();
 
-local function utf8char(utf)
-
-	if utf <= 0xFF  then
-
-		return string.char(utf);
-
-	elseif utf <= 0xFFFF then
-
-		return string.char((utf & 0x0000FF00) >> 8, utf & 0x000000FF);
-
-	elseif utf <= 0xFFFFFF then
-
-		return string.char((utf & 0x00FF0000) >> 16,(utf & 0x0000FF00) >> 8, utf & 0x000000FF);
-
-	elseif utf <= 0xFFFFFFFF then
-
-		return string.char((utf & 0xFF000000) >> 24, (utf & 0x00FF0000) >> 16,(utf & 0x0000FF00) >> 8, utf & 0x000000FF);
-	else 
-		return nil;
-	end
-end
-
-local function ReadUTF8(stream)
-	
-	local avail = stream:len() - stream:pos();
-
-	if avail <= 0 then 
-		return nil;
-	end 
-
-	local byte = stream:PeekByte();
-	local result = 0;
-
-	if byte > 0x10000 then 
-
-		if avail < 4 then 
-			return nil;
-		end
-		
-		result = stream:ReadByte();
-		result = result << 8;
-		result = result | stream:ReadByte();
-		result = result << 8;
-		result = result | stream:ReadByte();
-		result = result << 8;
-		result = result | stream:ReadByte();
-
-	elseif byte > 0x800 then 
-
-		if avail < 3 then 
-			return nil;
-		end
-		
-		result = stream:ReadByte();
-		result = result << 8;
-		result = result | stream:ReadByte();
-		result = result << 8;
-		result = result | stream:ReadByte();
-
-	elseif byte > 0x80 then 
-
-		if avail < 2 then 
-			return nil;
-		end
-		
-		result = stream:ReadByte();
-		result = result << 8;
-		result = result | stream:ReadByte();
-	else 
-		result = stream:ReadByte();
-	end
-
-	return result;
-end
-
 local stream = Stream.Create();
 stream:Buffer([[An preost wes on leoden, Laȝamon was ihoten
 He wes Leovenaðes sone -- liðe him be Drihten.
@@ -209,10 +134,10 @@ He wonede at Ernleȝe at æðelen are chirechen,
 Uppen Sevarne staþe, sel þar him þuhte,
 Onfest Radestone, þer he bock radde. åäö ÅÄÖ ¢]]);
 
-local c = ReadUTF8(stream);
+local str, c = stream:ReadUtf8();
 while c do 
-	print(string.format("%x", c),c, utf8char(c));
-	c = ReadUTF8(stream);
+	print(string.format("%x", c),c, str);
+	str, c = stream:ReadUtf8();
 end
 
 stream:Seek();
