@@ -586,7 +586,7 @@ Stream:
 	-returns number of bytes written
 	int Stream:Write(obj, opt size);
 
-	-Reads the next bytes as utf8 returning a string representing a utf8 character and the code
+	-Reads the next bytes as utf8 returning a string representing a utf8 character and the codepoint
 	-returns nil on failure
 	string, int Stream:ReadUtf8()
 

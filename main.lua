@@ -128,11 +128,7 @@ CreateGCPrint();
 collectgarbage();
 
 local stream = Stream.Create();
-stream:Buffer([[An preost wes on leoden, Laȝamon was ihoten
-He wes Leovenaðes sone -- liðe him be Drihten.
-He wonede at Ernleȝe at æðelen are chirechen,
-Uppen Sevarne staþe, sel þar him þuhte,
-Onfest Radestone, þer he bock radde. åäö ÅÄÖ ¢]]);
+stream:Buffer([[$¢ह€한𐍈]]);
 
 local str, c = stream:ReadUtf8();
 while c do 

@@ -6,6 +6,8 @@
 #include <windows.h> 
 #include <stdio.h>
 #include <compressapi.h>
+#include <cstdint>
+
 #pragma comment(lib, "Cabinet.lib")
 
 const size_t MIN_STREAM_SIZE = 1024;
@@ -552,7 +554,7 @@ int StreamIndexOf(lua_State* L) {
 		return 1;
 	}
 	else if (lua_type(L, 2) == LUA_TNUMBER || lua_isnone(L, 2)) {
-		
+
 		int raw = luaL_optinteger(L, 2, 0);
 
 		if (raw < 0 || raw > 255) {
@@ -641,7 +643,7 @@ int ReadUntilLuaStream(lua_State* L) {
 
 	BYTE find = (BYTE)len;
 	len = stream->len;
-	
+
 	for (size_t i = stream->pos; i < stream->len; i++)
 	{
 		if (stream->data[i] == find) {
@@ -772,6 +774,7 @@ int ReadUtf8(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
 
+
 	long avail = stream->len - stream->pos;
 
 	if (!stream->data || avail <= 0) {
@@ -781,44 +784,83 @@ int ReadUtf8(lua_State* L) {
 
 	BYTE first = stream->data[stream->pos];
 	DWORD code = 0;
+	DWORD shift = 0;
 
-	if (first > 0x10000) {
+	if ((first & 0xF8) == 0xF0) {
 
-		if (avail < 4) {
+		if (avail < 4 ||
+			(stream->data[stream->pos + 1] & 0xC0) != 0x80 ||
+			(stream->data[stream->pos + 2] & 0xC0) != 0x80 ||
+			(stream->data[stream->pos + 3] & 0xC0) != 0x80) {
 			lua_pushnil(L);
 			return 1;
 		}
 
 		memcpy(&code, &stream->data[stream->pos], 4);
 		lua_pushlstring(L, (const char*)&code, 4);
+
+		code = stream->data[stream->pos + 3] & 0x3F;
+		shift = stream->data[stream->pos + 2] << 6;
+		code |= (shift & 0xFC0);
+		shift = stream->data[stream->pos + 1] << 12;
+		code |= (shift & 0x3F000);
+		shift = stream->data[stream->pos] << 18;
+		code |= (shift & 0x1C0000);
+
+		code &= 0x1FFFFF;
+
 		stream->pos += 4;
 	}
-	else if (first > 0x800) {
+	else if ((first & 0xF0) == 0xE0) {
 
-		if (avail < 3) {
+		if (avail < 3 ||
+			(stream->data[stream->pos + 1] & 0xC0) != 0x80 ||
+			(stream->data[stream->pos + 2] & 0xC0) != 0x80) {
 			lua_pushnil(L);
 			return 1;
 		}
 
 		memcpy(&code, &stream->data[stream->pos], 3);
 		lua_pushlstring(L, (const char*)&code, 3);
+
+		code = stream->data[stream->pos + 2] & 0x3F;
+		shift = stream->data[stream->pos + 1] << 6;
+		code |= (shift & 0xFC0);
+		shift = stream->data[stream->pos] << 12;
+		code |= (shift & 0xF000);
+
+		code &= 0xFFFF;
+
 		stream->pos += 3;
 	}
-	else if (first > 0x80) {
+	else if ((first & 0xE0) == 0xC0) {
 
-		if (avail < 2) {
+		if (avail < 2 || (stream->data[stream->pos + 1] & 0xC0) != 0x80) {
 			lua_pushnil(L);
 			return 1;
 		}
 
 		memcpy(&code, &stream->data[stream->pos], 2);
 		lua_pushlstring(L, (const char*)&code, 2);
+
+		code = stream->data[stream->pos + 1] & 0x3F;
+		shift = stream->data[stream->pos] << 6;
+
+		code |= shift;
+		code &= 0x7FF;
+
 		stream->pos += 2;
 	}
-	else {
+	else if ((first & 0x80) == 0x0) {
+
 		memcpy(&code, &stream->data[stream->pos], 1);
 		lua_pushlstring(L, (const char*)&code, 1);
+
 		stream->pos += 1;
+	}
+	else {
+		lua_pushnil(L);
+		return 1;
 	}
 
 	lua_pushinteger(L, code);
@@ -1174,7 +1216,7 @@ int GetSharedMemoryStreamInfo(lua_State* L) {
 		return 2;
 	}
 
-	void * ptr = MapViewOfFile(h,FILE_MAP_READ, 0, 0, 0);
+	void * ptr = MapViewOfFile(h, FILE_MAP_READ, 0, 0, 0);
 
 	if (ptr == NULL) {
 		CloseHandle(h);
