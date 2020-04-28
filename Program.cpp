@@ -446,6 +446,8 @@ static void *l_alloc(void *ud, void *ptr, size_t osize,	size_t nsize) {
 
 int main(int argc, char *argv[]) {
 
+	SetConsoleOutputCP(65001);
+
 	InitMemoryManager();
 
 	WSADATA wsa;

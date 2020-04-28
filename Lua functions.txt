@@ -531,7 +531,7 @@ Stream:
 	-initialsize is the size that should be allocated at the start (default 1 mb)
 	-if a function is provided instead it'll be passed the first argument as the requested size
 	-function(size) return size; end
-	Stream Stream.Create(opt initialsize/allocfunc);
+	Stream Stream.Create(opt initialsize/allocfunc)
 
 	-Querries and returns shared memory information
 	-https://docs.microsoft.com/en-gb/windows/win32/api/winnt/ns-winnt-memory_basic_information

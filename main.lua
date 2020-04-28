@@ -127,85 +127,93 @@ end
 CreateGCPrint();
 collectgarbage();
 
-local s = Stream.Create();
+local function utf8char(utf)
 
-s:Buffer("Hello this is text\0");
-print(s:IndexOf(0));
-print(s:IndexOf("is"));
-print(s:ReadUntil(string.byte("i")));
-s:Read(1);
-print(s:ReadUntil(string.byte("i")));
-s:Read(1);
-print(s:ReadUntil(string.byte("i")));
-print(s:Read());
-print(s:Read());
+	if utf <= 0xFF  then
 
-if s then return; end
+		return string.char(utf);
 
-local j = Json.Create();
-local db=assert(MySQL.Connect("10.9.23.252", "TwitchKafka", "meowCat69!", "twitch"));
+	elseif utf <= 0xFFFF then
 
-print(j:Encode("hello"));
-Break();
+		return string.char((utf & 0x0000FF00) >> 8, utf & 0x000000FF);
 
-j:EncodeToFile("d:/big.json", coroutine.create(function() 
+	elseif utf <= 0xFFFFFF then
 
-	assert(db:Query("SELECT * FROM eventlogs LIMIT 800000;"));
-	coroutine.yield(nil, {});
+		return string.char((utf & 0x00FF0000) >> 16,(utf & 0x0000FF00) >> 8, utf & 0x000000FF);
 
-	while db:Fetch() do
+	elseif utf <= 0xFFFFFFFF then
 
-		coroutine.yield(1, {});
+		return string.char((utf & 0xFF000000) >> 24, (utf & 0x00FF0000) >> 16,(utf & 0x0000FF00) >> 8, utf & 0x000000FF);
+	else 
+		return nil;
+	end
+end
 
-		for k,v in pairs(db:GetRow()) do 
-			coroutine.yield(k, v);
+local function ReadUTF8(stream)
+	
+	local avail = stream:len() - stream:pos();
+
+	if avail <= 0 then 
+		return nil;
+	end 
+
+	local byte = stream:PeekByte();
+	local result = 0;
+
+	if byte > 0x10000 then 
+
+		if avail < 4 then 
+			return nil;
 		end
+		
+		result = stream:ReadByte();
+		result = result << 8;
+		result = result | stream:ReadByte();
+		result = result << 8;
+		result = result | stream:ReadByte();
+		result = result << 8;
+		result = result | stream:ReadByte();
 
-		coroutine.yield(nil, nil);
+	elseif byte > 0x800 then 
+
+		if avail < 3 then 
+			return nil;
+		end
+		
+		result = stream:ReadByte();
+		result = result << 8;
+		result = result | stream:ReadByte();
+		result = result << 8;
+		result = result | stream:ReadByte();
+
+	elseif byte > 0x80 then 
+
+		if avail < 2 then 
+			return nil;
+		end
+		
+		result = stream:ReadByte();
+		result = result << 8;
+		result = result | stream:ReadByte();
+	else 
+		result = stream:ReadByte();
 	end
 
-	coroutine.yield(nil, nil);
-end));
-
-local data={};
-local str,f;
-while true do  
-	
-	print("DecodeFromFile");
-	data = j:DecodeFromFile("d:/big.json");
-	print("Encode");
-	str = j:Encode(data);
-	f=io.open("d:/big2.json", "w");
-	f:write(str);
-	f:flush();
-	f:close();
-	data = nil;
-	str = nil;
-	f=io.open("d:/big2.json", "r");
-
-	print("DecodeFromFunction");
-	data = j:DecodeFromFunction(function() return f:read(1000); end);
-	f:close();
-
-	f=Stream.Create();
-	j:EncodeToFunction(function(part) f:Buffer(part); end, data);
-	data=nil;
-
-	data = j:DecodeFromFunction(function() return f:Read(1000); end);
-	f=nil;
-	data=nil;
-
-	f=io.open("d:/big2.json", "r");
-	str = f:read("*all");
-	f:close();
-
-	print("Decode");
-	data = j:Decode(str);
-	str=nil;
-
-	print("EncodeToFile");
-	j:EncodeToFile("d:/big3.json", data);
-	data=nil;
-
-	Break();
+	return result;
 end
+
+local stream = Stream.Create();
+stream:Buffer([[An preost wes on leoden, Laȝamon was ihoten
+He wes Leovenaðes sone -- liðe him be Drihten.
+He wonede at Ernleȝe at æðelen are chirechen,
+Uppen Sevarne staþe, sel þar him þuhte,
+Onfest Radestone, þer he bock radde. åäö ÅÄÖ ¢]]);
+
+local c = ReadUTF8(stream);
+while c do 
+	print(string.format("%x", c),c, utf8char(c));
+	c = ReadUTF8(stream);
+end
+
+stream:Seek();
+print(stream:Read());
