@@ -774,7 +774,6 @@ int ReadUtf8(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
 
-
 	long avail = stream->len - stream->pos;
 
 	if (!stream->data || avail <= 0) {
@@ -793,6 +792,7 @@ int ReadUtf8(lua_State* L) {
 			(stream->data[stream->pos + 2] & 0xC0) != 0x80 ||
 			(stream->data[stream->pos + 3] & 0xC0) != 0x80) {
 			lua_pushnil(L);
+			stream->pos += min(4, avail);
 			return 1;
 		}
 
@@ -817,6 +817,7 @@ int ReadUtf8(lua_State* L) {
 			(stream->data[stream->pos + 1] & 0xC0) != 0x80 ||
 			(stream->data[stream->pos + 2] & 0xC0) != 0x80) {
 			lua_pushnil(L);
+			stream->pos += min(3, avail);
 			return 1;
 		}
 
@@ -837,6 +838,7 @@ int ReadUtf8(lua_State* L) {
 
 		if (avail < 2 || (stream->data[stream->pos + 1] & 0xC0) != 0x80) {
 			lua_pushnil(L);
+			stream->pos += min(2, avail);
 			return 1;
 		}
 
