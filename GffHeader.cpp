@@ -4,6 +4,26 @@
 #include <string.h>
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
+static Gff * currentGff = NULL;
+
+void SetLuaAtPanicFunction(lua_State *L, Gff * gff) {
+
+	if (gff) {
+
+		if (currentGff) {
+			UntrackAll(currentGff);
+			StringClear(currentGff);
+			gff_free(currentGff->raw);
+			gff_free(currentGff);
+		}
+
+		currentGff = gff;
+	}
+	else {
+		currentGff = NULL;
+	}
+}
+
 void Bail(Gff * gff, lua_State *L, const char * errormsg){
 
 	lua_pop(L, lua_gettop(L));
@@ -11,11 +31,10 @@ void Bail(Gff * gff, lua_State *L, const char * errormsg){
 	StringClear(gff);
 	gff_free(gff->raw);
 	gff_free(gff);
+	SetLuaAtPanicFunction(L, NULL);
 	if (errormsg != NULL)
 		luaL_error(L, errormsg);
 }
-
-
 
 void StringAdd(Gff * gff, const char * string, size_t length, unsigned int offset){
 

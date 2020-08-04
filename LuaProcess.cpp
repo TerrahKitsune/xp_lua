@@ -568,9 +568,8 @@ int GetMemory(lua_State *L) {
 
 	LuaProcess * proc = lua_toprocess(L, 1);
 
-	PROCESS_MEMORY_COUNTERS_EX pmc;
+	PROCESS_MEMORY_COUNTERS pmc;
 	GetProcessMemoryInfo(proc->processInfo.hProcess, (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
-	SIZE_T virtualMemUsedByMe = pmc.PrivateUsage;
 
 	lua_pop(L, lua_gettop(L));
 	lua_pushnumber(L, pmc.WorkingSetSize);

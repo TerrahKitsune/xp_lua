@@ -13,7 +13,17 @@ unsigned int WriteStructFields(lua_State*L, Gff * gff, GffStruct *gffstruct){
 	}
 	else{
 
-		unsigned int * fields = (unsigned int *)&gff->raw[gff->Header.FieldIndicesOffset + gff->Header.FieldIndicesCount];
+		if (!lua_istable(L, -1)) {
+			Bail(gff, L, "Struct fields is not a table");
+		}
+
+		size_t offset = gff->Header.FieldIndicesOffset + gff->Header.FieldIndicesCount;
+
+		if (offset >= gff->size) {
+			Bail(gff, L, "Invalid struct file offset");
+		}
+
+		unsigned int * fields = (unsigned int *)&gff->raw[offset];
 		result = gff->Header.FieldIndicesCount;
 		unsigned int cnt = 0;
 
@@ -50,6 +60,10 @@ unsigned int WriteStructFields(lua_State*L, Gff * gff, GffStruct *gffstruct){
 
 unsigned int WriteStruct(lua_State*L, Gff* gff){
 
+	if (!lua_istable(L, -1)) {
+		Bail(gff, L, "Struct is not a table");
+	}
+
 	GffStruct * gffstruct = (GffStruct *)&gff->raw[gff->Header.StructOffset];
 	gffstruct = &gffstruct[gff->Header.StructCount];
 	int result = gff->Header.StructCount;
@@ -57,11 +71,17 @@ unsigned int WriteStruct(lua_State*L, Gff* gff){
 
 	lua_pushstring(L, "FieldCount");
 	lua_gettable(L, -2);
+	if (!lua_isnumber(L, -1)) {
+		Bail(gff, L, "Struct FieldCount missing");
+	}
 	gffstruct->FieldCount = (unsigned int)lua_tointeger(L, -1);
 	lua_pop(L, 1);
 
 	lua_pushstring(L, "Type");
 	lua_gettable(L, -2);
+	if (!lua_isnumber(L, -1)) {
+		Bail(gff, L, "Struct Type missing");
+	}
 	gffstruct->Type = (unsigned int)lua_tointeger(L, -1);
 	lua_pop(L, 1);
 

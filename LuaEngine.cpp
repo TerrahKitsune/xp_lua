@@ -61,6 +61,16 @@ static int print(lua_State *L){
 	return 0;
 }
 
+static int L_GetMemory(lua_State *L) {
+
+	lua_pop(L, lua_gettop(L));
+	int mem = lua_gc(L, LUA_GCCOUNT, 0);
+	mem = mem * 1024;
+	mem += lua_gc(L, LUA_GCCOUNTB, 0);
+	lua_pushinteger(L, mem);
+	return 1;
+}
+
 LuaEngine::LuaEngine()
 {
 
@@ -148,6 +158,9 @@ LuaEngine::LuaEngine()
 
 	lua_pushcfunction(L, print);
 	lua_setglobal(L, "print");
+
+	lua_pushcfunction(L, L_GetMemory);
+	lua_setglobal(L, "GetMemory");
 }
 
 

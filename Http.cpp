@@ -4,11 +4,56 @@
 #define WIN32_LEAN_AND_MEAN
 #include "Http.h"
 #include "networking.h"
-#define PACKETSIZE 1048576
+#define PACKETSIZE 1500
 static HttpResult * mustdieonpanic = NULL;
 lua_CFunction panic;
 using namespace concurrency;
 char PACKET[PACKETSIZE];
+
+char * FindInStringNoCase(char * data, size_t dataLen, const char * substr, size_t substrLen) {
+
+	if (dataLen <= 0 || substrLen <= 0 || !data || !substr) {
+		return NULL;
+	}
+
+	size_t found = 0;
+	char * ptr = NULL;
+	char a, b;
+
+	for (size_t i = 0; i < dataLen; i++)
+	{
+		if (isalpha(data[i])) {
+			a = tolower(data[i]);
+		}
+		else {
+			a = data[i];
+		}
+
+		if (isalpha(substr[found])) {
+			b = tolower(substr[found]);
+		}
+		else {
+			b = substr[found];
+		}
+
+		if (a == b) {
+
+			if (!ptr) {
+				ptr = &data[i];
+			}
+
+			if (++found == substrLen) {
+				return ptr;
+			}
+		}
+		else if (ptr || found > 0) {
+			found = 0;
+			ptr = NULL;
+		}
+	}
+
+	return NULL;
+}
 
 void StartCounter(LuaHttp* luahttp)
 {
@@ -232,32 +277,23 @@ bool IsBlocking(SSL* ssl, int ret) {
 	return ret == -1 && WSAGetLastError() == WSAEWOULDBLOCK;
 }
 
-int GetContentLength(const char * header) {
-	char * end;
+int GetContentLength(char * header, size_t totalsize) {
+	
+	const char * end;
 	char * contentlen;
-	char * head = (char*)gff_malloc(strlen(header) + 1);
 	int ret = -1;
-	if (!head)
-		return -1;
 
-	strcpy(head, header);
-	int n = 0;
-	while (head[n]) {
-		head[n] = tolower(head[n]);
-		n++;
-	}
-
-	contentlen = strstr(head, "content-length: ");
+	contentlen = FindInStringNoCase(header, totalsize, "content-length: ", 16);
 	if (contentlen) {
+
 		contentlen = contentlen + 16;
-		end = strstr(contentlen, "\r\n");
+
+		end = FindInStringNoCase(contentlen, totalsize - (contentlen - header), "\r\n", 2);
 		if (end) {
-			end[0] = '\0';
 			ret = atoi(contentlen);
 		}
 	}
 
-	gff_free(head);
 	return ret;
 }
 
@@ -269,7 +305,7 @@ HttpResult * SendRecv(LuaHttp* luahttp, SOCKET ConnectSocket, SSL* ssl) {
 	int contentlen = 0;
 	u_long flag = 1;
 	ioctlsocket(ConnectSocket, FIONBIO, &flag);
-	char * endofheader = NULL;
+	const char * endofheader = NULL;
 	size_t total = 0;
 
 	StartCounter(luahttp);
@@ -327,9 +363,9 @@ HttpResult * SendRecv(LuaHttp* luahttp, SOCKET ConnectSocket, SSL* ssl) {
 				return CreateResult("Failed to allocate memory for message buffer");
 			}
 			if (!endofheader) {
-				endofheader = strstr(c_str(b), "\r\n\r\n");
+				endofheader = FindInStringNoCase(c_str(b), b->length, "\r\n\r\n", 4);
 				if (endofheader) {
-					tosend = GetContentLength(c_str(b));
+					tosend = GetContentLength(c_str(b), b->length);
 					if (tosend != -1 && !PreAlloc(b, tosend + (endofheader - c_str(b)) + 2))
 					{
 						Destroy(b);
@@ -495,12 +531,17 @@ static int PushHttpResultToLua(lua_State *L, HttpResult * b, const char * file) 
 	char * endofheader = NULL;
 	if (b->result->file) {
 		rewind(b->result->file);
-		fread(PACKET, 1, PACKETSIZE, b->result->file);
-		endofheader = strstr(b->result->data, "\r\n\r\n");
+		int read = fread(PACKET, 1, PACKETSIZE, b->result->file);
+		endofheader = FindInStringNoCase(PACKET, read, "\r\n\r\n", 4);
 	}
 	else {
-		endofheader = strstr(b->result->data, "\r\n\r\n");
+		endofheader = FindInStringNoCase(b->result->data, b->result->length, "\r\n\r\n", 4);
 	}
+
+	FILE*f = fopen("D:/webraw.txt", "w");
+	fwrite(b->result->data, b->result->length, 1, f);
+	fflush(f);
+	fclose(f);
 
 	lua_pop(L, lua_gettop(L));
 	if (!b || b->result->length < 15)
@@ -519,18 +560,18 @@ static int PushHttpResultToLua(lua_State *L, HttpResult * b, const char * file) 
 	memset(&endofheader[2], 0, 2);
 	endofheader += 4;
 
-	char * cursor = strstr(b->result->data, " ");
+	char * cursor = FindInStringNoCase(b->result->data, b->result->length, " ", 1);
 	if (!cursor)
 		goto bad;
 	cursor++;
 
 	lua_pushinteger(L, atoi(cursor));
-	cursor = strstr(cursor, " ");
+	cursor = FindInStringNoCase(cursor, b->result->length - (cursor - b->result->data), " ", 1);
 	if (!cursor)
 		goto bad;
 	cursor++;
 
-	char * end = strstr(cursor, "\r\n");
+	char * end = FindInStringNoCase(cursor, b->result->length - (cursor - b->result->data), "\r\n", 2);
 	if (!end)
 		goto bad;
 
@@ -564,10 +605,10 @@ static int PushHttpResultToLua(lua_State *L, HttpResult * b, const char * file) 
 	cursor = end + 2;
 	lua_newtable(L);
 	while (cursor) {
-		end = strstr(cursor, "\r\n");
+		end = FindInStringNoCase(cursor, b->result->length - (cursor - b->result->data), "\r\n", 2);
 		if (!end)
 			break;
-		key = strstr(cursor, ": ");
+		key = FindInStringNoCase(cursor, b->result->length - (cursor - b->result->data), ": ", 2);
 		if (!key)
 			break;
 

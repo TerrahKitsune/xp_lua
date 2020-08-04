@@ -42,6 +42,7 @@ typedef struct Gff {
 
 //Free the gff memory and pop everything off the stack, runs luaL_error if errormsg isnt NULL
 void Bail(Gff * gff, lua_State *L, const char * errormsg);
+void SetLuaAtPanicFunction(lua_State *L, Gff * gff);
 
 void * SetGffPointer(size_t typelen, Gff * gff, int offset);
 void TrackOrBail(lua_State*L, Gff * gff, const void * gffstruct);

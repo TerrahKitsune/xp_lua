@@ -4,6 +4,15 @@
 
 unsigned int WriteField(lua_State *L, Gff * gff) {
 
+	if (!lua_istable(L, -1)) {
+		Bail(gff, L, "Field is not a table value");
+	}
+
+	if (gff->Header.FieldOffset >= gff->Header.LabelOffset || 
+		gff->Header.FieldOffset >= gff->size) {
+		Bail(gff, L, "Invalid field offset");
+	}
+
 	GffField * field = (GffField *)&gff->raw[gff->Header.FieldOffset];
 	field = &field[gff->Header.FieldCount];
 	unsigned int offset = gff->Header.FieldCount;
@@ -11,11 +20,17 @@ unsigned int WriteField(lua_State *L, Gff * gff) {
 
 	lua_pushstring(L, "Type");
 	lua_gettable(L, -2);
+	if (!lua_isnumber(L, -1)) {
+		Bail(gff, L, "Field Type is not an int");
+	}
 	field->Type = (unsigned int)lua_tointeger(L, -1);
 	lua_pop(L, 1);
 
 	lua_pushstring(L, "Label");
 	lua_gettable(L, -2);
+	if (!lua_isstring(L, -1)) {
+		Bail(gff, L, "Field Label is not a string");
+	}
 	field->LabelIndex = WriteLabel(L, gff);
 	lua_pop(L, 1);
 
@@ -25,6 +40,17 @@ unsigned int WriteField(lua_State *L, Gff * gff) {
 	lua_pop(L, 1);
 
 	return offset;
+}
+
+void * GetDataField(lua_State *L, Gff * gff, size_t offset) {
+
+	if (offset < gff->Header.FieldDataOffset || 
+		offset >= gff->Header.FieldIndicesOffset ||
+		offset >= gff->size) {
+		Bail(gff, L, "Invalid data offset");
+	}
+
+	return &gff->raw[offset];
 }
 
 unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type) {
@@ -63,7 +89,7 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type) {
 		break;
 	case 6:
 	case 7:
-		ptr = &gff->raw[gff->Header.FieldDataOffset + gff->Header.FieldDataCount];
+		ptr = GetDataField(L, gff, gff->Header.FieldDataOffset + gff->Header.FieldDataCount);
 		result = gff->Header.FieldDataCount;
 		gff->Header.FieldDataCount += sizeof(long);
 		data = (unsigned int)lua_tointeger(L, -1);
@@ -74,7 +100,7 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type) {
 		memcpy(&result, &fdata, sizeof(float));
 		break;
 	case 9:
-		ptr = &gff->raw[gff->Header.FieldDataOffset + gff->Header.FieldDataCount];
+		ptr = GetDataField(L, gff, gff->Header.FieldDataOffset + gff->Header.FieldDataCount);
 		result = gff->Header.FieldDataCount;
 		gff->Header.FieldDataCount += sizeof(double);
 		ddata = (unsigned int)lua_tonumber(L, -1);
@@ -82,7 +108,7 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type) {
 		break;
 	case 13:
 	case 10:
-		exostring = (CExoString*)&gff->raw[gff->Header.FieldDataOffset + gff->Header.FieldDataCount];
+		exostring = (CExoString*)GetDataField(L, gff, gff->Header.FieldDataOffset + gff->Header.FieldDataCount);
 		result = gff->Header.FieldDataCount;
 		string = lua_tolstring(L, -1, &len);
 		exostring->Length = len;
@@ -90,7 +116,7 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type) {
 		gff->Header.FieldDataCount += (sizeof(CExoString) + len);
 		break;
 	case 11:
-		resref = (ResRef*)&gff->raw[gff->Header.FieldDataOffset + gff->Header.FieldDataCount];
+		resref = (ResRef*)GetDataField(L, gff, gff->Header.FieldDataOffset + gff->Header.FieldDataCount);
 		result = gff->Header.FieldDataCount;
 		string = lua_tolstring(L, -1, &len);
 		resref->Length = len > RESREF_LENGTH ? RESREF_LENGTH : len;
@@ -99,7 +125,7 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type) {
 		break;
 	case 12:
 
-		exolocstring = (CExoLocString*)&gff->raw[gff->Header.FieldDataOffset + gff->Header.FieldDataCount];
+		exolocstring = (CExoLocString*)GetDataField(L, gff, gff->Header.FieldDataOffset + gff->Header.FieldDataCount);
 		result = gff->Header.FieldDataCount;
 		gff->Header.FieldDataCount += sizeof(CExoLocString);
 
@@ -121,7 +147,7 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type) {
 		while (lua_next(L, -2) != 0) {
 			if (lua_istable(L, -1)) {
 
-				exolocsubstring = (CExoLocStringSubString*)&gff->raw[gff->Header.FieldDataOffset + gff->Header.FieldDataCount];
+				exolocsubstring = (CExoLocStringSubString*)GetDataField(L, gff, gff->Header.FieldDataOffset + gff->Header.FieldDataCount);
 
 				lua_pushstring(L, "String");
 				lua_gettable(L, -2);
@@ -156,6 +182,10 @@ unsigned int WriteFieldData(lua_State *L, Gff * gff, unsigned int type) {
 		result = WriteStruct(L, gff);
 		break;
 	case 15:
+
+		if (gff->Header.ListIndicesOffset + gff->Header.ListIndicesCount >= gff->size) {
+			Bail(gff, L, "Invalid ListIndices");
+		}
 
 		list = (StructList*)&gff->raw[gff->Header.ListIndicesOffset + gff->Header.ListIndicesCount];
 		result = gff->Header.ListIndicesCount;

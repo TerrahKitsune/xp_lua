@@ -28,6 +28,13 @@ int WriteLabel(lua_State*L, Gff * gff){
 	memset(LABEL, 0, 17);
 	memcpy(LABEL, label, 16);
 
+	if (gff->Header.LabelOffset >= gff->size || gff->Header.LabelOffset >= gff->Header.FieldDataOffset) {
+		Bail(gff, L, "Label offset invalid");
+	}
+	else if (gff->Header.LabelOffset+(gff->Header.LabelCount * 16) >= gff->size) {
+		Bail(gff, L, "Labels are corrupt");
+	}
+
 	GffLabel * labels = (GffLabel*)&gff->raw[gff->Header.LabelOffset];
 	for (unsigned int n = 0; n < gff->Header.LabelCount; n++){
 		if (strncmp(labels[n].Label, LABEL, 16) == 0){

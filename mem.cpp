@@ -6,9 +6,9 @@
 #include <math.h>
 #include <windows.h>
 
-static MemoryState * memState = NULL;
-
 #ifdef USEMEMORYMANAGER
+
+static MemoryState * memState = NULL;
 
 void * Allocate(size_t requested, size_t* actual) {
 
@@ -61,7 +61,8 @@ void * gff_realloc(void * ptr, size_t size) {
 void gff_free(void * ptr) {
 	return MemoryStateDealloc(memState, ptr);
 }
-#else
+
+#elseifdef USEHEAPALLOC
 
 size_t EndMemoryManager() {
 	return 0;
@@ -97,6 +98,32 @@ void * gff_realloc(void * ptr, size_t size) {
 
 void gff_free(void * ptr) {
 	assert(HeapFree(GetProcessHeap(), 0, ptr));
+}
+
+#else
+
+size_t EndMemoryManager() {
+	return 0;
+}
+
+void InitMemoryManager() {
+}
+
+void * gff_malloc(size_t size) {
+	return malloc(size);
+}
+
+void * gff_calloc(size_t num, size_t size) {
+	return calloc(num, size);
+}
+
+void * gff_realloc(void * ptr, size_t size) {
+
+	return realloc(ptr, size);
+}
+
+void gff_free(void * ptr) {
+	free(ptr);
 }
 
 #endif

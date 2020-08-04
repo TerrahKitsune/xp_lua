@@ -101,6 +101,7 @@ int OpenGffString(lua_State *L){
 	memcpy(gff->raw, binary, size);
 	memcpy(&gff->Header, gff->raw, sizeof(GffHeader));
 	lua_pop(L, 2);
+	SetLuaAtPanicFunction(L, gff);
 	PushTopLevelStruct(gff, L);
 	if (gff->gfftracker != NULL){
 		Bail(gff, L, "Gff Malformed, structs still in tracker");
@@ -114,6 +115,7 @@ int OpenGffString(lua_State *L){
 		StringClear(gff);
 		gff_free(gff->raw);
 		gff_free(gff);
+		SetLuaAtPanicFunction(L, NULL);
 	}
 
 	return 1;
@@ -145,13 +147,21 @@ int SaveGffToFile(lua_State *L){
 	gff->Header.ListIndicesOffset = gff->Header.FieldIndicesOffset + gff->Header.FieldIndicesCount;
 
 	gff->size = gff->Header.ListIndicesOffset + gff->Header.ListIndicesCount;
+
+	if (gff->Header.StructOffset >= gff->size ||
+		gff->Header.FieldOffset >= gff->size ||
+		gff->Header.LabelOffset >= gff->size ||
+		gff->Header.FieldDataOffset >= gff->size ||
+		gff->Header.FieldIndicesOffset >= gff->size ||
+		gff->Header.ListIndicesOffset >= gff->size) {
+
+		Bail(gff, L, "GFF offsets are invalid");
+	}
+
 	gff->raw = (unsigned char*)gff_malloc(gff->size);
 	if (gff->raw == NULL){
 		Bail(gff, L, "Unable to allocate memory for gff");
 	}
-
-	//GffHeader old;
-	//memcpy(&old, &gff->Header, sizeof(GffHeader));
 
 	gff->Header.StructCount = 0;
 	gff->Header.FieldCount = 0;
@@ -160,26 +170,9 @@ int SaveGffToFile(lua_State *L){
 	gff->Header.FieldIndicesCount = 0;
 	gff->Header.ListIndicesCount = 0;
 
+	SetLuaAtPanicFunction(L, gff);
 	WriteStruct(L, gff);
 	memcpy(gff->raw, &gff->Header, sizeof(GffHeader));
-
-	//if (gff->Header.StructCount != old.StructCount)
-	//	printf("StructCount missmatch %d - %d\n", gff->Header.StructCount, old.StructCount);
-
-	//if (gff->Header.FieldCount != old.FieldCount)
-	//	printf("FieldCount missmatch %d - %d\n", gff->Header.FieldCount, old.FieldCount);
-
-	//if (gff->Header.LabelCount != old.LabelCount)
-	//	printf("LabelCount missmatch %d - %d\n", gff->Header.LabelCount, old.LabelCount);
-
-	//if (gff->Header.FieldDataCount != old.FieldDataCount)
-	//	printf("FieldDataCount missmatch %d - %d\n", gff->Header.FieldDataCount, old.FieldDataCount);
-
-	//if (gff->Header.FieldIndicesCount != old.FieldIndicesCount)
-	//	printf("FieldIndicesCount missmatch %d - %d\n", gff->Header.FieldIndicesCount, old.FieldIndicesCount);
-
-	//if (gff->Header.ListIndicesCount != old.ListIndicesCount)
-	//	printf("ListIndicesCount missmatch %d - %d\n", gff->Header.ListIndicesCount, old.ListIndicesCount);
 
 	FILE * target = fopen(PATH, "wb");
 	if (target == NULL){
@@ -192,6 +185,7 @@ int SaveGffToFile(lua_State *L){
 	StringClear(gff);
 	gff_free(gff->raw);
 	gff_free(gff);
+	SetLuaAtPanicFunction(L, NULL);
 
 	lua_pop(L, 1);
 	return 0;
@@ -228,6 +222,7 @@ int SaveGffToString(lua_State *L){
 	gff->Header.FieldIndicesCount = 0;
 	gff->Header.ListIndicesCount = 0;
 
+	SetLuaAtPanicFunction(L, gff);
 	WriteStruct(L, gff);
 	memcpy(gff->raw, &gff->Header, sizeof(GffHeader));
 
@@ -238,6 +233,7 @@ int SaveGffToString(lua_State *L){
 	StringClear(gff);
 	gff_free(gff->raw);
 	gff_free(gff);
+	SetLuaAtPanicFunction(L, NULL);
 
  	return 1;
 }

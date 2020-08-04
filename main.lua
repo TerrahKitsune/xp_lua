@@ -127,14 +127,5 @@ end
 CreateGCPrint();
 collectgarbage();
 
-local stream = Stream.Create();
-stream:Buffer([[$¢ह€한𐍈]]);
-
-local str, c = stream:ReadUtf8();
-while c do 
-	print(string.format("%x", c),c, str);
-	str, c = stream:ReadUtf8();
-end
-
-stream:Seek();
-print(stream:Read());
+ENDLESS=true;
+dofile("D:/test.lua");
