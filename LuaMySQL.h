@@ -34,8 +34,9 @@ typedef struct LuaMySQL {
 	char * lastError;
 
 	volatile bool isRunningAsync;
-	bool hasTask;
-	task<LuaAsyncResult*> task;
+	LuaAsyncResult* taskResult;
+	HANDLE hThread;
+
 	char * query;
 } LuaMySQL;
 

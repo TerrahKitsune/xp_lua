@@ -110,10 +110,12 @@ void InitMemoryManager() {
 }
 
 void * gff_malloc(size_t size) {
+
 	return malloc(size);
 }
 
 void * gff_calloc(size_t num, size_t size) {
+
 	return calloc(num, size);
 }
 

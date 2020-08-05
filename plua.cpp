@@ -124,6 +124,10 @@ void PLua::SetString(char* sFunction, char* sParam1, int nParam2, char* sValue)
 		Engine->Log = nParam2 > 0;
 		wxLogMessage(wxT("* Logging Set to = %d"), Engine->Log);
 	}
+	else if (function == wxT("AutoGC")) {
+		Engine->AutoGC = nParam2 > 0;
+		wxLogMessage(wxT("* Logging Set to = %d"), Engine->Log);
+	}
 	else{
 
 		if(Engine->Log)

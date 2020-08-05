@@ -6,17 +6,19 @@
 
 using namespace concurrency;
 
-void CleanUp(LuaAsyncResult * result) {
+void CleanUpTaskResult(LuaMySQL* luamysql) {
 
-	if (!result)
+	if (!luamysql || !luamysql->taskResult)
 		return;
 
-	if (result->Error) {
-		gff_free(result->Error);
-		result->Error = NULL;
+	if (luamysql->taskResult->Error) {
+		gff_free(luamysql->taskResult->Error);
+		luamysql->taskResult->Error = NULL;
 	}
 
-	gff_free(result);
+	gff_free(luamysql->taskResult);
+
+	luamysql->taskResult = NULL;
 }
 
 
@@ -133,15 +135,17 @@ int MySQLGetRow(lua_State *L) {
 
 LuaAsyncResult * GetResults(LuaMySQL * luamysql) {
 
-	if (!luamysql->hasTask) {
+	if (luamysql->hThread == INVALID_HANDLE_VALUE){
 		return NULL;
 	}
-	else {
-		luamysql->hasTask = false;
-	}
 
-	luamysql->task.wait();
-	return luamysql->task.get();
+	WaitForSingleObject(luamysql->hThread, INFINITE);
+
+	CloseHandle(luamysql->hThread);
+
+	luamysql->hThread = INVALID_HANDLE_VALUE;
+
+	return luamysql->taskResult;
 }
 
 int MySQLFetch(lua_State *L) {
@@ -153,11 +157,11 @@ int MySQLFetch(lua_State *L) {
 	if (results && !results->Ok) {
 		lua_pop(L, lua_gettop(L));
 		lua_pushstring(L, results->Error);
-		CleanUp(results);
+		CleanUpTaskResult(luamysql);
 		lua_error(L);
 	}
 	else {
-		CleanUp(results);
+		CleanUpTaskResult(luamysql);
 	}
 
 	if (luamysql->result == NULL || luamysql->connection == NULL) {
@@ -200,11 +204,11 @@ int MySQLForkResult(lua_State *L) {
 
 	if (results && !results->Ok) {
 		lua_pushstring(L, results->Error);
-		CleanUp(results);
+		CleanUpTaskResult(luamysql);
 		lua_error(L);
 	}
 	else {
-		CleanUp(results);
+		CleanUpTaskResult(luamysql);
 	}
 
 	LuaMySQLResult * result = lua_pushmysqlresult(L);
@@ -248,7 +252,7 @@ void SetResult(LuaAsyncResult * result, const char *error, int rows) {
 
 LuaAsyncResult* Execute(LuaMySQL * luamysql, bool store) {
 
-	LuaAsyncResult * result = (LuaAsyncResult*)gff_calloc(1, sizeof(LuaAsyncResult));
+ 	LuaAsyncResult * result = (LuaAsyncResult*)gff_calloc(1, sizeof(LuaAsyncResult));
 
 	if (!luamysql->connection)
 	{
@@ -306,11 +310,15 @@ LuaAsyncResult* Execute(LuaMySQL * luamysql, bool store) {
 int MySQLIsRunningAsync(lua_State *L) {
 	LuaMySQL * luamysql = luaL_checkmysql(L, 1);
 	lua_pop(L, lua_gettop(L));
-	if (!luamysql->hasTask) {
+	if (luamysql->hThread == INVALID_HANDLE_VALUE) {
 		lua_pushboolean(L, false);
 	}
 	else {
-		lua_pushboolean(L, luamysql->isRunningAsync || !luamysql->task.is_done());
+		
+		DWORD code = 0;
+		GetExitCodeThread(luamysql->hThread, &code);
+
+		lua_pushboolean(L, luamysql->isRunningAsync || code == STILL_ACTIVE);
 	}
 	return 1;
 }
@@ -319,15 +327,15 @@ int MySQLGetAsyncResults(lua_State *L) {
 
 	LuaMySQL * luamysql = luaL_checkmysql(L, 1);
 
-	if (!luamysql->hasTask) {
+	if (luamysql->hThread == INVALID_HANDLE_VALUE) {
 		lua_pushboolean(L, true);
 		lua_pushstring(L, "No result");
 		return 2;
 	}
+	
+	WaitForSingleObject(luamysql->hThread, INFINITE);
 
-	luamysql->task.wait();
-
-	LuaAsyncResult * result = luamysql->task.get();
+	LuaAsyncResult * result = luamysql->taskResult;
 
 	if (result) {
 
@@ -347,14 +355,25 @@ int MySQLGetAsyncResults(lua_State *L) {
 	return 2;
 }
 
+void MysqlProc(LuaMySQL* luamysql) {
+
+	luamysql->taskResult = Execute(luamysql, true);
+	luamysql->isRunningAsync = false;
+}
+
 int MySQLExecute(lua_State *L) {
 
 	size_t len;
 	LuaMySQL * luamysql = luaL_checkmysql(L, 1);
 
-	if (luamysql->hasTask) {
-		luamysql->task.wait();
+	if (luamysql->hThread != INVALID_HANDLE_VALUE) {
+		
+		WaitForSingleObject(luamysql->hThread, INFINITE);
+		CloseHandle(luamysql->hThread);
+		luamysql->hThread = INVALID_HANDLE_VALUE;
 	}
+
+	CleanUpTaskResult(luamysql);
 
 	const char * query = luaL_checklstring(L, 2, &len);
 
@@ -362,15 +381,6 @@ int MySQLExecute(lua_State *L) {
 
 	if (lua_gettop(L) >= 3) {
 		runasync = lua_toboolean(L, 3);
-	}
-
-	if (luamysql->hasTask) {
-		try {
-			luamysql->task.wait();
-		}
-		catch (...) {}
-		CleanUp(luamysql->task.get());
-		luamysql->hasTask = false;
 	}
 
 	if (luamysql->result) {
@@ -402,7 +412,9 @@ int MySQLExecute(lua_State *L) {
 	lua_pop(L, lua_gettop(L));
 	if (!runasync) {
 
-		LuaAsyncResult * result = Execute(luamysql, false);
+		luamysql->taskResult = Execute(luamysql, false);
+
+		LuaAsyncResult* result = luamysql->taskResult;
 
 		if (result) {
 
@@ -413,7 +425,7 @@ int MySQLExecute(lua_State *L) {
 			else {
 				lua_pushinteger(L, result->Rows);
 			}
-			CleanUp(result);
+			CleanUpTaskResult(luamysql);
 		}
 		else {
 			lua_pushboolean(L, false);
@@ -423,24 +435,7 @@ int MySQLExecute(lua_State *L) {
 	else {
 
 		luamysql->isRunningAsync = true;
-		luamysql->hasTask = true;
-		luamysql->task = create_task([luamysql]
-		{
-			try {
-				LuaAsyncResult * result = Execute(luamysql, true);
-				luamysql->isRunningAsync = false;
-				//if (luamysql->result)
-				//	mysql_free_result(luamysql->result);
-				return result;
-			}
-			catch (...) {
-				//if (luamysql->result)
-				//	mysql_free_result(luamysql->result);
-				luamysql->isRunningAsync = false;
-			}
-
-			return (LuaAsyncResult*)NULL;
-		});
+		luamysql->hThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)MysqlProc, luamysql, 0, NULL);
 
 		lua_pushboolean(L, true);
 		lua_pushstring(L, "Running async");
@@ -454,8 +449,8 @@ int MySQLChangeDatabase(lua_State *L) {
 	LuaMySQL * luamysql = luaL_checkmysql(L, 1);
 	const char * db = luaL_checkstring(L, 2);
 
-	if (luamysql->hasTask) {
-		luamysql->task.wait();
+	if (luamysql->hThread != INVALID_HANDLE_VALUE) {
+		WaitForSingleObject(luamysql->hThread, INFINITE);
 	}
 
 	if(luamysql->schema)
@@ -711,14 +706,14 @@ int luamysql_gc(lua_State *L) {
 
 	LuaMySQL * luamysql = (LuaMySQL*)lua_tomysql(L, 1);
 
-	if (luamysql->hasTask) {
-		try {
-			luamysql->task.wait();
-		}
-		catch (...) {}
-		CleanUp(luamysql->task.get());
-		luamysql->hasTask = false;
+	if (luamysql->hThread != INVALID_HANDLE_VALUE) {
+		
+		WaitForSingleObject(luamysql->hThread, INFINITE);
+		CloseHandle(luamysql->hThread);
+		luamysql->hThread = INVALID_HANDLE_VALUE;
 	}
+
+	CleanUpTaskResult(luamysql);
 
 	if (luamysql->result) {
 		mysql_free_result(luamysql->result);

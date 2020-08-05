@@ -1,3 +1,6 @@
+#ifdef _DEBUG
+#define _CRTDBG_MAP_ALLOC
+#endif
 #define _CRT_SECURE_NO_WARNINGS
 
 #include "mem.h"
@@ -259,6 +262,8 @@ static int L_put(lua_State *L) {
 	return 0;
 }
 
+int _SKIPEXIT = 0;
+
 static int L_Exit(lua_State *L) {
 
 	int ExitCode = (int)luaL_optinteger(L, 1, 0);
@@ -272,7 +277,14 @@ static int L_Exit(lua_State *L) {
 #ifdef _DEBUG
 	assert(leaked == 0);
 #endif
-	exit(ExitCode);
+
+	if (_SKIPEXIT > 0) {
+		return 0;
+	}
+	else {
+
+		exit(ExitCode);
+	}
 }
 
 static int L_GetMemory(lua_State *L) {
@@ -446,6 +458,15 @@ static void *l_alloc(void *ud, void *ptr, size_t osize,	size_t nsize) {
 
 int main(int argc, char *argv[]) {
 
+#ifdef _DEBUG
+	_CrtMemState sOld;
+	_CrtMemState sNew;
+	_CrtMemState sDiff;
+	_CrtMemCheckpoint(&sOld); //take a snapchot
+#endif
+
+	int ret = 0;
+
 	SetConsoleOutputCP(65001);
 
 	InitMemoryManager();
@@ -612,8 +633,6 @@ int main(int argc, char *argv[]) {
 			DumpStack(L, true);
 		}
 
-		int ret = 0;
-
 		if (lua_type(L, 1) == LUA_TNUMBER) {
 			ret = (int)lua_tointeger(L, 1);
 		}
@@ -645,13 +664,6 @@ int main(int argc, char *argv[]) {
 		else {
 			ret = 0;
 		}
-
-		lua_pop(L, lua_gettop(L));
-		lua_pushinteger(L, ret);
-
-		L_Exit(L);
-
-		return ret;
 	}
 	else {
 
@@ -672,5 +684,25 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	return 0;
+	lua_pop(L, lua_gettop(L));
+	lua_pushinteger(L, ret);
+
+	_SKIPEXIT = 1;
+	L_Exit(L);
+
+#ifdef _DEBUG
+
+	_CrtMemCheckpoint(&sNew); //take a snapchot 
+	if (_CrtMemDifference(&sDiff, &sOld, &sNew)) // if there is a difference
+	{
+		OutputDebugString("-----------_CrtMemDumpStatistics ---------");
+		_CrtMemDumpStatistics(&sDiff);
+		OutputDebugString("-----------_CrtMemDumpAllObjectsSince ---------");
+		_CrtMemDumpAllObjectsSince(&sOld);
+		OutputDebugString("-----------_CrtDumpMemoryLeaks ---------");
+		_CrtDumpMemoryLeaks();
+	}
+#endif
+
+	return ret;
 }

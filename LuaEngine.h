@@ -14,6 +14,7 @@ public:
 	const char * GetLastError();
 
 	lua_State *L;
+	bool AutoGC;
 	bool Log;
 private:
 	char * _lasterror;

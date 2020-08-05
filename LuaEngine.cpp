@@ -80,6 +80,8 @@ LuaEngine::LuaEngine()
 	Log = true;
 #endif
 
+	AutoGC = true;
+
 	_lasterror = NULL;
 	WSADATA wsa;
 	WSAStartup(MAKEWORD(2, 2), &wsa);
@@ -233,6 +235,11 @@ char * LuaEngine::Luapcall(int params){
 		SetError(luaresult, len);
 
 		lua_pop(L, lua_gettop(L));
+
+		if (this->AutoGC) {
+			lua_gc(L, LUA_GCCOLLECT, 0);
+		}
+
 		return NULL;
 	}
 	else if (lua_gettop(L) >= 1 && !lua_isnoneornil(L, -1))
@@ -259,11 +266,17 @@ char * LuaEngine::Luapcall(int params){
 		memcpy(result, luaresult, len);
 		result[len] = '\0';
 		lua_pop(L, lua_gettop(L));
+		if (this->AutoGC) {
+			lua_gc(L, LUA_GCCOLLECT, 0);
+		}
 		return result;
 	}
 	else
 	{
 		lua_pop(L, lua_gettop(L));
+		if (this->AutoGC) {
+			lua_gc(L, LUA_GCCOLLECT, 0);
+		}
 		return NULL;
 	}
 }

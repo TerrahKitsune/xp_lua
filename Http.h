@@ -26,7 +26,9 @@ typedef struct LuaHttp {
 	bool ssl;
 	Buffer * request;
 	volatile bool alive;
-	task<HttpResult*> task;
+	HttpResult* result;
+	HANDLE tHandle;
+
 } LuaHttp;
 
 LuaHttp * lua_tohttp(lua_State *L, int index);

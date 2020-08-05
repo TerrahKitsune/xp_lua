@@ -1,4 +1,5 @@
 local _exit=Exit;Exit=function(ret) GetKey(); return ret; end
+
 JSON = assert(loadfile "JSON.lua")();
 function TablePrint(tbl, depth)
 

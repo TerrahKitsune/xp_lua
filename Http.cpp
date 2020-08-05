@@ -1,13 +1,12 @@
 #include "http.h"
 #include <string.h>
-#include <ppltasks.h>
 #define WIN32_LEAN_AND_MEAN
 #include "Http.h"
 #include "networking.h"
 #define PACKETSIZE 1500
 static HttpResult * mustdieonpanic = NULL;
 lua_CFunction panic;
-using namespace concurrency;
+
 char PACKET[PACKETSIZE];
 
 char * FindInStringNoCase(char * data, size_t dataLen, const char * substr, size_t substrLen) {
@@ -76,10 +75,15 @@ double GetCounter(LuaHttp* luahttp)
 void Destroy(HttpResult * result) {
 	if (result) {
 
-		if (result->result)
+		if (result->result) {
 			Destroy(result->result);
-		if (result->error)
+			result->result = NULL;
+		}
+		if (result->error) {
 			gff_free(result->error);
+			result->error = NULL;
+		}
+
 		gff_free(result);
 	}
 }
@@ -220,10 +224,11 @@ SOCKET Connect(const char * ip, int port) {
 	for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
 
 		// Create a SOCKET for connecting to server
-		ConnectSocket = socket(ptr->ai_family, ptr->ai_socktype,
-			ptr->ai_protocol);
+		ConnectSocket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+
 		if (ConnectSocket == INVALID_SOCKET) {
 
+			freeaddrinfo(result);
 			return INVALID_SOCKET;
 		}
 
@@ -441,6 +446,23 @@ HttpResult * DoHttps(LuaHttp* luahttp, SOCKET ConnectSocket) {
 	return resp;
 }
 
+void TaskProcess(LuaHttp* luahttp) {
+
+	if (!luahttp->packet) {
+		luahttp->result = CreateResult("Unable to allocate message buffer");
+		return;
+	}
+
+	SOCKET ConnectSocket = Connect(luahttp->ip, luahttp->port);
+
+	if (ConnectSocket == INVALID_SOCKET) {
+		luahttp->result = CreateResult("Unable to connect to server");
+		return;
+	}
+
+	luahttp->result = luahttp->ssl ? DoHttps(luahttp, ConnectSocket) : DoHttp(luahttp, ConnectSocket);
+}
+
 int Start(lua_State *L) {
 
 	char ip[100];
@@ -492,27 +514,8 @@ int Start(lua_State *L) {
 	luahttp->request = b;
 	luahttp->alive = true;
 	luahttp->ssl = ssl;
-	luahttp->task = create_task([luahttp]
-	{
-		try {
 
-			if(!luahttp->packet)
-				return CreateResult("Unable to allocate message buffer");
-
-			SOCKET ConnectSocket = Connect(luahttp->ip, luahttp->port);
-
-			if (ConnectSocket == INVALID_SOCKET) {
-				return CreateResult("Unable to connect to server");
-			}
-
-			HttpResult * result = luahttp->ssl ? DoHttps(luahttp, ConnectSocket) : DoHttp(luahttp, ConnectSocket);
-			return result;
-		}
-		catch (...) {
-		}
-
-		return (HttpResult*)NULL;
-	});
+	luahttp->tHandle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)TaskProcess, luahttp, 0, NULL);
 
 	return 1;
 }
@@ -537,11 +540,6 @@ static int PushHttpResultToLua(lua_State *L, HttpResult * b, const char * file) 
 	else {
 		endofheader = FindInStringNoCase(b->result->data, b->result->length, "\r\n\r\n", 4);
 	}
-
-	FILE*f = fopen("D:/webraw.txt", "w");
-	fwrite(b->result->data, b->result->length, 1, f);
-	fflush(f);
-	fclose(f);
 
 	lua_pop(L, lua_gettop(L));
 	if (!b || b->result->length < 15)
@@ -669,16 +667,17 @@ int GetResult(lua_State *L) {
 		return 2;
 	}
 
-	try {
-		luahttp->task.wait();
+	if (luahttp->tHandle != INVALID_HANDLE_VALUE) {
+		WaitForSingleObject(luahttp->tHandle, INFINITE);
 	}
-	catch (...) {}
 
 	luahttp->alive = false;
 
 	lua_pop(L, lua_gettop(L));
 
-	HttpResult* result = luahttp->task.get();
+	HttpResult* result = luahttp->result;
+
+	luahttp->result = NULL;
 
 	if (result->error) {
 		lua_pop(L, lua_gettop(L));
@@ -688,14 +687,21 @@ int GetResult(lua_State *L) {
 		return 2;
 	}
 
-	return PushHttpResultToLua(L, result, NULL);
+	int lreturn = PushHttpResultToLua(L, result, NULL);
+
+	return lreturn;
 }
 
 int GetStatus(lua_State *L) {
 
 	LuaHttp * luahttp = luaL_checkhttp(L, 1);
+	DWORD code = 0;
 
-	bool isrunnning = !luahttp->task.is_done();
+	if (luahttp->tHandle != INVALID_HANDLE_VALUE) {
+		GetExitCodeThread(luahttp->tHandle, &code);
+	}
+
+	bool isrunnning = code == STILL_ACTIVE;
 	double elapsed = GetCounter(luahttp);
 	size_t recv = luahttp->recv;
 	size_t sent = luahttp->sent;
@@ -746,11 +752,19 @@ int luahttp_gc(lua_State *L) {
 
 	LuaHttp * luahttp = (LuaHttp*)lua_tohttp(L, 1);
 
-	if (luahttp->alive) {
+	luahttp->alive = false;
 
-		luahttp->alive = false;
-		luahttp->task.wait();
-		Destroy(luahttp->task.get());
+	if (luahttp->tHandle != INVALID_HANDLE_VALUE) {
+
+		WaitForSingleObject(luahttp->tHandle, INFINITE);
+		CloseHandle(luahttp->tHandle);
+		luahttp->tHandle = INVALID_HANDLE_VALUE;
+	}
+
+	if (luahttp->result) {
+
+		Destroy(luahttp->result);
+		luahttp->result = NULL;
 	}
 
 	if (luahttp->request) {

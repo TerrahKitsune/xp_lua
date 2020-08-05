@@ -6,11 +6,7 @@
 #include <stdarg.h>
 #include "mem.h"
 
-#define FORMATBUFFERSIZE 1048576
 #define INITIAL 1024
-
-
-static char fbuffer[FORMATBUFFERSIZE];
 
 static bool Resize(Buffer * b, size_t more){
 
@@ -106,12 +102,40 @@ bool BufferAdd(Buffer * b, const void * data, size_t len){
 
 bool BufferFormat(Buffer * b, const char * format, ...){
 
+	int size = INITIAL;
+	int bytes;
+	char* temp = NULL;
+
 	va_list args;
 	va_start(args, format);
-	int bytes = vsprintf_s(fbuffer, format, args);
-	if (bytes < 0)
-		return false;
-	return BufferAdd(b, fbuffer, bytes);
+	va_list argList;
+
+	do {
+
+		if (temp) {
+			gff_free(temp);			
+			size *= 2;
+		}
+
+		temp = (char*)gff_malloc(size);
+
+		if (!temp) {
+			va_end(args);
+			return false;
+		}
+
+		va_copy(argList, args);
+		bytes = vsprintf_s(temp, size, format, argList);
+		va_end(argList);
+
+	} while (bytes == size);
+
+	
+	va_end(args);
+	bool result = BufferAdd(b, temp, bytes);
+	gff_free(temp);
+
+	return result;
 }
 
 char * c_str(Buffer * b){
