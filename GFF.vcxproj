@@ -130,7 +130,6 @@
     <ClCompile Include="StreamMain.cpp" />
     <ClCompile Include="WinServices.cpp" />
     <ClCompile Include="WinServicesMain.cpp" />
-    <ClCompile Include="_Http.cpp" />
     <ClCompile Include="HttpMain.cpp" />
     <ClCompile Include="List.cpp" />
     <ClCompile Include="LuaClient.cpp" />

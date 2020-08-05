@@ -513,9 +513,6 @@
     <ClCompile Include="Client.cpp">
       <Filter>LuaService\Client\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_Http.cpp">
-      <Filter>LuaHTTP\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Http.cpp">
       <Filter>LuaHTTP\Source Files</Filter>
     </ClCompile>
