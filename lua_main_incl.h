@@ -2,6 +2,9 @@
 #include "xp_lua_incl.h"
 #include "mem.h"
 
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
 static void DumpStack(lua_State *L, bool untilnil = false){
 
 	FILE * file = fopen("STACK.txt", "w");

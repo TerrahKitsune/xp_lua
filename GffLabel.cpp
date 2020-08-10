@@ -26,7 +26,7 @@ int WriteLabel(lua_State*L, Gff * gff){
 	size_t len;
 	const char * label = lua_tolstring(L, -1, &len);
 	memset(LABEL, 0, 17);
-	memcpy(LABEL, label, 16);
+	memcpy(LABEL, label, MIN(len, 16));
 
 	if (gff->Header.LabelOffset >= gff->size || gff->Header.LabelOffset >= gff->Header.FieldDataOffset) {
 		Bail(gff, L, "Label offset invalid");

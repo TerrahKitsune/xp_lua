@@ -128,5 +128,20 @@ end
 CreateGCPrint();
 collectgarbage();
 
-ENDLESS=true;
-dofile("D:/test.lua");
+local request = Http.Start("GET", "http://httpstat.us/200?sleep=5000", nil, nil);
+request:SetTimeout(5000);
+local IsRunning, ms, sent, recv = request:GetStatus();
+while IsRunning do 
+
+	print(IsRunning, ms, sent, recv);
+	IsRunning, ms, sent, recv = request:GetStatus();
+end
+
+local code, ok, contents, header = request:GetResult();
+print(code, ok, contents);
+
+if header then 
+	for k,v in pairs(header) do 
+		print(k,v);
+	end
+end 

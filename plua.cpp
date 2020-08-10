@@ -57,7 +57,7 @@ Implementation of Lua Plugin
 PLua::PLua()
 {
 	header = _T(
-		"NWNX Lua Plugin V.0.3.72\n" \
+		"NWNX Lua Plugin V.0.3.74\n" \
 		"(c) 2020 by Robin Karlsson (Terrahkitsune)\n" \
 		"Lua (c) PUC-Rio: https://www.lua.org/ \n"\
 		"visit us at http://www.nwnx.org\n");
@@ -66,7 +66,7 @@ PLua::PLua()
 		"This plugin provides a lua engine and environment.");
 
 	subClass = _T("LUA");
-	version = _T("0.3.72");
+	version = _T("0.3.74");
 	buffer = NULL;
 	Engine = new LuaEngine();
 
