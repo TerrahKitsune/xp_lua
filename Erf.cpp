@@ -8,13 +8,13 @@
 static char nullref[33];
 static const char * NullTerminatedResRef(const char * resref, int version){
 
+	memset(nullref, 0, 33);
+
 	if (version == 2){
-		nullref[32] = '\0';
 		strncpy(nullref, resref, 32);
 		return nullref;
 	}
 
-	nullref[16] = '\0';
 	strncpy(nullref, resref, 16);
 	return nullref;
 }
@@ -508,7 +508,7 @@ int GetKeys(lua_State *L){
 			lua_settable(L, -3);
 
 			lua_pushstring(L, "File");
-			lua_pushfstring(L, "%s.%s", NullTerminatedResRef(keys[n].ResRef, 2), lua_resource_getextension(L, keys[n].ResType, "bin"));
+			lua_pushfstring(L, "%s.%s", NullTerminatedResRef(keys[n].ResRef, 1), lua_resource_getextension(L, keys[n].ResType, "bin"));
 			lua_settable(L, -3);
 
 			lua_pushstring(L, "Unused");
