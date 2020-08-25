@@ -283,6 +283,15 @@
     <Filter Include="Memory\Source Files">
       <UniqueIdentifier>{dcefc642-cd9a-4e70-a7ee-cbd7cadcc68e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaKeyBif">
+      <UniqueIdentifier>{bf915113-1772-46d8-bc92-11bc2b625b5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaKeyBif\Header Files">
+      <UniqueIdentifier>{f9df1326-fec6-45be-84a4-248658a26729}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaKeyBif\Source Files">
+      <UniqueIdentifier>{d622c2f2-63ea-4be2-b5de-095fc879f9c3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -645,6 +654,15 @@
     <ClCompile Include="MemoryManager.cpp">
       <Filter>Memory\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="KeyBifMain.cpp">
+      <Filter>LuaKeyBif</Filter>
+    </ClCompile>
+    <ClCompile Include="keybif.cpp">
+      <Filter>LuaKeyBif\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="keyfile.cpp">
+      <Filter>LuaKeyBif\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -1000,6 +1018,15 @@
     </ClInclude>
     <ClInclude Include="MemoryManager.h">
       <Filter>Memory\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyBifMain.h">
+      <Filter>LuaKeyBif</Filter>
+    </ClInclude>
+    <ClInclude Include="keybif.h">
+      <Filter>LuaKeyBif\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="keyfile.h">
+      <Filter>LuaKeyBif\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

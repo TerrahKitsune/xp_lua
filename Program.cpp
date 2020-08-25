@@ -42,6 +42,7 @@
 #include "LuaAesMain.h"
 #include "luajsonmain.h"
 #include "base64.h"
+#include "keybifmain.h"
 
 #define HI_PART(x)  ((x>>4) & 0x0F)
 #define LO_PART(x)  ((x) & 0x0F)
@@ -556,6 +557,8 @@ int main(int argc, char *argv[]) {
 	lua_setglobal(L, "Json");
 	luaopen_base64(L);
 	lua_setglobal(L, "Base64");
+	luaopen_keybif(L);
+	lua_setglobal(L, "KeyBif");
 
 	lua_pushcfunction(L, L_GetRuntime);
 	lua_setglobal(L, "Runtime");

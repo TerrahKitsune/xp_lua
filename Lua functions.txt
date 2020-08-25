@@ -1493,6 +1493,11 @@ TLK:
 
 	-return the number of entries, languageid and version of the tlk
 	count,languageid,version TLK:GetInfo()
+
+KeyBif:
+
+	KeyBif KeyBif.Create()
+
 ERF:
 	
 	-opens filename as a erf returning a erf object

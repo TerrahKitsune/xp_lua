@@ -96,6 +96,9 @@
     <ClCompile Include="jsonencode.cpp" />
     <ClCompile Include="jsonutil.cpp" />
     <ClCompile Include="kafkahelpers.cpp" />
+    <ClCompile Include="keybif.cpp" />
+    <ClCompile Include="KeyBifMain.cpp" />
+    <ClCompile Include="keyfile.cpp" />
     <ClCompile Include="LinkedList.cpp" />
     <ClCompile Include="luaaes.cpp" />
     <ClCompile Include="LuaAesMain.cpp" />
@@ -219,6 +222,9 @@
     <ClInclude Include="jsonencode.h" />
     <ClInclude Include="jsonutil.h" />
     <ClInclude Include="kafkahelpers.h" />
+    <ClInclude Include="keybif.h" />
+    <ClInclude Include="KeyBifMain.h" />
+    <ClInclude Include="keyfile.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="luaaes.h" />
     <ClInclude Include="LuaAesMain.h" />

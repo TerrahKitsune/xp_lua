@@ -128,4 +128,8 @@ end
 CreateGCPrint();
 collectgarbage();
 
-dofile("C:\\Users\\Terrah\\Documents\\Neverwinter Nights\\modules\\ModulePacker\\main.lua");
+local folders = {};
+folders["AuroraEngine"] = "D:/AuroraEngine";
+folders["isos"] = "D:/isos";
+
+local keybif = KeyBif.Create("R:/Test.key", folders);
