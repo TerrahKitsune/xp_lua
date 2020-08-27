@@ -695,6 +695,10 @@ BinaryTree:
 	-fails (and returns false) if the key is already in the tree
 	bool BinaryTree:Add(key, value)
 
+	-Deletes the key by rebuilding the tree without any nodes that has the key
+	-returns false if key does not exist in the tree
+	bool BinaryTree:Delete(key)
+
 	-func = function(k,v) end if it returns a value then the value is passed back to the caller
 	-order = 0 (default) pre-order
 	-1 = in-order

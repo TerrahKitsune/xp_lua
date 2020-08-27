@@ -7,6 +7,7 @@ static const struct luaL_Reg binarytreefunctions[] = {
 	{ "Add", BinaryTreeAdd},
 	{ "Count", BinaryTreeCount},
 	{ "Create", BinaryTreeCreate },
+	{ "Delete", BinaryTreeDelete },
 	{ NULL, NULL }
 };
 

@@ -15,6 +15,7 @@ int BinaryTreeCount(lua_State* L);
 int BinaryTreeAdd(lua_State* L);
 int BinaryTreeIterate(lua_State* L);
 int BinaryTreeGet(lua_State* L);
+int BinaryTreeDelete(lua_State* L);
 
 LuaBinaryTree* lua_pushbinarytree(lua_State* L);
 LuaBinaryTree* lua_tobinarytree(lua_State* L, int index);

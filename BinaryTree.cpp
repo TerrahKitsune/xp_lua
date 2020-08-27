@@ -43,6 +43,46 @@ BinaryTreeNode* Search(BinaryTreeNode** tree, long long key)
     }
 }
 
+void Deletion(BinaryTreeNode** root, BinaryTreeNode* tree, long long key)
+{
+    if (!tree)
+    {
+        return;
+    }
+    
+    BinaryTreeNode* left = tree->Left;
+    BinaryTreeNode* right = tree->Right;
+
+    if (*root == tree) {
+        *root = NULL;
+    }
+    
+    tree->Left = NULL;
+    tree->Right = NULL;
+    
+    Deletion(root, left, key);
+    Deletion(root, right, key);
+
+    if (tree->key == key) {
+        DestroyTree(tree);
+    }
+    else {
+        Insert(tree, root);
+    }    
+}
+
+int DeleteInTree(BinaryTreeNode** root, long long key) {
+
+    BinaryTreeNode* node = Search(root, key);
+    if (!node) {
+        return false;
+    }
+
+    Deletion(root, *root, key);
+
+    return true;
+}
+
 BinaryTreeNode* GetInTree(BinaryTreeNode* root, long long key) {
 
     return Search(&root, key);

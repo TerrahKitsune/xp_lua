@@ -39,6 +39,22 @@ void lua_PushBinaryTreeValue(lua_State* L, BinaryTreeNode* node) {
 	}
 }
 
+int BinaryTreeDelete(lua_State* L) {
+
+	LuaBinaryTree* btree = lua_tobinarytree(L, 1);
+	long long key = luaL_checkinteger(L, 2);
+
+	if (DeleteInTree(&btree->root, key)) {
+		btree->count--;
+		lua_pushboolean(L, true);
+	}
+	else {
+		lua_pushboolean(L, true);
+	}
+
+	return 1;
+}
+
 int BinaryTreeGet(lua_State* L) {
 
 	LuaBinaryTree* btree = lua_tobinarytree(L, 1);
@@ -165,7 +181,7 @@ int BinaryTreeIterate(lua_State* L) {
 	int type = luaL_optinteger(L, 3, 0);
 
 	if (type == 1) {
-		if (!_IterateInorder(L, btree->root)) {
+		if (!_IteratePreorder(L, btree->root)) {
 			lua_pushnil(L);
 		}
 	}
@@ -176,7 +192,7 @@ int BinaryTreeIterate(lua_State* L) {
 	}
 	else {
 	
-		if (!_IteratePreorder(L, btree->root)) {
+		if (!_IterateInorder(L, btree->root)) {
 			lua_pushnil(L);
 		}
 	}
@@ -259,7 +275,6 @@ int BinaryTreeCount(lua_State* L) {
 
 	LuaBinaryTree* btree = lua_tobinarytree(L, 1);
 
-	lua_settop(L, lua_gettop(L));
 	lua_pushinteger(L, (lua_Integer)btree->count);
 
 	return 1;
