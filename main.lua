@@ -128,8 +128,32 @@ end
 CreateGCPrint();
 collectgarbage();
 
-local folders = {};
+--[[local folders = {};
 folders["AuroraEngine"] = "D:/AuroraEngine";
 folders["isos"] = "D:/isos";
 
-local keybif = KeyBif.Create("R:/Test.key", folders);
+local keybif = KeyBif.Create("R:/Test.key", folders);]]
+
+local btree = BinaryTree.Create();
+print(btree);
+print(btree:Count());
+print("Add",btree:Add(1, true));
+print("Add",btree:Add(3, "abc"));
+print("Add",btree:Add(2, 5));
+print("Add",btree:Add(3, "123"));
+print(btree:Count());
+
+print("-----");
+local re = btree:Iterate(function(k,v) print(k,v); end);
+print(re);
+print("-----");
+local re = btree:Iterate(function(k,v) print(k,v); end, 1);
+print(re);
+print("-----");
+local re = btree:Iterate(function(k,v) print(k,v); end, 2);
+print(re);
+
+print("Get", btree:Get(3));
+print("Get", btree:Get(2));
+print("Get", btree:Get(1));
+print("fail", btree:Get(4));

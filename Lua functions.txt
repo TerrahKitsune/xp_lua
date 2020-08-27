@@ -682,6 +682,29 @@ Env:
 	-Gets the table that contains all other environment tables
 	table Env.Meta();
 
+BinaryTree:
+
+	-Create a new binary tree
+	BinaryTree BinaryTree.Create()
+
+	-Get the number of entries in the tree
+	int BinaryTree:Count()
+
+	-Key that the value can then be seached on, must be an int
+	-Value the value associated with they key, must be a bool, string, or number
+	-fails (and returns false) if the key is already in the tree
+	bool BinaryTree:Add(key, value)
+
+	-func = function(k,v) end if it returns a value then the value is passed back to the caller
+	-order = 0 (default) pre-order
+	-1 = in-order
+	-2 = post-order
+	value BinaryTree:Iterate(func, opt order)
+
+	-Returns the first value by key
+	-returns nil if none is found
+	value BinaryTree:Get(key)
+
 LinkedList:
 	
 	-create a new instance

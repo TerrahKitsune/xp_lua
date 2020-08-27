@@ -147,7 +147,7 @@ int keybif_gc(lua_State* L) {
 
 	LuaKeyBif* keybif = lua_tokeybif(L, 1);
 
-	return 1;
+	return 0;
 }
 
 int keybif_tostring(lua_State* L) {
