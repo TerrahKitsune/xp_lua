@@ -103,7 +103,6 @@
     <ClCompile Include="LinkedList.cpp" />
     <ClCompile Include="luaaes.cpp" />
     <ClCompile Include="LuaAesMain.cpp" />
-    <ClCompile Include="LuaBinaryTree.cpp" />
     <ClCompile Include="LuaFTP.cpp" />
     <ClCompile Include="LuaFTPChannel.cpp" />
     <ClCompile Include="LuaFTPMain.cpp" />
@@ -131,7 +130,6 @@
     <ClCompile Include="ODBCMain.cpp" />
     <ClCompile Include="sha256.c" />
     <ClCompile Include="Sha256Main.cpp" />
-    <ClCompile Include="LuaBinaryTreeMain.cpp" />
     <ClCompile Include="stream.cpp" />
     <ClCompile Include="StreamMain.cpp" />
     <ClCompile Include="WinServices.cpp" />
@@ -232,8 +230,6 @@
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="luaaes.h" />
     <ClInclude Include="LuaAesMain.h" />
-    <ClInclude Include="LuaBinaryTree.h" />
-    <ClInclude Include="LuaBinaryTreeMain.h" />
     <ClInclude Include="LuaFTP.h" />
     <ClInclude Include="LuaFTPChannel.h" />
     <ClInclude Include="LuaFTPMain.h" />
