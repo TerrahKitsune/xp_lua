@@ -134,6 +134,60 @@ folders["isos"] = "D:/isos";
 
 local keybif = KeyBif.Create("R:/Test.key", folders);]]
 
-print(CRC32("hi"));
-
 local btree = BinaryTree.Create();
+print(btree);
+print(btree:Count());
+print("Add",btree:Add(5, true));
+print("Add",btree:Add(3, "abc"));
+print("Add",btree:Add(2, 5));
+print("Add",btree:Add(1, "123"));
+print("Add",btree:Add(3, "abc"));
+print(btree:Count());
+
+print("-----");
+btree:Iterate(function(k,v) print(k,v); end);
+print("-----");
+btree:Iterate(function(k,v) print(k,v); end, 1);
+print("-----");
+btree:Iterate(function(k,v) print(k,v); end, 2);
+
+
+print("Get", btree:Get(3));
+print("Get", btree:Get(2));
+print("Get", btree:Get(1));
+print("fail", btree:Get(4));
+
+print("Delete", btree:Delete(3));
+print("Delete", btree:Delete(2));
+print("Delete", btree:Delete(1));
+print("Delete", btree:Delete(5));
+
+print("-----");
+btree:Iterate(function(k,v) print(k,v); end);
+
+for n=1, 10 do 
+	print(n, "Add",btree:Add(n, "Meow"..tostring(n)));
+end
+
+print("-----");
+btree:Iterate(function(k,v) print(k,v); end);
+
+print("Delete", btree:Delete(1));
+print("-----");
+btree:Iterate(function(k,v) print(k,v); end);
+
+btree = BinaryTree.Create();
+btree:Add(1, "Hihihi");
+
+for n=1, 20000000 do 
+	btree:Add(CRC32(n), n);
+end
+btree:Add(2, "Last");
+
+print("-----");
+--btree:Iterate(function(k,v) print(k,v); end);
+print("Get", btree:Get(1));
+print("Get", btree:Get(2));
+
+
+print(btree:Count());

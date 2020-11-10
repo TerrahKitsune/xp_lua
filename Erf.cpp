@@ -304,63 +304,6 @@ int CreateErf(lua_State *L){
 	return 1;
 }
 
-int GetErfHeader(lua_State* L) {
-
-	ERF* luaerf = (ERF*)lua_toerf(L, 1);
-
-	lua_createtable(L, 0, 12);
-
-	lua_pushstring(L, "BuildDay");
-	lua_pushinteger(L, luaerf->Header->BuildDay);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "BuildYear");
-	lua_pushinteger(L, luaerf->Header->BuildYear);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "DescriptionStrRef");
-	lua_pushinteger(L, luaerf->Header->DescriptionStrRef);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "EntryCount");
-	lua_pushinteger(L, luaerf->Header->EntryCount);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "FileType");
-	lua_pushlstring(L, luaerf->Header->FileType, 4);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "LanguageCount");
-	lua_pushinteger(L, luaerf->Header->LanguageCount);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "LocalizedStringSize");
-	lua_pushinteger(L, luaerf->Header->LocalizedStringSize);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "OffsetToKeyList");
-	lua_pushinteger(L, luaerf->Header->OffsetToKeyList);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "OffsetToLocalizedString");
-	lua_pushinteger(L, luaerf->Header->OffsetToLocalizedString);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "OffsetToResourceList");
-	lua_pushinteger(L, luaerf->Header->OffsetToResourceList);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "Reserved");
-	lua_pushlstring(L, (const char*)luaerf->Header->Reserved, 116);
-	lua_settable(L, -3);
-
-	lua_pushstring(L, "Version");
-	lua_pushlstring(L, luaerf->Header->Version, 4);
-	lua_settable(L, -3);
-
-	return 1;
-}
-
 int ExtractErf(lua_State *L){
 
 	ERF * luaerf = (ERF*)lua_toerf(L, 1);

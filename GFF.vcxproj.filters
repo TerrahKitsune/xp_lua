@@ -681,9 +681,6 @@
     <ClCompile Include="LuaBinaryTree.cpp">
       <Filter>LuaBinaryTree\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="crc32.cpp">
-      <Filter>Util</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -1057,9 +1054,6 @@
     </ClInclude>
     <ClInclude Include="LuaBinaryTree.h">
       <Filter>LuaBinaryTree\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="crc32.h">
-      <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
