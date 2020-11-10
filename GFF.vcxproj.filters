@@ -292,6 +292,15 @@
     <Filter Include="LuaKeyBif\Source Files">
       <UniqueIdentifier>{d622c2f2-63ea-4be2-b5de-095fc879f9c3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaBinaryTree">
+      <UniqueIdentifier>{11bbb80e-6792-4cba-9c80-496b79ba4cf1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaBinaryTree\Header Files">
+      <UniqueIdentifier>{479aa9f5-575f-4c60-a940-11f22cbe9201}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaBinaryTree\Source Files">
+      <UniqueIdentifier>{4db50053-ca0c-494c-8fc7-5b09e6ed6bcf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -666,6 +675,7 @@
     <ClCompile Include="BinaryTree.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="LuaBinaryTreeMain.cpp">
       <Filter>LuaBinaryTree</Filter>
     </ClCompile>
     <ClCompile Include="LuaBinaryTree.cpp">
