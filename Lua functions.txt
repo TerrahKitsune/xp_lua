@@ -1541,6 +1541,9 @@ ERF:
 	-desc default "LUA" what the description should be
 	ERF ERF.Create(filename, typeheader, filelist, opt version, opt desc);
 
+	-Retrive all header data
+	header ERF:GetHeader()
+
 	-Returns an array containing localized strings describing the container
 	-localsized string is a table containing:
 	-LanguageID int

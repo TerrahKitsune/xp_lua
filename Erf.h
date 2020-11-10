@@ -57,6 +57,7 @@ typedef struct ERFBuildEntry {
 ERF * lua_pusherf(lua_State *L);
 ERF * lua_toerf(lua_State *L, int index);
 
+int GetErfHeader(lua_State* L);
 int ExtractErf(lua_State *L);
 int OpenErf(lua_State *L);
 int GetLocalizedStrings(lua_State *L);
