@@ -1533,6 +1533,8 @@ ERF:
 	-version = what the version is "V1.0"
 	ERF, entries, filetype, version ERF.Open(filename)
 
+	header ERF:GetHeader()
+
 	-Create an erf file
 	-filenae = the path+name of the file to create
 	-type header, a 4 character field in the header that describes the file IE "HAK\0"

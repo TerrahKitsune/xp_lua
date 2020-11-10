@@ -2,6 +2,7 @@
 
 struct BinaryTreeNode {
 
+	int crc;
 	long long key;
 	void* data;
 	struct BinaryTreeNode* Left;

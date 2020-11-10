@@ -9,6 +9,7 @@
 #include <mmsystem.h>
 #include <conio.h>
 #include "lua_json.h"
+#include "crc32.h"
 
 #pragma comment (lib , "winmm.lib")
 
@@ -69,7 +70,7 @@ static int GetLastErrorAsMessage(lua_State* L)
 	DWORD lasterror = (DWORD)luaL_optinteger(L, 1, GetLastError());
 	char err[1024];
 
-	DWORD ok =FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, lasterror,
+	DWORD ok = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, lasterror,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), err, 1024, NULL);
 
 	lua_pop(L, lua_gettop(L));
@@ -273,37 +274,44 @@ int TableSelect(lua_State* L) {
 	return 1;
 }
 
-DWORD crc32(byte* data, int size, DWORD crc)
-{
-	DWORD r = crc;
-	byte* end = data + size;
-	DWORD t;
-
-	while (data < end)
-	{
-		r ^= *data++;
-
-		for (int i = 0; i < 8; i++)
-		{
-			t = ~((r & 1) - 1);
-			r = (r >> 1) ^ (0xEDB88320 & t);
-		}
-	}
-
-	return ~r;
-}
-
 int CRC32(lua_State* L) {
 
-	size_t size;
-	const char* data = lua_tolstring(L, 1, &size);
 	DWORD crc = 0xFFFFFFFF;
+
+	size_t len;
+	void* data;
+	lua_Number lnumb;
+	lua_Integer lint;
+	int lbool;
+
+	if (lua_isnumber(L, 1)) {
+
+
+		if (lua_isinteger(L, 1)) {
+			lint = lua_tointeger(L, 1);
+			data = &lint;
+			len = sizeof(lua_Integer);
+		}
+		else {
+			lnumb = lua_tonumber(L, 1);
+			data = &lnumb;
+			len = sizeof(lua_Number);
+		}
+	}
+	else if (lua_isboolean(L, 1)) {
+		lbool = lua_toboolean(L, 1);
+		data = &lbool;
+		len = sizeof(int);
+	}
+	else {
+		data = (void*)lua_tolstring(L, 1, &len);
+	}
 
 	if (lua_isnumber(L, 2)) {
 		crc = ~(DWORD)lua_tonumber(L, 2);
 	}
 
-	crc = crc32((BYTE*)data, size, crc);
+	crc = crc32((BYTE*)data, len, crc);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -677,7 +685,7 @@ static int L_ConsoleReadKey(lua_State* L) {
 static int L_GetHost(lua_State* L) {
 
 	const char* data = lua_tostring(L, 1);
-	struct addrinfo* result = NULL, *ptr = NULL, hints;
+	struct addrinfo* result = NULL, * ptr = NULL, hints;
 
 	bool full = lua_toboolean(L, 2) > 0;
 
@@ -789,7 +797,7 @@ static int L_GetComputerName(lua_State* L) {
 	return 1;
 }
 
-int L_GetGlobalMemoryStatus(lua_State *L) {
+int L_GetGlobalMemoryStatus(lua_State* L) {
 
 	int type = luaL_optinteger(L, 1, 0);
 
@@ -827,11 +835,11 @@ int L_GetGlobalMemoryStatus(lua_State *L) {
 		lua_pushinteger(L, statex.dwMemoryLoad);
 		break;
 	}
-	
+
 	return 1;
 }
 
-int L_DebugBreak(lua_State *L) {
+int L_DebugBreak(lua_State* L) {
 
 	DebugBreak();
 
@@ -1014,7 +1022,7 @@ int luaopen_misc(lua_State* L) {
 	lua_settable(L, -3);
 
 	lua_setglobal(L, "Console");
-	
+
 	lua_newtable(L);
 
 	lua_pushstring(L, "Play");

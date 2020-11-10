@@ -8,6 +8,7 @@ static const struct luaL_Reg erffunctions[] = {
 	{ "Extract", ExtractErf },
 	{ "GetStrings", GetLocalizedStrings },
 	{ "GetKeys", GetKeys },
+	{ "GetHeader", GetErfHeader },
 	{ "Create", CreateErf },
 	{ NULL, NULL }
 };
