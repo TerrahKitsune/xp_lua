@@ -37,7 +37,7 @@ int UpdateSHA256(lua_State *L) {
 	LuaSHA256 * luasha256 = lua_tosha256(L, 1);
 	if (!luasha256)
 		luaL_error(L, "Unable to get sha256 instance");
-	else if (luasha256->hash)
+	else if (luasha256->hash && luasha256->hash[0] != '\0')
 		luaL_error(L, "Cannot update already finished sha256 digest");
 
 	size_t len;
@@ -52,7 +52,7 @@ int UpdateSHA256(lua_State *L) {
 int FinalSHA256(lua_State *L) {
 
 	LuaSHA256 * luasha256 = lua_tosha256(L, 1);
-	if (!luasha256->hash) {
+	if (luasha256->hash || luasha256->hash[0] == '\0') {
 		sha256_final(&luasha256->SHA, luasha256->hash);
 	}
 

@@ -37,7 +37,7 @@ int UpdateMD5(lua_State *L){
 	LuaMD5 * luamd5 = lua_tomd5(L, 1);
 	if (!luamd5)
 		luaL_error(L, "Unable to get md5 instance");
-	else if (luamd5->hash)
+	else if (luamd5->hash && luamd5->hash[0] != '\0')
 		luaL_error(L, "Cannot update already finished md5 digest");
 
 	size_t len;
@@ -52,7 +52,7 @@ int UpdateMD5(lua_State *L){
 int FinalMD5(lua_State *L){
 
 	LuaMD5 * luamd5 = lua_tomd5(L, 1);
-	if (!luamd5->hash){
+	if (luamd5->hash || luamd5->hash[0] == '\0'){
 		MD5Final((unsigned char *)luamd5->hash, &luamd5->MD5);
 	}
 
