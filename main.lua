@@ -128,4 +128,4 @@ end
 CreateGCPrint();
 collectgarbage();
 
-dofile("C:\\Users\\Terrah\\Desktop\\extractor - Copy - Copy.lua");
+dofile("C:\\Users\\Terrah\\Documents\\Neverwinter Nights\\modules\\pack.lua");

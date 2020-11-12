@@ -203,7 +203,8 @@ int CreateErf(lua_State *L){
 
 			fseek(entries[n].f, 0, SEEK_END);
 			entries[n].len = ftell(entries[n].f);
-			rewind(entries[n].f);
+			fclose(entries[n].f);
+			entries[n].f = NULL;
 
 			n++;
 		}
@@ -248,10 +249,21 @@ int CreateErf(lua_State *L){
 			fflush(raw);
 
 			for (unsigned int i = 0; i < erf.Header->EntryCount; i++){
+
+				entries[i].f = fopen(entries[i].file, "rb");
+
+				if (!entries[i].f) {
+					fail = true;
+					break;
+				}
+
 				if (!WriteToFile(raw, entries[i].f, entries[i].len)){
 					fail = true;
 					break;
 				}
+
+				fclose(entries[i].f);
+				entries[i].f = NULL;
 			}
 
 			if (!fail){
@@ -270,12 +282,14 @@ int CreateErf(lua_State *L){
 		fail = true;
 	}
 
-	if (fail){
-
-		for (int i = 0; i < n; i++){
+	for (unsigned int i = 0; i < erf.Header->EntryCount; i++) {
+		if (entries[i].f) {
 			fclose(entries[i].f);
+			entries[i].f = NULL;
 		}
+	}
 
+	if (fail){
 		if (locstr)
 			gff_free(locstr);
 
@@ -292,9 +306,6 @@ int CreateErf(lua_State *L){
 		return 0;
 	}
 
-	for (unsigned int i = 0; i < erf.Header->EntryCount; i++){
-		fclose(entries[i].f);
-	}
 	gff_free(entries);
 	gff_free(locstr);
 	gff_free(reslit);
