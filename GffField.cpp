@@ -563,11 +563,13 @@ void PushCExoLocString(lua_State *L, CExoLocString * locstr, Gff * gff, unsigned
 	lua_pushstring(L, "Strings");
 	lua_createtable(L, locstr->StringCount, 0);
 
+	offset = 0;
+
 	for (unsigned int n = 0; n < locstr->StringCount; n++) {
 
 		if (sizeof(CExoLocStringSubString) + originaloffset > gff->Header.FieldDataCount ||
 			sizeof(CExoLocStringSubString) + originaloffset + gff->Header.FieldDataOffset > gff->size) {
-			Bail(gff, L, "Malformed gff, unable to CExoLocStringSubString");
+			Bail(gff, L, "Malformed gff, unable to read CExoLocStringSubString");
 		}
 
 		lua_createtable(L, 0, locstr->StringCount);
@@ -580,9 +582,9 @@ void PushCExoLocString(lua_State *L, CExoLocString * locstr, Gff * gff, unsigned
 		lua_pushinteger(L, cursor->StringLength);
 		lua_settable(L, -3);
 
-		if (cursor->StringLength + sizeof(CExoLocStringSubString) + originaloffset > gff->Header.FieldDataCount ||
-			cursor->StringLength + sizeof(CExoLocStringSubString) + originaloffset + gff->Header.FieldDataOffset > gff->size) {
-			Bail(gff, L, "Malformed gff, unable to CExoLocStringSubString");
+		if (cursor->StringLength + offset + sizeof(CExoLocStringSubString) + originaloffset > gff->Header.FieldDataCount ||
+			cursor->StringLength + offset  + sizeof(CExoLocStringSubString) + originaloffset + gff->Header.FieldDataOffset > gff->size) {
+			Bail(gff, L, "Malformed gff, unable to read CExoLocStringSubString");
 		}
 
 		lua_pushstring(L, "String");
@@ -590,9 +592,8 @@ void PushCExoLocString(lua_State *L, CExoLocString * locstr, Gff * gff, unsigned
 		lua_settable(L, -3);
 
 		lua_rawseti(L, -2, n + 1);
-		offset = (sizeof(unsigned long) * 2) + cursor->StringLength;
+		offset += (sizeof(unsigned long) * 2) + cursor->StringLength;
 		cursor = (CExoLocStringSubString *)&locstr->Strings[offset];
-		//originaloffset += offset;
 	}
 
 	lua_settable(L, -3);

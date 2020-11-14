@@ -128,4 +128,5 @@ end
 CreateGCPrint();
 collectgarbage();
 
-dofile("C:\\Users\\Terrah\\Documents\\Neverwinter Nights\\modules\\pack.lua");
+FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Documents\\Neverwinter Nights\\modules\\");
+dofile("Analyze.lua");
