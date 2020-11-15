@@ -61,7 +61,7 @@ Lua2daLine GetField(const char * original, const char * end)
 			}
 		}
 		else {
-			if (*c != ' ' && *c != '\t') {
+			if (*c != ' ' && *c != '\t' && *c != '\r') {
 				start = c;
 
 				if (*c == '"') {
