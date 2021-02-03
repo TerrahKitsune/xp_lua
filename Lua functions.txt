@@ -174,7 +174,8 @@ Kafka:
 	-partition: the partition to send to (default is the partition that was subscribed to) -1 and it'll automatically partition
 	-key: default nil, otherwise it should be a string
 	-timeout default 10000
-	bool, errormsg Kafka:Send(Kafkatopic, data, opt partition, opt key, opt timeout)
+	-headers should be table of key values
+	bool, errormsg Kafka:Send(Kafkatopic, data, opt partition, opt key, opt timeout, opt headers)
 
 	-Poll for any events on the kafka object
 	-This should be done regularly
@@ -314,6 +315,7 @@ Kafkamessage:
 	-Partition: The partition the message came from
 	-Payload: The actual data
 	-Topic: Name of the topic the message came from
+	-Headers: table containing key values
 	table Kafkamessage:GetData()
 
 	-Get the timestamp (The timestamp is the number of milliseconds since the epoch (UTC).)

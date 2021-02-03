@@ -82,7 +82,7 @@ int GetKafkaMessageData(lua_State* L) {
 	const rd_kafka_message_t* message = kafkamsg->message;
 
 	lua_pop(L, lua_gettop(L));
-	lua_createtable(L, 0, 7);
+	lua_createtable(L, 0, 8);
 
 	lua_pushstring(L, "Error");
 	lua_pushstring(L, rd_kafka_err2str(message->err));
@@ -110,6 +110,35 @@ int GetKafkaMessageData(lua_State* L) {
 
 	lua_pushstring(L, "Topic");
 	lua_pushstring(L, message->rkt ? rd_kafka_topic_name(message->rkt) : NULL);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "Headers");
+
+	rd_kafka_headers_t* headers;
+	if (rd_kafka_message_headers(message, &headers) == RD_KAFKA_RESP_ERR_NO_ERROR) {
+
+		size_t count = rd_kafka_header_cnt(headers);
+
+		lua_createtable(L, 0, count);
+
+		const char* name;
+		const char* data;
+		size_t datasize;
+
+		for (size_t i = 0; i < count; i++)
+		{
+			if (rd_kafka_header_get_all(headers, i, &name, (const void**)&data, &datasize) == RD_KAFKA_RESP_ERR_NO_ERROR) {
+				
+				lua_pushstring(L, name);
+				lua_pushlstring(L, data, datasize);
+				lua_settable(L, -3);
+			}
+		}
+	}
+	else {
+		lua_createtable(L, 0, 0);
+	}
+
 	lua_settable(L, -3);
 
 	return 1;

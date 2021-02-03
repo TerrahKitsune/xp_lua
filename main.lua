@@ -128,5 +128,30 @@ end
 CreateGCPrint();
 collectgarbage();
 
-FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Documents\\Neverwinter Nights\\hak\\");
-dofile("2damerge.lua");
+local conf = {};
+conf["bootstrap.servers"]="10.9.23.252:9092";
+local k = assert(Kafka.NewConsumer(conf));
+assert(k:Subscribe("test"));
+
+local p = assert(Kafka.NewProducer(conf));
+local topic = assert(p:OpenTopic("test"));
+assert(p:Send(topic, "asd", -1, "keyyy", 100000, {Nice= "Value"}));
+
+local msg,data;
+while true do 
+	msg = k:Poll();
+
+	if msg then 
+		data = msg:GetData();
+		for k,v in pairs(data) do 
+			print(k, v);
+		end
+
+		for k,v in pairs(data.Headers) do 
+			print(k, v);
+		end
+	else
+		Sleep();
+	end 
+
+end

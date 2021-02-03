@@ -392,7 +392,7 @@ int MySQLExecute(lua_State *L) {
 		luamysql->columns = NULL;
 		luamysql->fields = NULL;
 	}
-
+	
 	if (luamysql->server == NULL || luamysql->server[0] == '\0') {
 		luaL_error(L, "No connection initilized, call Connect");
 	}

@@ -100,7 +100,7 @@ int PollMessages(lua_State* L) {
 	rd_kafka_message_t* rkmessage;
 
 	rkmessage = rd_kafka_consumer_poll(luak->rd, timeout);
-	
+
 	lua_pop(L, lua_gettop(L));
 
 	if (rkmessage) {
@@ -186,7 +186,64 @@ int ProduceMessage(lua_State* L) {
 
 	int timeout = luaL_optinteger(L, 6, 10000);
 
-	int ret = rd_kafka_produce(topic->topic, partition, RD_KAFKA_MSG_F_COPY | RD_KAFKA_MSG_F_BLOCK, (void*)data, len, key, lenkey, NULL);
+	rd_kafka_headers_t* headers = NULL;
+
+	if (lua_type(L, 7) == LUA_TTABLE) {
+
+		size_t count = 0;
+		lua_pushvalue(L, 7);
+		lua_pushnil(L);
+		while (lua_next(L, -2) != 0) {
+			count++;
+			lua_pop(L, 1);
+		}
+
+		headers = rd_kafka_headers_new(count);
+
+		size_t namesize, datasize;
+		const char* name;
+		const char* value;
+		rd_kafka_resp_err_t err;
+
+		lua_pushnil(L);
+		while (lua_next(L, -2) != 0) {
+
+			value = luaL_tolstring(L, -1, &datasize);
+			lua_pop(L, 1);
+			name = luaL_tolstring(L, -2, &namesize);
+			lua_pop(L, 1);
+
+			err = rd_kafka_header_add(headers, name, namesize, value, datasize);
+
+			if (err) {
+
+				rd_kafka_headers_destroy(headers);
+				lua_pop(L, lua_gettop(L));
+				lua_pushboolean(L, false);
+				lua_pushstring(L, rd_kafka_err2str(err));
+				return 2;
+			}
+
+			lua_pop(L, 1);
+		}
+
+		lua_pop(L, 1);
+	}
+	else {
+		headers = rd_kafka_headers_new(0);
+	}
+
+	int ret = rd_kafka_producev(
+		luak->rd,
+		RD_KAFKA_V_RKT(topic->topic),
+		RD_KAFKA_V_PARTITION(partition),
+		RD_KAFKA_V_MSGFLAGS(RD_KAFKA_MSG_F_COPY | RD_KAFKA_MSG_F_BLOCK),
+		RD_KAFKA_V_VALUE((void*)data, len),
+		RD_KAFKA_V_HEADERS(headers),
+		RD_KAFKA_V_END);
+
+	if (ret)
+		rd_kafka_headers_destroy(headers);
 
 	lua_pop(L, lua_gettop(L));
 	lua_pushboolean(L, !ret);
