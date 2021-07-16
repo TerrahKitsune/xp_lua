@@ -13,3 +13,5 @@ unsigned int table_crc32(const unsigned char* data, int size);
 bool json_addtoantirecursion(unsigned int id, JsonContext* context);
 bool json_existsinantirecursion(unsigned int id, JsonContext* context);
 void json_removefromantirecursion(unsigned int id, JsonContext* context);
+void json_pushnullornil(lua_State* L, JsonContext* context);
+bool json_isnull(lua_State* L, JsonContext* context);

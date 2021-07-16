@@ -628,7 +628,7 @@ void json_decodevalue(lua_State *L, JsonContext* context) {
 			return;
 		}
 
-		lua_pushnil(L);
+		json_pushnullornil(L, context);
 	}
 	else {
 		json_unexpected(next, L, context);

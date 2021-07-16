@@ -50,6 +50,49 @@ int lua_jsondecodefunction(lua_State *L) {
 	return 1;
 }
 
+int lua_jsonsetnullvalue(lua_State* L) {
+	
+	JsonContext* json = lua_tojson(L, 1);
+
+	if (lua_isnoneornil(L, 2)) {
+
+		lua_pop(L, lua_gettop(L));
+
+		if (json->refNullValue != LUA_REFNIL) {
+
+			lua_rawgeti(L, LUA_REGISTRYINDEX, json->refNullValue);
+			luaL_unref(L, LUA_REGISTRYINDEX, json->refNullValue);
+			json->refNullValue = LUA_REFNIL;
+		}
+		else {
+			
+			lua_pushnil(L);
+		}
+
+		return 1;
+	}
+	else {
+
+		int temp = luaL_ref(L, LUA_REGISTRYINDEX);
+
+		lua_pop(L, lua_gettop(L));
+
+		if (json->refNullValue != LUA_REFNIL) {
+
+			lua_rawgeti(L, LUA_REGISTRYINDEX, json->refNullValue);
+			luaL_unref(L, LUA_REGISTRYINDEX, json->refNullValue);
+		}
+		else {
+
+			lua_pushnil(L);
+		}
+
+		json->refNullValue = temp;
+
+		return 1;
+	}
+}
+
 int lua_jsonencodefunction(lua_State *L) {
 
 	JsonContext * json = lua_tojson(L, 1);
@@ -177,6 +220,7 @@ JsonContext * lua_pushjson(lua_State *L) {
 	luajson->refWriteFunction = LUA_REFNIL;
 	luajson->refReadFunction = LUA_REFNIL;
 	luajson->refThreadInput = LUA_REFNIL;
+	luajson->refNullValue = LUA_REFNIL;
 
 	return luajson;
 }
@@ -193,6 +237,12 @@ int json_gc(lua_State *L) {
 	JsonContext * json = lua_tojson(L, 1);
 
 	json_bail(L, json, NULL);
+
+	if (json->refNullValue != LUA_REFNIL) {
+
+		luaL_unref(L, LUA_REGISTRYINDEX, json->refNullValue);
+		json->refNullValue = LUA_REFNIL;
+	}
 
 	return 0;
 }

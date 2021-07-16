@@ -128,30 +128,13 @@ end
 CreateGCPrint();
 collectgarbage();
 
-local conf = {};
-conf["bootstrap.servers"]="10.9.23.252:9092";
-local k = assert(Kafka.NewConsumer(conf));
-assert(k:Subscribe("test"));
+local null = {};
 
-local p = assert(Kafka.NewProducer(conf));
-local topic = assert(p:OpenTopic("test"));
-assert(p:Send(topic, "asd", -1, "keyyy", 100000, {Nice= "Value"}));
+local j = Json.Create();
+print(j:SetNullValue(null));
 
-local msg,data;
-while true do 
-	msg = k:Poll();
+local data = j:Decode([[{"array":[1,2,3],"boolean":true,"color":"gold","null":null,"number":123,"object":{"a":"b","c":"d"},"string":"Hello World"}]]);
 
-	if msg then 
-		data = msg:GetData();
-		for k,v in pairs(data) do 
-			print(k, v);
-		end
+TablePrint(data);
 
-		for k,v in pairs(data.Headers) do 
-			print(k, v);
-		end
-	else
-		Sleep();
-	end 
-
-end
+print(j:Encode(data));

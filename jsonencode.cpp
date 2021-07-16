@@ -51,6 +51,12 @@ void json_encodenumber(lua_State *L, JsonContext* context) {
 
 void json_encodevalue(lua_State *L, JsonContext* context, int* depth) {
 
+	if (json_isnull(L, context)) {
+
+		json_append("null", 4, L, context);
+		return;
+	}
+
 	switch (lua_type(L, -1)) {
 	case LUA_TTABLE:
 		json_encodetable(L, context, depth);

@@ -1,5 +1,32 @@
 #include "jsonutil.h"
 
+void json_pushnullornil(lua_State* L, JsonContext* context) {
+
+	if (context->refNullValue == LUA_REFNIL) {
+		lua_pushnil(L);
+	}
+	else {
+		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refNullValue);
+	}
+}
+
+bool json_isnull(lua_State* L, JsonContext* context) {
+
+	if (context->refNullValue == LUA_REFNIL) {
+
+		return false;
+	}
+	else {
+
+		lua_rawgeti(L, LUA_REGISTRYINDEX, context->refNullValue);
+		
+		int equal = lua_rawequal(L, -1, -2);
+		lua_pop(L, 1);
+
+		return equal != 0;
+	}
+}
+
 void json_bail(lua_State *L, JsonContext* context, const char * err) {
 
 	if (context->bufferFile) {
@@ -43,11 +70,14 @@ void json_bail(lua_State *L, JsonContext* context, const char * err) {
 		luaL_unref(L, LUA_REGISTRYINDEX, context->refThreadInput);
 	}
 
+	int temp = context->refNullValue;
+
 	memset(context, 0, sizeof(JsonContext));
 
 	context->refWriteFunction = LUA_REFNIL;
 	context->refReadFunction = LUA_REFNIL;
 	context->refThreadInput = LUA_REFNIL;
+	context->refNullValue = temp;
 
 	if (err) {
 		luaL_error(L, err);

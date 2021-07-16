@@ -15,6 +15,7 @@ typedef struct JsonContext {
 	int refWriteFunction;
 	int refReadFunction;
 	int refThreadInput;
+	int refNullValue;
 
 	int arrayKey;
 
@@ -48,6 +49,7 @@ int lua_jsonencodetabletostring(lua_State *L);
 int lua_jsonencodetabletofile(lua_State *L);
 int lua_jsonencodefunction(lua_State *L);
 int lua_jsondecodefunction(lua_State *L);
+int lua_jsonsetnullvalue(lua_State* L);
 
 JsonContext * lua_pushjson(lua_State *L);
 JsonContext * lua_tojson(lua_State *L, int index);

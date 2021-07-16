@@ -1340,6 +1340,11 @@ Json:
 	-Create a json instance
 	Json Json.Create()
 
+	-Sets a value that will represent null when decoding or encoding.
+	-Default this is nil and keys will be skipped.
+	-Returns the previous value.
+	nil/value Json:SetNullValue(value)
+
 	-Encodes a table (or coroutine that yeilds key-values) to a json string
 	jsonstring Json:Encode(table)
 
