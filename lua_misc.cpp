@@ -69,7 +69,7 @@ static int GetLastErrorAsMessage(lua_State* L)
 	DWORD lasterror = (DWORD)luaL_optinteger(L, 1, GetLastError());
 	char err[1024];
 
-	DWORD ok =FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, lasterror,
+	DWORD ok = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, lasterror,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), err, 1024, NULL);
 
 	lua_pop(L, lua_gettop(L));
@@ -677,7 +677,7 @@ static int L_ConsoleReadKey(lua_State* L) {
 static int L_GetHost(lua_State* L) {
 
 	const char* data = lua_tostring(L, 1);
-	struct addrinfo* result = NULL, *ptr = NULL, hints;
+	struct addrinfo* result = NULL, * ptr = NULL, hints;
 
 	bool full = lua_toboolean(L, 2) > 0;
 
@@ -789,7 +789,7 @@ static int L_GetComputerName(lua_State* L) {
 	return 1;
 }
 
-int L_GetGlobalMemoryStatus(lua_State *L) {
+int L_GetGlobalMemoryStatus(lua_State* L) {
 
 	int type = luaL_optinteger(L, 1, 0);
 
@@ -827,13 +827,46 @@ int L_GetGlobalMemoryStatus(lua_State *L) {
 		lua_pushinteger(L, statex.dwMemoryLoad);
 		break;
 	}
-	
+
 	return 1;
 }
 
-int L_DebugBreak(lua_State *L) {
+int GetKeyState(lua_State* L) {
+
+	SHORT state = GetAsyncKeyState(luaL_checkinteger(L, 1));
+
+	lua_pushboolean(L, (state & 0x8000) == 0x8000);
+	return 1;
+}
+
+int GetCursorPosition(lua_State* L) {
+
+	POINT point;
+
+	GetCursorPos(&point);
+
+	lua_pushinteger(L, point.x);
+	lua_pushinteger(L, point.y);
+
+	return 2;
+}
+
+int GetScreenSize(lua_State* L) {
+
+	lua_pushinteger(L, GetSystemMetrics(SM_CXSCREEN));
+	lua_pushinteger(L, GetSystemMetrics(SM_CYSCREEN));
+
+	return 2;
+}
+
+int L_DebugBreak(lua_State* L) {
 
 	DebugBreak();
+
+	return 0;
+}
+
+int Test(lua_State* L) {
 
 	return 0;
 }
@@ -988,7 +1021,7 @@ int luaopen_misc(lua_State* L) {
 	lua_pushstring(L, "SetVisible");
 	lua_pushcfunction(L, L_ToggleConsole);
 	lua_settable(L, -3);
-
+	
 	lua_pushstring(L, "SetTitle");
 	lua_pushcfunction(L, L_SetTitle);
 	lua_settable(L, -3);
@@ -1014,7 +1047,7 @@ int luaopen_misc(lua_State* L) {
 	lua_settable(L, -3);
 
 	lua_setglobal(L, "Console");
-	
+
 	lua_newtable(L);
 
 	lua_pushstring(L, "Play");
@@ -1044,7 +1077,19 @@ int luaopen_misc(lua_State* L) {
 	lua_pushstring(L, "select");
 	lua_pushcfunction(L, TableSelect);
 	lua_settable(L, -3);
-	lua_pop(L, 1);
+	lua_pop(L, 1); 
+
+	lua_pushcfunction(L, GetKeyState);
+	lua_setglobal(L, "GetKeyState");
+
+	lua_pushcfunction(L, GetCursorPosition);
+	lua_setglobal(L, "GetCursorPosition");
+
+	lua_pushcfunction(L, GetScreenSize);
+	lua_setglobal(L, "GetScreenSize");
+
+	lua_pushcfunction(L, Test);
+	lua_setglobal(L, "Test");
 
 	lua_pushcfunction(L, L_DebugBreak);
 	lua_setglobal(L, "Break");

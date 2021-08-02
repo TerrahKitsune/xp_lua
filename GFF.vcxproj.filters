@@ -301,6 +301,15 @@
     <Filter Include="LuaBinaryTree\Source Files">
       <UniqueIdentifier>{4db50053-ca0c-494c-8fc7-5b09e6ed6bcf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Macro">
+      <UniqueIdentifier>{5106056c-b4f3-4215-9913-7afad26273bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Macro\Header Files">
+      <UniqueIdentifier>{a52ae903-a2da-4e25-8555-267833a5a1c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Macro\Source Files">
+      <UniqueIdentifier>{fb10a103-0140-4978-a73d-6e3fb45b65fc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -681,6 +690,12 @@
     <ClCompile Include="LuaBinaryTree.cpp">
       <Filter>LuaBinaryTree\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MacroMain.cpp">
+      <Filter>Macro</Filter>
+    </ClCompile>
+    <ClCompile Include="macro.cpp">
+      <Filter>Macro\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -1054,6 +1069,12 @@
     </ClInclude>
     <ClInclude Include="LuaBinaryTree.h">
       <Filter>LuaBinaryTree\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MacroMain.h">
+      <Filter>Macro</Filter>
+    </ClInclude>
+    <ClInclude Include="macro.h">
+      <Filter>Macro\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

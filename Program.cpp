@@ -44,6 +44,7 @@
 #include "base64.h"
 #include "keybifmain.h"
 #include "LuaBinaryTreeMain.h";
+#include "MacroMain.h"
 
 #define HI_PART(x)  ((x>>4) & 0x0F)
 #define LO_PART(x)  ((x) & 0x0F)
@@ -562,6 +563,8 @@ int main(int argc, char *argv[]) {
 	lua_setglobal(L, "KeyBif");
 	luaopen_binarytree(L);
 	lua_setglobal(L, "BinaryTree");
+	luaopen_macro(L);
+	lua_setglobal(L, "Macro");
 
 	lua_pushcfunction(L, L_GetRuntime);
 	lua_setglobal(L, "Runtime");

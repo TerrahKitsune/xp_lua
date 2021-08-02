@@ -128,13 +128,39 @@ end
 CreateGCPrint();
 collectgarbage();
 
-local null = {};
+local x, y = GetScreenSize();
 
-local j = Json.Create();
-print(j:SetNullValue(null));
+local inputs = {};
 
-local data = j:Decode([[{"array":[1,2,3],"boolean":true,"color":"gold","null":null,"number":123,"object":{"a":"b","c":"d"},"string":"Hello World"}]]);
+local clicks = 1;
+for n=1, clicks do
+table.insert(inputs, {Type=0, Flags = 0x0002});
+table.insert(inputs, {Type=0, Flags = 0x0004});
+end
 
-TablePrint(data);
+local click = Macro.Create(inputs);
 
-print(j:Encode(data));
+local count = 0;
+local on = false;
+
+while true do
+
+	if GetKeyState(0x20) and GetKeyState(0x41) then 
+		if on then 
+			on = false;
+		else 
+			on = true;
+		end
+
+		print(on);
+		Sleep(1000);
+	end
+
+	if(on) then
+		click:Send();
+		count = count + clicks;	
+		print(count);
+	end
+
+	Sleep(1);
+end

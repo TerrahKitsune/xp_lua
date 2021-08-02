@@ -122,6 +122,8 @@
     <ClCompile Include="luasocket.cpp" />
     <ClCompile Include="luasocketmain.cpp" />
     <ClCompile Include="lua_json.cpp" />
+    <ClCompile Include="macro.cpp" />
+    <ClCompile Include="MacroMain.cpp" />
     <ClCompile Include="mem.cpp" />
     <ClCompile Include="MemoryManager.cpp" />
     <ClCompile Include="mysql_main_incl.cpp" />
@@ -252,6 +254,8 @@
     <ClInclude Include="luasocket.h" />
     <ClInclude Include="luasocketmain.h" />
     <ClInclude Include="lua_json.h" />
+    <ClInclude Include="macro.h" />
+    <ClInclude Include="MacroMain.h" />
     <ClInclude Include="mem.h" />
     <ClInclude Include="MemoryManager.h" />
     <ClInclude Include="mysql_main_incl.h" />

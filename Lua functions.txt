@@ -80,6 +80,13 @@ Misc global functions:
 	-6 free  KB of virtual memory
 	int GlobalMemoryStatus(opt type)
 
+	x,y GetScreenSize()
+	x,y GetCursorPosition();
+
+	- https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+	-returns true if the key is down
+	bool GetKeyState(key)
+
 	-Contains special characters 0 - 31 (http://www.asciitable.com/)
 	-Example c.LF = '\n'
 	table c
@@ -151,6 +158,34 @@ Mutex:
 
 	-Get information about the mutex
 	islocked, name, internalid Mutex:Info()
+
+Macro:
+	
+	-Creates a macro. Inputs should be an array containing "inputs"
+	- https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput?redirectedfrom=MSDN
+	-Input:
+	-Type 0 = mouse, 1 = keyboard
+	-Keyboard input:
+	-ExtraInfo
+	-Flags (0 button down, 2 = button up)
+	-Time
+	-Scan
+	-Key (key to emulate https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes)
+	-Mouse input:
+	-ExtraInfo
+	-Flags (0x8000 absorlute, 0x0001 move, 0x0002 leftdown, 0x0004 left up https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-mouse_event)
+	-Time
+	-Data
+	-X (0-65536)
+	-Y (0-65536)
+	-See GetScreenSize() and GetCursorPosition() for helpers
+	Macro Macro.Create(inputs)
+
+	-Execute the macro, returns the number of commands that was successful
+	int Macro:Send()
+
+	-Retrives the inputs as given in the create function
+	inputs Macro:GetInputs()
 
 Kafka:
 
