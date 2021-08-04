@@ -121,6 +121,7 @@
     <ClCompile Include="LuaSha256.cpp" />
     <ClCompile Include="luasocket.cpp" />
     <ClCompile Include="luasocketmain.cpp" />
+    <ClCompile Include="luawindow.cpp" />
     <ClCompile Include="lua_json.cpp" />
     <ClCompile Include="macro.cpp" />
     <ClCompile Include="MacroMain.cpp" />
@@ -136,6 +137,7 @@
     <ClCompile Include="LuaBinaryTreeMain.cpp" />
     <ClCompile Include="stream.cpp" />
     <ClCompile Include="StreamMain.cpp" />
+    <ClCompile Include="WindowMain.cpp" />
     <ClCompile Include="WinServices.cpp" />
     <ClCompile Include="WinServicesMain.cpp" />
     <ClCompile Include="HttpMain.cpp" />
@@ -253,6 +255,7 @@
     <ClInclude Include="LuaSha256.h" />
     <ClInclude Include="luasocket.h" />
     <ClInclude Include="luasocketmain.h" />
+    <ClInclude Include="luawindow.h" />
     <ClInclude Include="lua_json.h" />
     <ClInclude Include="macro.h" />
     <ClInclude Include="MacroMain.h" />
@@ -268,6 +271,7 @@
     <ClInclude Include="Sha256Main.h" />
     <ClInclude Include="stream.h" />
     <ClInclude Include="StreamMain.h" />
+    <ClInclude Include="WindowMain.h" />
     <ClInclude Include="WinServices.h" />
     <ClInclude Include="WinServicesMain.h" />
     <ClInclude Include="_Http.h" />

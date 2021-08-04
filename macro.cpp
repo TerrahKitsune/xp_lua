@@ -158,6 +158,19 @@ int CreateMacro(lua_State* L) {
 	return 1;
 }
 
+int ScreenToMouse(lua_State* L) {
+
+	lua_Number x = luaL_checknumber(L, 1);
+	lua_Number y = luaL_checknumber(L, 2);
+
+	lua_pop(L, lua_gettop(L));
+
+	lua_pushinteger(L, (lua_Integer)((x * 65536) / GetSystemMetrics(SM_CXSCREEN)));
+	lua_pushinteger(L, (lua_Integer)((y * 65536) / GetSystemMetrics(SM_CYSCREEN)));
+
+	return 2;
+}
+
 int SendMacro(lua_State* L) {
 
 	LuaMacro* macro = lua_tomacro(L, 1);

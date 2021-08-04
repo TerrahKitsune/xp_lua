@@ -310,6 +310,15 @@
     <Filter Include="Macro\Source Files">
       <UniqueIdentifier>{fb10a103-0140-4978-a73d-6e3fb45b65fc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Windows">
+      <UniqueIdentifier>{f768c589-1409-4dbd-a1da-c751af32ede3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Windows\Header Files">
+      <UniqueIdentifier>{95239f79-4dac-442a-b933-4e52bbe1adde}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Windows\Source Files">
+      <UniqueIdentifier>{5b5ea10e-5262-4243-8a92-dde4fe5a8c06}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -696,6 +705,12 @@
     <ClCompile Include="macro.cpp">
       <Filter>Macro\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WindowMain.cpp">
+      <Filter>Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="luawindow.cpp">
+      <Filter>Windows\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -1075,6 +1090,12 @@
     </ClInclude>
     <ClInclude Include="macro.h">
       <Filter>Macro\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowMain.h">
+      <Filter>Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="luawindow.h">
+      <Filter>Windows\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

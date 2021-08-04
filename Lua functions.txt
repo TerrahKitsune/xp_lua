@@ -159,8 +159,48 @@ Mutex:
 	-Get information about the mutex
 	islocked, name, internalid Mutex:Info()
 
+Window:
+
+	-Opens all windows
+	-if a process id is specified it opens only the ones for that process
+	-returns an array containg Window objects
+	array Window.Open(opt processId)
+
+	-Returns a window object, tupe should be one of these: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindow
+	-Returns nil if no window is found
+	Window Window:GetWindow(type)
+
+	-Get the parent window
+	-Returns nil if the window does not have a parent
+	Window Window:GetParent()
+
+	-Returns true if the window is visible
+	bool Window:GetIsVisible()
+
+	-Gets the text of the window
+	string Window:GetText()
+
+	-Retrive the processid and threadid that created the window
+	processId, threadId Window:GetProcessId()
+
+	-Retruns info on the table, object:
+	- https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowinfo
+	-AtomWindowType
+	-XWindowBorders
+	-YWindowBorders
+	-ExStyle
+	-Style
+	-WindowStatus
+	-CreatorVersion
+	-Client (object: Bottom, Left, Right, Top)
+	-Window (object: Bottom, Left, Right, Top)
+	info Window:GetInfo()
+
 Macro:
 	
+	-Converts screen X, Y coordinates to mouse coodinates that can be used with X,Y ccodinates in Macro.Create. 
+	x,y Macro.ScreenToMousePoint(x,y)
+
 	-Creates a macro. Inputs should be an array containing "inputs"
 	- https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput?redirectedfrom=MSDN
 	-Input:
@@ -178,7 +218,7 @@ Macro:
 	-Data
 	-X (0-65536)
 	-Y (0-65536)
-	-See GetScreenSize() and GetCursorPosition() for helpers
+	-See GetScreenSize() and GetCursorPosition() and Macro.ScreenToMousePoint(x,y) for helpers
 	Macro Macro.Create(inputs)
 
 	-Execute the macro, returns the number of commands that was successful

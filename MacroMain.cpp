@@ -6,6 +6,7 @@ static const struct luaL_Reg macrofunctions[] = {
 	{ "GetInputs", GetInputs },
 	{ "Send", SendMacro},
 	{ "Create", CreateMacro},
+	{ "ScreenToMousePoint", ScreenToMouse },
 	{ NULL, NULL }
 };
 

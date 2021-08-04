@@ -128,39 +128,23 @@ end
 CreateGCPrint();
 collectgarbage();
 
-local x, y = GetScreenSize();
+TablePrint(Window);
 
-local inputs = {};
+local p = Process.Open();
 
-local clicks = 1;
-for n=1, clicks do
-table.insert(inputs, {Type=0, Flags = 0x0002});
-table.insert(inputs, {Type=0, Flags = 0x0004});
+local hwnd = Window.Open();
+
+for n=1, #hwnd do 
+	if(hwnd[n]:GetIsVisible() and hwnd[n]:GetWindow(4) == nil)then 
+		print(hwnd[n]:GetText());
+	end
 end
 
-local click = Macro.Create(inputs);
+hwnd = Window.Open(p:GetID())[1];
 
-local count = 0;
-local on = false;
+local info = hwnd:GetInfo();
+print("GetProcessId", hwnd:GetProcessId());
+print("GetText", hwnd:GetText());
+print("GetIsVisible", hwnd:GetIsVisible());
 
-while true do
-
-	if GetKeyState(0x20) and GetKeyState(0x41) then 
-		if on then 
-			on = false;
-		else 
-			on = true;
-		end
-
-		print(on);
-		Sleep(1000);
-	end
-
-	if(on) then
-		click:Send();
-		count = count + clicks;	
-		print(count);
-	end
-
-	Sleep(1);
-end
+TablePrint(info);
