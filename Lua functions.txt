@@ -196,6 +196,55 @@ Window:
 	-Window (object: Bottom, Left, Right, Top)
 	info Window:GetInfo()
 
+	--Custom Window (These functions only work with windows created by Window.Create)
+
+	-Creates a window and returns a window instance and a coroutine for the messageloop.
+	-returns nil on failure
+	-coroutine.resume will return a array of messages that was processed
+	-message object: https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms633573(v=vs.85 )
+	-Message = uMsg
+	-WParam = wParam
+	-LParam  = lParam
+	Window, Coroutine Window.Create()
+
+	-Toggles if the window should be shown or not
+	nil Window:Show(bool)
+
+	-Returns the coroutine for a created window, returns nil if the window was not created with Window.Create
+	coroutine Window:GetThread()
+
+	-Sets a drawing function which is called when the window is being redrawn
+	-a draw object is passed to this object see Draw:
+	-SetDrawFunction(function(draw) 
+	-	local offset = draw:Text("Hello world");
+	-	draw:SetTextColor(draw:RgbToHex(255, 0, 255));
+	-	draw:SetBackgroundColor(0);
+	-	draw:SetBackgroundMode(2);
+	-	offset = draw:Text("Purple text on black background", 0, offset);
+	-end);
+
+	nil Window:SetDrawFunction(function(draw) end)
+
+	Draw:
+
+		-Draws text at x,y coordinates in the drawing rectangle
+		-flags: see format: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-drawtext
+		int Draw:Text(text, x, y, flags)
+
+		-Sets the text color to use (should be RGB hex int)
+		-returns the previously used color
+		int Draw:SetTextColor(int)
+
+		-Sets the background color to use (should be RGB hex int)
+		-returns the previously used color
+		int Draw:SetBackgroundColor(int)
+
+		-Sets the background mode https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-setbkmode
+		-returns the previous mode (OPAQUE = 2, TRANSPARENT = 1)
+		int Draw:SetBackgroundMode(mode)
+
+		-Returns an rgb as a COLORREF hexint
+		int Draw:RgbToHex(r,g,b)
 Macro:
 	
 	-Converts screen X, Y coordinates to mouse coodinates that can be used with X,Y ccodinates in Macro.Create. 

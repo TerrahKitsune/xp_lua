@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <stdlib.h> 
 #include <windows.h> 
+#include "customwindow.h"
 
 BOOL CALLBACK enum_windows_callback(HWND handle, LPARAM lParam);
 
@@ -31,6 +32,45 @@ BOOL CALLBACK enum_windows_callback(HWND handle, LPARAM lParam)
 	}
 
 	return TRUE;
+}
+
+int CreateLuaWindow(lua_State* L) {
+
+	return CreateLuaCustomWindow(L);
+}
+
+int LuaSetDrawFunction(lua_State* L) {
+
+	return LuaSetCustomWindowDrawFunction(L);
+}
+
+int GetCustomWindowCoroutine(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+
+	lua_pop(L, lua_gettop(L));
+
+	if (!window->custom || window->custom->threadRef == LUA_REFNIL) {
+		lua_pushnil(L);
+		return 1;
+	}
+	else {
+		lua_rawgeti(L, LUA_REGISTRYINDEX, window->custom->threadRef);
+		return 1;
+	}
+}
+
+int ShowCustomWindow(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+
+	if (window->custom) {
+
+		ShowWindow(window->handle, lua_toboolean(L, 2));
+		UpdateWindow(window->handle);
+	}
+
+	return 0;
 }
 
 int OpenWindow(lua_State* L) {
@@ -254,8 +294,19 @@ int window_gc(lua_State* L) {
 
 	LuaWindow* window = lua_tonwindow(L, 1);
 
-	if (window->wasCreated) {
+	if (window->custom) {
+
+		if (window->custom->threadRef != LUA_REFNIL) {
+			luaL_unref(L, LUA_REGISTRYINDEX, window->custom->threadRef);
+		}
+
+		if (window->custom->customDrawingRef != LUA_REFNIL) {
+			luaL_unref(L, LUA_REGISTRYINDEX, window->custom->customDrawingRef);
+		}
+
 		DestroyWindow(window->handle);
+
+		CleanUp(window->custom);
 	}
 
 	ZeroMemory(window, sizeof(LuaWindow));

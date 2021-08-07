@@ -257,8 +257,6 @@ int GetInputs(lua_State* L) {
 		lua_rawseti(L, -2, i + 1);
 	}
 
-	DumpStack(L);
-
 	return 1;
 }
 

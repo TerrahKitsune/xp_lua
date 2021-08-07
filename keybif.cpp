@@ -20,8 +20,6 @@ int CreateKeyBif(lua_State* L) {
 		return 2;
 	}
 
-	DumpStack(L);
-
 	char error[MAX_PATH*2];
 	memset(error, 0, MAX_PATH * 2);
 
@@ -31,8 +29,6 @@ int CreateKeyBif(lua_State* L) {
 	int n = 0;
 	lua_pushnil(L);
 	while (lua_next(L, -2) != 0) {
-
-		DumpStack(L);
 
 		str = lua_tolstring(L, -1, &len);
 		HANDLE h = FindFirstFile(str, &data);
@@ -88,8 +84,6 @@ int CreateKeyBif(lua_State* L) {
 		n++;
 		lua_pop(L, 1);
 	}
-
-	DumpStack(L);
 
 	CLEAN:
 

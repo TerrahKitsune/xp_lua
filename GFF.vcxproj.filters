@@ -711,6 +711,12 @@
     <ClCompile Include="luawindow.cpp">
       <Filter>Windows\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="customwindow.cpp">
+      <Filter>Windows\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="customdrawing.cpp">
+      <Filter>Windows\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -1095,6 +1101,12 @@
       <Filter>Windows</Filter>
     </ClInclude>
     <ClInclude Include="luawindow.h">
+      <Filter>Windows\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="customwindow.h">
+      <Filter>Windows\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="customdrawing.h">
       <Filter>Windows\Header Files</Filter>
     </ClInclude>
   </ItemGroup>

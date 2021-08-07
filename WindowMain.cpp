@@ -1,5 +1,6 @@
 #include "luawindow.h"
 #include "WindowMain.h"
+#include "customdrawing.h"
 
 static const struct luaL_Reg windowfunctions[] = {
 
@@ -10,13 +11,19 @@ static const struct luaL_Reg windowfunctions[] = {
 	{ "GetWindow", GetWindow },
 	{ "Open", OpenWindow},
 	{ "GetParent", GetWindowParent},
+
+	{ "Create", CreateLuaWindow },
+	{ "Show", ShowCustomWindow },
+	{ "GetThread", GetCustomWindowCoroutine },
+	{ "SetDrawFunction", LuaSetDrawFunction },
+
 	{ NULL, NULL }
 };
 
 static const luaL_Reg windowmeta[] = {
 	{ "__gc",  window_gc },
 	{ "__tostring",  window_tostring },
-{ NULL, NULL }
+	{ NULL, NULL }
 };
 
 int luaopen_window(lua_State* L) {
