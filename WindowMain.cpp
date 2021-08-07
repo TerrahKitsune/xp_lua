@@ -11,11 +11,12 @@ static const struct luaL_Reg windowfunctions[] = {
 	{ "GetWindow", GetWindow },
 	{ "Open", OpenWindow},
 	{ "GetParent", GetWindowParent},
-
+	
 	{ "Create", CreateLuaWindow },
 	{ "Show", ShowCustomWindow },
 	{ "GetThread", GetCustomWindowCoroutine },
 	{ "SetDrawFunction", LuaSetDrawFunction },
+	{ "CheckHasMessage", LuaCheckHasMessage },
 
 	{ NULL, NULL }
 };

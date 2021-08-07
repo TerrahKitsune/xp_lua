@@ -292,7 +292,7 @@ int CreateLuaCustomWindow(lua_State* L) {
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
 	WndClsEx.cbSize = sizeof(WNDCLASSEX);
-	WndClsEx.style = CS_HREDRAW | CS_VREDRAW;
+	WndClsEx.style = luaL_optinteger(L, 8, CS_HREDRAW | CS_VREDRAW);
 	WndClsEx.lpfnWndProc = WndProc;
 	WndClsEx.hInstance = hInstance;
 	WndClsEx.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
@@ -303,10 +303,10 @@ int CreateLuaCustomWindow(lua_State* L) {
 
 	LuaStateCallback = NULL;
 
-	HWND hwnd = CreateWindowEx(WS_EX_OVERLAPPEDWINDOW,
+	HWND hwnd = CreateWindowEx(luaL_optinteger(L, 9, WS_EX_OVERLAPPEDWINDOW),
 		custom->className,
 		custom->title,
-		WS_OVERLAPPEDWINDOW,
+		luaL_optinteger(L, 10, WS_OVERLAPPEDWINDOW),
 		x,
 		y,
 		width,

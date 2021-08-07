@@ -199,13 +199,28 @@ Window:
 	--Custom Window (These functions only work with windows created by Window.Create)
 
 	-Creates a window and returns a window instance and a coroutine for the messageloop.
+	-------------------
+	-classname = a unique classname for the window
+	-title = window title
+	-x = x coordinate to spawn on
+	-y = y coordinate to spawn on
+	-width = width of the window
+	-height = height of the window
+	-classstyle = the style to use, defaults to 0x0003 (CS_HREDRAW | CS_VREDRAW) https://docs.microsoft.com/en-us/windows/win32/winmsg/about-window-classes
+	-exstyle = (defaults to WS_EX_OVERLAPPEDWINDOW 0x300) dwExStyle https://docs.microsoft.com/en-us/windows/win32/winmsg/extended-window-styles
+	-style = (defaults to WS_OVERLAPPEDWINDOW 0xCF0000) dwStyle https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles
+	-------------------
 	-returns nil on failure
 	-coroutine.resume will return a array of messages that was processed
 	-message object: https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms633573(v=vs.85 )
 	-Message = uMsg
 	-WParam = wParam
 	-LParam  = lParam
-	Window, Coroutine Window.Create()
+	Window, Coroutine Window.Create(classname, title, x, y, width, height, classstyle, exstyle, style)
+
+	-Check if there is any pending messages
+	-if true then the Coroutine from Window.Create or Window:GetThread() should be resumed
+	bool Window:CheckHasMessage()
 
 	-Toggles if the window should be shown or not
 	nil Window:Show(bool)
@@ -231,6 +246,9 @@ Window:
 		-flags: see format: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-drawtext
 		int Draw:Text(text, x, y, flags)
 
+		-Calculates the size of a string to be drawn
+		width, height Draw:CalcTextSize(string)
+
 		-Sets the text color to use (should be RGB hex int)
 		-returns the previously used color
 		int Draw:SetTextColor(int)
@@ -243,8 +261,15 @@ Window:
 		-returns the previous mode (OPAQUE = 2, TRANSPARENT = 1)
 		int Draw:SetBackgroundMode(mode)
 
+		-Sets or gets a pixel, if colorref is set then the pixel is replaced
+		-returns the previous (or current if COLORREF is nil) pixel color
+		int Draw:Pixel(x,y, opt COLORREF)
+
 		-Returns an rgb as a COLORREF hexint
 		int Draw:RgbToHex(r,g,b)
+
+		-Returns the r,g,b from a colorref int
+		r,g,b Draw:HexToRgb(COLORREF)
 Macro:
 	
 	-Converts screen X, Y coordinates to mouse coodinates that can be used with X,Y ccodinates in Macro.Create. 

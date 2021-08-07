@@ -26,6 +26,10 @@ int DrawSetTextColor(lua_State* L);
 int DrawSetBackgroundColor(lua_State* L);
 int DrawSetBackgroundMode(lua_State* L);
 int RgbToHex(lua_State* L);
+int HexToRgb(lua_State* L);
+int DrawSetPixel(lua_State* L);
+int DrawGetSize(lua_State* L);
+int DrawCalcTextSize(lua_State* L);
 
 int windowdrawing_gc(lua_State* L);
 int windowdrawing_tostring(lua_State* L);

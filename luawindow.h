@@ -35,6 +35,7 @@ int GetCustomWindowCoroutine(lua_State* L);
 int CreateLuaWindow(lua_State* L);
 int ShowCustomWindow(lua_State* L);
 int LuaSetDrawFunction(lua_State* L);
+int LuaCheckHasMessage(lua_State* L);
 
 int window_gc(lua_State* L);
 int window_tostring(lua_State* L);

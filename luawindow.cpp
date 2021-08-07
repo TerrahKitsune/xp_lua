@@ -97,6 +97,16 @@ int OpenWindow(lua_State* L) {
 	return 1;
 }
 
+int LuaCheckHasMessage(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+	MSG         Msg;
+
+	lua_pushboolean(L, window->custom != NULL && PeekMessage(&Msg, window->handle, 0, 0, 0) != 0);
+
+	return 1;
+}
+
 int GetIsVisible(lua_State* L) {
 
 	LuaWindow* window = lua_tonwindow(L, 1);

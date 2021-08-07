@@ -11,18 +11,79 @@ int DrawCustomText(lua_State* L) {
 	RECT rc;
 	GetClientRect(window->window, &rc);
 
-	rc.left = (LONG)luaL_optinteger(L, 3, 0);
-	rc.top = (LONG)luaL_optinteger(L, 4, 0);
+	rc.left = (LONG)luaL_optnumber(L, 3, 0);
+	rc.top = (LONG)luaL_optnumber(L, 4, 0);
 
-	lua_pushinteger(L, DrawText(*window->hdc, data, len, &rc, (UINT)luaL_optinteger(L, 5, 0)));
+	lua_pop(L, lua_gettop(L));
+
+	lua_pushinteger(L,DrawText(*window->hdc, data, len, &rc, (UINT)luaL_optinteger(L, 5, 0)));
+
 	return 1;
+}
+
+int DrawCalcTextSize(lua_State* L) {
+
+	LuaCustomDrawing* window = lua_tonwindowdrawing(L, 1);
+	size_t len;
+	const char* data = luaL_checklstring(L, 2, &len);
+
+	SIZE size;
+
+	if (GetTextExtentPoint32A(*window->hdc, data, len, &size)) {
+
+		lua_pushinteger(L, size.cx);
+		lua_pushinteger(L, size.cy);
+	}
+	else {
+		return 0;
+	}
+
+	return 2;
+}
+
+int DrawSetPixel(lua_State* L) {
+
+	LuaCustomDrawing* window = lua_tonwindowdrawing(L, 1);
+
+	if (lua_type(L, 4) != LUA_TNUMBER) {
+		lua_pushinteger(L,GetPixel(*window->hdc, (int)luaL_optnumber(L, 2, 0), (int)luaL_optnumber(L, 3, 0)));
+	}
+	else {
+		lua_pushinteger(L, SetPixel(*window->hdc, (int)luaL_optnumber(L, 2, 0), (int)luaL_optnumber(L, 3, 0), (int)luaL_optnumber(L, 4, 0)));
+	}
+
+	return 1;
+}
+
+int DrawGetSize(lua_State* L) {
+
+	LuaCustomDrawing* window = lua_tonwindowdrawing(L, 1);
+	RECT rc;
+	GetClientRect(window->window, &rc);
+
+	lua_pushinteger(L, rc.right);
+	lua_pushinteger(L, rc.bottom);
+
+	return 2;
 }
 
 int RgbToHex(lua_State* L) {
 
 	LuaCustomDrawing* window = lua_tonwindowdrawing(L, 1);
-	lua_pushinteger(L, RGB(luaL_optinteger(L, 2, 0), luaL_optinteger(L, 3, 0), luaL_optinteger(L, 4, 0)));
+	lua_pushinteger(L, RGB((int)luaL_optnumber(L, 2, 0), (int)luaL_optnumber(L, 3, 0), (int)luaL_optnumber(L, 4, 0)));
 	return 1;
+}
+
+int HexToRgb(lua_State* L) {
+
+	LuaCustomDrawing* window = lua_tonwindowdrawing(L, 1);
+	lua_Integer hex = luaL_checkinteger(L, 2);
+
+	lua_pushinteger(L, GetRValue(hex));
+	lua_pushinteger(L, GetGValue(hex));
+	lua_pushinteger(L, GetBValue(hex));
+
+	return 3;
 }
 
 int DrawSetBackgroundMode(lua_State* L) {
@@ -35,14 +96,14 @@ int DrawSetBackgroundMode(lua_State* L) {
 int DrawSetBackgroundColor(lua_State* L) {
 
 	LuaCustomDrawing* window = lua_tonwindowdrawing(L, 1);
-	lua_pushinteger(L, SetBkColor(*window->hdc, (COLORREF)luaL_checkinteger(L, 2)));
+	lua_pushinteger(L, SetBkColor(*window->hdc, (COLORREF)luaL_checknumber(L, 2)));
 	return 1;
 }
 
 int DrawSetTextColor(lua_State* L) {
 
 	LuaCustomDrawing* window = lua_tonwindowdrawing(L, 1);
-	lua_pushinteger(L, SetTextColor(*window->hdc, (COLORREF)luaL_checkinteger(L, 2)));
+	lua_pushinteger(L, SetTextColor(*window->hdc, (COLORREF)luaL_checknumber(L, 2)));
 	return 1;
 }
 
@@ -97,11 +158,15 @@ int windowdrawing_tostring(lua_State* L) {
 
 static const struct luaL_Reg windowdrawingfunctions[] = {
 
+	{ "GetSize", DrawGetSize },
+	{ "Pixel", DrawSetPixel },
 	{ "RgbToHex", RgbToHex },
-	{ "SetBackgroundMode", DrawSetBackgroundMode},
+	{ "HexToRgb", HexToRgb },
+	{ "SetBackgroundMode", DrawSetBackgroundMode },
 	{ "SetBackgroundColor", DrawSetBackgroundColor},
 	{ "SetTextColor", DrawSetTextColor},
 	{ "Text", DrawCustomText },
+	{ "CalcTextSize", DrawCalcTextSize },
 	{ NULL, NULL }
 };
 

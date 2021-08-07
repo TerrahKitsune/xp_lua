@@ -149,22 +149,43 @@ print("GetIsVisible", hwnd:GetIsVisible());
 
 TablePrint(info);
 
-local c = Window.Create(nil, "class", "Lua", 100 ,100 ,500 ,250);
+local c = Window.Create(nil, "class", "Lua", 100 ,100 ,500 ,250, 0x3, 0x300, 0);
 c:Show(true);
-c:SetDrawFunction(function(draw) 
+c:SetDrawFunction(function(draw)
+
 	local offset = draw:Text("Hello world");
 	draw:SetTextColor(draw:RgbToHex(255, 0, 255));
 	draw:SetBackgroundColor(0);
 	draw:SetBackgroundMode(2);
-	offset = draw:Text("Purple text on black background", 0, offset);
+	draw:Text("Purple text on black background", 0, offset);
+	
+	local w,h = draw:GetSize();
+
+	local tw,th = draw:CalcTextSize(w.."x"..h);
+
+	for x=(w/2)-(tw/2)-25, (w/2)+(tw/2)+25 do 
+		for y=(h/2)-(th/2)-25, (h/2)+(th/2)+25 do 
+			draw:Pixel(x,y, math.random(0, draw:RgbToHex(math.random(0,255),math.random(0,255),math.random(0,255))));
+		end
+	end
+
+	draw:Text(w.."x"..h, (w/2)-(tw/2), (h/2)-(th/2));
+
 end);
 
 local ok,msgs;
 while coroutine.status(c:GetThread()) ~= "dead" do 
 
+	while not c:CheckHasMessage() do 
+		Sleep();
+	end
+
 	ok,msgs = coroutine.resume(c:GetThread());
 
-	if ok then
+	if ok and #msgs > 0 then
+		
+		print("-----");
+
 		for n=1, #msgs do 
 			print(msgs[n].Message, msgs[n].WParam, msgs[n].LParam);
 		end
