@@ -4,6 +4,7 @@
 
 static const struct luaL_Reg windowfunctions[] = {
 
+	{ "GetID", LuaWindowGetId },
 	{ "GetInfo", GetWindowInformation},
 	{ "GetProcessId", GetWindowProcessId},
 	{ "GetText", GetText},
@@ -17,6 +18,7 @@ static const struct luaL_Reg windowfunctions[] = {
 	{ "GetThread", GetCustomWindowCoroutine },
 	{ "SetDrawFunction", LuaSetDrawFunction },
 	{ "CheckHasMessage", LuaCheckHasMessage },
+	{ "CreateButton", CreateLuaButton },
 
 	{ NULL, NULL }
 };

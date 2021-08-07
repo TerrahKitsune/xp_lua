@@ -166,6 +166,9 @@ Window:
 	-returns an array containg Window objects
 	array Window.Open(opt processId)
 
+	-Gets an id from the window (this is the HWND value)
+	int Window:GetID()
+
 	-Returns a window object, tupe should be one of these: https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindow
 	-Returns nil if no window is found
 	Window Window:GetWindow(type)
@@ -212,11 +215,15 @@ Window:
 	-------------------
 	-returns nil on failure
 	-coroutine.resume will return a array of messages that was processed
-	-message object: https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms633573(v=vs.85 )
+	-message object: https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms633573(v=vs.85)
 	-Message = uMsg
 	-WParam = wParam
 	-LParam  = lParam
+	-ID = windowhandleID
 	Window, Coroutine Window.Create(classname, title, x, y, width, height, classstyle, exstyle, style)
+
+	-Creates a button on a window and returns the window object for it
+	Window Window:CreateButton(caption, x,y,width, height);
 
 	-Check if there is any pending messages
 	-if true then the Coroutine from Window.Create or Window:GetThread() should be resumed

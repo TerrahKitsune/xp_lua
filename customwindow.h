@@ -9,6 +9,8 @@ void CleanUp(LuaCustomWindow* custom);
 int CreateLuaCustomWindow(lua_State* L);
 
 int LuaSetCustomWindowDrawFunction(lua_State* L);
+int CreateCustomLuaButton(lua_State* L);
+bool CheckHasMessage(LuaWindow* window);
 
 int lua_customcoroutineiterator(lua_State* L, int status, lua_KContext ctx);
 int lua_customwindowloop(lua_State* L);

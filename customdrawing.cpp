@@ -89,7 +89,7 @@ int HexToRgb(lua_State* L) {
 int DrawSetBackgroundMode(lua_State* L) {
 
 	LuaCustomDrawing* window = lua_tonwindowdrawing(L, 1);
-	lua_pushinteger(L, (lua_Integer)SetBkMode(*window->hdc, luaL_checkinteger(L, 2)));
+	lua_pushinteger(L, (lua_Integer)SetBkMode(*window->hdc, (int)luaL_checkinteger(L, 2)));
 	return 1;
 }
 

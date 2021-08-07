@@ -149,8 +149,12 @@ print("GetIsVisible", hwnd:GetIsVisible());
 
 TablePrint(info);
 
-local c = Window.Create(nil, "class", "Lua", 100 ,100 ,500 ,250, 0x3, 0x300, 0);
+local c = Window.Create(nil, "class", "Lua", 100 ,100 ,500 ,250);
 c:Show(true);
+
+print(c:CreateButton("ITS A BUTTON!", 0, 36, 150, 50));
+print(c:CreateButton("Also a button", 0, 50+36, 150, 50));
+
 c:SetDrawFunction(function(draw)
 
 	local offset = draw:Text("Hello world");
@@ -187,7 +191,7 @@ while coroutine.status(c:GetThread()) ~= "dead" do
 		print("-----");
 
 		for n=1, #msgs do 
-			print(msgs[n].Message, msgs[n].WParam, msgs[n].LParam);
+			print(msgs[n].ID, msgs[n].Message, msgs[n].WParam, msgs[n].LParam);
 		end
 	end
 end

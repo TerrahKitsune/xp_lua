@@ -39,6 +39,11 @@ int CreateLuaWindow(lua_State* L) {
 	return CreateLuaCustomWindow(L);
 }
 
+int CreateLuaButton(lua_State* L) {
+
+	return CreateCustomLuaButton(L);
+}
+
 int LuaSetDrawFunction(lua_State* L) {
 
 	return LuaSetCustomWindowDrawFunction(L);
@@ -78,7 +83,7 @@ int OpenWindow(lua_State* L) {
 	handle_data data;
 
 	if (lua_type(L, 1) == LUA_TNUMBER) {
-		data.process_id = luaL_checkinteger(L, 1);
+		data.process_id = (unsigned long)luaL_checkinteger(L, 1);
 		data.all = false;
 	}
 	else {
@@ -100,9 +105,8 @@ int OpenWindow(lua_State* L) {
 int LuaCheckHasMessage(lua_State* L) {
 
 	LuaWindow* window = lua_tonwindow(L, 1);
-	MSG         Msg;
 
-	lua_pushboolean(L, window->custom != NULL && PeekMessage(&Msg, window->handle, 0, 0, 0) != 0);
+	lua_pushboolean(L, CheckHasMessage(window));
 
 	return 1;
 }
@@ -282,6 +286,14 @@ int GetText(lua_State* L) {
 	return 1;
 }
 
+int LuaWindowGetId(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+	lua_pushinteger(L, (lua_Integer)window->handle);
+
+	return 1;
+}
+
 LuaWindow* lua_pushwindow(lua_State* L) {
 	LuaWindow* window = (LuaWindow*)lua_newuserdata(L, sizeof(LuaWindow));
 	if (window == NULL)
@@ -312,6 +324,10 @@ int window_gc(lua_State* L) {
 
 		if (window->custom->customDrawingRef != LUA_REFNIL) {
 			luaL_unref(L, LUA_REGISTRYINDEX, window->custom->customDrawingRef);
+		}
+
+		if (window->custom->childRef != LUA_REFNIL) {
+			luaL_unref(L, LUA_REGISTRYINDEX, window->custom->childRef);
 		}
 
 		DestroyWindow(window->handle);
