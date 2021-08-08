@@ -11,6 +11,7 @@ typedef struct LuaCustomWindow {
 	int customDrawingRef;
 	int threadRef;
 	int childRef;
+	int parentRef;
 	int eventRef;
 	char* className;
 	char* title;
@@ -38,6 +39,7 @@ int GetText(lua_State* L);
 int GetWindowProcessId(lua_State* L);
 int GetWindowInformation(lua_State* L);
 int LuaWindowGetId(lua_State* L);
+int LuaDestroyWindow(lua_State* L);
 
 int GetCustomWindowCoroutine(lua_State* L);
 int CreateLuaWindow(lua_State* L);

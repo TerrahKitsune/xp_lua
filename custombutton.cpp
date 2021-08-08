@@ -58,6 +58,8 @@ int CreateCustomLuaButton(lua_State* L) {
 
 	lua_pushvalue(L, 7);
 	int ref = luaL_ref(L, LUA_REGISTRYINDEX);
+	lua_pushvalue(L, 1);
+	int refParent = luaL_ref(L, LUA_REGISTRYINDEX);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -66,6 +68,7 @@ int CreateCustomLuaButton(lua_State* L) {
 	button->custom = custom;
 	button->custom->type = WINDOW_TYPE_BUTTON;
 	button->custom->eventRef = ref;
+	button->custom->parentRef = refParent;
 
 	AddLuaTableChild(L, window->custom);
 

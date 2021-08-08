@@ -205,6 +205,9 @@ int GetWindowInformation(lua_State* L) {
 	return 1;
 }
 
+int LuaDestroyWindow(lua_State* L) {
+	return RemoveCustomWindow(L);
+}
 
 int GetWindow(lua_State* L) {
 
@@ -227,6 +230,12 @@ int GetWindow(lua_State* L) {
 int GetWindowParent(lua_State* L) {
 
 	LuaWindow* window = lua_tonwindow(L, 1);
+
+	if (window->custom && window->custom->parentRef != LUA_REFNIL) {
+
+		lua_rawgeti(L, LUA_REGISTRYINDEX, window->custom->parentRef);
+		return 1;
+	}
 
 	HWND hwnd = GetParent(window->handle);
 
@@ -333,6 +342,10 @@ int window_gc(lua_State* L) {
 
 		if (window->custom->eventRef != LUA_REFNIL) {
 			luaL_unref(L, LUA_REGISTRYINDEX, window->custom->eventRef);
+		}
+
+		if (window->custom->parentRef != LUA_REFNIL) {
+			luaL_unref(L, LUA_REGISTRYINDEX, window->custom->parentRef);
 		}
 
 		DestroyWindow(window->handle);

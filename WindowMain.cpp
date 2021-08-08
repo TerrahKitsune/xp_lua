@@ -12,7 +12,8 @@ static const struct luaL_Reg windowfunctions[] = {
 	{ "GetWindow", GetWindow },
 	{ "Open", OpenWindow},
 	{ "GetParent", GetWindowParent},
-	
+	{ "Destroy", LuaDestroyWindow },
+
 	{ "Create", CreateLuaWindow },
 	{ "Show", ShowCustomWindow },
 	{ "GetThread", GetCustomWindowCoroutine },

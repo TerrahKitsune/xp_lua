@@ -152,8 +152,12 @@ TablePrint(info);
 local c = Window.Create(nil, "class", "Lua", 100 ,100 ,500 ,250);
 c:Show(true);
 
-print(c:CreateButton("ITS A BUTTON!", 0, 36, 150, 50, function() print("ITS A BUTTON"); end));
-print(c:CreateButton("Also a button", 0, 50+36, 150, 50,  function() print("Also button"); end));
+local button1 = c:CreateButton("ITS A BUTTON!", 0, 36, 150, 50, function(child)
+
+	print("Button");
+end);
+
+print(c:CreateButton("Also a button", 0, 50+36, 150, 50,  function(child) print("Also button"); child:Destroy(); end));
 
 c:SetDrawFunction(function(draw)
 

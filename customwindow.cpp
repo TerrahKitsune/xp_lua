@@ -75,6 +75,7 @@ LuaCustomWindow* CreateCustomWindowStruct() {
 	custom->customDrawingRef = LUA_REFNIL;
 	custom->childRef = LUA_REFNIL;
 	custom->eventRef = LUA_REFNIL;
+	custom->parentRef = LUA_REFNIL;
 
 	return custom;
 }
@@ -91,6 +92,36 @@ size_t GetLuaChildrenCount(lua_State* L, LuaCustomWindow* window) {
 	lua_pop(L, 1);
 
 	return len;
+}
+
+void RemoveLuaTableChild(lua_State* L, LuaWindow* window) {
+
+	if (!window->custom || window->custom->childRef == LUA_REFNIL) {
+		return;
+	}
+
+	lua_newtable(L);
+	lua_rawgeti(L, LUA_REGISTRYINDEX, window->custom->childRef);
+	size_t len = lua_rawlen(L, -1);
+	LuaWindow* sub;
+
+	int nth = 0;
+	for (size_t i = 0; i < len; i++)
+	{
+		lua_pushinteger(L, i + 1);
+		lua_gettable(L, -2);
+
+		sub = lua_tonwindow(L, -1);
+
+		if (sub != window) {
+			lua_rawseti(L, -3, ++nth);
+		}
+		else {
+			lua_pop(L, 1);
+		}
+	}
+
+	lua_pop(L, 2);
 }
 
 LuaWindow* GetLuaTableChild(lua_State* L, LuaCustomWindow* window, HMENU menuid) {
@@ -141,6 +172,35 @@ void AddLuaTableChild(lua_State* L, LuaCustomWindow* window) {
 	lua_pop(L, 1);
 }
 
+int RemoveCustomWindow(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+
+	if (!window->custom) {
+		return 0;
+	}
+
+	if (window->custom && window->custom->parentRef != LUA_REFNIL) {
+
+		lua_rawgeti(L, LUA_REGISTRYINDEX, window->custom->parentRef);
+		RemoveLuaTableChild(L, lua_tonwindow(L, -1));
+		lua_pop(L, 1);
+	}
+
+	LuaWindow* parent = window;
+
+	while (parent->custom && parent->custom->parentRef != LUA_REFNIL) {
+
+		lua_rawgeti(L, LUA_REGISTRYINDEX, parent->custom->parentRef);
+		parent = lua_tonwindow(L, -1);
+		lua_pop(L, 1);
+	}
+
+	BOOL result = PostMessage(parent->handle, WM_LUA_DESTROY, (WPARAM)window->handle, 0);
+
+	return 0;
+}
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	lua_State* L = LuaStateCallback;
@@ -151,40 +211,40 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 
 		window = lua_type(L, 1) == LUA_TUSERDATA ? lua_tonwindow(L, 1) : NULL;
 
-		if (!window || !window->custom) {
-			return DefWindowProc(hwnd, Msg, wParam, lParam);
+		if (window && window->custom) {
+
+			lua_createtable(L, 0, 4);
+
+			lua_pushstring(L, "Message");
+			lua_pushinteger(L, Msg);
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "WParam");
+			lua_pushinteger(L, wParam);
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "LParam");
+			lua_pushinteger(L, lParam);
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "ID");
+			lua_pushinteger(L, (lua_Integer)hwnd);
+			lua_settable(L, -3);
+
+			//printf("%u %u", hwnd, Msg);
+			//DumpStack(L);
+
+			lua_rawseti(L, -2, ++msgcount);
 		}
-
-		lua_createtable(L, 0, 4);
-
-		lua_pushstring(L, "Message");
-		lua_pushinteger(L, Msg);
-		lua_settable(L, -3);
-
-		lua_pushstring(L, "WParam");
-		lua_pushinteger(L, wParam);
-		lua_settable(L, -3);
-
-		lua_pushstring(L, "LParam");
-		lua_pushinteger(L, lParam);
-		lua_settable(L, -3);
-
-		lua_pushstring(L, "ID");
-		lua_pushinteger(L, (lua_Integer)hwnd);
-		lua_settable(L, -3);
-
-		//printf("%u %u", hwnd, Msg);
-		//DumpStack(L);
-
-		lua_rawseti(L, -2, ++msgcount);
-	}
-	else {
-		return DefWindowProc(hwnd, Msg, wParam, lParam);
 	}
 
 	switch (Msg)
 	{
 
+	case WM_LUA_DESTROY:
+
+		DestroyWindow((HWND)wParam);
+		break;
 	case WM_NCDESTROY:
 
 		break;
@@ -196,17 +256,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 
 	case WM_COMMAND:
 
-		child = GetLuaTableChild(L, window->custom, (HMENU)LOWORD(wParam));
+		if (window) {
 
-		if (!child || !child->custom) {
+			child = GetLuaTableChild(L, window->custom, (HMENU)LOWORD(wParam));
+
+			if (!child || !child->custom) {
+				lua_pop(L, 1);
+				return DefWindowProc(hwnd, Msg, wParam, lParam);
+			}
+			else if (child->custom->type == WINDOW_TYPE_BUTTON) {
+				DoCustomButtonEvent(L, window, child, hwnd, Msg, wParam, lParam);
+			}
+
 			lua_pop(L, 1);
-			return DefWindowProc(hwnd, Msg, wParam, lParam);
 		}
-		else if (child->custom->type == WINDOW_TYPE_BUTTON) {
-			DoCustomButtonEvent(L, window, child, hwnd, Msg, wParam, lParam);
-		}
-
-		lua_pop(L, 1);
 
 		break;
 	case WM_PAINT:
@@ -216,39 +279,42 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 
 		hdc = BeginPaint(hwnd, &ps);
 
-		if (window->custom->customDrawingRef != LUA_REFNIL) {
+		if (window) {
 
-			lua_rawgeti(L, LUA_REGISTRYINDEX, window->custom->customDrawingRef);
-			LuaCustomDrawing* draw = lua_tonwindowdrawing(L, -1);
+			if (window->custom->customDrawingRef != LUA_REFNIL) {
 
-			if (draw->paintFunctionRef) {
+				lua_rawgeti(L, LUA_REGISTRYINDEX, window->custom->customDrawingRef);
+				LuaCustomDrawing* draw = lua_tonwindowdrawing(L, -1);
 
-				lua_rawgeti(L, LUA_REGISTRYINDEX, draw->paintFunctionRef);
-				lua_pushvalue(L, -2);
+				if (draw->paintFunctionRef) {
 
-				draw->hdc = &hdc;
-				draw->ps = &ps;
-				draw->window = hwnd;
+					lua_rawgeti(L, LUA_REGISTRYINDEX, draw->paintFunctionRef);
+					lua_pushvalue(L, -2);
 
-				if (lua_pcall(L, 1, 0, NULL)) {
+					draw->hdc = &hdc;
+					draw->ps = &ps;
+					draw->window = hwnd;
 
-					draw->hdc = NULL;
-					draw->ps = NULL;
-					draw->window = NULL;
+					if (lua_pcall(L, 1, 0, NULL)) {
 
-					EndPaint(hwnd, &ps);
-					lua_error(L);
-					return 0;
+						draw->hdc = NULL;
+						draw->ps = NULL;
+						draw->window = NULL;
+
+						EndPaint(hwnd, &ps);
+						lua_error(L);
+						return 0;
+					}
+					else {
+
+						draw->hdc = NULL;
+						draw->ps = NULL;
+						draw->window = NULL;
+					}
 				}
-				else {
 
-					draw->hdc = NULL;
-					draw->ps = NULL;
-					draw->window = NULL;
-				}
+				lua_pop(L, 1);
 			}
-
-			lua_pop(L, 1);
 		}
 
 		EndPaint(hwnd, &ps);
@@ -299,7 +365,7 @@ bool CheckHasMessage(LuaWindow* window) {
 	lua_State* prev = LuaStateCallback;
 	LuaStateCallback = NULL;
 
-	bool hasMessage = PeekMessage(&Msg, window->handle, 0, 0, 0);
+	bool hasMessage = PeekMessage(&Msg, window->handle, 0, 0, 0) != 0;
 
 	LuaStateCallback = prev;
 

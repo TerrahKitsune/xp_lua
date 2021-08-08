@@ -3,6 +3,8 @@
 #include "luawindow.h"
 #include <Windows.h>
 
+#define		WM_LUA_DESTROY		(WM_USER + 0)
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
 
@@ -11,6 +13,7 @@ void AddLuaTableChild(lua_State* L, LuaCustomWindow* window);
 size_t GetLuaChildrenCount(lua_State* L, LuaCustomWindow* window);
 void CleanUp(LuaCustomWindow* custom);
 int CreateLuaCustomWindow(lua_State* L);
+int RemoveCustomWindow(lua_State* L);
 
 int LuaSetCustomWindowDrawFunction(lua_State* L);
 int CreateCustomLuaButton(lua_State* L);
