@@ -152,8 +152,8 @@ TablePrint(info);
 local c = Window.Create(nil, "class", "Lua", 100 ,100 ,500 ,250);
 c:Show(true);
 
-print(c:CreateButton("ITS A BUTTON!", 0, 36, 150, 50));
-print(c:CreateButton("Also a button", 0, 50+36, 150, 50));
+print(c:CreateButton("ITS A BUTTON!", 0, 36, 150, 50, function() print("ITS A BUTTON"); end));
+print(c:CreateButton("Also a button", 0, 50+36, 150, 50,  function() print("Also button"); end));
 
 c:SetDrawFunction(function(draw)
 
@@ -177,6 +177,7 @@ c:SetDrawFunction(function(draw)
 
 end);
 
+local showmsgs = false;
 local ok,msgs;
 while coroutine.status(c:GetThread()) ~= "dead" do 
 
@@ -186,7 +187,7 @@ while coroutine.status(c:GetThread()) ~= "dead" do
 
 	ok,msgs = coroutine.resume(c:GetThread());
 
-	if ok and #msgs > 0 then
+	if showmsgs and ok and #msgs > 0 then
 		
 		print("-----");
 

@@ -223,7 +223,8 @@ Window:
 	Window, Coroutine Window.Create(classname, title, x, y, width, height, classstyle, exstyle, style)
 
 	-Creates a button on a window and returns the window object for it
-	Window Window:CreateButton(caption, x,y,width, height);
+	-function is the event that runs when the button is pressed, buttonWindow is the button, parentWindow is window with the button
+	Window Window:CreateButton(caption, x,y,width, height, function(buttonWindow, parentWindow) end);
 
 	-Check if there is any pending messages
 	-if true then the Coroutine from Window.Create or Window:GetThread() should be resumed

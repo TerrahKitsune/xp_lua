@@ -717,6 +717,9 @@
     <ClCompile Include="customdrawing.cpp">
       <Filter>Windows\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="custombutton.cpp">
+      <Filter>Windows\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -1107,6 +1110,9 @@
       <Filter>Windows\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="customdrawing.h">
+      <Filter>Windows\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="custombutton.h">
       <Filter>Windows\Header Files</Filter>
     </ClInclude>
   </ItemGroup>

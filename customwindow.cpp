@@ -1,6 +1,7 @@
 #include "customwindow.h"
 #include "luawindow.h"
 #include "customdrawing.h"
+#include "custombutton.h"
 
 lua_State* LuaStateCallback;
 int msgcount;
@@ -24,7 +25,7 @@ int LuaSetCustomWindowDrawFunction(lua_State* L) {
 
 	LuaWindow* window = lua_tonwindow(L, 1);
 
-	if (!window->custom) {
+	if (!window->custom || window->custom->type != WINDOW_TYPE_CUSTOM) {
 		return 0;
 	}
 
@@ -73,13 +74,60 @@ LuaCustomWindow* CreateCustomWindowStruct() {
 	custom->threadRef = LUA_REFNIL;
 	custom->customDrawingRef = LUA_REFNIL;
 	custom->childRef = LUA_REFNIL;
+	custom->eventRef = LUA_REFNIL;
 
 	return custom;
 }
 
-void AddLuaTableChild(lua_State* L, LuaCustomWindow* window) {
+size_t GetLuaChildrenCount(lua_State* L, LuaCustomWindow* window) {
 
-	DumpStack(L);
+	if (window->childRef == LUA_REFNIL) {
+		lua_newtable(L);
+		window->childRef = luaL_ref(L, LUA_REGISTRYINDEX);
+	}
+
+	lua_rawgeti(L, LUA_REGISTRYINDEX, window->childRef);
+	size_t len = lua_rawlen(L, -1);
+	lua_pop(L, 1);
+
+	return len;
+}
+
+LuaWindow* GetLuaTableChild(lua_State* L, LuaCustomWindow* window, HMENU menuid) {
+
+	if (window->childRef == LUA_REFNIL) {
+		lua_pushnil(L);
+		return NULL;
+	}
+
+	lua_rawgeti(L, LUA_REGISTRYINDEX, window->childRef);
+	size_t len = lua_rawlen(L, -1);
+	LuaWindow* sub;
+
+	for (size_t i = 0; i < len; i++)
+	{
+		lua_pushinteger(L, i + 1);
+		lua_gettable(L, -2);
+
+		sub = lua_tonwindow(L, -1);
+
+		if (sub->custom && sub->custom->hmenu == menuid) {
+
+			lua_copy(L, -1, -2);
+			lua_pop(L, 1);
+			return sub;
+		}
+
+		lua_pop(L, 1);
+	}
+
+	lua_pop(L, 1);
+	lua_pushnil(L);
+
+	return NULL;
+}
+
+void AddLuaTableChild(lua_State* L, LuaCustomWindow* window) {
 
 	if (window->childRef == LUA_REFNIL) {
 		lua_newtable(L);
@@ -97,6 +145,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	lua_State* L = LuaStateCallback;
 	LuaWindow* window = NULL;
+	LuaWindow* child = NULL;
 
 	if (L) {
 
@@ -145,6 +194,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 		PostQuitMessage(WM_QUIT);		
 		break;
 
+	case WM_COMMAND:
+
+		child = GetLuaTableChild(L, window->custom, (HMENU)LOWORD(wParam));
+
+		if (!child || !child->custom) {
+			lua_pop(L, 1);
+			return DefWindowProc(hwnd, Msg, wParam, lParam);
+		}
+		else if (child->custom->type == WINDOW_TYPE_BUTTON) {
+			DoCustomButtonEvent(L, window, child, hwnd, Msg, wParam, lParam);
+		}
+
+		lua_pop(L, 1);
+
+		break;
 	case WM_PAINT:
 
 		PAINTSTRUCT ps;
@@ -227,7 +291,7 @@ bool ContainsMessage(lua_State* L, UINT Msg){
 
 bool CheckHasMessage(LuaWindow* window) {
 
-	if (window->handle == NULL || window->custom == NULL) {
+	if (window->handle == NULL || window->custom == NULL || window->custom->type != WINDOW_TYPE_CUSTOM) {
 		return false;
 	}
 
@@ -287,47 +351,6 @@ int lua_customcoroutineiterator(lua_State* L, int status, lua_KContext ctx) {
 
 int lua_customwindowloop(lua_State* L) {
 	return lua_yieldk(L, 0, 0, lua_customcoroutineiterator);
-}
-
-int CreateCustomLuaButton(lua_State* L) {
-
-	LuaWindow* window = lua_tonwindow(L, 1);
-
-	if (!window->custom) {
-
-		lua_pushnil(L);
-		return 1;
-	}
-
-	LuaCustomWindow* custom = CreateCustomWindowStruct();
-
-	if (!custom) {
-		luaL_error(L, "out of memory");
-		return 0;
-	}
-
-	HWND hwndButton = CreateWindow(
-		"BUTTON",
-		luaL_checkstring(L, 2),
-		WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-		(int)luaL_optnumber(L, 3, 0),
-		(int)luaL_optnumber(L, 4, 0),
-		(int)luaL_optnumber(L, 5, 0),
-		(int)luaL_optnumber(L, 6, 0),
-		window->handle,
-		NULL,
-		(HINSTANCE)GetWindowLongPtr(window->handle, GWLP_HINSTANCE),
-		NULL);
-
-	lua_pop(L, lua_gettop(L));
-
-	LuaWindow* button = lua_pushwindow(L);
-	button->handle = hwndButton;
-	button->custom = custom;
-
-	AddLuaTableChild(L, window->custom);
-
-	return 1;
 }
 
 int CreateLuaCustomWindow(lua_State* L) {

@@ -5,6 +5,10 @@
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
+
+LuaCustomWindow* CreateCustomWindowStruct();
+void AddLuaTableChild(lua_State* L, LuaCustomWindow* window);
+size_t GetLuaChildrenCount(lua_State* L, LuaCustomWindow* window);
 void CleanUp(LuaCustomWindow* custom);
 int CreateLuaCustomWindow(lua_State* L);
 

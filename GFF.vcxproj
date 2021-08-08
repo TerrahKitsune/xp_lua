@@ -82,6 +82,7 @@
     <ClCompile Include="BinaryTree.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Client.cpp" />
+    <ClCompile Include="custombutton.cpp" />
     <ClCompile Include="customdrawing.cpp" />
     <ClCompile Include="customwindow.cpp" />
     <ClCompile Include="Erf.cpp" />
@@ -217,6 +218,7 @@
     <ClInclude Include="BinaryTree.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Client.h" />
+    <ClInclude Include="custombutton.h" />
     <ClInclude Include="customdrawing.h" />
     <ClInclude Include="customwindow.h" />
     <ClInclude Include="Erf.h" />

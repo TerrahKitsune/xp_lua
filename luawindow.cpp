@@ -5,6 +5,7 @@
 #include <stdlib.h> 
 #include <windows.h> 
 #include "customwindow.h"
+#include "custombutton.h"
 
 BOOL CALLBACK enum_windows_callback(HWND handle, LPARAM lParam);
 
@@ -328,6 +329,10 @@ int window_gc(lua_State* L) {
 
 		if (window->custom->childRef != LUA_REFNIL) {
 			luaL_unref(L, LUA_REGISTRYINDEX, window->custom->childRef);
+		}
+
+		if (window->custom->eventRef != LUA_REFNIL) {
+			luaL_unref(L, LUA_REGISTRYINDEX, window->custom->eventRef);
 		}
 
 		DestroyWindow(window->handle);

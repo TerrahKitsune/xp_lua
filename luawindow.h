@@ -3,14 +3,20 @@
 #include <Windows.h>
 static const char* LUAWINDOW = "WINDOW";
 
+#define WINDOW_TYPE_CUSTOM 0
+#define WINDOW_TYPE_BUTTON 1
+
 typedef struct LuaCustomWindow {
 
 	int customDrawingRef;
 	int threadRef;
 	int childRef;
+	int eventRef;
 	char* className;
 	char* title;
-
+	DWORD type;
+	HMENU hmenu;
+	
 } LuaCustomWindow;
 
 typedef struct LuaWindow {
