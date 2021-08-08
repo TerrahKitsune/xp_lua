@@ -5,6 +5,7 @@ static const char* LUAWINDOW = "WINDOW";
 
 #define WINDOW_TYPE_CUSTOM 0
 #define WINDOW_TYPE_BUTTON 1
+#define WINDOW_TYPE_TEXTBOX 2
 
 typedef struct LuaCustomWindow {
 
@@ -16,8 +17,9 @@ typedef struct LuaCustomWindow {
 	char* className;
 	char* title;
 	DWORD type;
+	WORD nextId;
 	HMENU hmenu;
-	
+
 } LuaCustomWindow;
 
 typedef struct LuaWindow {
@@ -40,7 +42,12 @@ int GetWindowProcessId(lua_State* L);
 int GetWindowInformation(lua_State* L);
 int LuaWindowGetId(lua_State* L);
 int LuaDestroyWindow(lua_State* L);
+int LuaGetContent(lua_State* L);
+int LuaSetContent(lua_State* L);
+int GetsWindowEnabled(lua_State* L);
 
+int LuaCreateCustomTextField(lua_State* L);
+int InvalidateWindow(lua_State* L);
 int GetCustomWindowCoroutine(lua_State* L);
 int CreateLuaWindow(lua_State* L);
 int ShowCustomWindow(lua_State* L);

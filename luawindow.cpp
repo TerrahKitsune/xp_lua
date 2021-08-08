@@ -50,6 +50,20 @@ int LuaSetDrawFunction(lua_State* L) {
 	return LuaSetCustomWindowDrawFunction(L);
 }
 
+int InvalidateWindow(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+
+	if (window->custom && window->custom->type == WINDOW_TYPE_CUSTOM) {
+		lua_pushboolean(L, RedrawWindow(window->handle, NULL, NULL, RDW_INVALIDATE) > 0);
+	}
+	else {
+		lua_pushboolean(L, false);
+	}
+
+	return 1;
+}
+
 int GetCustomWindowCoroutine(lua_State* L) {
 
 	LuaWindow* window = lua_tonwindow(L, 1);
@@ -68,15 +82,7 @@ int GetCustomWindowCoroutine(lua_State* L) {
 
 int ShowCustomWindow(lua_State* L) {
 
-	LuaWindow* window = lua_tonwindow(L, 1);
-
-	if (window->custom) {
-
-		ShowWindow(window->handle, lua_toboolean(L, 2));
-		UpdateWindow(window->handle);
-	}
-
-	return 0;
+	return LuaShowCustomWindow(L);
 }
 
 int OpenWindow(lua_State* L) {
@@ -119,6 +125,17 @@ int GetIsVisible(lua_State* L) {
 	lua_pop(L, lua_gettop(L));
 
 	lua_pushboolean(L, IsWindowVisible(window->handle));
+
+	return 1;
+}
+
+int GetsWindowEnabled(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+
+	lua_pop(L, lua_gettop(L));
+
+	lua_pushboolean(L, IsWindowEnabled(window->handle));
 
 	return 1;
 }
@@ -300,6 +317,46 @@ int LuaWindowGetId(lua_State* L) {
 
 	LuaWindow* window = lua_tonwindow(L, 1);
 	lua_pushinteger(L, (lua_Integer)window->handle);
+
+	return 1;
+}
+
+int LuaCreateCustomTextField(lua_State* L) {
+	return CreateTextField(L);
+}
+
+int LuaSetContent(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+
+	SetWindowText(window->handle, lua_tostring(L, 2));
+
+	return 0;
+}
+
+int LuaGetContent(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+
+	size_t len = GetWindowTextLength(window->handle);
+
+	if (len == 0) {
+		lua_pushstring(L, "");
+		return 1;
+	}
+
+	char* data = (char*)gff_calloc(len+1, sizeof(char));
+
+	if (!data) {
+		luaL_error(L, "Out of memory");
+		return 0;
+	}
+
+	int ret = GetWindowText(window->handle, data, len+1);
+
+	lua_pushlstring(L, data, ret);
+
+	gff_free(data);
 
 	return 1;
 }

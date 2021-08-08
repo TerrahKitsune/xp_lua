@@ -25,7 +25,7 @@ int LuaSetCustomWindowDrawFunction(lua_State* L) {
 
 	LuaWindow* window = lua_tonwindow(L, 1);
 
-	if (!window->custom || window->custom->type != WINDOW_TYPE_CUSTOM) {
+	if (!window->custom) {
 		return 0;
 	}
 
@@ -58,14 +58,12 @@ int LuaSetCustomWindowDrawFunction(lua_State* L) {
 		drawing->paintFunctionRef = luaL_ref(L, LUA_REGISTRYINDEX);
 	}
 
-	RedrawWindow(window->handle, NULL, NULL, RDW_INVALIDATE);
-
 	return 0;
 }
 
 LuaCustomWindow* CreateCustomWindowStruct() {
 
-	LuaCustomWindow * custom = (LuaCustomWindow*)gff_calloc(1, sizeof(LuaCustomWindow));
+	LuaCustomWindow* custom = (LuaCustomWindow*)gff_calloc(1, sizeof(LuaCustomWindow));
 
 	if (!custom) {
 		return NULL;
@@ -201,6 +199,20 @@ int RemoveCustomWindow(lua_State* L) {
 	return 0;
 }
 
+LuaWindow* GetSuperParent(lua_State* L, LuaWindow* window) {
+
+	LuaWindow* parent = window;
+
+	while (parent->custom && parent->custom->parentRef != LUA_REFNIL) {
+
+		lua_rawgeti(L, LUA_REGISTRYINDEX, parent->custom->parentRef);
+		parent = lua_tonwindow(L, -1);
+		lua_pop(L, 1);
+	}
+
+	return parent;
+}
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	lua_State* L = LuaStateCallback;
@@ -245,13 +257,25 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 
 		DestroyWindow((HWND)wParam);
 		break;
+	case WM_LUA_TOGGLESHOW:
+
+		ShowWindow((HWND)wParam, (int)lParam);
+		break;
+	case WM_LUA_UPDATE:
+
+		UpdateWindow((HWND)wParam);
+		break;
+	case WM_LUA_TOGGLEENABLE:
+
+		EnableWindow((HWND)wParam, (int)lParam);
+		break;
 	case WM_NCDESTROY:
 
 		break;
 
 	case WM_DESTROY:
 
-		PostQuitMessage(WM_QUIT);		
+		PostQuitMessage(WM_QUIT);
 		break;
 
 	case WM_COMMAND:
@@ -267,58 +291,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 			else if (child->custom->type == WINDOW_TYPE_BUTTON) {
 				DoCustomButtonEvent(L, window, child, hwnd, Msg, wParam, lParam);
 			}
-
+			
 			lua_pop(L, 1);
 		}
 
 		break;
+
+
 	case WM_PAINT:
 
-		PAINTSTRUCT ps;
-		HDC         hdc;
-
-		hdc = BeginPaint(hwnd, &ps);
-
-		if (window) {
-
-			if (window->custom->customDrawingRef != LUA_REFNIL) {
-
-				lua_rawgeti(L, LUA_REGISTRYINDEX, window->custom->customDrawingRef);
-				LuaCustomDrawing* draw = lua_tonwindowdrawing(L, -1);
-
-				if (draw->paintFunctionRef) {
-
-					lua_rawgeti(L, LUA_REGISTRYINDEX, draw->paintFunctionRef);
-					lua_pushvalue(L, -2);
-
-					draw->hdc = &hdc;
-					draw->ps = &ps;
-					draw->window = hwnd;
-
-					if (lua_pcall(L, 1, 0, NULL)) {
-
-						draw->hdc = NULL;
-						draw->ps = NULL;
-						draw->window = NULL;
-
-						EndPaint(hwnd, &ps);
-						lua_error(L);
-						return 0;
-					}
-					else {
-
-						draw->hdc = NULL;
-						draw->ps = NULL;
-						draw->window = NULL;
-					}
-				}
-
-				lua_pop(L, 1);
-			}
+		if (L) {
+			lua_pushvalue(L, 1);
+			CustomDrawEvent(L);
+			lua_pop(L, 1);
 		}
-
-		EndPaint(hwnd, &ps);
-
 		break;
 
 	default:
@@ -328,7 +314,41 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-bool ContainsMessage(lua_State* L, UINT Msg){
+int LuaEnableCustomWindow(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+	int show = lua_toboolean(L, 2);
+
+	if (!window->custom) {
+		return 0;
+	}
+
+	LuaWindow* parent = GetSuperParent(L, window);
+
+	PostMessage(parent->handle, WM_LUA_TOGGLEENABLE, (WPARAM)window->handle, show);
+	PostMessage(parent->handle, WM_LUA_UPDATE, (WPARAM)window->handle, 0);
+
+	return 0;
+}
+
+int LuaShowCustomWindow(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+	int show = lua_toboolean(L, 2);
+
+	if (!window->custom) {
+		return 0;
+	}
+
+	LuaWindow* parent = GetSuperParent(L, window);
+
+	PostMessage(parent->handle, WM_LUA_TOGGLESHOW, (WPARAM)window->handle, show);
+	PostMessage(parent->handle, WM_LUA_UPDATE, (WPARAM)window->handle, 0);
+
+	return 0;
+}
+
+bool ContainsMessage(lua_State* L, UINT Msg) {
 
 	size_t len = lua_rawlen(L, -1);
 
@@ -392,7 +412,7 @@ int lua_customcoroutineiterator(lua_State* L, int status, lua_KContext ctx) {
 		lua_yieldk(L, 1, ctx, lua_customcoroutineiterator);
 		return 1;
 	}
-	
+
 	lua_newtable(L);
 
 	msgcount = 0;
@@ -475,10 +495,10 @@ int CreateLuaCustomWindow(lua_State* L) {
 	LuaStateCallback = NULL;
 
 	HWND hwnd = CreateWindowEx(
-		(DWORD)luaL_optinteger(L, 9, WS_EX_OVERLAPPEDWINDOW),
+		(DWORD)luaL_optinteger(L, 9, 0),
 		custom->className,
 		custom->title,
-		(DWORD)luaL_optinteger(L, 10, WS_OVERLAPPEDWINDOW),
+		(DWORD)luaL_optinteger(L, 10, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CLIPCHILDREN),
 		x,
 		y,
 		width,
@@ -510,4 +530,62 @@ int CreateLuaCustomWindow(lua_State* L) {
 	lua_resume(T, L, 1);
 
 	return 2;
+}
+
+int CreateTextField(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+
+	if (!window->custom) {
+
+		lua_pushnil(L);
+		return 1;
+	}
+
+	LuaCustomWindow* custom = CreateCustomWindowStruct();
+
+	if (!custom) {
+		luaL_error(L, "out of memory");
+		return 0;
+	}
+
+	DWORD style = WS_CHILD | WS_VISIBLE | ES_LEFT | WS_BORDER;
+
+	if (lua_toboolean(L, 7)) {
+		style |= ES_MULTILINE;
+	}
+
+	if (lua_toboolean(L, 8)) {
+		style |= WS_VSCROLL | ES_AUTOVSCROLL;
+	}
+
+	custom->hmenu = (HMENU)(++window->custom->nextId);
+
+	HWND hwndButton = CreateWindow(
+		"EDIT",
+		luaL_checkstring(L, 2),
+		style,
+		(int)luaL_optnumber(L, 3, 0),
+		(int)luaL_optnumber(L, 4, 0),
+		(int)luaL_optnumber(L, 5, 0),
+		(int)luaL_optnumber(L, 6, 0),
+		window->handle,
+		custom->hmenu,
+		(HINSTANCE)GetWindowLongPtr(window->handle, GWLP_HINSTANCE),
+		NULL);
+
+	lua_pushvalue(L, 1);
+	int refParent = luaL_ref(L, LUA_REGISTRYINDEX);
+
+	lua_pop(L, lua_gettop(L));
+
+	LuaWindow* button = lua_pushwindow(L);
+	button->handle = hwndButton;
+	button->custom = custom;
+	button->custom->type = WINDOW_TYPE_TEXTBOX;
+	button->custom->parentRef = refParent;
+
+	AddLuaTableChild(L, window->custom);
+
+	return 1;
 }

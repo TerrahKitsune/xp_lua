@@ -15,8 +15,8 @@ void DoCustomButtonEvent(lua_State*L, LuaWindow* parent, LuaWindow* child, HWND 
 
 	if (lua_pcall(L, 2, 0, NULL)) {
 
-		lua_error(L);
-		return;
+		puts(lua_tostring(L, -1));
+		lua_pop(L, 1);
 	}
 }
 
@@ -41,7 +41,7 @@ int CreateCustomLuaButton(lua_State* L) {
 		return 0;
 	}
 
-	custom->hmenu = (HMENU)GetLuaChildrenCount(L, window->custom) + 1;
+	custom->hmenu = (HMENU)(++window->custom->nextId);
 
 	HWND hwndButton = CreateWindow(
 		"BUTTON",

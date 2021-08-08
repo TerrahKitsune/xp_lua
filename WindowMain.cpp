@@ -1,6 +1,7 @@
 #include "luawindow.h"
 #include "WindowMain.h"
 #include "customdrawing.h"
+#include "customwindow.h"
 
 static const struct luaL_Reg windowfunctions[] = {
 
@@ -9,17 +10,23 @@ static const struct luaL_Reg windowfunctions[] = {
 	{ "GetProcessId", GetWindowProcessId},
 	{ "GetText", GetText},
 	{ "GetIsVisible", GetIsVisible },
+	{ "GetIsEnabled", GetsWindowEnabled },
 	{ "GetWindow", GetWindow },
 	{ "Open", OpenWindow},
 	{ "GetParent", GetWindowParent},
 	{ "Destroy", LuaDestroyWindow },
+	{ "GetContent", LuaGetContent },
+	{ "SetContent", LuaSetContent },
 
 	{ "Create", CreateLuaWindow },
+	{ "Redraw", InvalidateWindow},
 	{ "Show", ShowCustomWindow },
+	{ "Enable", LuaEnableCustomWindow },
 	{ "GetThread", GetCustomWindowCoroutine },
 	{ "SetDrawFunction", LuaSetDrawFunction },
 	{ "CheckHasMessage", LuaCheckHasMessage },
 	{ "CreateButton", CreateLuaButton },
+	{ "CreateTextBox", LuaCreateCustomTextField },
 
 	{ NULL, NULL }
 };

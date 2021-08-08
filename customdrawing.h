@@ -15,6 +15,8 @@ typedef struct LuaCustomDrawing {
 
 } LuaCustomDrawing;
 
+int CustomDrawEvent(lua_State* L);
+
 int luaopen_windowdrawing(lua_State* L);
 
 LuaCustomDrawing* lua_pushwindowdrawing(lua_State* L);

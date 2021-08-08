@@ -152,16 +152,30 @@ TablePrint(info);
 local c = Window.Create(nil, "class", "Lua", 100 ,100 ,500 ,250);
 c:Show(true);
 
-local button1 = c:CreateButton("ITS A BUTTON!", 0, 36, 150, 50, function(child)
+local also = c:CreateButton("Also a button", 0, 50+36, 150, 50,  function(child) 
 
-	print("Button");
+	local p = child:GetParent();
+	print("Also button " .. tostring(p)); 
+	p:Redraw();
+
 end);
 
-print(c:CreateButton("Also a button", 0, 50+36, 150, 50,  function(child) print("Also button"); child:Destroy(); end));
+local textbox = c:CreateTextBox("abc",0,100+36,100,50, true, true);
 
-c:SetDrawFunction(function(draw)
+local button1 = c:CreateButton("ITS A BUTTON!", 0, 36, 150, 50, function(child)
 
-	local offset = draw:Text("Hello world");
+	print(textbox:GetContent());
+
+	also:Show(not also:GetIsVisible());
+	textbox:Enable(not textbox:GetIsEnabled());
+	
+end);
+
+print(button1:GetContent());
+
+c:SetDrawFunction(function(draw, window)
+
+	local offset = draw:Text(tostring(window));
 	draw:SetTextColor(draw:RgbToHex(255, 0, 255));
 	draw:SetBackgroundColor(0);
 	draw:SetBackgroundMode(2);
@@ -178,8 +192,9 @@ c:SetDrawFunction(function(draw)
 	end
 
 	draw:Text(w.."x"..h, (w/2)-(tw/2), (h/2)-(th/2));
-
 end);
+
+c:Redraw();
 
 local showmsgs = false;
 local ok,msgs;

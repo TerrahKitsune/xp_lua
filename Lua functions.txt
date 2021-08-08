@@ -180,6 +180,9 @@ Window:
 	-Returns true if the window is visible
 	bool Window:GetIsVisible()
 
+	-Returns true if the window is enabled
+	bool Window:GetIsEnabled()
+
 	-Gets the text of the window
 	string Window:GetText()
 
@@ -198,6 +201,12 @@ Window:
 	-Client (object: Bottom, Left, Right, Top)
 	-Window (object: Bottom, Left, Right, Top)
 	info Window:GetInfo()
+
+	-Retrives the content of a window (such as window titles, button captions, text field data etc)
+	string Window:GetContent()
+
+	-Sets the content of a window
+	void Window:SetContent(newcontent)
 
 	--Custom Window (These functions only work with windows created by Window.Create)
 
@@ -226,12 +235,21 @@ Window:
 	-function is the event that runs when the button is pressed, buttonWindow is the button, parentWindow is window with the button
 	Window Window:CreateButton(caption, x,y,width, height, function(buttonWindow, parentWindow) end);
 
+	-Creates a textbox containing content
+	-if multiline is true then the textbox allows multiple lines
+	-if enablescroll is enable then the scrollbar will be enabled
+	-use Window:GetContent or Window:SetContent to manipulate the content
+ 	Window Window:CreateTextBox(content, x,y,width,height, opt multiline, opt enablescroll)
+
 	-Check if there is any pending messages
 	-if true then the Coroutine from Window.Create or Window:GetThread() should be resumed
 	bool Window:CheckHasMessage()
 
 	-Toggles if the window should be shown or not
 	nil Window:Show(bool)
+
+	-Toggles if a window/component is enabled or disabled
+	nil Window:Enable(bool)
 
 	-Returns the coroutine for a created window, returns nil if the window was not created with Window.Create
 	coroutine Window:GetThread()
