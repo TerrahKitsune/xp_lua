@@ -2,6 +2,7 @@
 #include "WindowMain.h"
 #include "customdrawing.h"
 #include "customwindow.h"
+#include "customtextbox.h"
 
 static const struct luaL_Reg windowfunctions[] = {
 
@@ -26,7 +27,7 @@ static const struct luaL_Reg windowfunctions[] = {
 	{ "SetDrawFunction", LuaSetDrawFunction },
 	{ "CheckHasMessage", LuaCheckHasMessage },
 	{ "CreateButton", CreateLuaButton },
-	{ "CreateTextBox", LuaCreateCustomTextField },
+	{ "CreateTextBox", CreateTextField },
 
 	{ NULL, NULL }
 };

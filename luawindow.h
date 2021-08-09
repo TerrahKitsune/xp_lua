@@ -46,7 +46,6 @@ int LuaGetContent(lua_State* L);
 int LuaSetContent(lua_State* L);
 int GetsWindowEnabled(lua_State* L);
 
-int LuaCreateCustomTextField(lua_State* L);
 int InvalidateWindow(lua_State* L);
 int GetCustomWindowCoroutine(lua_State* L);
 int CreateLuaWindow(lua_State* L);

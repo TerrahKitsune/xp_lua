@@ -2,6 +2,7 @@
 #include "luawindow.h"
 #include "customdrawing.h"
 #include "custombutton.h"
+#include "customtextbox.h"
 
 lua_State* LuaStateCallback;
 int msgcount;
@@ -291,6 +292,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 			else if (child->custom->type == WINDOW_TYPE_BUTTON) {
 				DoCustomButtonEvent(L, window, child, hwnd, Msg, wParam, lParam);
 			}
+			else if (child->custom->type == WINDOW_TYPE_TEXTBOX) {
+				DoCustomTextboxEvent(L, window, child, hwnd, Msg, wParam, lParam);
+			}
 			
 			lua_pop(L, 1);
 		}
@@ -530,62 +534,4 @@ int CreateLuaCustomWindow(lua_State* L) {
 	lua_resume(T, L, 1);
 
 	return 2;
-}
-
-int CreateTextField(lua_State* L) {
-
-	LuaWindow* window = lua_tonwindow(L, 1);
-
-	if (!window->custom) {
-
-		lua_pushnil(L);
-		return 1;
-	}
-
-	LuaCustomWindow* custom = CreateCustomWindowStruct();
-
-	if (!custom) {
-		luaL_error(L, "out of memory");
-		return 0;
-	}
-
-	DWORD style = WS_CHILD | WS_VISIBLE | ES_LEFT | WS_BORDER;
-
-	if (lua_toboolean(L, 7)) {
-		style |= ES_MULTILINE;
-	}
-
-	if (lua_toboolean(L, 8)) {
-		style |= WS_VSCROLL | ES_AUTOVSCROLL;
-	}
-
-	custom->hmenu = (HMENU)(++window->custom->nextId);
-
-	HWND hwndButton = CreateWindow(
-		"EDIT",
-		luaL_checkstring(L, 2),
-		style,
-		(int)luaL_optnumber(L, 3, 0),
-		(int)luaL_optnumber(L, 4, 0),
-		(int)luaL_optnumber(L, 5, 0),
-		(int)luaL_optnumber(L, 6, 0),
-		window->handle,
-		custom->hmenu,
-		(HINSTANCE)GetWindowLongPtr(window->handle, GWLP_HINSTANCE),
-		NULL);
-
-	lua_pushvalue(L, 1);
-	int refParent = luaL_ref(L, LUA_REGISTRYINDEX);
-
-	lua_pop(L, lua_gettop(L));
-
-	LuaWindow* button = lua_pushwindow(L);
-	button->handle = hwndButton;
-	button->custom = custom;
-	button->custom->type = WINDOW_TYPE_TEXTBOX;
-	button->custom->parentRef = refParent;
-
-	AddLuaTableChild(L, window->custom);
-
-	return 1;
 }

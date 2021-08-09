@@ -160,7 +160,10 @@ local also = c:CreateButton("Also a button", 0, 50+36, 150, 50,  function(child)
 
 end);
 
-local textbox = c:CreateTextBox("abc",0,100+36,100,50, true, true);
+local textbox = c:CreateTextBox("abc",0,100+36,100,50, true, true, function(child, parent) 
+
+	print(child:GetContent());
+end);
 
 local button1 = c:CreateButton("ITS A BUTTON!", 0, 36, 150, 50, function(child)
 

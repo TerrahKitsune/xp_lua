@@ -84,6 +84,7 @@
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="custombutton.cpp" />
     <ClCompile Include="customdrawing.cpp" />
+    <ClCompile Include="customtextbox.cpp" />
     <ClCompile Include="customwindow.cpp" />
     <ClCompile Include="Erf.cpp" />
     <ClCompile Include="ERFMain.cpp" />
@@ -220,6 +221,7 @@
     <ClInclude Include="Client.h" />
     <ClInclude Include="custombutton.h" />
     <ClInclude Include="customdrawing.h" />
+    <ClInclude Include="customtextbox.h" />
     <ClInclude Include="customwindow.h" />
     <ClInclude Include="Erf.h" />
     <ClInclude Include="ERFMain.h" />

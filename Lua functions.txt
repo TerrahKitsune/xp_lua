@@ -219,8 +219,8 @@ Window:
 	-width = width of the window
 	-height = height of the window
 	-classstyle = the style to use, defaults to 0x0003 (CS_HREDRAW | CS_VREDRAW) https://docs.microsoft.com/en-us/windows/win32/winmsg/about-window-classes
-	-exstyle = (defaults to WS_EX_OVERLAPPEDWINDOW 0x300) dwExStyle https://docs.microsoft.com/en-us/windows/win32/winmsg/extended-window-styles
-	-style = (defaults to WS_OVERLAPPEDWINDOW 0xCF0000) dwStyle https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles
+	-exstyle = (0) dwExStyle https://docs.microsoft.com/en-us/windows/win32/winmsg/extended-window-styles
+	-style = (defaults to WS_OVERLAPPEDWINDOW 0x2CB0000) dwStyle https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles
 	-------------------
 	-returns nil on failure
 	-coroutine.resume will return a array of messages that was processed
@@ -239,7 +239,8 @@ Window:
 	-if multiline is true then the textbox allows multiple lines
 	-if enablescroll is enable then the scrollbar will be enabled
 	-use Window:GetContent or Window:SetContent to manipulate the content
- 	Window Window:CreateTextBox(content, x,y,width,height, opt multiline, opt enablescroll)
+	-function(buttonWindow, parentWindow) end is fired when the textbox is changed (can be nil)
+ 	Window Window:CreateTextBox(content, x,y,width,height, opt multiline, opt enablescroll, function(buttonWindow, parentWindow) end)
 
 	-Check if there is any pending messages
 	-if true then the Coroutine from Window.Create or Window:GetThread() should be resumed

@@ -321,10 +321,6 @@ int LuaWindowGetId(lua_State* L) {
 	return 1;
 }
 
-int LuaCreateCustomTextField(lua_State* L) {
-	return CreateTextField(L);
-}
-
 int LuaSetContent(lua_State* L) {
 
 	LuaWindow* window = lua_tonwindow(L, 1);
