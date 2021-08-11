@@ -149,6 +149,8 @@ print("GetIsVisible", hwnd:GetIsVisible());
 
 TablePrint(info);
 
+local function Testwindow()
+
 local c = Window.Create(nil, "class", "Lua", 100 ,100 ,500 ,250);
 c:Show(true);
 
@@ -219,4 +221,11 @@ while coroutine.status(c:GetThread()) ~= "dead" do
 	end
 end
 
+end 
+
+Testwindow();
+
+FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Desktop");
+dofile("recordfiles.lua");
+GetKey();
 _exit(0);

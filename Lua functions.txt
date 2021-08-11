@@ -1434,6 +1434,7 @@ SQLite:
 
 	-Runs a query on the sqlite object, preparedstatements should contain values matching the query
 	-IE: "INSERT INTO Test (@Data)" then preparedstatements should contain a value with the key "Data"
+	-preparedstatements can also be a function function(key) end where key is the prepared statement without the @
 	-returns true,"OK" on success, false and an error message on failure
 	bool, txt SQLite:Query(querystring, preparedstatements)
 

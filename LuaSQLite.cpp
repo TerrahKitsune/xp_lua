@@ -209,7 +209,7 @@ int SQLiteExecute(lua_State *L) {
 	if (luasqlite->db == NULL)
 		luaL_error(L, "SQLite instance has been closed");
 	const char * query = luaL_checkstring(L, 2);
-	int cnt;
+	int cnt = 0;
 	size_t len;
 	const char * data;
 	const char * name;
@@ -227,7 +227,6 @@ int SQLiteExecute(lua_State *L) {
 		return 2;
 	}
 	else if (lua_istable(L, 3)) {
-		cnt = 0;
 
 		for (int n = 0; n < sqlite3_bind_parameter_count(luasqlite->stmt); n++) {
 			name = sqlite3_bind_parameter_name(luasqlite->stmt, n + 1);
@@ -247,7 +246,57 @@ int SQLiteExecute(lua_State *L) {
 				sqlite3_bind_null(luasqlite->stmt, ++cnt);
 				break;
 			case LUA_TNUMBER:
-				sqlite3_bind_double(luasqlite->stmt, ++cnt, lua_tonumber(L, -1));
+				if (lua_isinteger(L, -1)) {
+					sqlite3_bind_int64(luasqlite->stmt, ++cnt, lua_tointeger(L, -1));
+				}
+				else {
+					sqlite3_bind_double(luasqlite->stmt, ++cnt, lua_tonumber(L, -1));
+				}
+				break;
+			case LUA_TBOOLEAN:
+				sqlite3_bind_int(luasqlite->stmt, ++cnt, lua_toboolean(L, -1));
+				break;
+			case LUA_TSTRING:
+				data = lua_tolstring(L, -1, &len);
+				sqlite3_bind_blob64(luasqlite->stmt, ++cnt, data, len, NULL);
+				break;
+			}
+
+			lua_pop(L, 1);
+		}
+	}
+	else if (lua_isfunction(L, 3)) {
+
+		for (int n = 0; n < sqlite3_bind_parameter_count(luasqlite->stmt); n++) {
+			name = sqlite3_bind_parameter_name(luasqlite->stmt, n + 1);
+			if (name == NULL || strlen(name) < 2) {
+				lua_pop(L, lua_gettop(L));
+				lua_pushboolean(L, false);
+				lua_pushstring(L, "Parameters contain a nameless parameter!");
+				return 2;
+			}
+
+			lua_pushvalue(L, 3);
+			lua_pushstring(L, &name[1]);
+
+			if (lua_pcall(L, 1, 1, 0) != 0) {
+				lua_error(L);
+				return 0;
+			}
+
+			switch (lua_type(L, -1))
+			{
+			case LUA_TNIL:
+				sqlite3_bind_null(luasqlite->stmt, ++cnt);
+				break;
+			case LUA_TNUMBER:
+				
+				if (lua_isinteger(L, -1)) {
+					sqlite3_bind_int64(luasqlite->stmt, ++cnt, lua_tointeger(L, -1));
+				}
+				else {
+					sqlite3_bind_double(luasqlite->stmt, ++cnt, lua_tonumber(L, -1));
+				}
 				break;
 			case LUA_TBOOLEAN:
 				sqlite3_bind_int(luasqlite->stmt, ++cnt, lua_toboolean(L, -1));
@@ -265,8 +314,24 @@ int SQLiteExecute(lua_State *L) {
 	luasqlite->status = sqlite3_step(luasqlite->stmt);
 
 	lua_pop(L, lua_gettop(L));
-	lua_pushboolean(L, true);
-	lua_pushstring(L, "OK");
+
+	if (luasqlite->status == SQLITE_OK) {
+		lua_pushboolean(L, true);
+		lua_pushstring(L, "OK");
+	}
+	else if (luasqlite->status == SQLITE_ROW) {
+		lua_pushboolean(L, true);
+		lua_pushstring(L, "ROW");
+	}
+	else if (luasqlite->status == SQLITE_DONE) {
+		lua_pushboolean(L, true);
+		lua_pushstring(L, "DONE");
+	}
+	else {
+		lua_pushboolean(L, false);
+		lua_pushstring(L, sqlite3_errmsg(luasqlite->db));
+	}
+
 	return 2;
 }
 
