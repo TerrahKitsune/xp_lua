@@ -66,7 +66,7 @@ int LuaLockMutex(lua_State* L) {
 		wait = (DWORD)timeout;
 	}
 
-	DWORD result = WaitForSingleObject(mutex->mutex, timeout);
+	DWORD result = WaitForSingleObject(mutex->mutex, (DWORD)timeout);
 
 	mutex->istaken = result == WAIT_OBJECT_0;
 

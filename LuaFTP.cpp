@@ -151,7 +151,7 @@ size_t LuaGetLogSize(lua_State* L, int messageLog) {
 int GetMessageLog(lua_State* L) {
 
 	LuaFTP* ftp = lua_toluaftp(L, 1);
-	int timeout = luaL_optinteger(L, 2, 0);
+	int timeout = (int)luaL_optinteger(L, 2, 0);
 
 	size_t current = LuaGetLogSize(L, ftp->log);
 	size_t size = LuaAddMessagesToTable(L, ftp->s, ftp->log, 0);
@@ -274,7 +274,7 @@ int LuaLogin(lua_State* L) {
 
 int LuaSetTimeout(lua_State* L) {
 
-	int tm = luaL_checkinteger(L, 1);
+	int tm = (int)luaL_checkinteger(L, 1);
 
 	if (tm < 1) {
 		tm = 1;
@@ -290,7 +290,7 @@ int LuaSetTimeout(lua_State* L) {
 int LuaOpenDataChannel(lua_State* L) {
 
 	const char* addr = luaL_checkstring(L, 1);
-	int port = luaL_checkinteger(L, 2);
+	int port = (int)luaL_checkinteger(L, 2);
 
 	SOCKET s = INVALID_SOCKET;
 	char portstr[15];
@@ -461,7 +461,7 @@ int LuaCommand(lua_State* L) {
 int LuaConnect(lua_State* L) {
 
 	const char* addr = luaL_checkstring(L, 1);
-	int port = luaL_optinteger(L, 2, 21);
+	int port = (int)luaL_optinteger(L, 2, 21);
 
 	SOCKET s = INVALID_SOCKET;
 	char portstr[15];

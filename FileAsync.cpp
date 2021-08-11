@@ -141,7 +141,7 @@ int OpenFileAsync(lua_State* L) {
 
 	const char* filename = luaL_checkstring(L, 1);
 	const char* mode = luaL_checkstring(L, 2);
-	size_t buffersize = luaL_optinteger(L, 3, 1048576);
+	size_t buffersize = (size_t)luaL_optinteger(L, 3, 1048576);
 
 	if (buffersize < 1000) {
 		buffersize = 1000;
@@ -203,8 +203,8 @@ int OpenFileAsync(lua_State* L) {
 int LuaSeek(lua_State* L) {
 
 	LuaFileAsync* file = lua_toluafileasync(L, 1);
-	long seek = luaL_checkinteger(L, 2);
-	int type = luaL_optinteger(L, 3, 0);
+	long seek = (long)luaL_checkinteger(L, 2);
+	int type = (int)luaL_optinteger(L, 3, 0);
 
 	if (!file->thread) {
 		luaL_error(L, "FileAsync object is closed");
@@ -274,7 +274,7 @@ int LuaRewind(lua_State* L) {
 int LuaIsBusy(lua_State* L) {
 
 	LuaFileAsync* file = lua_toluafileasync(L, 1);
-	bool isStopping = lua_toboolean(L, 3);
+	bool isStopping = lua_toboolean(L, 3) != 0;
 
 	if (isStopping) {
 		file->thread->stop = true;
@@ -312,8 +312,8 @@ int LuaIsEof(lua_State* L) {
 int LuaRead(lua_State* L) {
 
 	LuaFileAsync* file = lua_toluafileasync(L, 1);
-	size_t bytetoread = luaL_optinteger(L, 2, 0);
-	size_t readwritebuffersize = luaL_optinteger(L, 3, 1024);
+	size_t bytetoread = (size_t)luaL_optinteger(L, 2, 0);
+	size_t readwritebuffersize = (size_t)luaL_optinteger(L, 3, 1024);
 
 	if (readwritebuffersize < 1000) {
 		readwritebuffersize = 1000;

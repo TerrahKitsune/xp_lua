@@ -178,7 +178,7 @@ int BinaryTreeIterate(lua_State* L) {
 
 	LuaBinaryTree* btree = lua_tobinarytree(L, 1);
 	luaL_checktype(L, 2, LUA_TFUNCTION);
-	int type = luaL_optinteger(L, 3, 0);
+	int type = (int)luaL_optinteger(L, 3, 0);
 
 	if (type == 1) {
 		if (!_IteratePreorder(L, btree->root)) {

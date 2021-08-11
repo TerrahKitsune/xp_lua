@@ -31,7 +31,7 @@ int json_lua_arrayiterator(lua_State *L, int status, lua_KContext ctx) {
 		return 0;
 	}
 
-	int count = lua_tointeger(L, -1)+1;
+	int count = (int)lua_tointeger(L, -1)+1;
 	lua_pop(L, 1);
 	lua_pushinteger(L, count);
 	
@@ -480,7 +480,7 @@ double extended_atof(const char *s)
 
 	/* else, we have an exponent; parse its sign and value */
 	const double exponentsign = parse_sign(&s) ? 10. : .1;
-	int exponent = parse_digits(&s, NULL);
+	int exponent = (int)parse_digits(&s, NULL);
 	while (exponent--)
 		value *= exponentsign;
 

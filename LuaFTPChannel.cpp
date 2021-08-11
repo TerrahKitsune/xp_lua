@@ -59,7 +59,7 @@ int LuaFtpChannelSend(lua_State* L) {
 int LuaFtpChannelRecv(lua_State* L) {
 
 	LuaFTPChannel* ftp = lua_toluaftpchannel(L, 1);
-	size_t buffersize = luaL_optinteger(L, 2, 4096);
+	size_t buffersize = (size_t)luaL_optinteger(L, 2, 4096);
 
 	if (ftp->s == INVALID_SOCKET) {
 

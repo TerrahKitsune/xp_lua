@@ -81,7 +81,7 @@ bool CheckStreamSize(lua_State* L, LuaStream* stream, size_t requestedsize) {
 int SetLength(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
-	int size = luaL_checkinteger(L, 2);
+	size_t size = (size_t)luaL_checkinteger(L, 2);
 
 	if (size > stream->alloc) {
 		size = stream->alloc;
@@ -555,7 +555,7 @@ int StreamIndexOf(lua_State* L) {
 	}
 	else if (lua_type(L, 2) == LUA_TNUMBER || lua_isnone(L, 2)) {
 
-		int raw = luaL_optinteger(L, 2, 0);
+		int raw = (int)luaL_optinteger(L, 2, 0);
 
 		if (raw < 0 || raw > 255) {
 			luaL_error(L, "Parameter 2 must be a string or a byte");
@@ -602,7 +602,7 @@ int ReadStreamByte(lua_State* L) {
 int ReadLuaStream(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
-	long len = (long)luaL_optinteger(L, 2, stream->len - stream->pos);
+	size_t len = (size_t)luaL_optinteger(L, 2, stream->len - stream->pos);
 
 	if (stream->pos >= stream->len) {
 		lua_pop(L, lua_gettop(L));
@@ -873,8 +873,8 @@ int ReadFromFile(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
 	const char * file = luaL_checkstring(L, 2);
-	size_t pos = luaL_checkinteger(L, 3);
-	size_t len = luaL_checkinteger(L, 4);
+	size_t pos = (size_t)luaL_checkinteger(L, 3);
+	size_t len = (size_t)luaL_checkinteger(L, 4);
 
 	FILE * f = fopen(file, "rb");
 
@@ -917,8 +917,8 @@ int WriteToFile(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
 	const char * file = luaL_checkstring(L, 2);
-	size_t pos = luaL_checkinteger(L, 3);
-	size_t len = luaL_checkinteger(L, 4);
+	size_t pos = (size_t)luaL_checkinteger(L, 3);
+	size_t len = (size_t)luaL_checkinteger(L, 4);
 
 	const BYTE * data = ReadStream(stream, len);
 
@@ -940,7 +940,7 @@ int WriteToFile(lua_State* L) {
 		return 0;
 	}
 
-	long size = ftell(f);
+	size_t size = (size_t)ftell(f);
 
 	if (pos > size) {
 
@@ -1046,7 +1046,7 @@ int Compress(lua_State* L) {
 	LuaStream* stream = lua_toluastream(L, 1);
 	COMPRESSOR_HANDLE Compressor = NULL;
 	SIZE_T CompressedBufferSize;
-	DWORD compressionAlgorithm = luaL_optinteger(L, 2, COMPRESS_ALGORITHM_MSZIP);
+	DWORD compressionAlgorithm = (DWORD)luaL_optinteger(L, 2, COMPRESS_ALGORITHM_MSZIP);
 	LuaStream* compressed = lua_pushluastream(L);
 
 	BOOL Success = CreateCompressor(compressionAlgorithm, NULL, &Compressor);
@@ -1105,7 +1105,7 @@ int Decompress(lua_State* L) {
 
 	LuaStream* stream = lua_toluastream(L, 1);
 	DECOMPRESSOR_HANDLE Decompressor = NULL;
-	DWORD compressionAlgorithm = luaL_optinteger(L, 2, COMPRESS_ALGORITHM_MSZIP);
+	DWORD compressionAlgorithm = (DWORD)luaL_optinteger(L, 2, COMPRESS_ALGORITHM_MSZIP);
 	BOOL Success = CreateDecompressor(compressionAlgorithm, NULL, &Decompressor);
 	LuaStream* uncompressed = lua_pushluastream(L);
 	SIZE_T DecompressedBufferSize;
@@ -1332,8 +1332,8 @@ int OpenSharedMemoryStream(lua_State* L) {
 
 int NewSharedMemoryStream(lua_State* L) {
 
-	const char * name = luaL_checkstring(L, 1, &len);
-	int size = luaL_checkinteger(L, 2);
+	const char * name = luaL_checkstring(L, 1);
+	int size = (int)luaL_checkinteger(L, 2);
 
 	LuaStream* stream = lua_pushluastream(L);
 

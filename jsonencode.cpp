@@ -150,7 +150,7 @@ void json_encodetable(lua_State* L, JsonContext* C, int* depth) {
 	const char * rawid = luaL_tolstring(L, -1, &len);
 	lua_pop(L, 1);
 	lua_len(L, -1);
-	int size = lua_tointeger(L, -1);
+	int size = (int)lua_tointeger(L, -1);
 	lua_pop(L, 1);
 
 	unsigned int id = table_crc32((const unsigned char*)rawid, len);
@@ -309,9 +309,6 @@ void json_getnextthread(lua_State* L, JsonContext* C) {
 void json_encodethread(lua_State* L, JsonContext* C, int* depth) {
 
 	char firstType = '\0';
-
-	size_t keylen;
-	const char * key;
 
 	int count = 0;
 	json_getnextthread(L, C);

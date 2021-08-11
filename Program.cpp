@@ -43,7 +43,7 @@
 #include "luajsonmain.h"
 #include "base64.h"
 #include "keybifmain.h"
-#include "LuaBinaryTreeMain.h";
+#include "LuaBinaryTreeMain.h"
 #include "MacroMain.h"
 #include "WindowMain.h"
 

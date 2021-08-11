@@ -314,8 +314,8 @@ int CRC32(lua_State* L) {
 
 int luabeep(lua_State* L) {
 
-	DWORD freq = luaL_checkinteger(L, 1);
-	DWORD dur = luaL_checkinteger(L, 2);
+	DWORD freq = (DWORD)luaL_checkinteger(L, 1);
+	DWORD dur = (DWORD)luaL_checkinteger(L, 2);
 
 	lua_pop(L, lua_gettop(L));
 
@@ -465,8 +465,8 @@ static int L_cls(lua_State* L) {
 
 static int L_SetConsoleCoords(lua_State* L) {
 
-	int x = luaL_checkinteger(L, 1);
-	int y = luaL_checkinteger(L, 1);
+	int x = (int)luaL_checkinteger(L, 1);
+	int y = (int)luaL_checkinteger(L, 1);
 	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hStdOut == INVALID_HANDLE_VALUE) return 0;
 
@@ -760,7 +760,7 @@ static int L_GetHost(lua_State* L) {
 
 static int L_AttachConsole(lua_State* L) {
 
-	DWORD processId = luaL_optinteger(L, 1, ATTACH_PARENT_PROCESS);
+	DWORD processId = (DWORD)luaL_optinteger(L, 1, ATTACH_PARENT_PROCESS);
 
 	lua_pop(L, lua_gettop(L));
 	BOOL ok = AttachConsole(processId);
@@ -791,7 +791,7 @@ static int L_GetComputerName(lua_State* L) {
 
 int L_GetGlobalMemoryStatus(lua_State* L) {
 
-	int type = luaL_optinteger(L, 1, 0);
+	int type = (int)luaL_optinteger(L, 1, 0);
 
 	MEMORYSTATUSEX statex;
 	statex.dwLength = sizeof(statex);
@@ -833,7 +833,7 @@ int L_GetGlobalMemoryStatus(lua_State* L) {
 
 int GetKeyState(lua_State* L) {
 
-	SHORT state = GetAsyncKeyState(luaL_checkinteger(L, 1));
+	SHORT state = GetAsyncKeyState((int)luaL_checkinteger(L, 1));
 
 	lua_pushboolean(L, (state & 0x8000) == 0x8000);
 	return 1;

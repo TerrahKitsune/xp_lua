@@ -87,7 +87,7 @@ int LuaSocketWrite(lua_State* L) {
 int LuaSocketSelect(lua_State* L) {
 
 	LuaSocket* socket = lua_toluasocket(L, 1);
-	long timeout = luaL_optinteger(L, 2, 0);
+	long timeout = (long)luaL_optinteger(L, 2, 0);
 
 	fd_set setR, setW, setE;
 
@@ -117,10 +117,10 @@ int LuaSocketSelect(lua_State* L) {
 int LuaSocketOpen(lua_State* L) {
 
 	const char* addr = luaL_checkstring(L, 1);
-	int port = luaL_checkinteger(L, 2);
-	int family = luaL_optinteger(L, 3, AF_INET);
-	int socktype = luaL_optinteger(L, 4, SOCK_STREAM);
-	int protocol = luaL_optinteger(L, 5, IPPROTO_TCP);
+	int port = (int)luaL_checkinteger(L, 2);
+	int family = (int)luaL_optinteger(L, 3, AF_INET);
+	int socktype = (int)luaL_optinteger(L, 4, SOCK_STREAM);
+	int protocol = (int)luaL_optinteger(L, 5, IPPROTO_TCP);
 
 	struct addrinfo* result = NULL, * ptr = NULL, hints;
 
@@ -200,10 +200,10 @@ int LuaSocketOpen(lua_State* L) {
 
 int LuaSocketOpenListener(lua_State* L) {
 
-	int port = luaL_checkinteger(L, 1);
-	int family = luaL_optinteger(L, 2, AF_INET);
-	int socktype = luaL_optinteger(L, 3, SOCK_STREAM);
-	int protocol = luaL_optinteger(L, 4, IPPROTO_TCP);
+	int port = (int)luaL_checkinteger(L, 1);
+	int family = (int)luaL_optinteger(L, 2, AF_INET);
+	int socktype = (int)luaL_optinteger(L, 3, SOCK_STREAM);
+	int protocol = (int)luaL_optinteger(L, 4, IPPROTO_TCP);
 
 	struct addrinfo* result = NULL, *ptr = NULL, hints;
 

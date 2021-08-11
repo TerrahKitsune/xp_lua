@@ -96,7 +96,7 @@ int PollMessages(lua_State* L) {
 		return 0;
 	}
 
-	int timeout = luaL_optinteger(L, 3, 0);
+	int timeout = (int)luaL_optinteger(L, 3, 0);
 	rd_kafka_message_t* rkmessage;
 
 	rkmessage = rd_kafka_consumer_poll(luak->rd, timeout);
@@ -179,12 +179,12 @@ int ProduceMessage(lua_State* L) {
 	size_t len;
 	const char* data = luaL_checklstring(L, 3, &len);
 
-	int partition = luaL_optinteger(L, 4, topic->partition);
+	int partition = (int)luaL_optinteger(L, 4, topic->partition);
 
 	size_t lenkey;
 	const char* key = luaL_optlstring(L, 5, NULL, &lenkey);
 
-	int timeout = luaL_optinteger(L, 6, 10000);
+	int timeout = (int)luaL_optinteger(L, 6, 10000);
 
 	rd_kafka_headers_t* headers = NULL;
 
@@ -258,7 +258,7 @@ int Subscribe(lua_State* L) {
 
 	LuaKafka* luak = lua_tokafka(L, 1);
 	const char* topic = luaL_checkstring(L, 2);
-	int partition = luaL_optinteger(L, 3, -1);
+	int partition = (int)luaL_optinteger(L, 3, -1);
 
 	if (!luak->rd) {
 		luaL_error(L, "Kafka object not open");
@@ -310,7 +310,7 @@ int Assign(lua_State* L) {
 
 	LuaKafka* luak = lua_tokafka(L, 1);
 	const char* topic = luaL_checkstring(L, 2);
-	int partition = luaL_checkinteger(L, 3);
+	int partition = (int)luaL_checkinteger(L, 3);
 
 	if (!luak->rd) {
 		luaL_error(L, "Kafka object not open");
@@ -382,7 +382,7 @@ int ConsumeMessage(lua_State* L) {
 		return 0;
 	}
 
-	int timeout = luaL_optinteger(L, 3, 0);
+	int timeout = (int)luaL_optinteger(L, 3, 0);
 	rd_kafka_message_t* rkmessage;
 
 	rkmessage = rd_kafka_consume(topic->topic, topic->partition, timeout);
@@ -404,9 +404,9 @@ int ConsumeMessage(lua_State* L) {
 int GetConfig(lua_State* L) {
 
 	LuaKafka* luak = lua_tokafka(L, 1);
-	int configtype = luaL_checkinteger(L, 2);
+	int configtype = (int)luaL_checkinteger(L, 2);
 	const char* name = luaL_checkstring(L, 3);
-	int timeout = luaL_optinteger(L, 4, 10000);
+	int timeout = (int)luaL_optinteger(L, 4, 10000);
 
 	if (!luak->rd) {
 		luaL_error(L, "Kafka object not open");
@@ -544,7 +544,7 @@ int GetMetadata(lua_State* L) {
 		return 0;
 	}
 
-	int timeout = luaL_optinteger(L, 2, 10000);
+	int timeout = (int)luaL_optinteger(L, 2, 10000);
 	const struct rd_kafka_metadata* metadata;
 
 	rd_kafka_resp_err_t err = rd_kafka_metadata(luak->rd, 1, NULL, &metadata, timeout);
@@ -625,7 +625,7 @@ int DescribeGroups(lua_State* L) {
 	}
 
 	const char* group = luaL_optstring(L, 2, NULL);
-	int timeout = luaL_optinteger(L, 3, 10000);
+	int timeout = (int)luaL_optinteger(L, 3, 10000);
 
 	rd_kafka_resp_err_t err;
 	const struct rd_kafka_group_list* grplist;
@@ -799,8 +799,8 @@ int QueryHighLow(lua_State* L) {
 	}
 
 	const char* topic = luaL_checkstring(L, 2);
-	int partition = luaL_checkinteger(L, 3);
-	int timeout = luaL_optinteger(L, 4, 10000);
+	int partition = (int)luaL_checkinteger(L, 3);
+	int timeout = (int)luaL_optinteger(L, 4, 10000);
 	int64_t low;
 	int64_t high;
 
@@ -823,7 +823,7 @@ int DeleteTopic(lua_State* L) {
 
 	LuaKafka* luak = lua_tokafka(L, 1);
 	const char* topicname = luaL_checkstring(L, 2);
-	int timeout = luaL_optinteger(L, 3, 10000);
+	int timeout = (int)luaL_optinteger(L, 3, 10000);
 
 	if (!luak->rd) {
 		luaL_error(L, "Kafka object not open");
@@ -833,7 +833,7 @@ int DeleteTopic(lua_State* L) {
 	rd_kafka_DeleteTopic_t* topic = rd_kafka_DeleteTopic_new(topicname);
 	rd_kafka_AdminOptions_t* adminopts = rd_kafka_AdminOptions_new(luak->rd, RD_KAFKA_ADMIN_OP_ANY);
 
-	rd_kafka_resp_err_t err = rd_kafka_AdminOptions_set_request_timeout(adminopts, luaL_optinteger(L, 3, 10000), errorbuffer, kafka_error_buffer_len);
+	rd_kafka_resp_err_t err = rd_kafka_AdminOptions_set_request_timeout(adminopts, (int)luaL_optinteger(L, 3, 10000), errorbuffer, kafka_error_buffer_len);
 	if (err) {
 		rd_kafka_DeleteTopic_destroy(topic);
 		rd_kafka_AdminOptions_destroy(adminopts);
@@ -935,8 +935,8 @@ int GetCommitted(lua_State* L) {
 
 	LuaKafka* luak = lua_tokafka(L, 1);
 	const char* topicname = luaL_checkstring(L, 2);
-	int partition = luaL_checkinteger(L, 3);
-	int timeout = luaL_optinteger(L, 4, 10000);
+	int partition = (int)luaL_checkinteger(L, 3);
+	int timeout = (int)luaL_optinteger(L, 4, 10000);
 
 	if (!luak->rd) {
 		luaL_error(L, "Kafka object not open");
@@ -975,11 +975,11 @@ int GetCommitted(lua_State* L) {
 int AlterConfig(lua_State* L) {
 
 	LuaKafka* luak = lua_tokafka(L, 1);
-	int configtype = luaL_checkinteger(L, 2);
+	int configtype = (int)luaL_checkinteger(L, 2);
 	const char* name = luaL_checkstring(L, 3);
 	const char* configname = luaL_checkstring(L, 4);
 	const char* configvalue = luaL_checkstring(L, 5);
-	int timeout = luaL_optinteger(L, 6, 10000);
+	int timeout = (int)luaL_optinteger(L, 6, 10000);
 
 	if (!luak->rd) {
 		luaL_error(L, "Kafka object not open");
@@ -1097,8 +1097,8 @@ int CreatePartition(lua_State* L) {
 
 	LuaKafka* luak = lua_tokafka(L, 1);
 	const char* topicname = luaL_checkstring(L, 2);
-	int numbpartitions = luaL_optinteger(L, 3, 1);
-	int timeout = luaL_optinteger(L, 4, 10000);
+	int numbpartitions = (int)luaL_optinteger(L, 3, 1);
+	int timeout = (int)luaL_optinteger(L, 4, 10000);
 
 	if (!luak->rd) {
 		luaL_error(L, "Kafka object not open");
@@ -1207,8 +1207,8 @@ int CreateTopic(lua_State* L) {
 
 	LuaKafka* luak = lua_tokafka(L, 1);
 	const char* topicname = luaL_checkstring(L, 2);
-	int numbpartitions = luaL_optinteger(L, 3, 1);
-	int replicafactor = luaL_optinteger(L, 4, 1);
+	int numbpartitions = (int)luaL_optinteger(L, 3, 1);
+	int replicafactor = (int)luaL_optinteger(L, 4, 1);
 
 	if (!luak->rd) {
 		luaL_error(L, "Kafka object not open");
@@ -1230,7 +1230,7 @@ int CreateTopic(lua_State* L) {
 
 	if (lua_type(L, 5) == LUA_TNUMBER)
 	{
-		err = rd_kafka_AdminOptions_set_broker(adminopts, lua_tointeger(L, 5), errorbuffer, kafka_error_buffer_len);
+		err = rd_kafka_AdminOptions_set_broker(adminopts, (int32_t)lua_tointeger(L, 5), errorbuffer, kafka_error_buffer_len);
 		if (err) {
 			rd_kafka_NewTopic_destroy(rkt);
 			rd_kafka_AdminOptions_destroy(adminopts);
@@ -1241,7 +1241,7 @@ int CreateTopic(lua_State* L) {
 		}
 	}
 
-	err = rd_kafka_AdminOptions_set_request_timeout(adminopts, luaL_optinteger(L, 6, 10000), errorbuffer, kafka_error_buffer_len);
+	err = rd_kafka_AdminOptions_set_request_timeout(adminopts, (int)luaL_optinteger(L, 6, 10000), errorbuffer, kafka_error_buffer_len);
 	if (err) {
 		rd_kafka_NewTopic_destroy(rkt);
 		rd_kafka_AdminOptions_destroy(adminopts);
@@ -1253,7 +1253,7 @@ int CreateTopic(lua_State* L) {
 
 	if (lua_type(L, 7) == LUA_TNUMBER)
 	{
-		err = rd_kafka_AdminOptions_set_operation_timeout(adminopts, lua_tointeger(L, 7), errorbuffer, kafka_error_buffer_len);
+		err = rd_kafka_AdminOptions_set_operation_timeout(adminopts, (int)lua_tointeger(L, 7), errorbuffer, kafka_error_buffer_len);
 		if (err) {
 			rd_kafka_NewTopic_destroy(rkt);
 			rd_kafka_AdminOptions_destroy(adminopts);
@@ -1267,7 +1267,7 @@ int CreateTopic(lua_State* L) {
 	rd_kafka_queue_t* queue = rd_kafka_queue_new(luak->rd);
 	rd_kafka_CreateTopics(luak->rd, &rkt, 1, adminopts, queue);
 
-	rd_kafka_event_t* event = rd_kafka_queue_poll(queue, luaL_optinteger(L, 6, 10000));
+	rd_kafka_event_t* event = rd_kafka_queue_poll(queue, (int)luaL_optinteger(L, 6, 10000));
 
 	if (!event || rd_kafka_event_type(event) != RD_KAFKA_EVENT_CREATETOPICS_RESULT) {
 		rd_kafka_queue_destroy(queue);
@@ -1406,8 +1406,8 @@ int StartTopicConsumer(lua_State* L) {
 	}
 
 	const char* topic = luaL_checkstring(L, 2);
-	int partition = luaL_optinteger(L, 3, 0);
-	int64_t offset = luaL_optinteger(L, 4, RD_KAFKA_OFFSET_END);
+	int partition = (int)luaL_optinteger(L, 3, 0);
+	int64_t offset = (int64_t)luaL_optinteger(L, 4, RD_KAFKA_OFFSET_END);
 	rd_kafka_topic_conf_t* conf = lua_tokafkatopicconf(L, 5);
 
 	rd_kafka_topic_t* rkt = rd_kafka_topic_new(luak->rd, topic, conf);
