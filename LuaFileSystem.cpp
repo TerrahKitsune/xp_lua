@@ -1,6 +1,10 @@
 #include "LuaFileSystem.h"
 #include <Windows.h>
 #include <time.h>
+#include <io.h>
+#include "luawchar.h"
+
+#define tolstream(L)	((LStream *)luaL_checkudata(L, 1, LUA_FILEHANDLE))
 
 static char _PATH[MAX_PATH+2];
 
@@ -144,6 +148,188 @@ bool get_file_information(const char * path, WIN32_FIND_DATA* data)
 	}
 }
 
+typedef luaL_Stream LStream;
+
+static LStream* newprefile(lua_State* L) {
+	LStream* p = (LStream*)lua_newuserdata(L, sizeof(LStream));
+	p->closef = NULL;  /* mark file handle as 'closed' */
+	luaL_setmetatable(L, LUA_FILEHANDLE);
+	return p;
+}
+
+static int io_fclose(lua_State* L) {
+	LStream* p = tolstream(L);
+	int res = fclose(p->f);
+	return luaL_fileresult(L, (res == 0), NULL);
+}
+
+static LStream* newfile(lua_State* L) {
+	LStream* p = newprefile(L);
+	p->f = NULL;
+	p->closef = &io_fclose;
+	return p;
+}
+
+int	RenameWide(lua_State* L) {
+
+	size_t len;
+	LuaWChar* src = lua_towchar(L, 1);
+	LuaWChar* dst = lua_towchar(L, 1);
+
+	lua_pushboolean(L, _wrename(src->str, dst->str) == 0);
+
+	return 1;
+}
+
+int lua_SetFileAttributes(lua_State* L) {
+
+	size_t len;
+	const char* filename = luaL_checklstring(L, 1, &len);
+	DWORD mask = (DWORD)luaL_checkinteger(L, 2);
+
+	lua_pushboolean(L, SetFileAttributes(filename, mask));
+
+	return 1;
+}
+
+int OpenFileWide(lua_State* L) {
+	
+	LuaWChar* filename = lua_towchar(L, 1);
+	LuaWChar* mode = lua_towchar(L, 1);
+
+	LStream* p = newfile(L);
+	p->f = _wfopen(filename->str, mode->str);
+
+	if (p->f == NULL) {
+		lua_pushnil(L);
+	}
+
+	return 1;
+}
+
+int GetAllInFolderWide(lua_State* L) {
+
+	LuaWChar* path = lua_towchar(L, 1);
+
+	WIN32_FIND_DATAW FindFileData;
+	HANDLE hFind;
+
+	lua_pop(L, 1);
+	lua_newtable(L);
+
+	hFind = FindFirstFileW(path->str, &FindFileData);
+	int n = 0;
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
+
+			if (wcscmp(FindFileData.cFileName, L".") != 0 &&
+				wcscmp(FindFileData.cFileName, L"..") != 0)
+			{
+				lua_createtable(L, 0, 8);
+
+				lua_pushstring(L, "FileName");
+				lua_pushwchar(L, FindFileData.cFileName);
+				lua_settable(L, -3);
+
+				lua_pushstring(L, "AlternateFileName");
+				lua_pushwchar(L, FindFileData.cAlternateFileName);
+				lua_settable(L, -3);
+
+				lua_pushstring(L, "isFolder");
+				lua_pushboolean(L, (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0);
+				lua_settable(L, -3);
+
+				lua_pushstring(L, "Attributes");
+				lua_pushinteger(L, FindFileData.dwFileAttributes);
+				lua_settable(L, -3);
+
+				lua_pushstring(L, "Size");
+				lua_pushinteger(L, FindFileData.nFileSizeLow);
+				lua_settable(L, -3);
+
+				lua_pushstring(L, "Creation");
+				lua_pushinteger(L, FILETIME_to_time_t(&FindFileData.ftCreationTime));
+				lua_settable(L, -3);
+
+				lua_pushstring(L, "Access");
+				lua_pushinteger(L, FILETIME_to_time_t(&FindFileData.ftLastAccessTime));
+				lua_settable(L, -3);
+
+				lua_pushstring(L, "Write");
+				lua_pushinteger(L, FILETIME_to_time_t(&FindFileData.ftLastWriteTime));
+				lua_settable(L, -3);
+
+				lua_rawseti(L, -2, ++n);
+			}
+		} while (FindNextFileW(hFind, &FindFileData));
+		FindClose(hFind);
+	}
+
+	return 1;
+}
+
+
+int GetAllInFolder(lua_State* L) {
+
+	const char* path = lua_topath(L, 1, true);
+
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hFind;
+
+	lua_pop(L, 1);
+	lua_newtable(L);
+
+	hFind = FindFirstFile(path, &FindFileData);
+	int n = 0;
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
+
+			if (strcmp(FindFileData.cFileName, ".") != 0 &&
+				strcmp(FindFileData.cFileName, "..") != 0)
+			{
+				lua_createtable(L, 0, 8);
+
+				lua_pushstring(L, "FileName");
+				lua_pushstring(L, FindFileData.cFileName);
+				lua_settable(L, -3);
+
+				lua_pushstring(L, "AlternateFileName");
+				lua_pushstring(L, FindFileData.cAlternateFileName);
+				lua_settable(L, -3);
+
+				lua_pushstring(L, "isFolder");
+				lua_pushboolean(L, (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0);
+				lua_settable(L, -3);
+
+				lua_pushstring(L, "Attributes");
+				lua_pushinteger(L, FindFileData.dwFileAttributes);
+				lua_settable(L, -3);
+
+				lua_pushstring(L, "Size");
+				lua_pushinteger(L, FindFileData.nFileSizeLow);
+				lua_settable(L, -3);
+
+				lua_pushstring(L, "Creation");
+				lua_pushinteger(L, FILETIME_to_time_t(&FindFileData.ftCreationTime));
+				lua_settable(L, -3);
+
+				lua_pushstring(L, "Access");
+				lua_pushinteger(L, FILETIME_to_time_t(&FindFileData.ftLastAccessTime));
+				lua_settable(L, -3);
+
+				lua_pushstring(L, "Write");
+				lua_pushinteger(L, FILETIME_to_time_t(&FindFileData.ftLastWriteTime));
+				lua_settable(L, -3);
+
+				lua_rawseti(L, -2, ++n);
+			}
+		} while (FindNextFile(hFind, &FindFileData));
+		FindClose(hFind);
+	}
+
+	return 1;
+}
+
 int GetFileInfo(lua_State*L) {
 
 	const char * path = lua_topath(L, 1);
@@ -153,10 +339,18 @@ int GetFileInfo(lua_State*L) {
 
 		lua_pop(L, 1);
 
-		lua_newtable(L);
+		lua_createtable(L, 0, 8);
+
+		lua_pushstring(L, "FileName");
+		lua_pushstring(L, data.cFileName);
+		lua_settable(L, -3);
+
+		lua_pushstring(L, "AlternateFileName");
+		lua_pushstring(L, data.cAlternateFileName);
+		lua_settable(L, -3);
 
 		lua_pushstring(L, "isFolder");
-		lua_pushboolean(L, data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
+		lua_pushboolean(L, (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0);
 		lua_settable(L, -3);
 
 		lua_pushstring(L, "Attributes");

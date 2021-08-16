@@ -1021,7 +1021,7 @@ int luaopen_misc(lua_State* L) {
 	lua_pushstring(L, "SetVisible");
 	lua_pushcfunction(L, L_ToggleConsole);
 	lua_settable(L, -3);
-	
+
 	lua_pushstring(L, "SetTitle");
 	lua_pushcfunction(L, L_SetTitle);
 	lua_settable(L, -3);
@@ -1077,7 +1077,7 @@ int luaopen_misc(lua_State* L) {
 	lua_pushstring(L, "select");
 	lua_pushcfunction(L, TableSelect);
 	lua_settable(L, -3);
-	lua_pop(L, 1); 
+	lua_pop(L, 1);
 
 	lua_pushcfunction(L, GetKeyState);
 	lua_setglobal(L, "GetKeyState");

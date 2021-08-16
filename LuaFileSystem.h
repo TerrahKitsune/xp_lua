@@ -1,6 +1,7 @@
 #pragma once
 #include "lua_main_incl.h"
 
+int GetAllInFolder(lua_State* L);
 int GetFiles(lua_State*L);
 int GetDirectories(lua_State*L);
 int GetFileInfo(lua_State*L);
@@ -14,3 +15,8 @@ int GetCurrent(lua_State*L);
 int lua_TempFile(lua_State *L);
 int lua_SetCurrentDirectory(lua_State *L);
 int lua_GetAllAvailableDrives(lua_State *L);
+int lua_SetFileAttributes(lua_State* L);
+
+int GetAllInFolderWide(lua_State* L);
+int OpenFileWide(lua_State* L);
+int	RenameWide(lua_State* L);

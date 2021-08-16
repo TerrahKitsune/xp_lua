@@ -2,6 +2,7 @@
 #include "LuaFileSystem.h"
 
 static const struct luaL_Reg filesystemfuncs[] = {
+	{ "GetAll", GetAllInFolder },
 	{ "GetFiles", GetFiles },
 	{ "GetDirectories", GetDirectories },
 	{ "GetFileInfo", GetFileInfo },
@@ -15,6 +16,10 @@ static const struct luaL_Reg filesystemfuncs[] = {
 	{ "GetTempFileName", lua_TempFile },
 	{ "SetCurrentDirectory", lua_SetCurrentDirectory },
 	{ "GetDrives", lua_GetAllAvailableDrives },
+	{ "SetAttributes", lua_SetFileAttributes},
+	{ "GetAllWide",  GetAllInFolderWide },
+	{ "OpenFileWide", OpenFileWide },
+	{ "RenameWide", RenameWide },
 	{ NULL, NULL }
 };
 

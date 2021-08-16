@@ -319,6 +319,15 @@
     <Filter Include="Windows\Source Files">
       <UniqueIdentifier>{5b5ea10e-5262-4243-8a92-dde4fe5a8c06}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaWchar">
+      <UniqueIdentifier>{3cce908f-8005-4bb8-8ea7-41325772c947}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaWchar\Header Files">
+      <UniqueIdentifier>{fdda124e-d4e6-4514-8c44-c1aa1fd1ae3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaWchar\Source Files">
+      <UniqueIdentifier>{5152b899-2bcf-47db-bb32-93b6dca0ed23}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Program.cpp">
@@ -723,6 +732,12 @@
     <ClCompile Include="customtextbox.cpp">
       <Filter>Windows\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="wcharmain.cpp">
+      <Filter>LuaWchar</Filter>
+    </ClCompile>
+    <ClCompile Include="luawchar.cpp">
+      <Filter>LuaWchar\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -1120,6 +1135,12 @@
     </ClInclude>
     <ClInclude Include="customtextbox.h">
       <Filter>Windows\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wcharmain.h">
+      <Filter>LuaWchar</Filter>
+    </ClInclude>
+    <ClInclude Include="luawchar.h">
+      <Filter>LuaWchar\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

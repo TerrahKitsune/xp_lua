@@ -1582,6 +1582,21 @@ Json:
 
 	result: {"MyTable":["Hello","Hello","Hello","Hello","Hello","Hello","Hello","Hello","Hello","Hello"],"Cake":"Is good"}
 
+Wchar:
+
+	-Creates a wchar string from an ansi string
+	Wchar Wchar.FromAnsi(str)
+
+	-Returns the wchar as an ansi string, missing characters are replaced with ?
+	string Wchar:ToAnsi()
+	
+	-Returns the string representation of the wide
+	string Wchar:ToWide()
+
+	meta:
+		tostring: same as ToAnsi
+		concat (..): returns a new Wchar
+	
 FileSystem:
 
 	-Returns an array containing all files that exists in path
@@ -1597,8 +1612,29 @@ FileSystem:
 	-Creation unix time when the file was created
 	-Access unix time when the file was accessed
 	-Write unix time when the file was written to
+	-FileName name of the file
+	-AlternateFileName alternate filename if any
 	-returns nil on failure
 	FileInfo FileSystem.GetFileInfo(file)
+
+	-Returns an array of all objects in the path
+	-Each entry in the array is the same object as FileSystem.GetFileInfo
+	Array FileSystem.GetAll(path)
+
+	-Retrives all files from a widepath (must include filters)
+	-widepath must be a widestring (See WideToAnsi and AnsiToWide)
+	-results are the same as GetAll except filenames are wide
+	Array FileSystem.GetAllWide(widepath)
+
+	-Open a file using widestrings
+	-equal to io.open
+	file FileSystem.OpenFileWide(widefilename, widemode)
+
+	-Renames a file using wide characters (see AnsiToWide)
+	bool FileSystem.RenameWide(widefilenamesrc, widefilenamedst)
+
+	-Sets new attributes on a file
+	bool FileSystem.SetAttributes(filename, attributemask)
 
 	-Copies file source to destination
 	-if overwrite is true existing file will be overwritten

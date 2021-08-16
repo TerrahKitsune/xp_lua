@@ -46,6 +46,7 @@
 #include "LuaBinaryTreeMain.h"
 #include "MacroMain.h"
 #include "WindowMain.h"
+#include "wcharmain.h"
 
 #define HI_PART(x)  ((x>>4) & 0x0F)
 #define LO_PART(x)  ((x) & 0x0F)
@@ -568,6 +569,8 @@ int main(int argc, char *argv[]) {
 	lua_setglobal(L, "Macro");
 	luaopen_window(L);
 	lua_setglobal(L, "Window");
+	luaopen_wchar(L);
+	lua_setglobal(L, "Wchar");
 
 	lua_pushcfunction(L, L_GetRuntime);
 	lua_setglobal(L, "Runtime");

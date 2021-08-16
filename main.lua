@@ -128,104 +128,21 @@ end
 CreateGCPrint();
 collectgarbage();
 
-TablePrint(Window);
+TablePrint(Wchar);
 
-local p = Process.Open();
+local a = Wchar.FromAnsi("abc");
+local b = Wchar.FromAnsi("123");
+print(a .. b);
+print(a .. "n");
 
-local hwnd = Window.Open();
+local files = FileSystem.GetAllWide(Wchar.FromAnsi("R:/tilesets/*"));
+print(#files);
 
-for n=1, #hwnd do 
-	if(hwnd[n]:GetIsVisible() and hwnd[n]:GetWindow(4) == nil)then 
-		print(hwnd[n]:GetText());
-	end
-end
-
-hwnd = Window.Open(p:GetID())[1];
-
-local info = hwnd:GetInfo();
-print("GetProcessId", hwnd:GetProcessId());
-print("GetText", hwnd:GetText());
-print("GetIsVisible", hwnd:GetIsVisible());
-
-TablePrint(info);
-
-local function Testwindow()
-
-local c = Window.Create(nil, "class", "Lua", 100 ,100 ,500 ,250);
-c:Show(true);
-
-local also = c:CreateButton("Also a button", 0, 50+36, 150, 50,  function(child) 
-
-	local p = child:GetParent();
-	print("Also button " .. tostring(p)); 
-	p:Redraw();
-
-end);
-
-local textbox = c:CreateTextBox("abc",0,100+36,100,50, true, true, function(child, parent) 
-
-	print(child:GetContent());
-end);
-
-local button1 = c:CreateButton("ITS A BUTTON!", 0, 36, 150, 50, function(child)
-
-	print(textbox:GetContent());
-
-	also:Show(not also:GetIsVisible());
-	textbox:Enable(not textbox:GetIsEnabled());
-	
-end);
-
-print(button1:GetContent());
-
-c:SetDrawFunction(function(draw, window)
-
-	local offset = draw:Text(tostring(window));
-	draw:SetTextColor(draw:RgbToHex(255, 0, 255));
-	draw:SetBackgroundColor(0);
-	draw:SetBackgroundMode(2);
-	draw:Text("Purple text on black background", 0, offset);
-	
-	local w,h = draw:GetSize();
-
-	local tw,th = draw:CalcTextSize(w.."x"..h);
-
-	for x=(w/2)-(tw/2)-25, (w/2)+(tw/2)+25 do 
-		for y=(h/2)-(th/2)-25, (h/2)+(th/2)+25 do 
-			draw:Pixel(x,y, math.random(0, draw:RgbToHex(math.random(0,255),math.random(0,255),math.random(0,255))));
-		end
-	end
-
-	draw:Text(w.."x"..h, (w/2)-(tw/2), (h/2)-(th/2));
-end);
-
-c:Redraw();
-
-local showmsgs = false;
-local ok,msgs;
-while coroutine.status(c:GetThread()) ~= "dead" do 
-
-	while not c:CheckHasMessage() do 
-		Sleep();
-	end
-
-	ok,msgs = coroutine.resume(c:GetThread());
-
-	if showmsgs and ok and #msgs > 0 then
-		
-		print("-----");
-
-		for n=1, #msgs do 
-			print(msgs[n].ID, msgs[n].Message, msgs[n].WParam, msgs[n].LParam);
-		end
-	end
-end
-
+for n=1, #files do 
+	print(files[n].FileName,files[n].FileName:ToAnsi());
 end 
 
-Testwindow();
-
-FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Desktop");
-dofile("recordfiles.lua");
+--FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Desktop");
+--dofile("recordfiles.lua");
 GetKey();
 _exit(0);
