@@ -17,6 +17,8 @@ int lua_SetCurrentDirectory(lua_State *L);
 int lua_GetAllAvailableDrives(lua_State *L);
 int lua_SetFileAttributes(lua_State* L);
 
+int GetCurrentWide(lua_State* L);
 int GetAllInFolderWide(lua_State* L);
 int OpenFileWide(lua_State* L);
 int	RenameWide(lua_State* L);
+int GetFileInfoWide(lua_State* L);

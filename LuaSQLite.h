@@ -9,6 +9,7 @@ typedef struct LuaSQLite {
 	char * file;
 	int status;
 	int busyhandler;
+	bool useWidechar;
 } LuaSQLite;
 
 int SQLiteConnect(lua_State *L);
@@ -17,6 +18,7 @@ int SQLiteFetch(lua_State *L);
 int SQLiteGetRow(lua_State *L);
 int SQLiteExecuteWithCallback(lua_State *L);
 int SQLiteSetBusyHandler(lua_State *L);
+int SQLiteSetUseWidechar(lua_State* L);
 
 int SQLite_ToString(lua_State *L);
 int SQLite_GC(lua_State *L);

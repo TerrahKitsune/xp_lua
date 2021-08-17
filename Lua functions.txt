@@ -1435,6 +1435,7 @@ SQLite:
 	-Runs a query on the sqlite object, preparedstatements should contain values matching the query
 	-IE: "INSERT INTO Test (@Data)" then preparedstatements should contain a value with the key "Data"
 	-preparedstatements can also be a function function(key) end where key is the prepared statement without the @
+	-preparedstatment data can be WChars
 	-returns true,"OK" on success, false and an error message on failure
 	bool, txt SQLite:Query(querystring, preparedstatements)
 
@@ -1452,6 +1453,9 @@ SQLite:
 	-if no callback is passed any resultset (if any) is ignored
 	-For more accurate data or binary data Query
 	bool, txt SQLite:Execute(querystring, opt callback)
+
+	-If toggled true then strings from GetRow will be returned at Wchars
+	nil SQLite:ToggleWidechar(bool);
 
 	-closes the database connection, it should not be used afterwards
 	nil SQLite:Close()
@@ -1587,15 +1591,38 @@ Wchar:
 	-Creates a wchar string from an ansi string
 	Wchar Wchar.FromAnsi(str)
 
+	-Converts an array of integers into a wchar
+	-Opposite of Wchar:FromBytes
+	Wchar Wchar.FromBytes(array)
+
 	-Returns the wchar as an ansi string, missing characters are replaced with ?
 	string Wchar:ToAnsi()
 	
 	-Returns the string representation of the wide
 	string Wchar:ToWide()
 
+	-Returns a wchar with the characters lowered or uppered
+	Wchar Wchar:ToLower()
+	Wchar Wchar:ToUpper()
+
+	-Retrive a substring
+	-1 Indexed
+	Wchar Wchar:Substring(start, opt length)
+
+	-Returns the wchar as an array containing integers representing the characters
+	-Opposite of Wchar.FromBytes
+	array Wchar:ToBytes()
+
+	-Find the first instance of the substring starting at offset
+	-1 Indexed
+	-Retruns nil if none is found
+	int Wchar:Find(substring, opt offset)
+
 	meta:
 		tostring: same as ToAnsi
 		concat (..): returns a new Wchar
+		length (#): returns the length of the wchar
+		equal (==): returns true if a wchar is matching another wchar
 	
 FileSystem:
 
@@ -1617,6 +1644,9 @@ FileSystem:
 	-returns nil on failure
 	FileInfo FileSystem.GetFileInfo(file)
 
+	-Same as above but with wchars
+	FileInfo FileSystem.GetFileInfoWide(file)
+
 	-Returns an array of all objects in the path
 	-Each entry in the array is the same object as FileSystem.GetFileInfo
 	Array FileSystem.GetAll(path)
@@ -1634,6 +1664,7 @@ FileSystem:
 	bool FileSystem.RenameWide(widefilenamesrc, widefilenamedst)
 
 	-Sets new attributes on a file
+	-Works with Wchar
 	bool FileSystem.SetAttributes(filename, attributemask)
 
 	-Copies file source to destination
@@ -1646,14 +1677,17 @@ FileSystem:
 	bool FileSystem.Move(source, destination)
 
 	-Deletes source, returns true on success
+	-Works with Wchar
 	bool FileSystem.Delete(source)
 
 	-Creates a directory at path
+	-Works with Wchar
 	-returns true on success
 	bool FileSystem.CreateDirectory(path)
 
 	-Creates a directory at path
 	-Folder has to be empty
+	-Works with Wchar
 	-returns true on success
 	bool FileSystem.RemoveDirectory(path)
 
@@ -1662,8 +1696,10 @@ FileSystem:
 	
 	-Retruns the current active directory in full path (the directory the program lives in)
 	string FileSystem.CurrentDirectory()
+	WChar FileSystem.CurrentDirectoryWide()
 
 	-Sets the current directory (where relative paths start)
+	-Works with Wchar
 	-returns true/false on success or failure
 	bool FileSystem.SetCurrentDirectory(dir)
 

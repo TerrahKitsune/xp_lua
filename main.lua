@@ -128,21 +128,38 @@ end
 CreateGCPrint();
 collectgarbage();
 
-TablePrint(Wchar);
-
-local a = Wchar.FromAnsi("abc");
-local b = Wchar.FromAnsi("123");
-print(a .. b);
-print(a .. "n");
-
-local files = FileSystem.GetAllWide(Wchar.FromAnsi("R:/tilesets/*"));
+local files = FileSystem.GetAllWide(Wchar.FromAnsi("R:/tilesets"));
 print(#files);
 
-for n=1, #files do 
-	print(files[n].FileName,files[n].FileName:ToAnsi());
-end 
+local function OpenDb()
 
---FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Desktop");
---dofile("recordfiles.lua");
+	local db = SQLite.Open("R:/test.sqlite", 2);
+	db:ToggleWidechar(true);
+
+	assert(db:Query([[CREATE TABLE IF NOT EXISTS `test` (
+	`Id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	`Data`	TEXT NOT NULL);]]));
+
+	assert(db:Query("delete from `test`;"));
+
+	return db;
+end
+
+local db = OpenDb();
+
+for n=1, #files do 
+	print(files[n].FileName,files[n].FileName);
+	assert(db:Query("INSERT INTO `test`(`Data`) VALUES (@data);", {data = files[n].FileName}));
+end 
+print("---------------");
+assert(db:Query("SELECT * FROM `test`;"));
+while db:Fetch() do 
+	print(db:GetRow().Data);
+end 
+db:Close();
+
+FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Desktop");
+dofile("recordfiles.lua");
+
 GetKey();
 _exit(0);

@@ -20,10 +20,12 @@ static const struct luaL_Reg filesystemfuncs[] = {
 	{ "GetAllWide",  GetAllInFolderWide },
 	{ "OpenFileWide", OpenFileWide },
 	{ "RenameWide", RenameWide },
+	{ "GetFileInfoWide", GetFileInfoWide },
+	{ "CurrentDirectoryWide", GetCurrentWide },
 	{ NULL, NULL }
 };
 
-int luaopen_filesystem(lua_State *L){
+int luaopen_filesystem(lua_State* L) {
 
 	luaL_newlibtable(L, filesystemfuncs);
 	luaL_setfuncs(L, filesystemfuncs, 0);

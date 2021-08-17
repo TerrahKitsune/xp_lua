@@ -1,18 +1,19 @@
 #include "LuaSQLite.h"
 #include <string.h>
 #include <stdlib.h>
+#include "luawchar.h"
 
-LuaSQLite * luaL_checksqlite(lua_State *L, int index) {
+LuaSQLite* luaL_checksqlite(lua_State* L, int index) {
 
-	LuaSQLite * luasqlite = (LuaSQLite*)luaL_checkudata(L, index, LUASQLITE);
+	LuaSQLite* luasqlite = (LuaSQLite*)luaL_checkudata(L, index, LUASQLITE);
 	if (luasqlite == NULL)
 		luaL_error(L, "parameter is not a %s", LUASQLITE);
 	return luasqlite;
 }
 
-LuaSQLite * lua_pushsqlite(lua_State *L) {
+LuaSQLite* lua_pushsqlite(lua_State* L) {
 
-	LuaSQLite * luasqlite = (LuaSQLite*)lua_newuserdata(L, sizeof(LuaSQLite));
+	LuaSQLite* luasqlite = (LuaSQLite*)lua_newuserdata(L, sizeof(LuaSQLite));
 	if (luasqlite == NULL)
 		luaL_error(L, "Unable to create sqlite connection");
 	luaL_getmetatable(L, LUASQLITE);
@@ -21,7 +22,7 @@ LuaSQLite * lua_pushsqlite(lua_State *L) {
 	return luasqlite;
 }
 
-void push_sqlitevalue(lua_State *L, sqlite3_stmt *pStmt, int idx) {
+void push_sqlitevalue(lua_State* L, sqlite3_stmt* pStmt, int idx, bool usewchar) {
 	switch (sqlite3_column_type(pStmt, idx)) {
 	case SQLITE_INTEGER:
 		lua_pushinteger(L, sqlite3_column_int64(pStmt, idx));
@@ -31,7 +32,13 @@ void push_sqlitevalue(lua_State *L, sqlite3_stmt *pStmt, int idx) {
 		break;
 	case SQLITE_TEXT:
 	case SQLITE_BLOB:
-		lua_pushlstring(L, (const char*)sqlite3_column_blob(pStmt, idx), sqlite3_column_bytes(pStmt, idx));
+
+		if (usewchar) {
+			lua_pushwchar(L, (wchar_t*)sqlite3_column_text16(pStmt, idx), sqlite3_column_bytes16(pStmt, idx) / sizeof(wchar_t));
+		}
+		else {
+			lua_pushlstring(L, (const char*)sqlite3_column_blob(pStmt, idx), sqlite3_column_bytes(pStmt, idx));
+		}
 		break;
 	case SQLITE_NULL:
 	default:
@@ -40,9 +47,9 @@ void push_sqlitevalue(lua_State *L, sqlite3_stmt *pStmt, int idx) {
 	}
 }
 
-static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
+static int callback(void* NotUsed, int argc, char** argv, char** azColName) {
 
-	lua_State *L = (lua_State *)NotUsed;
+	lua_State* L = (lua_State*)NotUsed;
 
 	lua_createtable(L, argc, 0);
 
@@ -64,16 +71,16 @@ static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
 	}
 }
 
-int SQLiteExecuteWithCallback(lua_State *L) {
+int SQLiteExecuteWithCallback(lua_State* L) {
 
 	size_t len;
-	LuaSQLite * luasqlite = (LuaSQLite*)luaL_checksqlite(L, 1);
+	LuaSQLite* luasqlite = (LuaSQLite*)luaL_checksqlite(L, 1);
 	if (luasqlite->db == NULL)
 		luaL_error(L, "SQLite instance has been closed");
-	const char * query = luaL_checklstring(L, 2, &len);
+	const char* query = luaL_checklstring(L, 2, &len);
 	int err;
-	char *zErrMsg = 0;
-	char * current = (char*)gff_malloc(len + 1);
+	char* zErrMsg = 0;
+	char* current = (char*)gff_malloc(len + 1);
 	if (current == NULL) {
 
 		lua_pop(L, lua_gettop(L));
@@ -116,9 +123,18 @@ int SQLiteExecuteWithCallback(lua_State *L) {
 	return 2;
 }
 
-int SQLiteGetRow(lua_State *L) {
+int SQLiteSetUseWidechar(lua_State* L) {
 
-	LuaSQLite * luasqlite = (LuaSQLite*)luaL_checksqlite(L, 1);
+	LuaSQLite* luasqlite = (LuaSQLite*)luaL_checksqlite(L, 1);
+
+	luasqlite->useWidechar = lua_toboolean(L, 2) != 0;
+
+	return 0;
+}
+
+int SQLiteGetRow(lua_State* L) {
+
+	LuaSQLite* luasqlite = (LuaSQLite*)luaL_checksqlite(L, 1);
 	if (luasqlite->db == NULL)
 		luaL_error(L, "SQLite instance has been closed");
 
@@ -144,7 +160,7 @@ int SQLiteGetRow(lua_State *L) {
 		}
 		else {
 			lua_pop(L, lua_gettop(L));
-			push_sqlitevalue(L, luasqlite->stmt, idx);
+			push_sqlitevalue(L, luasqlite->stmt, idx, luasqlite->useWidechar);
 		}
 		return 1;
 	}
@@ -155,16 +171,16 @@ int SQLiteGetRow(lua_State *L) {
 	for (int n = 0; n < cnt; n++) {
 
 		lua_pushstring(L, sqlite3_column_name(luasqlite->stmt, n));
-		push_sqlitevalue(L, luasqlite->stmt, n);
+		push_sqlitevalue(L, luasqlite->stmt, n, luasqlite->useWidechar);
 		lua_settable(L, -3);
 	}
 
 	return 1;
 }
 
-int SQLiteFetch(lua_State *L) {
+int SQLiteFetch(lua_State* L) {
 
-	LuaSQLite * luasqlite = (LuaSQLite*)luaL_checksqlite(L, 1);
+	LuaSQLite* luasqlite = (LuaSQLite*)luaL_checksqlite(L, 1);
 	if (luasqlite->db == NULL)
 		luaL_error(L, "SQLite instance has been closed");
 
@@ -203,16 +219,17 @@ int SQLiteFetch(lua_State *L) {
 	return 1;
 }
 
-int SQLiteExecute(lua_State *L) {
+int SQLiteExecute(lua_State* L) {
 
-	LuaSQLite * luasqlite = (LuaSQLite*)luaL_checksqlite(L, 1);
+	LuaSQLite* luasqlite = (LuaSQLite*)luaL_checksqlite(L, 1);
 	if (luasqlite->db == NULL)
 		luaL_error(L, "SQLite instance has been closed");
-	const char * query = luaL_checkstring(L, 2);
+	const char* query = luaL_checkstring(L, 2);
 	int cnt = 0;
 	size_t len;
-	const char * data;
-	const char * name;
+	const char* data;
+	const char* name;
+	LuaWChar* wchar;
 
 	if (luasqlite->stmt) {
 		sqlite3_finalize(luasqlite->stmt);
@@ -260,6 +277,14 @@ int SQLiteExecute(lua_State *L) {
 				data = lua_tolstring(L, -1, &len);
 				sqlite3_bind_blob64(luasqlite->stmt, ++cnt, data, len, NULL);
 				break;
+			case LUA_TUSERDATA:
+
+				if (luaL_testudata(L, -1, LUAWCHAR)) {
+					wchar = lua_towchar(L, -1);
+					sqlite3_bind_text16(luasqlite->stmt, ++cnt, wchar->str, wchar->len * sizeof(wchar_t), NULL);
+				}
+
+				break;
 			}
 
 			lua_pop(L, 1);
@@ -290,7 +315,7 @@ int SQLiteExecute(lua_State *L) {
 				sqlite3_bind_null(luasqlite->stmt, ++cnt);
 				break;
 			case LUA_TNUMBER:
-				
+
 				if (lua_isinteger(L, -1)) {
 					sqlite3_bind_int64(luasqlite->stmt, ++cnt, lua_tointeger(L, -1));
 				}
@@ -304,6 +329,14 @@ int SQLiteExecute(lua_State *L) {
 			case LUA_TSTRING:
 				data = lua_tolstring(L, -1, &len);
 				sqlite3_bind_blob64(luasqlite->stmt, ++cnt, data, len, NULL);
+				break;
+			case LUA_TUSERDATA:
+
+				if (luaL_testudata(L, -1, LUAWCHAR)) {
+					wchar = lua_towchar(L, -1);
+					sqlite3_bind_text16(luasqlite->stmt, ++cnt, wchar->str, wchar->len * sizeof(wchar_t), NULL);
+				}
+
 				break;
 			}
 
@@ -335,7 +368,7 @@ int SQLiteExecute(lua_State *L) {
 	return 2;
 }
 
-static void RemoveBusyHandler(lua_State *L, LuaSQLite * luasqlite) {
+static void RemoveBusyHandler(lua_State* L, LuaSQLite* luasqlite) {
 	if (luasqlite->busyhandler != -1) {
 		luaL_unref(L, LUA_REGISTRYINDEX, luasqlite->busyhandler);
 		luasqlite->busyhandler = -1;
@@ -343,10 +376,10 @@ static void RemoveBusyHandler(lua_State *L, LuaSQLite * luasqlite) {
 	}
 }
 
-static int BusyHandler(void * d, int retries) {
-	lua_State *L = (lua_State*)d;
+static int BusyHandler(void* d, int retries) {
+	lua_State* L = (lua_State*)d;
 
-	LuaSQLite * luasqlite = (LuaSQLite*)luaL_checksqlite(L, 1);
+	LuaSQLite* luasqlite = (LuaSQLite*)luaL_checksqlite(L, 1);
 	lua_rawgeti(L, LUA_REGISTRYINDEX, luasqlite->busyhandler);
 	if (!lua_isfunction(L, -1)) {
 		lua_pop(L, 1);
@@ -357,17 +390,17 @@ static int BusyHandler(void * d, int retries) {
 		lua_pushinteger(L, retries);
 		if (lua_pcall(L, 2, 1, NULL)) {
 			return 0;
-		}		
-		bool ok = lua_toboolean(L, -1)>0;
+		}
+		bool ok = lua_toboolean(L, -1) > 0;
 		lua_pop(L, 1);
 		return 1;
-	}	
+	}
 	return 0;
 }
 
-int SQLiteSetBusyHandler(lua_State *L) {
+int SQLiteSetBusyHandler(lua_State* L) {
 
-	LuaSQLite * luasqlite = (LuaSQLite*)luaL_checksqlite(L, 1);
+	LuaSQLite* luasqlite = (LuaSQLite*)luaL_checksqlite(L, 1);
 	if (luasqlite->db == NULL)
 		luaL_error(L, "SQLite instance has been closed");
 
@@ -383,11 +416,11 @@ int SQLiteSetBusyHandler(lua_State *L) {
 	return 0;
 }
 
-int SQLiteConnect(lua_State *L) {
+int SQLiteConnect(lua_State* L) {
 
 	size_t len;
-	const char * db = luaL_optlstring(L, 1, ":memory:", &len);
-	char * file = (char*)gff_malloc(len + 1);
+	const char* db = luaL_optlstring(L, 1, ":memory:", &len);
+	char* file = (char*)gff_malloc(len + 1);
 	if (!file)
 		luaL_error(L, "Unable to allocate memory for sqlite");
 	file[len] = '\0';
@@ -396,7 +429,7 @@ int SQLiteConnect(lua_State *L) {
 	int mode = (int)luaL_optinteger(L, 2, 0);
 
 	lua_pop(L, lua_gettop(L));
-	LuaSQLite * luasqlite = lua_pushsqlite(L);
+	LuaSQLite* luasqlite = lua_pushsqlite(L);
 	if (!luasqlite) {
 		gff_free(file);
 		luaL_error(L, "Unable to allocate memory for sqlite");
@@ -443,9 +476,9 @@ int SQLiteConnect(lua_State *L) {
 	return 1;
 }
 
-int SQLite_GC(lua_State *L) {
+int SQLite_GC(lua_State* L) {
 
-	LuaSQLite * luasqlite = (LuaSQLite*)luaL_checksqlite(L, 1);
+	LuaSQLite* luasqlite = (LuaSQLite*)luaL_checksqlite(L, 1);
 
 	RemoveBusyHandler(L, luasqlite);
 
@@ -467,9 +500,9 @@ int SQLite_GC(lua_State *L) {
 	return 0;
 }
 
-int SQLite_ToString(lua_State *L) {
+int SQLite_ToString(lua_State* L) {
 
-	LuaSQLite * sq = luaL_checksqlite(L, 1);
+	LuaSQLite* sq = luaL_checksqlite(L, 1);
 	char sqlite[_MAX_PATH + 20];
 	sprintf(sqlite, "SQLite: 0x%08X File: %s", sq, sq->file);
 
