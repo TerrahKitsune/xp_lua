@@ -311,6 +311,7 @@ int ODBCBind(lua_State* L) {
 		}
 		break;
 	case LUA_TUSERDATA:
+
 		wchar = (LuaWChar*)luaL_checkudata(L, 2, LUAWCHAR);
 
 		if (wchar) {
