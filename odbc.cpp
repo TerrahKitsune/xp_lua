@@ -1,5 +1,6 @@
 #include "odbc.h"
 #include <math.h>
+#include "luawchar.h"
 
 LuaOdbc* AssertIsOpen(lua_State* L, int idx) {
 
@@ -239,6 +240,7 @@ int ODBCBind(lua_State* L) {
 	SQLPOINTER data;
 	SQLDOUBLE ddata;
 	SQLINTEGER idata;
+	LuaWChar* wchar;
 
 	size_t rawlen;
 	const char* cdata;
@@ -308,6 +310,28 @@ int ODBCBind(lua_State* L) {
 			data = odbc->params[odbc->paramnumber];
 		}
 		break;
+	case LUA_TUSERDATA:
+		wchar = (LuaWChar*)luaL_checkudata(L, 2, LUAWCHAR);
+
+		if (wchar) {
+
+			odbc->params[odbc->paramnumber] = gff_calloc(wchar->len + 1, sizeof(wchar_t));
+
+			if (!odbc->params[odbc->paramnumber]) {
+				luaL_error(L, "Failed to allocate memory");
+			}
+
+			memcpy(odbc->params[odbc->paramnumber], wchar->str, wchar->len * sizeof(wchar_t));
+
+			valuetype = SQL_C_WCHAR;
+			paramtype = SQL_CHAR;
+
+			data = (SQLPOINTER)odbc->params[odbc->paramnumber];
+			len = wchar->len * sizeof(wchar_t);
+
+			break;
+		}
+		// Fall through
 
 	default:
 
@@ -829,13 +853,13 @@ int ODBCGetRow(lua_State* L) {
 		}
 		else {
 
-			data = gff_calloc(sizeof(SQLCHAR), columnsize);
+			data = gff_calloc(sizeof(SQLWCHAR), columnsize);
 
 			if (!data) {
 				luaL_error(L, "Unable to allocate memory");
 			}
 
-			if (!SUCCEEDED(SQLGetData(odbc->stmt, i + 1, SQL_C_CHAR, data, columnsize, &datalen))) {
+			if (!SUCCEEDED(SQLGetData(odbc->stmt, i + 1, SQL_WCHAR, data, columnsize * sizeof(wchar_t), &datalen))) {
 
 				lua_pop(L, lua_gettop(L));
 				lua_pushboolean(L, false);
@@ -849,7 +873,7 @@ int ODBCGetRow(lua_State* L) {
 				lua_pushnil(L);
 			}
 			else {
-				lua_pushlstring(L, (const char*)data, datalen);
+				lua_pushwchar(L, (wchar_t*)data, datalen / sizeof(wchar_t));
 			}
 		}
 
@@ -908,18 +932,17 @@ int ODBCGetAllDrivers(lua_State* L) {
 
 int ODBCDriverConnect(lua_State* L) {
 
-	size_t len;
-	const char* connectionString = luaL_checklstring(L, 1, &len);
+	LuaWChar* connectionStringw = lua_stringtowchar(L, 1);
 
-	if (!connectionString || len <= 0) {
+	if (!connectionStringw || connectionStringw->len <= 0) {
 		luaL_error(L, "Connection string cannot be empty");
 	}
 
-	char* currentconnectionstring = (char*)gff_calloc(len + 1, sizeof(char));
+	wchar_t* currentconnectionstring = (wchar_t*)gff_calloc(connectionStringw->len + 1, sizeof(wchar_t));
 	if (!currentconnectionstring) {
 		luaL_error(L, "Failed to allocate memory");
 	}
-	memcpy(currentconnectionstring, connectionString, len);
+	memcpy(currentconnectionstring, connectionStringw->str, connectionStringw->len * sizeof(wchar_t));
 
 	lua_pop(L, lua_gettop(L));
 
@@ -950,7 +973,7 @@ int ODBCDriverConnect(lua_State* L) {
 		PushDiagonstics(L, SQL_HANDLE_DBC, odbc->env);
 		return 2;
 	}
-	else if (SQLDriverConnect(odbc->dbc, NULL, (SQLCHAR*)odbc->ConnectionString, SQL_NTS, NULL, 0, NULL, SQL_DRIVER_COMPLETE) != SQL_SUCCESS) {
+	else if (SQLDriverConnectW(odbc->dbc, NULL, (SQLWCHAR*)odbc->ConnectionString, SQL_NTS, NULL, 0, NULL, SQL_DRIVER_COMPLETE) != SQL_SUCCESS) {
 
 		lua_pushnil(L);
 		PushDiagonstics(L, SQL_HANDLE_DBC, odbc->dbc);

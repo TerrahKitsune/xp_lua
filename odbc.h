@@ -8,7 +8,7 @@ static const char* ODBC = "ODBC";
 
 typedef struct LuaOdbc {
 
-	char* ConnectionString;
+	wchar_t* ConnectionString;
 	SQLHENV env;
 	SQLHDBC dbc;
 	SQLHSTMT stmt;

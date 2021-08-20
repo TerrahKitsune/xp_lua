@@ -257,6 +257,26 @@ int WcharFind(lua_State* L) {
 	return 1;
 }
 
+LuaWChar* lua_stringtowchar(lua_State* L, int index) {
+
+	LuaWChar* wchar;
+
+	if (lua_type(L, index) == LUA_TUSERDATA) {
+		wchar = (LuaWChar*)luaL_checkudata(L, index, LUAWCHAR);
+		if (wchar) {
+			return wchar;
+		}
+	}
+
+	lua_pushvalue(L, index);
+	FromAnsi(L);
+
+	wchar = lua_towchar(L, -1);
+	lua_pop(L, 2);
+
+	return wchar;
+}
+
 LuaWChar* lua_pushwchar(lua_State* L) {
 	LuaWChar* wchar = (LuaWChar*)lua_newuserdata(L, sizeof(LuaWChar));
 	if (wchar == NULL)

@@ -472,6 +472,7 @@ int SQLiteConnect(lua_State* L) {
 	sqlite3_exec(luasqlite->db, "PRAGMA synchronous=NORMAL;", 0, 0, 0);
 
 	luasqlite->file = file;
+	luasqlite->useWidechar = true;
 
 	return 1;
 }

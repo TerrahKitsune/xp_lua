@@ -7,6 +7,8 @@
 
 static void DumpStack(lua_State *L, bool untilnil = false){
 
+	size_t len;
+	const char* str;
 	FILE * file = fopen("STACK.txt", "w");
 	if (!file)
 		return;
@@ -19,7 +21,7 @@ static void DumpStack(lua_State *L, bool untilnil = false){
 			return;
 
 		fprintf(file, "%d: ", n);
-		printf("%d: ", n);
+		printf("%d: ", n);		
 
 		switch (lua_type(L, n)){
 		case LUA_TNIL:
@@ -47,8 +49,11 @@ static void DumpStack(lua_State *L, bool untilnil = false){
 			printf("FUNCTION 0x%08X", lua_topointer(L, n));
 			break;
 		case LUA_TUSERDATA:
-			fprintf(file, "USERDATA 0x%08X", lua_topointer(L, n));
-			printf("USERDATA 0x%08X", lua_topointer(L, n));
+
+			str = luaL_tolstring(L, n, &len);
+			lua_pop(L, 1);
+			fprintf(file, "USERDATA 0x%08X", str);
+			printf("USERDATA 0x%08X", str);
 			break;
 		case LUA_TTHREAD:
 			fprintf(file, "THREAD 0x%08X", lua_topointer(L, n));

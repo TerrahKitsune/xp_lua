@@ -159,7 +159,7 @@ end
 db:Close();
 
 FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Desktop");
-dofile("recordfiles.lua");
+dofile("test.lua");
 
 GetKey();
 _exit(0);
