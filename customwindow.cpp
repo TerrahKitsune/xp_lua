@@ -4,6 +4,7 @@
 #include "custombutton.h"
 #include "customtextbox.h"
 #include "luawchar.h"
+#include "customcombobox.h"
 
 lua_State* LuaStateCallback;
 int msgcount;
@@ -76,6 +77,7 @@ LuaCustomWindow* CreateCustomWindowStruct() {
 	custom->childRef = LUA_REFNIL;
 	custom->eventRef = LUA_REFNIL;
 	custom->parentRef = LUA_REFNIL;
+	custom->comboBoxItemsRef = LUA_REFNIL;
 
 	return custom;
 }
@@ -121,7 +123,10 @@ void RemoveLuaTableChild(lua_State* L, LuaWindow* window) {
 		}
 	}
 
-	lua_pop(L, 2);
+	luaL_unref(L, LUA_REGISTRYINDEX, window->custom->childRef);
+	lua_pop(L, 1);
+	window->custom->childRef = luaL_ref(L, LUA_REGISTRYINDEX);
+	lua_pop(L, 1);
 }
 
 LuaWindow* GetLuaTableChild(lua_State* L, LuaCustomWindow* window, HMENU menuid) {
@@ -220,10 +225,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 	lua_State* L = LuaStateCallback;
 	LuaWindow* window = NULL;
 	LuaWindow* child = NULL;
+	LuaWChar* wchar;
 
 	if (L) {
 
-		window = lua_type(L, 1) == LUA_TUSERDATA ? lua_tonwindow(L, 1) : NULL;
+		window = lua_type(L, -2) == LUA_TUSERDATA ? lua_tonwindow(L, -2) : NULL;
 
 		if (window && window->custom) {
 
@@ -251,7 +257,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 
 	switch (Msg)
 	{
+	case WM_LUA_SETCONTENT:
 
+		lua_rawgeti(L, LUA_REGISTRYINDEX, lParam);
+		wchar = lua_towchar(L, -1);
+		luaL_unref(L, LUA_REGISTRYINDEX, lParam);
+		SetWindowTextW((HWND)wParam, wchar->str);
+		lua_pop(L, 1);
+
+		break;
 	case WM_LUA_DESTROY:
 
 		DestroyWindow((HWND)wParam);
@@ -293,6 +307,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 			else if (child->custom->type == WINDOW_TYPE_TEXTBOX) {
 				DoCustomTextboxEvent(L, window, child, hwnd, Msg, wParam, lParam);
 			}
+			else if (child->custom->type == WINDOW_TYPE_COMBOBOX) {
+				DoCustomComboBoxEvent(L, window, child, hwnd, Msg, wParam, lParam);
+			}
+			else {
+				puts("test");
+			}
 			
 			lua_pop(L, 1);
 		}
@@ -303,7 +323,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 	case WM_PAINT:
 
 		if (L) {
-			lua_pushvalue(L, 1);
+			lua_pushvalue(L, -2);
 			CustomDrawEvent(L);
 			lua_pop(L, 1);
 		}
@@ -335,6 +355,18 @@ int LuaEnableCustomWindow(lua_State* L) {
 
 	PostMessageW(parent->handle, WM_LUA_TOGGLEENABLE, (WPARAM)window->handle, show);
 	PostMessageW(parent->handle, WM_LUA_UPDATE, (WPARAM)window->handle, 0);
+
+	return 0;
+}
+
+int LuaSetContent(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+	LuaWChar* content = lua_stringtowchar(L, 2);
+
+	LuaWindow* parent = GetSuperParent(L, window);
+	lua_pushwchar(L, content->str, content->len);
+	PostMessageW(parent->handle, WM_LUA_SETCONTENT, (WPARAM)window->handle, luaL_ref(L, LUA_REGISTRYINDEX));
 
 	return 0;
 }
@@ -385,7 +417,7 @@ bool ContainsMessage(lua_State* L, UINT Msg) {
 
 bool CheckHasMessage(LuaWindow* window) {
 
-	if (window->handle == NULL || window->custom == NULL || window->custom->type != WINDOW_TYPE_CUSTOM) {
+	if (window->handle == NULL || window->custom == NULL) {
 		return false;
 	}
 
@@ -393,7 +425,7 @@ bool CheckHasMessage(LuaWindow* window) {
 	lua_State* prev = LuaStateCallback;
 	LuaStateCallback = NULL;
 
-	bool hasMessage = PeekMessageW(&Msg, window->handle, 0, 0, 0) != 0;
+	bool hasMessage = PeekMessageW(&Msg, NULL, 0, 0, 0) != 0;
 
 	LuaStateCallback = prev;
 
@@ -403,6 +435,10 @@ bool CheckHasMessage(LuaWindow* window) {
 int lua_customcoroutineiterator(lua_State* L, int status, lua_KContext ctx) {
 
 	LuaWindow* window = lua_tonwindow(L, 1);
+
+	if (!IsWindow(window->handle)) {
+		return 1;
+	}
 
 	if (!CheckHasMessage(window)) {
 
@@ -422,13 +458,13 @@ int lua_customcoroutineiterator(lua_State* L, int status, lua_KContext ctx) {
 	}
 
 	lua_newtable(L);
-
 	msgcount = 0;
 	lua_State* prev = LuaStateCallback;
 	LuaStateCallback = L;
+
 	MSG Msg;
 
-	if (GetMessageW(&Msg, window->handle, 0, 0))
+	if (GetMessageW(&Msg, NULL, 0, 0))
 	{
 		TranslateMessage(&Msg);
 		DispatchMessageW(&Msg);

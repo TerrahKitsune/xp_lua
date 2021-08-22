@@ -130,9 +130,15 @@ collectgarbage();
 local w, co = Window.Create(nil, "lua", "Lua Window", 500, 500, 500, 500);
 local text = w:CreateTextBox("", 0, 50, 200, 25);
 
+local combo = w:CreateComboBox(200,0,100,100, function(comboBoxWindow, parentWindow, data)
+	print(comboBoxWindow, parentWindow, data);
+	text:SetContent(data);
+end);
+
 local button = w:CreateButton("Button!", 0,0,100, 50, 
 function(buttonWindow, parentWindow) 
 	print(text:GetContent());
+	combo:AddComboBoxItem(text:GetContent());
 end);
 
 local button = w:CreateButton("Quit!", 100,0,100, 50, 
@@ -140,14 +146,22 @@ function(buttonWindow, parentWindow)
 	parentWindow:Destroy();
 end);
 
+
+
+combo:AddComboBoxItem("Test 1");
+combo:AddComboBoxItem("Test 2");
+combo:AddComboBoxItem("Test 3");
+combo:RemoveComboBoxItem(2);
+local items = combo:GetComboBoxItems();
+
+for i=1,#items do
+	print(items[i]);
+end
+
 w:Show(true);
 
 local ok, msgs;
 while coroutine.status(co) ~= "dead" do 
-
-	while not w:CheckHasMessage() do 
-		Sleep(1);
-	end 
 
 	ok, msgs = coroutine.resume(co);
 

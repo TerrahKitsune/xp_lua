@@ -6,6 +6,7 @@ static const char* LUAWINDOW = "WINDOW";
 #define WINDOW_TYPE_CUSTOM 0
 #define WINDOW_TYPE_BUTTON 1
 #define WINDOW_TYPE_TEXTBOX 2
+#define WINDOW_TYPE_COMBOBOX 3
 
 typedef struct LuaCustomWindow {
 
@@ -14,6 +15,7 @@ typedef struct LuaCustomWindow {
 	int childRef;
 	int parentRef;
 	int eventRef;
+	int comboBoxItemsRef;
 	wchar_t* className;
 	wchar_t* title;
 	DWORD type;
@@ -43,7 +45,6 @@ int GetWindowInformation(lua_State* L);
 int LuaWindowGetId(lua_State* L);
 int LuaDestroyWindow(lua_State* L);
 int LuaGetContent(lua_State* L);
-int LuaSetContent(lua_State* L);
 int GetsWindowEnabled(lua_State* L);
 
 int InvalidateWindow(lua_State* L);

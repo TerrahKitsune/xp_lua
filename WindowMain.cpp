@@ -2,6 +2,7 @@
 #include "WindowMain.h"
 #include "customdrawing.h"
 #include "customwindow.h"
+#include "customcombobox.h"
 #include "customtextbox.h"
 
 static const struct luaL_Reg windowfunctions[] = {
@@ -28,7 +29,10 @@ static const struct luaL_Reg windowfunctions[] = {
 	{ "CheckHasMessage", LuaCheckHasMessage },
 	{ "CreateButton", CreateLuaButton },
 	{ "CreateTextBox", CreateTextField },
-
+	{ "CreateComboBox", CreateCustomLuaComboBox },
+	{ "AddComboBoxItem", AddComboBoxItem},
+	{ "RemoveComboBoxItem", DeleteComboBoxItem},
+	{ "GetComboBoxItems", GetComboBoxItems },
 	{ NULL, NULL }
 };
 

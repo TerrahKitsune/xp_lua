@@ -738,6 +738,9 @@
     <ClCompile Include="luawchar.cpp">
       <Filter>LuaWchar\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="customcombobox.cpp">
+      <Filter>Windows\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -1141,6 +1144,9 @@
     </ClInclude>
     <ClInclude Include="luawchar.h">
       <Filter>LuaWchar\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="customcombobox.h">
+      <Filter>Windows\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

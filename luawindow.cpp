@@ -322,16 +322,6 @@ int LuaWindowGetId(lua_State* L) {
 	return 1;
 }
 
-int LuaSetContent(lua_State* L) {
-
-	LuaWindow* window = lua_tonwindow(L, 1);
-	LuaWChar* content = lua_stringtowchar(L, 2);
-
-	SetWindowTextW(window->handle, content->str);
-
-	return 0;
-}
-
 int LuaGetContent(lua_State* L) {
 
 	LuaWindow* window = lua_tonwindow(L, 1);
@@ -343,14 +333,14 @@ int LuaGetContent(lua_State* L) {
 		return 1;
 	}
 
-	wchar_t* data = (wchar_t*)gff_calloc(len+1, sizeof(wchar_t));
+	wchar_t* data = (wchar_t*)gff_calloc(len + 1, sizeof(wchar_t));
 
 	if (!data) {
 		luaL_error(L, "Out of memory");
 		return 0;
 	}
 
-	int ret = GetWindowTextW(window->handle, data, len+1);
+	int ret = GetWindowTextW(window->handle, data, len + 1);
 
 	lua_pushwchar(L, data);
 
@@ -401,6 +391,10 @@ int window_gc(lua_State* L) {
 
 		if (window->custom->parentRef != LUA_REFNIL) {
 			luaL_unref(L, LUA_REGISTRYINDEX, window->custom->parentRef);
+		}
+
+		if (window->custom->comboBoxItemsRef != LUA_REFNIL) {
+			luaL_unref(L, LUA_REGISTRYINDEX, window->custom->comboBoxItemsRef);
 		}
 
 		DestroyWindow(window->handle);

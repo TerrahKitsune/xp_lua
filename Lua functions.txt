@@ -242,6 +242,20 @@ Window:
 	-function(buttonWindow, parentWindow) end is fired when the textbox is changed (can be nil)
  	Window Window:CreateTextBox(content, x,y,width,height, opt multiline, opt enablescroll, function(buttonWindow, parentWindow) end)
 
+	-Creates a combobox
+	-function runs when a new item is selected returning the data that was selected
+	Window Window:CreateComboBox(x,y,width,height, function(buttonWindow, parentWindow, data) end)
+
+	-Add an entry to a combo box
+	nil Window:AddComboBoxItem(string)
+
+	-1 index'd, removes an entry from the combobox
+	nil Window:RemoveComboBoxItem(index)
+
+	-Gets the array of the data that is being returned by the combobox
+	-modifying this array modifies the return results in the event in CreateTextBox
+	array Window:GetComboBoxItems()
+
 	-Check if there is any pending messages
 	-if true then the Coroutine from Window.Create or Window:GetThread() should be resumed
 	bool Window:CheckHasMessage()

@@ -83,6 +83,7 @@
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="custombutton.cpp" />
+    <ClCompile Include="customcombobox.cpp" />
     <ClCompile Include="customdrawing.cpp" />
     <ClCompile Include="customtextbox.cpp" />
     <ClCompile Include="customwindow.cpp" />
@@ -222,6 +223,7 @@
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="custombutton.h" />
+    <ClInclude Include="customcombobox.h" />
     <ClInclude Include="customdrawing.h" />
     <ClInclude Include="customtextbox.h" />
     <ClInclude Include="customwindow.h" />
