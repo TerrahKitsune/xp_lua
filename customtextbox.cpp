@@ -1,5 +1,6 @@
 #include "customtextbox.h"
 #include "customwindow.h"
+#include "luawchar.h"
 
 void DoCustomTextboxEvent(lua_State* L, LuaWindow* parent, LuaWindow* child, HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 
@@ -53,9 +54,11 @@ int CreateTextField(lua_State* L) {
 
 	custom->hmenu = (HMENU)(++window->custom->nextId);
 
-	HWND hwndButton = CreateWindow(
-		"EDIT",
-		luaL_checkstring(L, 2),
+	LuaWChar* content = lua_stringtowchar(L, 2);
+
+	HWND hwndButton = CreateWindowW(
+		L"EDIT",
+		content->str,
 		style,
 		(int)luaL_optnumber(L, 3, 0),
 		(int)luaL_optnumber(L, 4, 0),

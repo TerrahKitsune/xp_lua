@@ -1,6 +1,5 @@
 local _exit=Exit;Exit=function(ret) GetKey(); return ret; end
 
-JSON = assert(loadfile "JSON.lua")();
 function TablePrint(tbl, depth)
 
 	if(not tbl and depth) then
@@ -128,38 +127,33 @@ end
 CreateGCPrint();
 collectgarbage();
 
-local files = FileSystem.GetAllWide(Wchar.FromAnsi("R:/tilesets"));
-print(#files);
+local w, co = Window.Create(nil, "lua", "Lua Window", 500, 500, 500, 500);
+local text = w:CreateTextBox("", 0, 50, 200, 25);
 
-local function OpenDb()
+local button = w:CreateButton("Button!", 0,0,100, 50, 
+function(buttonWindow, parentWindow) 
+	print(text:GetContent());
+end);
 
-	local db = SQLite.Open("R:/test.sqlite", 2);
-	db:ToggleWidechar(true);
+local button = w:CreateButton("Quit!", 100,0,100, 50, 
+function(buttonWindow, parentWindow) 
+	parentWindow:Destroy();
+end);
 
-	assert(db:Query([[CREATE TABLE IF NOT EXISTS `test` (
-	`Id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	`Data`	TEXT NOT NULL);]]));
+w:Show(true);
 
-	assert(db:Query("delete from `test`;"));
+local ok, msgs;
+while coroutine.status(co) ~= "dead" do 
 
-	return db;
+	while not w:CheckHasMessage() do 
+		Sleep(1);
+	end 
+
+	ok, msgs = coroutine.resume(co);
+
+	for n=1, #msgs do 
+		--print(msgs[n].Message);
+	end 
 end
 
-local db = OpenDb();
-
-for n=1, #files do 
-	print(files[n].FileName,files[n].FileName);
-	assert(db:Query("INSERT INTO `test`(`Data`) VALUES (@data);", {data = files[n].FileName}));
-end 
-print("---------------");
-assert(db:Query("SELECT * FROM `test`;"));
-while db:Fetch() do 
-	print(db:GetRow().Data);
-end 
-db:Close();
-
-FileSystem.SetCurrentDirectory("C:\\Users\\Terrah\\Desktop");
-dofile("test.lua");
-
-GetKey();
 _exit(0);

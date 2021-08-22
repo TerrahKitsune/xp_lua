@@ -3,6 +3,7 @@
 #include "customdrawing.h"
 #include "custombutton.h"
 #include "customtextbox.h"
+#include "luawchar.h"
 
 lua_State* LuaStateCallback;
 int msgcount;
@@ -195,7 +196,7 @@ int RemoveCustomWindow(lua_State* L) {
 		lua_pop(L, 1);
 	}
 
-	BOOL result = PostMessage(parent->handle, WM_LUA_DESTROY, (WPARAM)window->handle, 0);
+	BOOL result = PostMessageW(parent->handle, WM_LUA_DESTROY, (WPARAM)window->handle, 0);
 
 	return 0;
 }
@@ -243,9 +244,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 			lua_pushstring(L, "ID");
 			lua_pushinteger(L, (lua_Integer)hwnd);
 			lua_settable(L, -3);
-
-			//printf("%u %u", hwnd, Msg);
-			//DumpStack(L);
 
 			lua_rawseti(L, -2, ++msgcount);
 		}
@@ -309,10 +307,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 			CustomDrawEvent(L);
 			lua_pop(L, 1);
 		}
+		else {
+			PAINTSTRUCT ps;
+			HDC         hdc;
+			hdc = BeginPaint(window->handle, &ps);
+			EndPaint(window->handle, &ps);
+		}
 		break;
 
 	default:
-		return DefWindowProc(hwnd, Msg, wParam, lParam);
+		return DefWindowProcW(hwnd, Msg, wParam, lParam);
 	}
 
 	return 0;
@@ -329,8 +333,8 @@ int LuaEnableCustomWindow(lua_State* L) {
 
 	LuaWindow* parent = GetSuperParent(L, window);
 
-	PostMessage(parent->handle, WM_LUA_TOGGLEENABLE, (WPARAM)window->handle, show);
-	PostMessage(parent->handle, WM_LUA_UPDATE, (WPARAM)window->handle, 0);
+	PostMessageW(parent->handle, WM_LUA_TOGGLEENABLE, (WPARAM)window->handle, show);
+	PostMessageW(parent->handle, WM_LUA_UPDATE, (WPARAM)window->handle, 0);
 
 	return 0;
 }
@@ -346,8 +350,8 @@ int LuaShowCustomWindow(lua_State* L) {
 
 	LuaWindow* parent = GetSuperParent(L, window);
 
-	PostMessage(parent->handle, WM_LUA_TOGGLESHOW, (WPARAM)window->handle, show);
-	PostMessage(parent->handle, WM_LUA_UPDATE, (WPARAM)window->handle, 0);
+	PostMessageW(parent->handle, WM_LUA_TOGGLESHOW, (WPARAM)window->handle, show);
+	PostMessageW(parent->handle, WM_LUA_UPDATE, (WPARAM)window->handle, 0);
 
 	return 0;
 }
@@ -389,7 +393,7 @@ bool CheckHasMessage(LuaWindow* window) {
 	lua_State* prev = LuaStateCallback;
 	LuaStateCallback = NULL;
 
-	bool hasMessage = PeekMessage(&Msg, window->handle, 0, 0, 0) != 0;
+	bool hasMessage = PeekMessageW(&Msg, window->handle, 0, 0, 0) != 0;
 
 	LuaStateCallback = prev;
 
@@ -458,35 +462,33 @@ int CreateLuaCustomWindow(lua_State* L) {
 	}
 
 	HWND parent = lua_type(L, 1) == LUA_TUSERDATA ? lua_tonwindow(L, 1)->handle : NULL;
-	size_t lenclassname;
-	const char* classname = luaL_checklstring(L, 2, &lenclassname);
-	size_t lentitle;
-	const char* title = luaL_checklstring(L, 3, &lentitle);
+	LuaWChar* classname = lua_stringtowchar(L, 2);
+	LuaWChar* title = lua_stringtowchar(L, 3);
 	int x = (int)luaL_checkinteger(L, 4);
 	int y = (int)luaL_checkinteger(L, 5);
 	int width = (int)luaL_checkinteger(L, 6);
 	int height = (int)luaL_checkinteger(L, 7);
 
-	custom->className = (char*)gff_calloc(lenclassname + 1, sizeof(char));
+	custom->className = (wchar_t*)gff_calloc(classname->len + 1, sizeof(wchar_t));
 	if (!custom->className) {
 		CleanUp(custom);
 		luaL_error(L, "out of memory");
 		return 0;
 	}
-	memcpy(custom->className, classname, lenclassname);
+	memcpy(custom->className, classname->str, classname->len * sizeof(wchar_t));
 
-	custom->title = (char*)gff_calloc(lentitle + 1, sizeof(char));
+	custom->title = (wchar_t*)gff_calloc(title->len + 1, sizeof(wchar_t));
 	if (!custom->title) {
 		CleanUp(custom);
 		luaL_error(L, "out of memory");
 		return 0;
 	}
-	memcpy(custom->title, title, lentitle);
+	memcpy(custom->title, title->str, title->len * sizeof(wchar_t));
 
-	WNDCLASSEX  WndClsEx = { 0 };
+	WNDCLASSEXW  WndClsEx = { 0 };
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
-	WndClsEx.cbSize = sizeof(WNDCLASSEX);
+	WndClsEx.cbSize = sizeof(WNDCLASSEXW);
 	WndClsEx.style = (UINT)luaL_optinteger(L, 8, CS_HREDRAW | CS_VREDRAW);
 	WndClsEx.lpfnWndProc = WndProc;
 	WndClsEx.hInstance = hInstance;
@@ -494,11 +496,11 @@ int CreateLuaCustomWindow(lua_State* L) {
 	WndClsEx.lpszClassName = custom->className;
 	WndClsEx.hIconSm = LoadIcon(hInstance, IDI_APPLICATION);
 
-	RegisterClassEx(&WndClsEx);
+	RegisterClassExW(&WndClsEx);
 
 	LuaStateCallback = NULL;
 
-	HWND hwnd = CreateWindowEx(
+	HWND hwnd = CreateWindowExW(
 		(DWORD)luaL_optinteger(L, 9, 0),
 		custom->className,
 		custom->title,

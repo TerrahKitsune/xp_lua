@@ -1,6 +1,7 @@
 #include "customwindow.h"
 #include "luawindow.h"
 #include "customdrawing.h"
+#include "luawchar.h"
 
 int CustomDrawEvent(lua_State* L) {
 
@@ -38,8 +39,16 @@ int CustomDrawEvent(lua_State* L) {
 				draw->ps = NULL;
 				draw->window = NULL;			
 			}
+			else if(window->custom->type == WINDOW_TYPE_CUSTOM){
+				hdc = BeginPaint(window->handle, &ps);
+				EndPaint(window->handle, &ps);
+			}
 
 			lua_pop(L, 1);
+		}
+		else if (window->custom->type == WINDOW_TYPE_CUSTOM) {
+			hdc = BeginPaint(window->handle, &ps);
+			EndPaint(window->handle, &ps);
 		}
 
 		if (window->custom->childRef != LUA_REFNIL) {
@@ -71,8 +80,7 @@ int CustomDrawEvent(lua_State* L) {
 int DrawCustomText(lua_State* L) {
 
 	LuaCustomDrawing* window = lua_tonwindowdrawing(L, 1);
-	size_t len;
-	const char* data = luaL_checklstring(L, 2, &len);
+	LuaWChar* data = lua_stringtowchar(L, 2);
 
 	RECT rc;
 	GetClientRect(window->window, &rc);
@@ -82,7 +90,7 @@ int DrawCustomText(lua_State* L) {
 
 	lua_pop(L, lua_gettop(L));
 
-	lua_pushinteger(L, DrawText(*window->hdc, data, len, &rc, (UINT)luaL_optinteger(L, 5, 0)));
+	lua_pushinteger(L, DrawTextW(*window->hdc, data->str, data->len, &rc, (UINT)luaL_optinteger(L, 5, 0)));
 
 	return 1;
 }
@@ -90,12 +98,11 @@ int DrawCustomText(lua_State* L) {
 int DrawCalcTextSize(lua_State* L) {
 
 	LuaCustomDrawing* window = lua_tonwindowdrawing(L, 1);
-	size_t len;
-	const char* data = luaL_checklstring(L, 2, &len);
+	LuaWChar* data = lua_stringtowchar(L, 2);
 
 	SIZE size;
 
-	if (GetTextExtentPoint32A(*window->hdc, data, len, &size)) {
+	if (GetTextExtentPoint32W(*window->hdc, data->str, data->len, &size)) {
 
 		lua_pushinteger(L, size.cx);
 		lua_pushinteger(L, size.cy);

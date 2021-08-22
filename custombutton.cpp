@@ -2,6 +2,7 @@
 #include "luawindow.h"
 #include "customdrawing.h"
 #include "custombutton.h"
+#include "luawchar.h"
 
 void DoCustomButtonEvent(lua_State*L, LuaWindow* parent, LuaWindow* child, HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 
@@ -43,9 +44,21 @@ int CreateCustomLuaButton(lua_State* L) {
 
 	custom->hmenu = (HMENU)(++window->custom->nextId);
 
-	HWND hwndButton = CreateWindow(
-		"BUTTON",
-		luaL_checkstring(L, 2),
+	LuaWChar* title = lua_stringtowchar(L, 2);
+
+	custom->title = (wchar_t*)gff_calloc(title->len + 1, sizeof(wchar_t));
+
+	if (!custom->title) {
+		CleanUp(custom);
+		luaL_error(L, "Out of memory");
+		return 0;
+	}
+
+	memcpy(custom->title, title->str, title->len * sizeof(wchar_t));
+
+	HWND hwndButton = CreateWindowW(
+		L"BUTTON",
+		custom->title,
 		WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
 		(int)luaL_optnumber(L, 3, 0),
 		(int)luaL_optnumber(L, 4, 0),

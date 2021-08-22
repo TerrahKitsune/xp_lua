@@ -229,7 +229,7 @@ Window:
 	-WParam = wParam
 	-LParam  = lParam
 	-ID = windowhandleID
-	Window, Coroutine Window.Create(classname, title, x, y, width, height, classstyle, exstyle, style)
+	Window, Coroutine Window.Create(parentwindow (nil), classname, title, x, y, width, height, classstyle, exstyle, style)
 
 	-Creates a button on a window and returns the window object for it
 	-function is the event that runs when the button is pressed, buttonWindow is the button, parentWindow is window with the button

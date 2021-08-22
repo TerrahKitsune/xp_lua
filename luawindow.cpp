@@ -6,6 +6,7 @@
 #include <windows.h> 
 #include "customwindow.h"
 #include "custombutton.h"
+#include "luawchar.h"
 
 BOOL CALLBACK enum_windows_callback(HWND handle, LPARAM lParam);
 
@@ -324,8 +325,9 @@ int LuaWindowGetId(lua_State* L) {
 int LuaSetContent(lua_State* L) {
 
 	LuaWindow* window = lua_tonwindow(L, 1);
+	LuaWChar* content = lua_stringtowchar(L, 2);
 
-	SetWindowText(window->handle, lua_tostring(L, 2));
+	SetWindowTextW(window->handle, content->str);
 
 	return 0;
 }
@@ -334,23 +336,23 @@ int LuaGetContent(lua_State* L) {
 
 	LuaWindow* window = lua_tonwindow(L, 1);
 
-	size_t len = GetWindowTextLength(window->handle);
+	size_t len = GetWindowTextLengthW(window->handle);
 
 	if (len == 0) {
 		lua_pushstring(L, "");
 		return 1;
 	}
 
-	char* data = (char*)gff_calloc(len+1, sizeof(char));
+	wchar_t* data = (wchar_t*)gff_calloc(len+1, sizeof(wchar_t));
 
 	if (!data) {
 		luaL_error(L, "Out of memory");
 		return 0;
 	}
 
-	int ret = GetWindowText(window->handle, data, len+1);
+	int ret = GetWindowTextW(window->handle, data, len+1);
 
-	lua_pushlstring(L, data, ret);
+	lua_pushwchar(L, data);
 
 	gff_free(data);
 

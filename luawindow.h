@@ -14,8 +14,8 @@ typedef struct LuaCustomWindow {
 	int childRef;
 	int parentRef;
 	int eventRef;
-	char* className;
-	char* title;
+	wchar_t* className;
+	wchar_t* title;
 	DWORD type;
 	WORD nextId;
 	HMENU hmenu;
