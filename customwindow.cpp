@@ -428,10 +428,10 @@ int lua_customcoroutineiterator(lua_State* L, int status, lua_KContext ctx) {
 	LuaStateCallback = L;
 	MSG Msg;
 
-	if (GetMessage(&Msg, window->handle, 0, 0))
+	if (GetMessageW(&Msg, window->handle, 0, 0))
 	{
 		TranslateMessage(&Msg);
-		DispatchMessage(&Msg);
+		DispatchMessageW(&Msg);
 	}
 
 	LuaStateCallback = prev;
