@@ -77,7 +77,7 @@ LuaCustomWindow* CreateCustomWindowStruct() {
 	custom->childRef = LUA_REFNIL;
 	custom->eventRef = LUA_REFNIL;
 	custom->parentRef = LUA_REFNIL;
-	custom->comboBoxItemsRef = LUA_REFNIL;
+	custom->boxItemsRef = LUA_REFNIL;
 
 	return custom;
 }
@@ -291,6 +291,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 		PostQuitMessage(WM_QUIT);
 		break;
 
+	case WM_NOTIFY:
+		if (window) {
+			child = GetLuaTableChild(L, window->custom, (HMENU)LOWORD(wParam));
+			if (!child || !child->custom) {
+				lua_pop(L, 1);
+				return DefWindowProc(hwnd, Msg, wParam, lParam);
+			}
+			else if (child->custom->type == WINDOW_TYPE_LISTVIEW) {
+				DoCustomListViewEvent(L, window, child, hwnd, Msg, wParam, lParam);
+			}
+			lua_pop(L, 1);
+		}
+		break;
+
 	case WM_COMMAND:
 
 		if (window) {
@@ -309,6 +323,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 			}
 			else if (child->custom->type == WINDOW_TYPE_COMBOBOX) {
 				DoCustomComboBoxEvent(L, window, child, hwnd, Msg, wParam, lParam);
+			}
+			else if (child->custom->type == WINDOW_TYPE_LISTBOX) {
+				DoCustomListBoxEvent(L, window, child, hwnd, Msg, wParam, lParam);
 			}
 			else {
 				puts("test");

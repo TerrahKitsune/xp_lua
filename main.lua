@@ -138,7 +138,7 @@ end);
 local button = w:CreateButton("Button!", 0,0,100, 50, 
 function(buttonWindow, parentWindow) 
 	print(text:GetContent());
-	combo:AddComboBoxItem(text:GetContent());
+	combo:AddBoxItem(text:GetContent());
 end);
 
 local button = w:CreateButton("Quit!", 100,0,100, 50, 
@@ -146,13 +146,46 @@ function(buttonWindow, parentWindow)
 	parentWindow:Destroy();
 end);
 
+local listbox = w:CreateListBox(200, 75, 200, 200, function(comboBoxWindow, parentWindow, data)
+	print(comboBoxWindow, parentWindow, data);
+	text:SetContent(data);
+end);
 
+local listview = w:CreateListView(0, 75, 200, 200, {"Row", "Test"}, function(comboBoxWindow, parentWindow, data)
+	print(comboBoxWindow, parentWindow, data[1]);
+	text:SetContent(data[2]);
+end);
 
-combo:AddComboBoxItem("Test 1");
-combo:AddComboBoxItem("Test 2");
-combo:AddComboBoxItem("Test 3");
-combo:RemoveComboBoxItem(2);
-local items = combo:GetComboBoxItems();
+listview:AddBoxItem({1, "Hi"});
+listview:AddBoxItem({2, "Hello"});
+listview:AddBoxItem({3, "Cats"});
+listview:AddBoxItem({4, "asd"});
+listview:AddBoxItem({5, "123"});
+
+listview:RemoveBoxItem(1);
+local items = listview:GetBoxItems();
+
+for i=1,#items do
+	print(items[i][2]);
+end
+
+for n=1, 10 do
+	listbox:AddBoxItem("Test "..n);
+end
+
+listbox:RemoveBoxItem(2);
+
+items = listbox:GetBoxItems();
+
+for i=1,#items do
+	print(items[i]);
+end
+
+combo:AddBoxItem("Test 1");
+combo:AddBoxItem("Test 2");
+combo:AddBoxItem("Test 3");
+combo:RemoveBoxItem(2);
+items = combo:GetBoxItems();
 
 for i=1,#items do
 	print(items[i]);

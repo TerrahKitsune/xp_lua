@@ -245,16 +245,24 @@ Window:
 	-Creates a combobox
 	-function runs when a new item is selected returning the data that was selected
 	Window Window:CreateComboBox(x,y,width,height, function(buttonWindow, parentWindow, data) end)
+	Window Window:CreateListBox(x,y,width,height, function(buttonWindow, parentWindow, data) end)
 
-	-Add an entry to a combo box
-	nil Window:AddComboBoxItem(string)
+	-Creates a listview
+	-Columns should be an array with column names
+	-Function runs when selection changes with data being the table of values in the listview
+	Window Window:CreateListView(x,y,width,height, columns, function(buttonWindow, parentWindow, data) end)
 
-	-1 index'd, removes an entry from the combobox
-	nil Window:RemoveComboBoxItem(index)
+	-Add an entry to a combo/list box
+	-If the target is a listview then an array of values should be provided instead
+	nil Window:AddBoxItem(string)
 
-	-Gets the array of the data that is being returned by the combobox
-	-modifying this array modifies the return results in the event in CreateTextBox
-	array Window:GetComboBoxItems()
+	-1 index'd, removes an entry from the combo/listbox
+	nil Window:RemoveBoxItem(index)
+
+	-Gets the array of the data that is being returned by the combo/listbox
+	-modifying this array modifies the return results in the event in CreateTextBox or CreateListBox
+	-If the window is a ListView then an array of columns (array) is returned
+	array Window:GetBoxItems()
 
 	-Check if there is any pending messages
 	-if true then the Coroutine from Window.Create or Window:GetThread() should be resumed

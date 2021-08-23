@@ -7,6 +7,8 @@ static const char* LUAWINDOW = "WINDOW";
 #define WINDOW_TYPE_BUTTON 1
 #define WINDOW_TYPE_TEXTBOX 2
 #define WINDOW_TYPE_COMBOBOX 3
+#define WINDOW_TYPE_LISTBOX 4
+#define WINDOW_TYPE_LISTVIEW 5
 
 typedef struct LuaCustomWindow {
 
@@ -15,13 +17,13 @@ typedef struct LuaCustomWindow {
 	int childRef;
 	int parentRef;
 	int eventRef;
-	int comboBoxItemsRef;
+	int boxItemsRef;
 	wchar_t* className;
 	wchar_t* title;
 	DWORD type;
 	WORD nextId;
 	HMENU hmenu;
-
+	
 } LuaCustomWindow;
 
 typedef struct LuaWindow {

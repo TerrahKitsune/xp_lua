@@ -4,6 +4,7 @@
 #include "customwindow.h"
 #include "customcombobox.h"
 #include "customtextbox.h"
+#include <commctrl.h>
 
 static const struct luaL_Reg windowfunctions[] = {
 
@@ -30,9 +31,11 @@ static const struct luaL_Reg windowfunctions[] = {
 	{ "CreateButton", CreateLuaButton },
 	{ "CreateTextBox", CreateTextField },
 	{ "CreateComboBox", CreateCustomLuaComboBox },
-	{ "AddComboBoxItem", AddComboBoxItem},
-	{ "RemoveComboBoxItem", DeleteComboBoxItem},
-	{ "GetComboBoxItems", GetComboBoxItems },
+	{ "AddBoxItem", AddBoxItem},
+	{ "RemoveBoxItem", DeleteBoxItem},
+	{ "GetBoxItems", GetBoxItems },
+	{ "CreateListBox", CreateCustomLuaListbox },
+	{ "CreateListView" , CreateCustomLuaListView },
 	{ NULL, NULL }
 };
 
@@ -43,6 +46,8 @@ static const luaL_Reg windowmeta[] = {
 };
 
 int luaopen_window(lua_State* L) {
+
+	CoInitialize(NULL);
 
 	luaL_newlibtable(L, windowfunctions);
 	luaL_setfuncs(L, windowfunctions, 0);
