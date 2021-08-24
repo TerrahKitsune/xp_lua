@@ -14,6 +14,7 @@
     <ProjectGuid>{DB53B7C6-DAD2-432E-839F-75E1809C9C59}</ProjectGuid>
     <RootNamespace>GFF</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <ProjectName>Kitsune</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -358,10 +359,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Lua functions.txt" />
-    <Text Include="scrap.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="GFF.rc" />
+    <ResourceCompile Include="Kitsune.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Lua\jiiiiiiiiitsu.ico" />

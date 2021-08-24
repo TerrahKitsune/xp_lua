@@ -5,6 +5,7 @@
 #include "customtextbox.h"
 #include "luawchar.h"
 #include "customcombobox.h"
+#include "resource.h"
 
 lua_State* LuaStateCallback;
 int msgcount;
@@ -547,7 +548,7 @@ int CreateLuaCustomWindow(lua_State* L) {
 	WndClsEx.hInstance = hInstance;
 	WndClsEx.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
 	WndClsEx.lpszClassName = custom->className;
-	WndClsEx.hIconSm = LoadIcon(hInstance, IDI_APPLICATION);
+	WndClsEx.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
 
 	RegisterClassExW(&WndClsEx);
 

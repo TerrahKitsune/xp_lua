@@ -1150,14 +1150,8 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="scrap.txt" />
     <Text Include="Lua functions.txt" />
     <Text Include="main.lua" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="GFF.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Lua\jiiiiiiiiitsu.ico">
@@ -1166,5 +1160,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Kitsune.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
