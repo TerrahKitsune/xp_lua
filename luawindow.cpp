@@ -393,10 +393,6 @@ int window_gc(lua_State* L) {
 			luaL_unref(L, LUA_REGISTRYINDEX, window->custom->parentRef);
 		}
 
-		if (window->custom->boxItemsRef != LUA_REFNIL) {
-			luaL_unref(L, LUA_REGISTRYINDEX, window->custom->boxItemsRef);
-		}
-
 		DestroyWindow(window->handle);
 
 		CleanUp(window->custom);

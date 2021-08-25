@@ -17,7 +17,6 @@ typedef struct LuaCustomWindow {
 	int childRef;
 	int parentRef;
 	int eventRef;
-	int boxItemsRef;
 	wchar_t* className;
 	wchar_t* title;
 	DWORD type;

@@ -36,6 +36,7 @@ static const struct luaL_Reg windowfunctions[] = {
 	{ "GetBoxItems", GetBoxItems },
 	{ "CreateListBox", CreateCustomLuaListbox },
 	{ "CreateListView" , CreateCustomLuaListView },
+
 	{ NULL, NULL }
 };
 

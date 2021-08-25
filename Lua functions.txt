@@ -243,16 +243,19 @@ Window:
  	Window Window:CreateTextBox(content, x,y,width,height, opt multiline, opt enablescroll, function(buttonWindow, parentWindow) end)
 
 	-Creates a combobox
-	-function runs when a new item is selected returning the data that was selected
-	Window Window:CreateComboBox(x,y,width,height, function(buttonWindow, parentWindow, data) end)
-	Window Window:CreateListBox(x,y,width,height, function(buttonWindow, parentWindow, data) end)
+	-function runs when a new item is selected returning the index that was selected
+	Window Window:CreateComboBox(x,y,width,height, function(buttonWindow, parentWindow, index) end)
+
+	-Creates a combobox
+	-function runs when a new item is selected returning the index that was selected
+	Window Window:CreateListBox(x,y,width,height, function(buttonWindow, parentWindow, index) end)
 
 	-Creates a listview
 	-Columns should be an array with column names
-	-Function runs when selection changes with data being the table of values in the listview
-	Window Window:CreateListView(x,y,width,height, columns, function(buttonWindow, parentWindow, data) end)
+	-function runs when a new item is selected returning the index that was selected
+	Window Window:CreateListView(x,y,width,height, columns, function(buttonWindow, parentWindow, index) end)
 
-	-Add an entry to a combo/list box
+	-Add an entry to a combo/listbox/listview
 	-If the target is a listview then an array of values should be provided instead
 	nil Window:AddBoxItem(string)
 
@@ -261,8 +264,8 @@ Window:
 
 	-Gets the array of the data that is being returned by the combo/listbox
 	-modifying this array modifies the return results in the event in CreateTextBox or CreateListBox
-	-If the window is a ListView then an array of columns (array) is returned
-	array Window:GetBoxItems()
+	-If the window is a ListView then column can be used to return another column, defaults to the first (1)
+	array Window:GetBoxItems(opt column)
 
 	-Check if there is any pending messages
 	-if true then the Coroutine from Window.Create or Window:GetThread() should be resumed

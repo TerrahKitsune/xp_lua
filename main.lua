@@ -152,21 +152,22 @@ local listbox = w:CreateListBox(200, 75, 200, 200, function(comboBoxWindow, pare
 end);
 
 local listview = w:CreateListView(0, 75, 200, 200, {"Row", "Test"}, function(comboBoxWindow, parentWindow, data)
-	print(comboBoxWindow, parentWindow, data[1]);
-	text:SetContent(data[2]);
+	print(comboBoxWindow, parentWindow, data);
+	text:SetContent(data);
 end);
 
 listview:AddBoxItem({1, "Hi"});
 listview:AddBoxItem({2, "Hello"});
 listview:AddBoxItem({3, "Cats"});
-listview:AddBoxItem({4, "asd"});
+listview:AddBoxItem({444, "asd"});
 listview:AddBoxItem({5, "123"});
 
 listview:RemoveBoxItem(1);
-local items = listview:GetBoxItems();
+local items = listview:GetBoxItems(1);
+local items2 = listview:GetBoxItems(2);
 
 for i=1,#items do
-	print(items[i][2]);
+	print(items[i], items2[i]);
 end
 
 for n=1, 10 do
@@ -185,6 +186,7 @@ combo:AddBoxItem("Test 1");
 combo:AddBoxItem("Test 2");
 combo:AddBoxItem("Test 3");
 combo:RemoveBoxItem(2);
+
 items = combo:GetBoxItems();
 
 for i=1,#items do

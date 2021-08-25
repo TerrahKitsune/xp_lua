@@ -5,6 +5,13 @@
 #include "luawchar.h"
 #include <commctrl.h>
 
+bool IsBox(LuaWindow* window) {
+	return window->custom &&
+		(window->custom->type == WINDOW_TYPE_COMBOBOX ||
+			window->custom->type == WINDOW_TYPE_LISTBOX ||
+			window->custom->type == WINDOW_TYPE_LISTVIEW);
+}
+
 void DoCustomComboBoxEvent(lua_State* L, LuaWindow* parent, LuaWindow* child, HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 
 	WORD type = HIWORD(wParam);
@@ -13,24 +20,20 @@ void DoCustomComboBoxEvent(lua_State* L, LuaWindow* parent, LuaWindow* child, HW
 
 		int ItemIndex = SendMessageW((HWND)lParam, (UINT)CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
 
-		if (child->custom->eventRef == LUA_REFNIL || child->custom->boxItemsRef == LUA_REFNIL) {
+		if (!IsBox(child)) {
 			return;
 		}
 
-		lua_rawgeti(L, LUA_REGISTRYINDEX, child->custom->boxItemsRef);
-		lua_rawgeti(L, -1, ItemIndex + 1);
 		lua_rawgeti(L, LUA_REGISTRYINDEX, child->custom->eventRef);
 		lua_pushvalue(L, -4);
-		lua_pushvalue(L, -7);
-		lua_pushvalue(L, -4);
+		lua_pushvalue(L, -5);
+		lua_pushinteger(L, ItemIndex + 1);
 
 		if (lua_pcall(L, 3, 0, NULL)) {
 
 			puts(lua_tostring(L, -1));
 			lua_pop(L, 1);
 		}
-
-		lua_pop(L, 2);
 	}
 }
 
@@ -42,60 +45,46 @@ void DoCustomListBoxEvent(lua_State* L, LuaWindow* parent, LuaWindow* child, HWN
 
 		int ItemIndex = SendMessageW((HWND)lParam, (UINT)LB_GETCURSEL, (WPARAM)0, (LPARAM)0);
 
-		if (child->custom->eventRef == LUA_REFNIL || child->custom->boxItemsRef == LUA_REFNIL) {
+		if (!IsBox(child)) {
 			return;
 		}
 
-		lua_rawgeti(L, LUA_REGISTRYINDEX, child->custom->boxItemsRef);
-		lua_rawgeti(L, -1, ItemIndex + 1);
 		lua_rawgeti(L, LUA_REGISTRYINDEX, child->custom->eventRef);
 		lua_pushvalue(L, -4);
-		lua_pushvalue(L, -7);
-		lua_pushvalue(L, -4);
+		lua_pushvalue(L, -5);
+		lua_pushinteger(L, ItemIndex + 1);
 
 		if (lua_pcall(L, 3, 0, NULL)) {
 
 			puts(lua_tostring(L, -1));
 			lua_pop(L, 1);
 		}
-
-		lua_pop(L, 2);
 	}
 }
 
 void DoCustomListViewEvent(lua_State* L, LuaWindow* parent, LuaWindow* child, HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 
-	NMHDR * nmh = (NMHDR*)lParam;
+	NMHDR* nmh = (NMHDR*)lParam;
 	NMLISTVIEW* nmlist = (NMLISTVIEW*)lParam;
 
 	if (nmh && nmh->code == LVN_ITEMCHANGED && nmlist->uNewState & LVIS_SELECTED) {
 
 		int ItemIndex = ListView_GetNextItem(child->handle, -1, LVNI_SELECTED);
 
-		if (child->custom->eventRef == LUA_REFNIL || child->custom->boxItemsRef == LUA_REFNIL) {
+		if (!IsBox(child)) {
 			return;
 		}
 
-		lua_rawgeti(L, LUA_REGISTRYINDEX, child->custom->boxItemsRef);
-		size_t len = luaL_len(L, -1);
-		lua_pop(L, 1);
-
-		ItemIndex = len - ItemIndex - 1;
-
-		lua_rawgeti(L, LUA_REGISTRYINDEX, child->custom->boxItemsRef);
-		lua_rawgeti(L, -1, ItemIndex + 1);
 		lua_rawgeti(L, LUA_REGISTRYINDEX, child->custom->eventRef);
 		lua_pushvalue(L, -4);
-		lua_pushvalue(L, -7);
-		lua_pushvalue(L, -4);
+		lua_pushvalue(L, -5);
+		lua_pushinteger(L, ItemIndex + 1);
 
 		if (lua_pcall(L, 3, 0, NULL)) {
 
 			puts(lua_tostring(L, -1));
 			lua_pop(L, 1);
 		}
-
-		lua_pop(L, 2);
 	}
 }
 
@@ -104,64 +93,102 @@ int DeleteBoxItem(lua_State* L) {
 	LuaWindow* window = lua_tonwindow(L, 1);
 	int index = (int)luaL_checkinteger(L, 2) - 1;
 
-	if (!window->custom || window->custom->boxItemsRef == LUA_REFNIL) {
+	if (!IsBox(window)) {
 
 		luaL_error(L, "Cannot add combobox strings to non combobox elements");
 		return 0;
 	}
 
-	lua_newtable(L);
-	lua_rawgeti(L, LUA_REGISTRYINDEX, window->custom->boxItemsRef);
-	size_t len = lua_rawlen(L, -1);
-
-	if (index > len || index < 0) {
-		luaL_error(L, "Index out of bounds");
-		return 0;
-	}
-
-	int nth = 0;
-	for (size_t i = 0; i < len; i++)
-	{
-		lua_pushinteger(L, i + 1);
-		lua_gettable(L, -2);
-
-		if (index != i) {
-			lua_rawseti(L, -3, ++nth);
-		}
-		else {
-			lua_pop(L, 1);
-		}
-	}
-
-	luaL_unref(L, LUA_REGISTRYINDEX, window->custom->boxItemsRef);
-	lua_pop(L, 1);
-	window->custom->boxItemsRef = luaL_ref(L, LUA_REGISTRYINDEX);
-	lua_pop(L, 1);
-
 	if (window->custom->type == WINDOW_TYPE_COMBOBOX) {
-		SendMessageW(window->handle, (UINT)CB_DELETESTRING, (WPARAM)index, NULL);
+		lua_pushboolean(L, SendMessageW(window->handle, (UINT)CB_DELETESTRING, (WPARAM)index, NULL) != CB_ERR);
 	}
 	else if (window->custom->type == WINDOW_TYPE_LISTVIEW) {
-		ListView_DeleteItem(window->handle, (len - index - 1));
+		lua_pushboolean(L, ListView_DeleteItem(window->handle, index) == TRUE);
 	}
 	else {
-		SendMessageW(window->handle, (UINT)LB_DELETESTRING, (WPARAM)index, NULL);
+		lua_pushboolean(L, SendMessageW(window->handle, (UINT)LB_DELETESTRING, (WPARAM)index, NULL) != LB_ERR);
 	}
 
-	return 0;
+	return 1;
 }
 
 int GetBoxItems(lua_State* L) {
 
 	LuaWindow* window = lua_tonwindow(L, 1);
 
-	if (!window->custom || window->custom->boxItemsRef == LUA_REFNIL) {
+	if (!IsBox(window)) {
 
 		luaL_error(L, "Cannot add combobox strings to non combobox elements");
 		return 0;
 	}
 
-	lua_rawgeti(L, LUA_REGISTRYINDEX, window->custom->boxItemsRef);
+	size_t len, items;
+	size_t bufferlen = 0;
+	wchar_t* data = NULL;
+	int column = luaL_optinteger(L, 2, 1) - 1;
+
+	if (window->custom->type == WINDOW_TYPE_COMBOBOX) {
+		items = SendMessageW(window->handle, (UINT)CB_GETCOUNT, (WPARAM)0, (LPARAM)0);
+		lua_createtable(L, items, 0);
+	}
+	else if (window->custom->type == WINDOW_TYPE_LISTVIEW) {
+		items = ListView_GetItemCount(window->handle);
+		lua_createtable(L, items, 0);
+	}
+	else if (window->custom->type == WINDOW_TYPE_LISTBOX) {
+		items = SendMessageW(window->handle, (UINT)LB_GETCOUNT, (WPARAM)0, (LPARAM)0);
+		lua_createtable(L, items, 0);
+	}
+	else {
+		return 0;
+	}
+
+	LVITEMW item;
+
+	for (size_t i = 0; i < items; i++)
+	{
+		if (window->custom->type == WINDOW_TYPE_COMBOBOX) {
+			len = SendMessageW(window->handle, (UINT)CB_GETLBTEXTLEN, (WPARAM)i, (LPARAM)0);
+		}
+		else if (window->custom->type == WINDOW_TYPE_LISTVIEW) {
+			len = 1024;
+		}
+		else {
+			return 1;
+		}
+
+		if (len > bufferlen) {
+			if (data) {
+				gff_free(data);
+			}
+
+			data = (wchar_t*)gff_calloc(len + 1, sizeof(wchar_t));
+			if (!data) {
+				luaL_error(L, "Out of memory");
+				return 0;
+			}
+			else {
+				bufferlen = len;
+			}
+		}
+
+		if (window->custom->type == WINDOW_TYPE_COMBOBOX) {
+			len = SendMessageW(window->handle, (UINT)CB_GETLBTEXT, (WPARAM)i, (LPARAM)data);
+		}
+		if (window->custom->type == WINDOW_TYPE_LISTVIEW) {
+			item.iSubItem = column;
+			item.pszText = data;
+			item.cchTextMax = len;
+			len = SendMessageW((window->handle), LVM_GETITEMTEXTW, (WPARAM)(i), (LPARAM)(LV_ITEM*)&item);
+		}
+
+		lua_pushwchar(L, data, len);
+		lua_rawseti(L, -2, i + 1);
+	}
+
+	if (data) {
+		gff_free(data);
+	}
 
 	return 1;
 }
@@ -171,27 +198,29 @@ int AddBoxItem(lua_State* L) {
 	LuaWindow* window = lua_tonwindow(L, 1);
 	LuaWChar* data;
 
-	if (!window->custom || window->custom->boxItemsRef == LUA_REFNIL) {
+	if (!IsBox(window)) {
 
 		luaL_error(L, "Cannot add combobox strings to non combobox elements");
 		return 0;
 	}
 
-	lua_rawgeti(L, LUA_REGISTRYINDEX, window->custom->boxItemsRef);
-	size_t len = lua_rawlen(L, -1);
+	size_t len;
 	int ItemIndex = 0;
 
 	if (window->custom->type == WINDOW_TYPE_COMBOBOX) {
+		len = SendMessageW(window->handle, (UINT)CB_GETCOUNT, (WPARAM)0, (LPARAM)0);
 		ItemIndex = SendMessageW(window->handle, (UINT)CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
-		SendMessageW(window->handle, CB_SETCURSEL, (WPARAM)len, (LPARAM)0);		
+		SendMessageW(window->handle, CB_SETCURSEL, (WPARAM)len, (LPARAM)0);
 	}
 	else if (window->custom->type == WINDOW_TYPE_LISTVIEW) {
+		len = ListView_GetItemCount(window->handle);
 		ItemIndex = ListView_GetNextItem(window->handle, -1, LVNI_SELECTED);
-		ListView_SetItemState(window->handle, len, LVNI_SELECTED | LVNI_FOCUSED, LVNI_SELECTED | LVNI_FOCUSED);	
+		ListView_SetItemState(window->handle, len, LVNI_SELECTED | LVNI_FOCUSED, LVNI_SELECTED | LVNI_FOCUSED);
 	}
 	else {
+		len = SendMessageW(window->handle, (UINT)LB_GETCOUNT, (WPARAM)0, (LPARAM)0);
 		ItemIndex = SendMessageW(window->handle, (UINT)LB_GETCURSEL, (WPARAM)0, (LPARAM)0);
-		SendMessageW(window->handle, LB_SETCURSEL, (WPARAM)len, (LPARAM)0);		
+		SendMessageW(window->handle, LB_SETCURSEL, (WPARAM)len, (LPARAM)0);
 	}
 
 	if (ItemIndex < 0) {
@@ -202,7 +231,6 @@ int AddBoxItem(lua_State* L) {
 		data = lua_stringtowchar(L, 2);
 		SendMessageW(window->handle, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)data->str);
 		SendMessageW(window->handle, CB_SETCURSEL, (WPARAM)ItemIndex, (LPARAM)0);
-		lua_pushwchar(L, data->str, data->len);
 	}
 	else if (window->custom->type == WINDOW_TYPE_LISTVIEW) {
 
@@ -228,6 +256,8 @@ int AddBoxItem(lua_State* L) {
 
 				lua_pop(L, 1);
 			}
+
+			lua_pop(L, 1);
 		}
 
 		ListView_SetItemState(window->handle, ItemIndex, LVNI_SELECTED | LVNI_FOCUSED, LVNI_SELECTED | LVNI_FOCUSED);
@@ -236,11 +266,7 @@ int AddBoxItem(lua_State* L) {
 		data = lua_stringtowchar(L, 2);
 		SendMessageW(window->handle, (UINT)LB_ADDSTRING, (WPARAM)0, (LPARAM)data->str);
 		SendMessageW(window->handle, LB_SETCURSEL, (WPARAM)ItemIndex, (LPARAM)0);
-		lua_pushwchar(L, data->str, data->len);
 	}
-
-	lua_rawseti(L, -2, len + 1);
-	lua_pop(L, 1);
 
 	return 0;
 }
@@ -324,9 +350,6 @@ int CreateCustomLuaListView(lua_State* L) {
 
 	AddLuaTableChild(L, window->custom);
 
-	lua_newtable(L);
-	button->custom->boxItemsRef = luaL_ref(L, LUA_REGISTRYINDEX);
-
 	return 1;
 }
 
@@ -383,9 +406,6 @@ int CreateCustomLuaListbox(lua_State* L) {
 
 	AddLuaTableChild(L, window->custom);
 
-	lua_newtable(L);
-	button->custom->boxItemsRef = luaL_ref(L, LUA_REGISTRYINDEX);
-
 	return 1;
 }
 
@@ -441,9 +461,6 @@ int CreateCustomLuaComboBox(lua_State* L) {
 	button->custom->parentRef = refParent;
 
 	AddLuaTableChild(L, window->custom);
-
-	lua_newtable(L);
-	button->custom->boxItemsRef = luaL_ref(L, LUA_REGISTRYINDEX);
 
 	return 1;
 }

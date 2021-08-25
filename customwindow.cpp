@@ -78,7 +78,6 @@ LuaCustomWindow* CreateCustomWindowStruct() {
 	custom->childRef = LUA_REFNIL;
 	custom->eventRef = LUA_REFNIL;
 	custom->parentRef = LUA_REFNIL;
-	custom->boxItemsRef = LUA_REFNIL;
 
 	return custom;
 }
