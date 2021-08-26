@@ -7,6 +7,8 @@
 #include "customcombobox.h"
 #include "resource.h"
 
+#define WINDOW_EVENT_RESIZE 1
+
 lua_State* LuaStateCallback;
 int msgcount;
 int emptytableref = LUA_REFNIL;
@@ -220,12 +222,89 @@ LuaWindow* GetSuperParent(lua_State* L, LuaWindow* window) {
 	return parent;
 }
 
+int MoveCustomWindow(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+
+	if (!window->custom) {
+		return 0;
+	}
+
+	lua_createtable(L, 0, 4);
+
+	lua_pushstring(L, "X");
+	lua_pushinteger(L, luaL_checkinteger(L, 2));
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "Y");
+	lua_pushinteger(L, luaL_checkinteger(L, 3));
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "Width");
+	lua_pushinteger(L, luaL_checkinteger(L, 4));
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "Height");
+	lua_pushinteger(L, luaL_checkinteger(L, 5));
+	lua_settable(L, -3);
+
+	PostMessageW(GetSuperParent(L, window)->handle, WM_LUA_MOVE, (WPARAM)window->handle, luaL_ref(L, LUA_REGISTRYINDEX));
+}
+
+int DoCustomComboBoxEvent(lua_State* L, LuaWindow* parent, HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
+
+	if (parent &&
+		parent->custom &&
+		parent->custom->type == WINDOW_TYPE_CUSTOM &&
+		parent->custom->eventRef != LUA_REFNIL) {
+
+		bool trigger = false;
+
+		if (Msg == WM_SIZE) {
+
+			trigger = true;
+			lua_createtable(L, 0, 4);
+
+			lua_pushstring(L, "Event");
+			lua_pushinteger(L, WINDOW_EVENT_RESIZE);
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "Type");
+			lua_pushinteger(L, wParam);
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "Height");
+			lua_pushinteger(L, HIWORD(lParam));
+			lua_settable(L, -3);
+
+			lua_pushstring(L, "Width");
+			lua_pushinteger(L, LOWORD(lParam));
+			lua_settable(L, -3);
+		}
+
+		if (trigger) {
+			lua_rawgeti(L, LUA_REGISTRYINDEX, parent->custom->eventRef);
+			lua_pushvalue(L, -2);
+			if (lua_pcall(L, 1, 0, NULL)) {
+
+				puts(lua_tostring(L, -1));
+				lua_pop(L, 1);
+			}
+			lua_pop(L, 1);
+		}
+	}
+
+	return DefWindowProcW(hwnd, Msg, wParam, lParam);;
+}
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	lua_State* L = LuaStateCallback;
 	LuaWindow* window = NULL;
 	LuaWindow* child = NULL;
 	LuaWChar* wchar;
+	BOOL result;
+	int x, y, h, w;
 
 	if (L) {
 
@@ -266,6 +345,36 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 		lua_pop(L, 1);
 
 		break;
+
+	case WM_LUA_MOVE:
+
+		lua_rawgeti(L, LUA_REGISTRYINDEX, lParam);
+
+		lua_pushstring(L, "X");
+		lua_gettable(L, -2);
+		x = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+
+		lua_pushstring(L, "Y");
+		lua_gettable(L, -2);
+		y = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+
+		lua_pushstring(L, "Height");
+		lua_gettable(L, -2);
+		h = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+
+		lua_pushstring(L, "Width");
+		lua_gettable(L, -2);
+		w = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+
+		result = SetWindowPos((HWND)wParam, HWND_TOP, x, y, w, h, 0);
+		luaL_unref(L, LUA_REGISTRYINDEX, lParam);
+		lua_pop(L, 1);
+		break;
+
 	case WM_LUA_DESTROY:
 
 		DestroyWindow((HWND)wParam);
@@ -289,6 +398,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 
 		PostQuitMessage(WM_QUIT);
+		break;
+
+	case WM_SIZE:
+		if (window) {
+			return DoCustomComboBoxEvent(L, window, hwnd, Msg, wParam, lParam);
+		}
 		break;
 
 	case WM_NOTIFY:
@@ -542,7 +657,7 @@ int CreateLuaCustomWindow(lua_State* L) {
 	HINSTANCE hInstance = GetModuleHandle(NULL);
 
 	WndClsEx.cbSize = sizeof(WNDCLASSEXW);
-	WndClsEx.style = (UINT)luaL_optinteger(L, 8, CS_HREDRAW | CS_VREDRAW);
+	WndClsEx.style = CS_HREDRAW | CS_VREDRAW;
 	WndClsEx.lpfnWndProc = WndProc;
 	WndClsEx.hInstance = hInstance;
 	WndClsEx.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
@@ -553,11 +668,13 @@ int CreateLuaCustomWindow(lua_State* L) {
 
 	LuaStateCallback = NULL;
 
+	printf("%x\n", WS_OVERLAPPEDWINDOW);
+
 	HWND hwnd = CreateWindowExW(
-		(DWORD)luaL_optinteger(L, 9, 0),
+		0,
 		custom->className,
 		custom->title,
-		(DWORD)luaL_optinteger(L, 10, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CLIPCHILDREN),
+		(DWORD)luaL_optinteger(L, 8, WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CLIPCHILDREN),
 		x,
 		y,
 		width,
@@ -566,6 +683,11 @@ int CreateLuaCustomWindow(lua_State* L) {
 		NULL,
 		hInstance,
 		NULL);
+
+	if (lua_type(L, 9) == LUA_TFUNCTION) {
+		lua_pushvalue(L, 9);
+		custom->eventRef = luaL_ref(L, LUA_REGISTRYINDEX);
+	}
 
 	lua_pop(L, lua_gettop(L));
 
@@ -579,6 +701,7 @@ int CreateLuaCustomWindow(lua_State* L) {
 	LuaWindow* window = lua_pushwindow(L);
 	window->handle = hwnd;
 	window->custom = custom;
+	window->custom->type = WINDOW_TYPE_CUSTOM;
 
 	lua_State* T = lua_newthread(L);
 	lua_pushvalue(L, -1);

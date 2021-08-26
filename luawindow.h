@@ -3,12 +3,13 @@
 #include <Windows.h>
 static const char* LUAWINDOW = "WINDOW";
 
-#define WINDOW_TYPE_CUSTOM 0
-#define WINDOW_TYPE_BUTTON 1
-#define WINDOW_TYPE_TEXTBOX 2
-#define WINDOW_TYPE_COMBOBOX 3
-#define WINDOW_TYPE_LISTBOX 4
-#define WINDOW_TYPE_LISTVIEW 5
+#define WINDOW_TYPE_INVALID 0
+#define WINDOW_TYPE_CUSTOM 1
+#define WINDOW_TYPE_BUTTON 2
+#define WINDOW_TYPE_TEXTBOX 3
+#define WINDOW_TYPE_COMBOBOX 4
+#define WINDOW_TYPE_LISTBOX 5
+#define WINDOW_TYPE_LISTVIEW 6
 
 typedef struct LuaCustomWindow {
 
@@ -47,6 +48,7 @@ int LuaWindowGetId(lua_State* L);
 int LuaDestroyWindow(lua_State* L);
 int LuaGetContent(lua_State* L);
 int GetsWindowEnabled(lua_State* L);
+int GetWindowSize(lua_State* L);
 
 int InvalidateWindow(lua_State* L);
 int GetCustomWindowCoroutine(lua_State* L);

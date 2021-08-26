@@ -143,7 +143,7 @@ int GetsWindowEnabled(lua_State* L) {
 
 void PushRect(lua_State* L, RECT rect) {
 
-	lua_createtable(L, 0, 4);
+	lua_createtable(L, 0, 6);
 
 	lua_pushstring(L, "Bottom");
 	lua_pushinteger(L, rect.bottom);
@@ -159,6 +159,14 @@ void PushRect(lua_State* L, RECT rect) {
 
 	lua_pushstring(L, "Top");
 	lua_pushinteger(L, rect.top);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "Width");
+	lua_pushinteger(L, rect.right - rect.left);
+	lua_settable(L, -3);
+
+	lua_pushstring(L, "Height");
+	lua_pushinteger(L, rect.bottom - rect.top);
 	lua_settable(L, -3);
 }
 
@@ -221,6 +229,30 @@ int GetWindowInformation(lua_State* L) {
 	}
 
 	return 1;
+}
+
+int GetWindowSize(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+
+	RECT rect;
+	if (GetWindowRect(window->handle, &rect))
+	{
+		PushRect(L, rect);
+	}
+	else {
+		lua_pushnil(L);
+	}
+
+	if (GetClientRect(window->handle, &rect))
+	{
+		PushRect(L, rect);
+	}
+	else {
+		lua_pushnil(L);
+	}
+
+	return 2;
 }
 
 int LuaDestroyWindow(lua_State* L) {

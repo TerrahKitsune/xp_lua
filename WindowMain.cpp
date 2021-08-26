@@ -20,6 +20,7 @@ static const struct luaL_Reg windowfunctions[] = {
 	{ "Destroy", LuaDestroyWindow },
 	{ "GetContent", LuaGetContent },
 	{ "SetContent", LuaSetContent },
+	{ "Size", GetWindowSize },
 
 	{ "Create", CreateLuaWindow },
 	{ "Redraw", InvalidateWindow},
@@ -36,6 +37,7 @@ static const struct luaL_Reg windowfunctions[] = {
 	{ "GetBoxItems", GetBoxItems },
 	{ "CreateListBox", CreateCustomLuaListbox },
 	{ "CreateListView" , CreateCustomLuaListView },
+	{ "Move", MoveCustomWindow },
 
 	{ NULL, NULL }
 };

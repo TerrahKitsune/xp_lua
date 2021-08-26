@@ -8,6 +8,7 @@
 #define		WM_LUA_UPDATE		(WM_USER + 3)
 #define		WM_LUA_TOGGLEENABLE	(WM_USER + 4)
 #define		WM_LUA_SETCONTENT	(WM_USER + 5)
+#define		WM_LUA_MOVE			(WM_USER + 6)
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
@@ -20,6 +21,7 @@ int RemoveCustomWindow(lua_State* L);
 int LuaShowCustomWindow(lua_State* L);
 int LuaEnableCustomWindow(lua_State* L);
 int LuaSetContent(lua_State* L);
+int MoveCustomWindow(lua_State* L);
 
 int LuaSetCustomWindowDrawFunction(lua_State* L);
 bool CheckHasMessage(LuaWindow* window);

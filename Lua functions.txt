@@ -202,6 +202,11 @@ Window:
 	-Window (object: Bottom, Left, Right, Top)
 	info Window:GetInfo()
 
+	-Returns the sizes of a window/component
+	-Window (object: Bottom, Left, Right, Top, Width, Height)
+	-Client (object: Bottom, Left, Right, Top, Width, Height)
+	window, client Window:Size()
+
 	-Retrives the content of a window (such as window titles, button captions, text field data etc)
 	string Window:GetContent()
 
@@ -218,9 +223,9 @@ Window:
 	-y = y coordinate to spawn on
 	-width = width of the window
 	-height = height of the window
-	-classstyle = the style to use, defaults to 0x0003 (CS_HREDRAW | CS_VREDRAW) https://docs.microsoft.com/en-us/windows/win32/winmsg/about-window-classes
-	-exstyle = (0) dwExStyle https://docs.microsoft.com/en-us/windows/win32/winmsg/extended-window-styles
-	-style = (defaults to WS_OVERLAPPEDWINDOW 0x2CB0000) dwStyle https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles
+	-style = (defaults to WS_OVERLAPPEDWINDOW 0x2CB0000 0xcf0000 for resizeable) dwStyle https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles
+	-eventhandler eventhandler is a function to handle the events of the window, may be nil
+	-eventhandler: function(eventData) end
 	-------------------
 	-returns nil on failure
 	-coroutine.resume will return a array of messages that was processed
@@ -229,7 +234,7 @@ Window:
 	-WParam = wParam
 	-LParam  = lParam
 	-ID = windowhandleID
-	Window, Coroutine Window.Create(parentwindow (nil), classname, title, x, y, width, height, classstyle, exstyle, style)
+	Window, Coroutine Window.Create(parentwindow (nil), classname, title, x, y, width, height, style, eventhandler)
 
 	-Creates a button on a window and returns the window object for it
 	-function is the event that runs when the button is pressed, buttonWindow is the button, parentWindow is window with the button
@@ -273,6 +278,9 @@ Window:
 
 	-Toggles if the window should be shown or not
 	nil Window:Show(bool)
+
+	-Moves a window or component relative to the screen or the parent
+	nil Window:Move(X, Y, Width, Height)
 
 	-Toggles if a window/component is enabled or disabled
 	nil Window:Enable(bool)

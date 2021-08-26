@@ -127,7 +127,19 @@ end
 CreateGCPrint();
 collectgarbage();
 
-local w, co = Window.Create(nil, "lua", "Lua Window", 500, 500, 500, 500);
+local gigabutton;
+local w, co = Window.Create(nil, "lua", "Lua Window", 500, 500, 500, 500, 0xcf0000, function(event)
+	for k,v in pairs(event)do
+		print(k,v);
+	end
+
+	if gigabutton then 
+		local info = gigabutton:Size();
+		print(0, 225, info.Width, info.Height);
+		gigabutton:Move(0, 275, event.Width, event.Height - 275);
+	end
+
+end);
 local text = w:CreateTextBox("", 0, 50, 200, 25);
 
 local combo = w:CreateComboBox(200,0,100,100, function(comboBoxWindow, parentWindow, data)
@@ -154,6 +166,15 @@ end);
 local listview = w:CreateListView(0, 75, 200, 200, {"Row", "Test"}, function(comboBoxWindow, parentWindow, data)
 	print(comboBoxWindow, parentWindow, data);
 	text:SetContent(data);
+end);
+
+local info = w:GetInfo();
+
+print(0,275, info.Client.Width, info.Client.Height - 275);
+
+gigabutton = w:CreateButton("GIGA BUTTON!", 0,275, info.Client.Width, info.Client.Height - 275, 
+function(buttonWindow, parentWindow) 
+
 end);
 
 listview:AddBoxItem({1, "Hi"});
