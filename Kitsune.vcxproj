@@ -40,7 +40,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <EmbedManifest>false</EmbedManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <EmbedManifest>false</EmbedManifest>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -86,6 +91,7 @@
     <ClCompile Include="custombutton.cpp" />
     <ClCompile Include="customcombobox.cpp" />
     <ClCompile Include="customdrawing.cpp" />
+    <ClCompile Include="customprogressbar.cpp" />
     <ClCompile Include="customtextbox.cpp" />
     <ClCompile Include="customwindow.cpp" />
     <ClCompile Include="Erf.cpp" />
@@ -226,6 +232,7 @@
     <ClInclude Include="custombutton.h" />
     <ClInclude Include="customcombobox.h" />
     <ClInclude Include="customdrawing.h" />
+    <ClInclude Include="customprogressbar.h" />
     <ClInclude Include="customtextbox.h" />
     <ClInclude Include="customwindow.h" />
     <ClInclude Include="Erf.h" />
@@ -368,6 +375,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="kitsune.exe.manifest" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

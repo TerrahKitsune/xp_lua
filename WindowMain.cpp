@@ -4,7 +4,7 @@
 #include "customwindow.h"
 #include "customcombobox.h"
 #include "customtextbox.h"
-#include <commctrl.h>
+#include "customprogressbar.h"
 
 static const struct luaL_Reg windowfunctions[] = {
 
@@ -15,8 +15,8 @@ static const struct luaL_Reg windowfunctions[] = {
 	{ "GetIsVisible", GetIsVisible },
 	{ "GetIsEnabled", GetsWindowEnabled },
 	{ "GetWindow", GetWindow },
-	{ "Open", OpenWindow},
-	{ "GetParent", GetWindowParent},
+	{ "Open", OpenWindow },
+	{ "GetParent", GetWindowParent },
 	{ "Destroy", LuaDestroyWindow },
 	{ "GetContent", LuaGetContent },
 	{ "SetContent", LuaSetContent },
@@ -35,9 +35,17 @@ static const struct luaL_Reg windowfunctions[] = {
 	{ "AddBoxItem", AddBoxItem},
 	{ "RemoveBoxItem", DeleteBoxItem},
 	{ "GetBoxItems", GetBoxItems },
+	{ "GetBoxSelectedIndex", GetSelectedIndex },
+	{ "SetBoxSelectedIndex", SetSelectedIndex },
 	{ "CreateListBox", CreateCustomLuaListbox },
 	{ "CreateListView" , CreateCustomLuaListView },
 	{ "Move", MoveCustomWindow },
+	{ "SetListViewText", ListviewSetItemText },
+	{ "SetListViewColumnWidth", SetViewlistColumnWidth },
+	{ "CreateProgressbar", CreateCustomLuaProgressbar },
+	{ "StepProgressbar", LuaProgressbarStep },
+	{ "GetProgressbarStep", LuaProgressbarGetStep },
+	{ "CreateStaticText", CreateStaticTextField },
 
 	{ NULL, NULL }
 };
@@ -51,6 +59,25 @@ static const luaL_Reg windowmeta[] = {
 int luaopen_window(lua_State* L) {
 
 	CoInitialize(NULL);
+	INITCOMMONCONTROLSEX icex;
+	icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
+	icex.dwICC = ICC_ANIMATE_CLASS | 
+		ICC_BAR_CLASSES | 
+		ICC_COOL_CLASSES | 
+		ICC_DATE_CLASSES | 
+		ICC_INTERNET_CLASSES |
+		ICC_LINK_CLASS |
+		ICC_LISTVIEW_CLASSES |
+		ICC_NATIVEFNTCTL_CLASS |
+		ICC_PAGESCROLLER_CLASS |
+		ICC_PROGRESS_CLASS |
+		ICC_STANDARD_CLASSES |
+		ICC_TAB_CLASSES |
+		ICC_TREEVIEW_CLASSES |
+		ICC_UPDOWN_CLASS |
+		ICC_USEREX_CLASSES |
+		ICC_WIN95_CLASSES;
+	InitCommonControlsEx(&icex);
 
 	luaL_newlibtable(L, windowfunctions);
 	luaL_setfuncs(L, windowfunctions, 0);

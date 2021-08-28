@@ -249,6 +249,8 @@ int MoveCustomWindow(lua_State* L) {
 	lua_settable(L, -3);
 
 	PostMessageW(GetSuperParent(L, window)->handle, WM_LUA_MOVE, (WPARAM)window->handle, luaL_ref(L, LUA_REGISTRYINDEX));
+
+	return 0;
 }
 
 int DoCustomComboBoxEvent(lua_State* L, LuaWindow* parent, HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
@@ -392,7 +394,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 		EnableWindow((HWND)wParam, (int)lParam);
 		break;
 	case WM_NCDESTROY:
-
+		if (window && window->custom) {
+			window->custom->type = WINDOW_TYPE_INVALID;
+		}
 		break;
 
 	case WM_DESTROY:
@@ -596,16 +600,21 @@ int lua_customcoroutineiterator(lua_State* L, int status, lua_KContext ctx) {
 
 	MSG Msg;
 
-	if (GetMessageW(&Msg, NULL, 0, 0))
-	{
-		TranslateMessage(&Msg);
-		DispatchMessageW(&Msg);
+	while (PeekMessageW(&Msg, NULL, 0, 0, 0) != 0) {
+
+		if (GetMessageW(&Msg, NULL, 0, 0))
+		{
+			TranslateMessage(&Msg);
+			DispatchMessageW(&Msg);
+		}
 	}
 
 	LuaStateCallback = prev;
 
-	if (!ContainsMessage(L, WM_NCDESTROY)) {
+	if (window->custom->type != WINDOW_TYPE_INVALID) {
+		LuaStateCallback = prev;
 		lua_yieldk(L, 1, ctx, lua_customcoroutineiterator);
+		return 1;
 	}
 
 	return 1;
@@ -667,8 +676,6 @@ int CreateLuaCustomWindow(lua_State* L) {
 	RegisterClassExW(&WndClsEx);
 
 	LuaStateCallback = NULL;
-
-	printf("%x\n", WS_OVERLAPPEDWINDOW);
 
 	HWND hwnd = CreateWindowExW(
 		0,

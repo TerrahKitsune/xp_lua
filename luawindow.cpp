@@ -360,11 +360,6 @@ int LuaGetContent(lua_State* L) {
 
 	size_t len = GetWindowTextLengthW(window->handle);
 
-	if (len == 0) {
-		lua_pushstring(L, "");
-		return 1;
-	}
-
 	wchar_t* data = (wchar_t*)gff_calloc(len + 1, sizeof(wchar_t));
 
 	if (!data) {

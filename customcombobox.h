@@ -10,6 +10,10 @@ int CreateCustomLuaComboBox(lua_State* L);
 int AddBoxItem(lua_State* L);
 int DeleteBoxItem(lua_State* L);
 int GetBoxItems(lua_State* L);
+int ListviewSetItemText(lua_State* L);
+int SetViewlistColumnWidth(lua_State* L);
+int GetSelectedIndex(lua_State* L);
+int SetSelectedIndex(lua_State* L);
 
 int CreateCustomLuaListbox(lua_State* L);
 int CreateCustomLuaListView(lua_State* L);

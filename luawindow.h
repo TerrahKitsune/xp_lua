@@ -1,6 +1,9 @@
 #pragma once
 #include "lua_main_incl.h"
 #include <Windows.h>
+#include <CommCtrl.h>
+#pragma comment(lib, "comctl32.lib")
+
 static const char* LUAWINDOW = "WINDOW";
 
 #define WINDOW_TYPE_INVALID 0
@@ -10,6 +13,8 @@ static const char* LUAWINDOW = "WINDOW";
 #define WINDOW_TYPE_COMBOBOX 4
 #define WINDOW_TYPE_LISTBOX 5
 #define WINDOW_TYPE_LISTVIEW 6
+#define WINDOW_TYPE_PROGRESSBAR 7
+#define WINDOW_TYPE_STATICTEXT 8
 
 typedef struct LuaCustomWindow {
 

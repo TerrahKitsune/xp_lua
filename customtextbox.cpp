@@ -24,6 +24,69 @@ void DoCustomTextboxEvent(lua_State* L, LuaWindow* parent, LuaWindow* child, HWN
 	}
 }
 
+int CreateStaticTextField(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+
+	if (!window->custom) {
+
+		lua_pushnil(L);
+		return 1;
+	}
+
+	LuaCustomWindow* custom = CreateCustomWindowStruct();
+
+	if (!custom) {
+		luaL_error(L, "out of memory");
+		return 0;
+	}
+
+	DWORD style = WS_VISIBLE | WS_CHILD;
+
+	switch ((int)luaL_optnumber(L, 7, 0))
+	{
+	case 1:
+		style |= SS_CENTER;
+		break;
+	case 2:
+		style |= SS_RIGHT;
+		break;
+	default:
+		style |= SS_LEFT;
+		break;
+	}
+
+	custom->hmenu = (HMENU)(++window->custom->nextId);
+
+	LuaWChar* content = lua_stringtowchar(L, 2);
+
+	HWND hwndButton = CreateWindowW(
+		L"STATIC",
+		content->str,
+		style,
+		(int)luaL_optnumber(L, 3, 0),
+		(int)luaL_optnumber(L, 4, 0),
+		(int)luaL_optnumber(L, 5, 0),
+		(int)luaL_optnumber(L, 6, 0),
+		window->handle,
+		custom->hmenu,
+		(HINSTANCE)GetWindowLongPtr(window->handle, GWLP_HINSTANCE),
+		NULL);
+
+	lua_pushvalue(L, 1);
+	int refParent = luaL_ref(L, LUA_REGISTRYINDEX);
+	lua_pop(L, lua_gettop(L));
+
+	LuaWindow* button = lua_pushwindow(L);
+	button->handle = hwndButton;
+	button->custom = custom;
+	button->custom->type = WINDOW_TYPE_STATICTEXT;
+	button->custom->parentRef = refParent;
+
+	AddLuaTableChild(L, window->custom);
+
+	return 1;
+}
 
 int CreateTextField(lua_State* L) {
 

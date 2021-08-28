@@ -741,6 +741,9 @@
     <ClCompile Include="customcombobox.cpp">
       <Filter>Windows\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="customprogressbar.cpp">
+      <Filter>Windows\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lua\lapi.h">
@@ -1148,6 +1151,9 @@
     <ClInclude Include="customcombobox.h">
       <Filter>Windows\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="customprogressbar.h">
+      <Filter>Windows\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Lua functions.txt" />
@@ -1165,5 +1171,8 @@
     <ResourceCompile Include="Kitsune.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="kitsune.exe.manifest" />
   </ItemGroup>
 </Project>

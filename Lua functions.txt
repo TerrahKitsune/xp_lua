@@ -247,6 +247,11 @@ Window:
 	-function(buttonWindow, parentWindow) end is fired when the textbox is changed (can be nil)
  	Window Window:CreateTextBox(content, x,y,width,height, opt multiline, opt enablescroll, function(buttonWindow, parentWindow) end)
 
+	-Creates a static text field with content
+	-align: 0 = left, 1 = center, 2 = right text alignment, default 0
+	-use Window:GetContent or Window:SetContent to manipulate the content
+	Window Window:CreateStaticText(content, x,y,width,height, opt align)
+
 	-Creates a combobox
 	-function runs when a new item is selected returning the index that was selected
 	Window Window:CreateComboBox(x,y,width,height, function(buttonWindow, parentWindow, index) end)
@@ -259,6 +264,25 @@ Window:
 	-Columns should be an array with column names
 	-function runs when a new item is selected returning the index that was selected
 	Window Window:CreateListView(x,y,width,height, columns, function(buttonWindow, parentWindow, index) end)
+
+	-Sets the text of a listview cell
+	nil Window:SetListViewText(row, column, text)
+
+	-Sets the width of a listview column
+	nil Window:SetListViewColumnWidth(column, width)
+
+	-Creates a progressbar
+	-min = 0
+	-max = 100
+	-step = 1
+	Window Window:CreateProgressbar(x,y,width,height, opt min, opt max, opt step)
+
+	-Advances the progress bar by advancement (may be negative)
+	-if no advacement is given its incremented by step as defined in the creation of the bar
+	nil Window:StepProgressbar(opt advancement)
+
+	-Retrives the current step of the progressbar
+	int Window:GetProgressbarStep()
 
 	-Add an entry to a combo/listbox/listview
 	-If the target is a listview then an array of values should be provided instead

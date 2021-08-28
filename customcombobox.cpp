@@ -88,6 +88,57 @@ void DoCustomListViewEvent(lua_State* L, LuaWindow* parent, LuaWindow* child, HW
 	}
 }
 
+int SetSelectedIndex(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+	int index = luaL_optinteger(L, 2, 0) - 1;
+
+	if (!IsBox(window)) {
+
+		luaL_error(L, "Cannot add combobox strings to non combobox elements");
+		return 0;
+	}
+
+	if (window->custom->type == WINDOW_TYPE_COMBOBOX) {
+		SendMessageW(window->handle, CB_SETCURSEL, (WPARAM)index, (LPARAM)0);
+	}
+	else if (window->custom->type == WINDOW_TYPE_LISTVIEW) {
+		ListView_SetItemState(window->handle, index, LVNI_SELECTED | LVNI_FOCUSED, LVNI_SELECTED | LVNI_FOCUSED);
+	}
+	else if (window->custom->type == WINDOW_TYPE_LISTBOX) {
+		SendMessageW(window->handle, LB_SETCURSEL, (WPARAM)index, (LPARAM)0);
+	}
+
+	return 0;
+}
+
+int GetSelectedIndex(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+
+	if (!IsBox(window)) {
+
+		luaL_error(L, "Cannot add combobox strings to non combobox elements");
+		return 0;
+	}
+
+	int ItemIndex = -1;
+
+	if (window->custom->type == WINDOW_TYPE_COMBOBOX) {
+		ItemIndex = SendMessageW(window->handle, (UINT)CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+	}
+	else if (window->custom->type == WINDOW_TYPE_LISTVIEW) {
+		ItemIndex = ListView_GetNextItem(window->handle, -1, LVNI_SELECTED);
+	}
+	else if (window->custom->type == WINDOW_TYPE_LISTBOX) {
+		ItemIndex = SendMessageW(window->handle, (UINT)LB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+	}
+
+	lua_pushinteger(L, ItemIndex + 1);
+
+	return 1;
+}
+
 int DeleteBoxItem(lua_State* L) {
 
 	LuaWindow* window = lua_tonwindow(L, 1);
@@ -193,6 +244,48 @@ int GetBoxItems(lua_State* L) {
 	return 1;
 }
 
+int ListviewSetItemText(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+	int row = luaL_checkinteger(L, 2) - 1;
+	int column = luaL_checkinteger(L, 3) - 1;
+	LuaWChar* data = lua_stringtowchar(L, 4);
+
+	if (!IsBox(window) || window->custom->type != WINDOW_TYPE_LISTVIEW) {
+
+		luaL_error(L, "Cannot modify non listview items");
+		return 0;
+	}
+
+	LV_ITEMW item;
+
+	item.iItem = row;
+	item.iSubItem = column;
+	item.pszText = data->str;
+	item.cchTextMax = data->len;
+
+	SendMessageW(window->handle, LVM_SETITEMTEXTW, row, (LPARAM)&item);
+
+	return 0;
+}
+
+int SetViewlistColumnWidth(lua_State* L) {
+
+	LuaWindow* window = lua_tonwindow(L, 1);
+	int column = luaL_checkinteger(L, 2) - 1;
+	int width = luaL_checkinteger(L, 3);
+
+	if (!IsBox(window) || window->custom->type != WINDOW_TYPE_LISTVIEW) {
+
+		luaL_error(L, "Cannot modify non listview items");
+		return 0;
+	}
+
+	lua_pushboolean(L, ListView_SetColumnWidth(window->handle, column, width) == TRUE);
+
+	return 1;
+}
+
 int AddBoxItem(lua_State* L) {
 
 	LuaWindow* window = lua_tonwindow(L, 1);
@@ -214,8 +307,6 @@ int AddBoxItem(lua_State* L) {
 	}
 	else if (window->custom->type == WINDOW_TYPE_LISTVIEW) {
 		len = ListView_GetItemCount(window->handle);
-		ItemIndex = ListView_GetNextItem(window->handle, -1, LVNI_SELECTED);
-		ListView_SetItemState(window->handle, len, LVNI_SELECTED | LVNI_FOCUSED, LVNI_SELECTED | LVNI_FOCUSED);
 	}
 	else {
 		len = SendMessageW(window->handle, (UINT)LB_GETCOUNT, (WPARAM)0, (LPARAM)0);
@@ -235,11 +326,12 @@ int AddBoxItem(lua_State* L) {
 	else if (window->custom->type == WINDOW_TYPE_LISTVIEW) {
 
 		if (lua_type(L, 2)) {
+
 			lua_pushvalue(L, 2);
+
 			LV_ITEMW item;
 			ZeroMemory(&item, sizeof(LV_ITEMW));
 			item.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM | WS_VISIBLE;
-			item.iGroupId = len;
 			SendMessageW(window->handle, LVM_INSERTITEMW, 0, (LPARAM)&item);
 
 			size_t sublen = luaL_len(L, -1);
@@ -259,8 +351,6 @@ int AddBoxItem(lua_State* L) {
 
 			lua_pop(L, 1);
 		}
-
-		ListView_SetItemState(window->handle, ItemIndex, LVNI_SELECTED | LVNI_FOCUSED, LVNI_SELECTED | LVNI_FOCUSED);
 	}
 	else {
 		data = lua_stringtowchar(L, 2);
