@@ -12,11 +12,11 @@ static wchar_t _PATHW[MAX_PATH_LENGTH];
 
 const wchar_t* lua_topathw(lua_State* L, int idx, bool wildcard = false) {
 
-	LuaWChar* fromlua = lua_towchar(L, idx);
+	LuaWChar* fromlua = lua_stringtowchar(L, idx);
 	wchar_t* filter = L"*";
 
 	if (wildcard && lua_type(L, idx + 1) == LUA_TUSERDATA) {
-		filter = lua_towchar(L, idx + 1)->str;
+		filter = lua_stringtowchar(L, idx + 1)->str;
 	}
 
 	wchar_t c;
@@ -411,6 +411,7 @@ int GetFileInfoWide(lua_State* L) {
 
 	const wchar_t* path = lua_topathw(L, 1);
 	WIN32_FIND_DATAW data;
+	unsigned __int64 totalsize;
 
 	if (get_file_informationw(path, &data)) {
 
@@ -434,8 +435,12 @@ int GetFileInfoWide(lua_State* L) {
 		lua_pushinteger(L, data.dwFileAttributes);
 		lua_settable(L, -3);
 
+		totalsize = data.nFileSizeHigh;
+		totalsize <<= 32;
+		totalsize |= data.nFileSizeLow;
+
 		lua_pushstring(L, "Size");
-		lua_pushinteger(L, data.nFileSizeLow);
+		lua_pushinteger(L, totalsize);
 		lua_settable(L, -3);
 
 		lua_pushstring(L, "Creation");
@@ -462,6 +467,7 @@ int GetFileInfo(lua_State* L) {
 
 	const char* path = lua_topath(L, 1);
 	WIN32_FIND_DATA data;
+	unsigned __int64 totalsize;
 
 	if (get_file_information(path, &data)) {
 
@@ -485,8 +491,12 @@ int GetFileInfo(lua_State* L) {
 		lua_pushinteger(L, data.dwFileAttributes);
 		lua_settable(L, -3);
 
+		totalsize = data.nFileSizeHigh;
+		totalsize <<= 32;
+		totalsize |= data.nFileSizeLow;
+
 		lua_pushstring(L, "Size");
-		lua_pushinteger(L, data.nFileSizeLow);
+		lua_pushinteger(L, totalsize);
 		lua_settable(L, -3);
 
 		lua_pushstring(L, "Creation");

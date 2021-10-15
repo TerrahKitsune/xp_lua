@@ -41,6 +41,7 @@ typedef struct LuaWindow {
 
 LuaWindow* lua_pushwindow(lua_State* L);
 LuaWindow* lua_tonwindow(lua_State* L, int index);
+void lua_pushhwnd(lua_State* L, HWND handle);
 
 int OpenWindow(lua_State* L);
 int GetWindowParent(lua_State* L);
@@ -51,7 +52,6 @@ int GetWindowProcessId(lua_State* L);
 int GetWindowInformation(lua_State* L);
 int LuaWindowGetId(lua_State* L);
 int LuaDestroyWindow(lua_State* L);
-int LuaGetContent(lua_State* L);
 int GetsWindowEnabled(lua_State* L);
 int GetWindowSize(lua_State* L);
 

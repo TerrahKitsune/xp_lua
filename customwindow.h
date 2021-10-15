@@ -22,6 +22,9 @@ int LuaShowCustomWindow(lua_State* L);
 int LuaEnableCustomWindow(lua_State* L);
 int LuaSetContent(lua_State* L);
 int MoveCustomWindow(lua_State* L);
+void RemoveWindowFromTable(lua_State* L, HWND hwnd);
+void AddWindowToTable(lua_State* L, int idx);
+int LuaGetContent(lua_State* L);
 
 int LuaSetCustomWindowDrawFunction(lua_State* L);
 bool CheckHasMessage(LuaWindow* window);

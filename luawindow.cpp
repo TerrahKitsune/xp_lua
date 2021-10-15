@@ -354,28 +354,6 @@ int LuaWindowGetId(lua_State* L) {
 	return 1;
 }
 
-int LuaGetContent(lua_State* L) {
-
-	LuaWindow* window = lua_tonwindow(L, 1);
-
-	size_t len = GetWindowTextLengthW(window->handle);
-
-	wchar_t* data = (wchar_t*)gff_calloc(len + 1, sizeof(wchar_t));
-
-	if (!data) {
-		luaL_error(L, "Out of memory");
-		return 0;
-	}
-
-	int ret = GetWindowTextW(window->handle, data, len + 1);
-
-	lua_pushwchar(L, data);
-
-	gff_free(data);
-
-	return 1;
-}
-
 LuaWindow* lua_pushwindow(lua_State* L) {
 	LuaWindow* window = (LuaWindow*)lua_newuserdata(L, sizeof(LuaWindow));
 	if (window == NULL)
@@ -394,6 +372,13 @@ LuaWindow* lua_tonwindow(lua_State* L, int index) {
 	return window;
 }
 
+void lua_pushhwnd(lua_State* L, HWND handle) {
+
+	lua_Integer n = 0;
+	memcpy(&n, &handle, sizeof(HWND));
+	lua_pushinteger(L, n);
+}
+
 int window_gc(lua_State* L) {
 
 	LuaWindow* window = lua_tonwindow(L, 1);
@@ -401,7 +386,7 @@ int window_gc(lua_State* L) {
 	if (window->custom) {
 
 		if (window->custom->threadRef != LUA_REFNIL) {
-			luaL_unref(L, LUA_REGISTRYINDEX, window->custom->threadRef);
+			window->custom->threadRef = LUA_REFNIL;
 		}
 
 		if (window->custom->customDrawingRef != LUA_REFNIL) {
