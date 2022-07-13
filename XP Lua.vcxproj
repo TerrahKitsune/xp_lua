@@ -72,6 +72,7 @@
     <ClCompile Include="luasocketmain.cpp" />
     <ClCompile Include="LuaSQLite.cpp" />
     <ClCompile Include="LuaSQLiteMain.cpp" />
+    <ClCompile Include="luawchar.cpp" />
     <ClCompile Include="luazip.cpp" />
     <ClCompile Include="lua_helper.cpp" />
     <ClCompile Include="lua_json.cpp" />
@@ -147,6 +148,7 @@
     <ClCompile Include="TimerMain.cpp" />
     <ClCompile Include="tlk.cpp" />
     <ClCompile Include="TlkMain.cpp" />
+    <ClCompile Include="wcharmain.cpp" />
     <ClCompile Include="WinServices.cpp" />
     <ClCompile Include="WinServicesMain.cpp" />
     <ClCompile Include="ZIPMain.cpp" />
@@ -214,6 +216,7 @@
     <ClInclude Include="luasocketmain.h" />
     <ClInclude Include="LuaSQLite.h" />
     <ClInclude Include="LuaSQLiteMain.h" />
+    <ClInclude Include="luawchar.h" />
     <ClInclude Include="luazip.h" />
     <ClInclude Include="lua_helper.h" />
     <ClInclude Include="lua_json.h" />
@@ -284,6 +287,7 @@
     <ClInclude Include="TimerMain.h" />
     <ClInclude Include="tlk.h" />
     <ClInclude Include="TlkMain.h" />
+    <ClInclude Include="wcharmain.h" />
     <ClInclude Include="WinServices.h" />
     <ClInclude Include="WinServicesMain.h" />
     <ClInclude Include="xp_lua_incl.h" />

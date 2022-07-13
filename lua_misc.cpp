@@ -866,11 +866,6 @@ int L_DebugBreak(lua_State* L) {
 	return 0;
 }
 
-int Test(lua_State* L) {
-
-	return 0;
-}
-
 int luaopen_misc(lua_State* L) {
 
 	lua_newtable(L);
@@ -1087,9 +1082,6 @@ int luaopen_misc(lua_State* L) {
 
 	lua_pushcfunction(L, GetScreenSize);
 	lua_setglobal(L, "GetScreenSize");
-
-	lua_pushcfunction(L, Test);
-	lua_setglobal(L, "Test");
 
 	lua_pushcfunction(L, L_DebugBreak);
 	lua_setglobal(L, "Break");

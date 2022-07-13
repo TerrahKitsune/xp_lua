@@ -298,6 +298,15 @@
     <Filter Include="Memory\Source Files">
       <UniqueIdentifier>{600b7231-e941-4b61-84d6-e6ec244b3fd7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaWchar">
+      <UniqueIdentifier>{94e88b70-f6c0-4025-ab23-1a39a7444f79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaWchar\Header Files">
+      <UniqueIdentifier>{ac5ebf74-8690-4188-84f8-7e50ebfd52ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LuaWchar\Source Files">
+      <UniqueIdentifier>{9c769453-4271-423c-a338-f421b83ee2cc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\plugin.cpp">
@@ -717,6 +726,12 @@
     <ClCompile Include="MemoryManager.cpp">
       <Filter>Memory\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="wcharmain.cpp">
+      <Filter>LuaWchar</Filter>
+    </ClCompile>
+    <ClCompile Include="luawchar.cpp">
+      <Filter>LuaWchar\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\dbplugin.h">
@@ -1132,6 +1147,12 @@
     </ClInclude>
     <ClInclude Include="MemoryManager.h">
       <Filter>Memory\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="luawchar.h">
+      <Filter>LuaWchar\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wcharmain.h">
+      <Filter>LuaWchar</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

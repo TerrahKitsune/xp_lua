@@ -10,8 +10,8 @@ typedef struct LuaWChar {
 
 } LuaWChar;
 
-LuaWChar* lua_pushwchar(lua_State* L, wchar_t* str);
-LuaWChar* lua_pushwchar(lua_State* L, wchar_t* str, size_t len);
+LuaWChar* lua_pushwchar(lua_State* L, const wchar_t* str);
+LuaWChar* lua_pushwchar(lua_State* L, const wchar_t* str, size_t len);
 LuaWChar* lua_towchar(lua_State* L, int index);
 LuaWChar* lua_pushwchar(lua_State* L);
 LuaWChar* lua_stringtowchar(lua_State* L, int index);

@@ -5,11 +5,11 @@
 #include <stdlib.h> 
 #include <windows.h> 
 
-LuaWChar* lua_pushwchar(lua_State* L, wchar_t* str) {
+LuaWChar* lua_pushwchar(lua_State* L, const wchar_t* str) {
 	return lua_pushwchar(L, str, wcslen(str));
 }
 
-LuaWChar* lua_pushwchar(lua_State* L, wchar_t* str, size_t len) {
+LuaWChar* lua_pushwchar(lua_State* L, const wchar_t* str, size_t len) {
 
 	LuaWChar* wchar = lua_pushwchar(L);
 
@@ -158,7 +158,6 @@ int FromAnsi(lua_State* L) {
 
 	return 1;
 }
-
 
 size_t to_narrow(const wchar_t* src, char* dest, size_t dest_len) {
 
